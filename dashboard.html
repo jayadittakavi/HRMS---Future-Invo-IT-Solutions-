@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HRMS Dashboard</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Inter,Arial;}
+body{display:flex;height:100vh;background:#f6f8fc;color:#213547}
+
+/* Sidebar */
+.sidebar{width:260px;background:#3464bc;color:#fff;display:flex;flex-direction:column;transition:0.3s;}
+.sidebar-header{padding:18px 20px;font-size:20px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.15);display:flex;align-items:center;gap:8px;}
+.role-box{padding:12px 16px;font-size:14px;background:#3464bc;border-radius:10px;margin:14px 14px 0;}
+.menu li{background:#f7f9fd;color:#213547;border-radius:14px;margin:8px 10px;padding:12px 14px;box-shadow:0 6px 14px rgba(0,0,0,.08);border-left:3px solid transparent;display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer}
+.menu li:hover{border-left-color:#3464bc;background:#f9fbff;}
+.menu li.active{border-left-color:#ffb703;background:#fffbe8}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;}
+.topbar{height:60px;border-bottom:1px solid #e8e8e8;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#fff;}
+.topbar span{font-weight:600}
+.role-select{padding:6px 10px;border-radius:8px;border:1px solid #d2d2d2;}
+.content{padding:20px;overflow-y:auto}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.card{background:#fff;border-radius:14px;padding:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);}
+.card h3{font-size:15px;margin-bottom:6px}
+.card p{font-size:13px;color:#555}
+
+.calendar{grid-column:3 / 4;margin-top:14px;background:#fff;border-radius:14px;padding:16px;box-shadow:0 8px 18px rgba(0,0,0,.06);width:100%;}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.calendar-header button{border:none;background:#3464bc;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer}
+
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.day{background:#f2f6ff;border-radius:10px;padding:6px;text-align:center;font-size:12px;position:relative;cursor:pointer;}
+.today{background:#3464bc;color:#fff;font-weight:600}
+
+.day::after{content: attr(data-event);position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:6px 10px;border-radius:8px;font-size:11px;white-space:nowrap;opacity:0;pointer-events:none;transition:0.2s ease;}
+.day:hover::after{opacity:1;}
+
+@media(max-width:900px){
+  .sidebar{width:70px}
+  .sidebar-header .title,.role-box{display:none}
+  .menu li span{display:none}
+}
+</style>
+</head>
+
+<body>
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <i class="fa-solid fa-briefcase"></i>
+    <span class="title">HRMS</span>
+  </div>
+
+  <div class="role-box" id="roleLabel">Role: Super Admin</div>
+
+  <div class="menu">
+    <h4 style="padding:10px 14px;">Navigation</h4>
+    <div class="menu-box">
+      <ul id="menuList"></ul>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <span id="pageTitle">Dashboard</span>
+    <select id="roleSelect" class="role-select">
+      <option value="superadmin">Super Admin</option>
+      <option value="admin">Admin</option>
+      <option value="manager">Manager</option>
+      <option value="hr">HR</option>
+      <option value="employee">Employee</option>
+      <option value="accountant">Accountant</option>
+      <option value="newuser">New User</option>
+    </select>
+  </div>
+
+  <section class="content">
+    <div class="cards">
+      <div class="card"><h3>Welcome</h3><p>Smart HR, payroll & operations in one place.</p></div>
+      <div class="card"><h3>Quick Actions</h3><p>Track leaves, attendance & approvals.</p></div>
+      <div class="card"><h3>Security</h3><p>Role-based access controls enabled.</p></div>
+
+      <div class="calendar">
+        <div class="calendar-header">
+          <h3 id="monthLabel"></h3>
+          <div>
+            <button onclick="changeMonth(-1)">Prev</button>
+            <button onclick="changeMonth(1)">Next</button>
+          </div>
+        </div>
+        <div class="calendar-grid" id="calendarDays"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------------- ICON MENUS ---------------- //
+const menus = {
+  superadmin:[
+    {icon:"fa-building", label:"Companies"},
+    {icon:"fa-city", label:"Branches"},
+    {icon:"fa-sitemap", label:"Departments"},
+    {icon:"fa-boxes-stacked", label:"Assets"},
+    {icon:"fa-layer-group", label:"Asset Categories"},
+    {icon:"fa-money-check-dollar", label:"Pay Grade"},
+    {icon:"fa-calendar-days", label:"Financial Year"},
+    {icon:"fa-clipboard-check", label:"Leave Management"},
+    {icon:"fa-users", label:"Employees"},
+    {icon:"fa-user-shield", label:"User Management"}
+  ],
+
+  admin:[
+    {icon:"fa-gauge", label:"Dashboard"},
+    {icon:"fa-user", label:"Employee"},
+    {icon:"fa-calendar-check", label:"Attendance"},
+    {icon:"fa-clock", label:"Daily Track"},
+    {icon:"fa-list-check", label:"Task"},
+    {icon:"fa-hand-holding-dollar", label:"Loans"},
+    {icon:"fa-receipt", label:"Tracker Expenses"},
+    {icon:"fa-file-invoice", label:"Pay Slips"},
+    {icon:"fa-plane", label:"Leaves"},
+    {icon:"fa-briefcase", label:"Manage Leave"}
+  ],
+
+  manager:[
+    {icon:"fa-id-badge", label:"My Details"},
+    {icon:"fa-calendar-check", label:"My Attendance"},
+    {icon:"fa-list-check", label:"Attendance"},
+    {icon:"fa-clock", label:"Daily Tracker"},
+    {icon:"fa-tasks", label:"Task"},
+    {icon:"fa-laptop", label:"Asset Allocation"},
+    {icon:"fa-car", label:"Travel Expenses"},
+    {icon:"fa-plane", label:"Leaves"}
+  ],
+
+  hr:[
+    {icon:"fa-user-plus", label:"Onboarding"},
+    {icon:"fa-calendar-check", label:"Leave Tracker"},
+    {icon:"fa-calendar-days", label:"Attendance"},
+    {icon:"fa-stopwatch", label:"Time Tracker"},
+    {icon:"fa-chart-line", label:"Performance"},
+    {icon:"fa-gears", label:"Operations"},
+    {icon:"fa-heart", label:"Employee Engagement"},
+    {icon:"fa-file-lines", label:"HR Letters"},
+    {icon:"fa-list-check", label:"Tasks"},
+    {icon:"fa-user-minus", label:"Offboarding"}
+  ],
+
+  employee:[
+    {icon:"fa-plane", label:"Leaves"},
+    {icon:"fa-stopwatch", label:"Time Tracker"},
+    {icon:"fa-bars-progress", label:"Daily Tasks"},
+    {icon:"fa-calendar-check", label:"My Attendance"},
+    {icon:"fa-id-card", label:"My Details"},
+    {icon:"fa-chart-simple", label:"Performance"},
+    {icon:"fa-file-invoice-dollar", label:"Pay Slips"}
+  ],
+
+  accountant:[
+    {icon:"fa-file-invoice-dollar", label:"Pay Slips"},
+    {icon:"fa-chart-pie", label:"Budget Tracker"},
+    {icon:"fa-hand-holding-dollar", label:"Loans"},
+    {icon:"fa-calendar-alt", label:"Financial Years"},
+    {icon:"fa-box", label:"Assets"},
+    {icon:"fa-boxes", label:"Asset Categories"}
+  ],
+
+  newuser:[
+    {icon:"fa-user-tie", label:"Recruiters"},
+    {icon:"fa-user-group", label:"HR"},
+    {icon:"fa-building", label:"Companies"},
+    {icon:"fa-city", label:"Branches"},
+    {icon:"fa-sitemap", label:"Departments"},
+    {icon:"fa-users", label:"Employees"},
+    {icon:"fa-user-gear", label:"Managers"}
+  ]
+};
+
+const menuList=document.getElementById("menuList");
+const roleSelect=document.getElementById("roleSelect");
+const roleLabel=document.getElementById("roleLabel");
+
+function renderMenu(role){
+  menuList.innerHTML="";
+  roleLabel.innerText="Role: "+roleSelect.options[roleSelect.selectedIndex].text;
+
+  menus[role].forEach(item=>{
+    const li=document.createElement("li");
+    li.innerHTML = `
+      <i class="fa-solid ${item.icon}"></i>
+      <span>${item.label}</span>
+    `;
+    li.onclick=()=>document.getElementById("pageTitle").innerText=item.label;
+    menuList.appendChild(li);
+  });
+}
+
+roleSelect.addEventListener("change",()=>renderMenu(roleSelect.value));
+renderMenu("superadmin");
+
+// ---------------- CALENDAR ---------------- //
+let current=new Date();
+
+const sampleEvents={5:"Team review",12:"Client call 2PM",18:"Workshop",25:"Holiday"};
+
+function loadCalendar(){
+  const days=document.getElementById("calendarDays");
+  days.innerHTML="";
+  const year=current.getFullYear();
+  const month=current.getMonth();
+
+  document.getElementById("monthLabel").innerText=
+    current.toLocaleString("default",{month:"long"})+" "+year;
+
+  const first=new Date(year,month,1).getDay();
+  const last=new Date(year,month+1,0).getDate();
+
+  for(let i=0;i<first;i++) days.appendChild(document.createElement("div"));
+
+  for(let d=1;d<=last;d++){
+    const el=document.createElement("div");
+    el.className="day";
+    el.innerText=d;
+
+    if(sampleEvents[d]) el.setAttribute("data-event",sampleEvents[d]);
+    if(d===new Date().getDate() && month===new Date().getMonth())
+      el.classList.add("today");
+
+    days.appendChild(el);
+  }
+}
+function changeMonth(step){ current.setMonth(current.getMonth()+step); loadCalendar(); }
+loadCalendar();
+</script>
+</body>
+</html>
