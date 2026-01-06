@@ -1,0 +1,160 @@
+/* ===============================
+   GLOBAL RESET
+================================ */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Inter", "Poppins", Arial, sans-serif;
+  background-color: #f4f6fb;
+  color: #121212;
+  line-height: 1.5;
+}
+
+/* ===============================
+   LINKS
+================================ */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  opacity: 0.9;
+}
+
+/* ===============================
+   COMMON BUTTONS
+================================ */
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn.primary {
+  background: #3464bc;
+  color: #fff;
+}
+
+.btn.secondary {
+  background: #3f72ca;
+  color: #fff;
+}
+
+.btn.outline {
+  background: transparent;
+  border: 1px solid #3464bc;
+  color: #3464bc;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ===============================
+   INPUTS
+================================ */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  outline: none;
+  font-size: 14px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #3464bc;
+}
+
+/* ===============================
+   CONTAINERS
+================================ */
+.page-container {
+  min-height: 100vh;
+  padding: 40px 60px;
+}
+
+.center-box {
+  max-width: 420px;
+  margin: auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===============================
+   HEADINGS
+================================ */
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 34px;
+}
+
+h2 {
+  font-size: 26px;
+}
+
+/* ===============================
+   UTILITIES
+================================ */
+.text-center {
+  text-align: center;
+}
+
+.mt-1 {
+  margin-top: 8px;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.mt-3 {
+  margin-top: 24px;
+}
+
+.mt-4 {
+  margin-top: 32px;
+}
+
+/* ===============================
+   DASHBOARD BASE
+================================ */
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 30px;
+  background: #f4f6fb;
+}
+
+/* ===============================
+   FADE ANIMATION (WELCOME)
+================================ */
+.fade-out {
+  opacity: 0;
+  transition: opacity 1s ease;
+}

@@ -1,0 +1,95 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:Inter,Arial;
+}
+
+body{
+  background:#f6f8fc;
+  color:#213547;
+}
+
+/* Layout */
+.dashboard-wrapper{
+  display:flex;
+  height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+  width:260px;
+  background:#3464bc;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+}
+
+.sidebar-header{
+  padding:18px 20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.sidebar-header img{
+  height:38px;
+  border-radius:50%;
+  background:#fff;
+}
+
+.title-box .name{
+  font-size:19px;
+  font-weight:800;
+}
+
+.menu li{
+  background:#f7f9fd;
+  color:#213547;
+  border-radius:14px;
+  margin:8px 10px;
+  padding:12px 14px;
+  cursor:pointer;
+  display:flex;
+  gap:10px;
+}
+
+.menu li.active{
+  background:#dfe9fc;
+  border-left:3px solid #3464bc;
+}
+
+/* Main */
+.main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+.topbar{
+  height:70px;
+  background:#fff;
+  border-bottom:1px solid #e8e8e8;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 24px;
+}
+
+.content{
+  padding:20px;
+  overflow-y:auto;
+}
+
+.cards{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:16px;
+  box-shadow:0 8px 18px rgba(0,0,0,.06);
+}

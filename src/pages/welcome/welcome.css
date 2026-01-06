@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+
+.welcome-page {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background:
+    linear-gradient(to right, rgba(65, 103, 147, 0.7), rgba(96, 103, 114, 0.7)),
+    url("/images/welcome-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: opacity 1s ease;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.container {
+  text-align: center;
+  color: white;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.logo-img {
+  height: 350px;
+  width: 350px;
+  border-radius: 50%;
+  animation: scaleUp 2s ease-in-out;
+}
+
+.white-text {
+  color: white;
+}
+
+/* sparkles */
+.seasoning {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #fafdf9;
+  border-radius: 50%;
+  animation: floatUp 5s infinite ease-in-out;
+}
+
+.seasoning:nth-child(2) { left: 20%; animation-delay: 0s; }
+.seasoning:nth-child(3) { left: 40%; animation-delay: 1s; }
+.seasoning:nth-child(4) { left: 60%; animation-delay: 2s; }
+.seasoning:nth-child(5) { left: 80%; animation-delay: 3s; }
+.seasoning:nth-child(6) { left: 50%; animation-delay: 4s; }
+
+/* animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes floatUp {
+  from { bottom: -10px; opacity: 0; }
+  to { bottom: 100vh; opacity: 1; }
+}

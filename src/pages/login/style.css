@@ -1,0 +1,71 @@
+/* ===== AUTH COMMON STYLES ===== */
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Container */
+.login-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Left side */
+.login-left {
+  width: 50%;
+  padding: 40px;
+}
+
+/* Right side */
+.login-right {
+  width: 50%;
+  background: #f5f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-right img {
+  width: 80%;
+}
+
+/* Inputs */
+input {
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Button */
+.btn {
+  background-color: #3f72ca;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #2f5bb7;
+}
+
+/* Links */
+.auth-links {
+  display: flex;
+  justify-content: space-between;
+  width: 60%;
+  margin: auto;
+  font-size: 14px;
+}
+
+.auth-links a {
+  color: #3f72ca;
+  text-decoration: none;
+}
+
+.auth-links a:hover {
+  text-decoration: underline;
+}

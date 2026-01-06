@@ -1,0 +1,89 @@
+.hero {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  padding: 70px 60px;
+  gap: 40px;
+}
+
+.hero-text h1 {
+  font-size: 44px;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.highlight {
+  color: #3464bc;
+}
+
+.subtitle {
+  color: #444;
+  max-width: 520px;
+  margin-bottom: 22px;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.btn.primary {
+  background: #3464bc;
+  color: white;
+}
+
+.btn.secondary {
+  background: #3464bc;
+  color: white;
+}
+
+.btn.big {
+  padding: 12px 22px;
+}
+
+.benefits span {
+  margin-right: 12px;
+  color: #2b7a2b;
+  font-size: 14px;
+}
+
+.hero-image img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+}
+
+/* Stats */
+.stats-section {
+  display: flex;
+  gap: 18px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 130px;
+  background: #e6f2f9;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.stat-card h2 {
+  color: #1d3e8d;
+  font-size: 24px;
+}
+
+.stat-card p {
+  font-size: 14px;
+  color: #444;
+}
