@@ -1,123 +1,96 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "src/assets/App.css";
-;
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import './style.css';
+import sideImage from '../../assets/loginside.png';
+import logo from '../../assets/fislogo1.png';
 
-export default function Login() {
+const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const validateLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
+    setError('');
 
-    /* 🔐 ADMIN LOGIN → BACKEND (AS-IS from your code) */
-    if (email === "admin@gmail.com") {
-      try {
-        const res = await fetch("http://127.0.0.1:5000/api/auth/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-          }),
-        });
-
-        const data = await res.json();
-
-        if (res.ok) {
-          localStorage.setItem("userRole", "admin");
-          localStorage.setItem("token", data.token || "");
-          navigate("/dashboard");
-        } else {
-          alert(data.message || "Admin login failed");
-        }
-      } catch (err) {
-        alert("Backend server not reachable");
-      }
+    if (!email || !password) {
+      setError('Please fill in all fields');
       return;
     }
 
-    /* 🔹 FRONTEND ROLE-BASED DEMO LOGINS */
-    const roleMap = {
-      "superadmin@gmail.com": "superadmin",
-      "hr@gmail.com": "hr",
-      "manager@gmail.com": "manager",
-      "employee@gmail.com": "employee",
-      "accountant@gmail.com": "accountant",
-      "newuser@gmail.com": "newuser",
-    };
-
-    if (roleMap[email] && password === "1234") {
-      localStorage.setItem("userRole", roleMap[email]);
-      navigate("/dashboard");
-      return;
+    try {
+      const user = login(email, password);
+      // Redirect to the main dashboard route, which handles role-based rendering
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to login. Please try again.');
     }
-
-    alert("Invalid credentials");
   };
 
   return (
     <div className="login-container">
-      <div className="login-left">
-        <br /><br /><br /><br />
-        <center>
-          <h2>Login to HRMS your work starts here!</h2>
-        </center>
-        <br />
+      <div className="login-wrapper">
+        <div className="login-form-side">
+          <div className="login-header">
+            <img src={logo} alt="Logo" className="login-logo" />
+            <h2>Welcome Back</h2>
+            <p className="subtitle">Please enter your details to sign in</p>
+          </div>
 
-        <form onSubmit={validateLogin}>
-          <center>
-            <input
-              type="email"
-              style={{ width: "60%" }}
-              placeholder="Email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </center>
+          <form onSubmit={handleLogin} className="auth-form">
+            {error && <div className="error-message">{error}</div>}
 
-          <center>
-            <input
-              type="password"
-              style={{ width: "60%" }}
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </center>
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                placeholder="Enter your email..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <span className="helper-text">Try: superadmin@futureinvo.com, admin@hrms.com...</span>
+            </div>
 
-          <center>
-            <button type="submit" style={{ width: "60%" }} className="btn">
-              Login
-            </button>
-          </center>
-        </form>
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
 
-        <br /><br />
+            <div className="form-options">
+              <label className="checkbox-container">
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+                Remember me
+              </label>
+              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
+            </div>
 
-        {/* Auth links */}
-        <div className="auth-links">
-          <a href="/forgot-password">Forgot password?</a>
-          <span>
-            Don&apos;t have an account?{" "}
-            <a href="/signup">Sign up now</a>
-          </span>
+            <button type="submit" className="btn primary block">Sign In</button>
+          </form>
+
+          <div className="login-footer">
+            <p>Don't have an account? <Link to="/signup">Sign up for free</Link></p>
+          </div>
         </div>
-      </div>
 
-      <div className="login-right">
-        {/* IMPORTANT: move image to /src/assets */}
-        <img
-          src="/src/assets/C:/Users/jaya/OneDrive/Desktop/Future Invo Project ( HRMS )/HRMS---Future-Invo-IT-Solutions-/hrms-frontend/src/assets/loginside.png"
-          alt="HRMS LOGIN"
-        />
+        <div className="login-image-side">
+          <img src={sideImage} alt="HRMS Login Visual" />
+          <div className="image-overlay">
+            <h3>Manage your workforce efficiently</h3>
+            <p>The number one dashboard to manage your company.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
+
+export default Login;

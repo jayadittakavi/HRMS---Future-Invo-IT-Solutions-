@@ -1,40 +1,35 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Welcome.css";
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './welcome.css';
+import logo from '../../assets/fislogo1.png'; // Assuming this is the main logo
+import bgImage from '../../assets/welcom bg1.jpg';
 
-export default function Welcome() {
+const Welcome = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      document.body.classList.add("fade-out");
-
-      setTimeout(() => {
-        navigate("/"); // Home page
-      }, 1000);
+      navigate('/home');
     }, 4000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
 
   return (
-    <div className="welcome-page">
-      <div className="container">
-        <img src="/images/logo.jpeg" alt="HRMS Logo" className="logo-img" />
+    <div className="welcome-container" style={{ backgroundImage: `url("${bgImage}")` }}>
+      <div className="overlay">
+        <div className="content fade-in-up">
+          <div className="logo-wrapper">
+            <img src={logo} alt="HRMS Logo" className="welcome-logo" />
+          </div>
+          <h1 className="welcome-title">Future Invo HRMS</h1>
+          <p className="welcome-subtitle">Empowering Your Workforce</p>
 
-        <h1 className="white-text">
-          Welcome – let’s build better workplaces
-        </h1>
-
-        <h2 className="white-text">“Manage. Engage. Grow.”</h2>
+          <div className="loader-line"></div>
+        </div>
       </div>
-
-      {/* sparkles */}
-      <div className="seasoning"></div>
-      <div className="seasoning"></div>
-      <div className="seasoning"></div>
-      <div className="seasoning"></div>
-      <div className="seasoning"></div>
     </div>
   );
-}
+};
+
+export default Welcome;

@@ -1,43 +1,46 @@
+import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 /* Pages */
-import Welcome from "./pages/Welcome";
-import Home from "./pages/Index";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import Dashboard from "./pages/Dashboard";
+import Welcome from "./pages/welcome/Welcome";
+import Home from "./pages/home/Index";
+import Login from "./pages/login/Login";
+import Signup from "./pages/signup/Signup";
+import ForgotPassword from "./pages/forgetpassword/Forgetpassword";
 
-/* Components */
-import Navbar from "./components/Navbar";
+/* Dashboard Manager (Role Based) */
+import DashboardManager from "./dashboards/DashboardManager";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
 
-        {/* Splash / Welcome */}
-        <Route path="/welcome" element={<Welcome />} />
+          {/* Public Routes */}
+          <Route path="/" element={<Welcome />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* Public pages with Navbar */}
-        <Route
-          path="/"
-          element={
-            <>
-              <Navbar />
-              <Home />
-            </>
-          }
-        />
+          {/* Protected Dashboard Route */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardManager />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+          {/* Fallback */}
+          <Route path="*" element={<Login />} />
 
-        {/* Dashboard (after login) */}
-        <Route path="/dashboard" element={<Dashboard />} />
-
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
