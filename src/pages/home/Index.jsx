@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './Index.css';
-import logo from '../../assets/fislogo1.png';
+import logo from '../../assets/images/fislogo1.png';
 
 const Home = () => {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Dashboardstyle.css';
-import logo from '../../assets/fislogo1.png';
+import logo from '../../assets/images/fislogo1.png';
 
 const Dashboard = () => {
   const navigate = useNavigate();

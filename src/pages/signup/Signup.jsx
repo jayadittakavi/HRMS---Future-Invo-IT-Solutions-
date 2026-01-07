@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Signup.css';
-import logo from '../../assets/fislogo1.png';
-import sideImage from '../../assets/loginside.png'; // Reusing for consistency
+import logo from '../../assets/images/fislogo1.png';
+import sideImage from '../../assets/images/loginside.png'; // Reusing for consistency
 
 const Signup = () => {
   const [formData, setFormData] = useState({

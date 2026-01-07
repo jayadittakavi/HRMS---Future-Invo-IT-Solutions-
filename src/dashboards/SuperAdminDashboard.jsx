@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import '../pages/dashboard/Dashboardstyle.css'; // Reusing existing styles
-import logo from '../assets/fislogo1.png';
+import logo from '../assets/images/fislogo1.png';
 
 const SuperAdminDashboard = () => {
     const { user, logout } = useAuth();
