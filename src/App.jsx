@@ -9,6 +9,7 @@ import Home from "./pages/home/Index";
 import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import ForgotPassword from "./pages/forgetpassword/Forgetpassword";
+import Attendance from "./pages/attendance/Attendance";
 
 /* Dashboard Manager (Role Based) */
 import DashboardManager from "./dashboards/DashboardManager";
@@ -32,6 +33,15 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <DashboardManager />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/attendance"
+            element={
+              <ProtectedRoute>
+                <Attendance />
               </ProtectedRoute>
             }
           />

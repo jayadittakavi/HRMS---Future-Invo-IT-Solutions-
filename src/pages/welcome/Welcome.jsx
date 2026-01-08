@@ -1,33 +1,43 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './welcome.css';
-import logo from '../../assets/images/fislogo1.png'; // Assuming this is the main logo
+import { useEffect } from "react";
+import "./welcome.css";
+import logo from '../../assets/images/logo.jpeg';
 import bgImage from '../../assets/images/welcom bg1.jpg';
 
 const Welcome = () => {
-  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/home');
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = "/login"; // Redirect to login
+      }, 1000);
     }, 4000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, []);
 
   return (
-    <div className="welcome-container" style={{ backgroundImage: `url("${bgImage}")` }}>
-      <div className="overlay">
-        <div className="content fade-in-up">
-          <div className="logo-wrapper">
-            <img src={logo} alt="HRMS Logo" className="welcome-logo" />
-          </div>
-          <h1 className="welcome-title">Future Invo HRMS</h1>
-          <p className="welcome-subtitle">Empowering Your Workforce</p>
+    <div className="welcome-page" style={{
+      background: `linear-gradient(to right, rgba(65, 103, 147, 0.7), rgba(96, 103, 114, 0.7)), url("${bgImage}")`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
+    }}>
+      <div className="container">
+        <img src={logo} alt="HRMS" className="img" />
 
-          <div className="loader-line"></div>
-        </div>
+        <h1 className="white-text">
+          <strong>Welcome – let’s build better workplaces</strong>
+        </h1>
+
+        <h2 className="white-text">"Manage. Engage. Grow."</h2>
       </div>
+
+      {/* seasoning sparkles */}
+      <div className="seasoning"></div>
+      <div className="seasoning"></div>
+      <div className="seasoning"></div>
+      <div className="seasoning"></div>
+      <div className="seasoning"></div>
     </div>
   );
 };

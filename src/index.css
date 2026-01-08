@@ -1,0 +1,34 @@
+:root {
+    /* Color Palette */
+    --primary-blue: #3b76ef;
+    --dark-blue: #1e3a8a;
+    --light-blue: #eff6ff;
+
+    /* Gradients */
+    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    --sidebar-gradient: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
+    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+    --card-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-blue: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+
+    /* Text */
+    --text-main: #1e293b;
+    --text-secondary: #64748b;
+    --text-light: #94a3b8;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background: var(--bg-gradient);
+    background-attachment: fixed;
+    /* Ensures gradient covers full scroll */
+    color: var(--text-main);
+    min-height: 100vh;
+}

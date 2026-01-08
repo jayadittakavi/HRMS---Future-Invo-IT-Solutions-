@@ -35,58 +35,44 @@ const Login = () => {
       <div className="login-wrapper">
         <div className="login-form-side">
           <div className="login-header">
-            <img src={logo} alt="Logo" className="login-logo" />
-            <h2>Welcome Back</h2>
-            <p className="subtitle">Please enter your details to sign in</p>
+            {/* Logo removed as per design image */}
+            <h2>Login to HRMS your<br />work starts here!</h2>
           </div>
 
           <form onSubmit={handleLogin} className="auth-form">
             {error && <div className="error-message">{error}</div>}
 
             <div className="form-group">
-              <label>Email Address</label>
               <input
                 type="email"
-                placeholder="Enter your email..."
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
               />
-              <span className="helper-text">Try: superadmin@futureinvo.com, admin@hrms.com...</span>
             </div>
 
             <div className="form-group">
-              <label>Password</label>
               <input
                 type="password"
-                placeholder="••••••••"
+                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
               />
             </div>
 
+            <button type="submit" className="btn primary block">Login</button>
+
             <div className="form-options">
-              <label className="checkbox-container">
-                <input type="checkbox" />
-                <span className="checkmark"></span>
-                Remember me
-              </label>
-              <Link to="/forgot-password" className="forgot-link">Forgot Password?</Link>
+              <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
+              <p className="signup-text">Don't have an account? <Link to="/signup">Sign up now</Link></p>
             </div>
-
-            <button type="submit" className="btn primary block">Sign In</button>
           </form>
-
-          <div className="login-footer">
-            <p>Don't have an account? <Link to="/signup">Sign up for free</Link></p>
-          </div>
         </div>
 
         <div className="login-image-side">
-          <img src={sideImage} alt="HRMS Login Visual" />
-          <div className="image-overlay">
-            <h3>Manage your workforce efficiently</h3>
-            <p>The number one dashboard to manage your company.</p>
-          </div>
+          <img src={sideImage} alt="HRMS Dashboard Preview" />
         </div>
       </div>
     </div>

@@ -3,7 +3,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f0f4f8;
+  background-color: transparent;
+  /* Updated to show body gradient */
   padding: 2rem;
 }
 
@@ -22,29 +23,24 @@
 /* Form Side */
 .login-form-side {
   flex: 1;
-  padding: 3rem 4rem;
+  padding: 4rem 5rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .login-header {
-  margin-bottom: 2.5rem;
-}
-
-.login-logo {
-  height: 40px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
+  text-align: center;
 }
 
 .login-header h2 {
-  font-size: 2rem;
-  color: var(--text-main);
-  margin-bottom: 0.5rem;
-}
-
-.subtitle {
-  color: var(--text-secondary);
+  font-size: 1.8rem;
+  color: #2563eb;
+  /* Royal Blue */
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
 }
 
 .auth-form {
@@ -56,18 +52,47 @@
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
 }
 
-.form-group label {
-  font-weight: 500;
-  color: var(--text-main);
-  font-size: 0.9rem;
+.input-field {
+  padding: 1rem 1.2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  background: white;
+  transition: border-color 0.3s ease;
+  color: #475569;
 }
 
-.helper-text {
-  font-size: 0.75rem;
-  color: var(--text-light);
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+.input-field:focus {
+  border-color: #2563eb;
+}
+
+.btn.block {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  background: #2563eb;
+  /* Solid Royal Blue */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.btn.block:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+  background: #1d4ed8;
 }
 
 .form-options {
@@ -75,102 +100,76 @@
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .forgot-link {
-  color: var(--accent-color);
+  color: #2563eb;
   font-weight: 500;
+  text-decoration: none;
 }
 
-.btn.block {
-  width: 100%;
-  padding: 0.8rem;
-  font-size: 1rem;
-  margin-top: 0.5rem;
+.signup-text {
+  color: #64748b;
 }
 
-.login-footer {
-  margin-top: 2rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-}
-
-.login-footer a {
-  color: var(--primary-color);
+.signup-text a {
+  color: #2563eb;
   font-weight: 600;
+  text-decoration: none;
+  margin-left: 5px;
 }
 
 .error-message {
   background-color: #fee2e2;
-  color: var(--danger);
+  color: #dc2626;
   padding: 0.75rem;
-  border-radius: var(--radius-md);
+  border-radius: 8px;
   text-align: center;
   font-size: 0.9rem;
-}
-
-/* Checkbox Style */
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--text-secondary);
 }
 
 /* Image Side */
 .login-image-side {
   flex: 1;
-  background-color: #eef2ff;
+  background-color: #dbeafe;
+  /* Light blue background matching image tone */
   position: relative;
   display: flex;
-  /* Ensure image behaves nicely */
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  padding: 2rem;
 }
 
 .login-image-side img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  position: absolute;
-  top: 0;
-  left: 0;
+  height: auto;
+  max-width: 500px;
+  object-fit: contain;
+  border-radius: 20px;
+  /* If the image itself needs rounding */
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
 }
 
-.image-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  padding: 3rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
-  color: white;
-  z-index: 2;
-}
-
-.image-overlay h3 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
-}
-
-.image-overlay p {
-  opacity: 0.9;
-}
-
-@media (max-width: 768px) {
+/* Mobile Responsive */
+@media (max-width: 900px) {
   .login-wrapper {
     flex-direction: column;
+    max-width: 500px;
   }
 
   .login-image-side {
     display: none;
-    /* Hide image on mobile to focus on login */
   }
 
   .login-form-side {
     padding: 2rem;
+  }
+
+  .login-header h2 {
+    font-size: 1.5rem;
   }
 }
