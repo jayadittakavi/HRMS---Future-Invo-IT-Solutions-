@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import '../pages/dashboard/Dashboardstyle.css';
 import logo from '../assets/images/fislogo1.png';
 
 const NewUserDashboard = () => {
@@ -14,24 +13,20 @@ const NewUserDashboard = () => {
     };
 
     return (
-        <div className="dashboard-layout" style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-            <aside className={`sidebar open`} style={{ display: 'none' }}>
-                {/* Hidden sidebar for this view */}
-            </aside>
-
-            <main className="dashboard-content" style={{ marginLeft: 0, width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <div style={{ textAlign: 'center', background: 'white', padding: '3rem', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-                    <img src={logo} alt="HRMS" style={{ height: '60px', width: '60px', borderRadius: '50%', objectFit: 'cover', marginBottom: '1rem' }} />
-                    <h2 style={{ color: '#1e293b', marginBottom: '1rem' }}>Account Pending Approval</h2>
-                    <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '400px' }}>
-                        Your account is currently waiting for Super Admin approval.
-                        You will be notified once your account is active.
-                    </p>
-                    <button onClick={handleLogout} className="btn primary">
-                        Back to Login
-                    </button>
+        <div className="min-vh-100 bg-light d-flex align-items-center justify-content-center">
+            <div className="card border-0 shadow-lg p-5 text-center" style={{ maxWidth: '500px', width: '90%' }}>
+                <div className="mb-4">
+                    <img src={logo} alt="HRMS" className="rounded-circle shadow-sm" style={{ width: '80px', height: '80px', objectFit: 'cover' }} />
                 </div>
-            </main>
+                <h2 className="h3 fw-bold text-dark mb-3">Account Pending Approval</h2>
+                <p className="text-muted mb-4">
+                    Your account is currently waiting for Super Admin approval.
+                    You will be notified once your account is active.
+                </p>
+                <button onClick={handleLogout} className="btn text-white btn-lg w-100 rounded-pill fw-bold" style={{ backgroundColor: '#3464bc' }}>
+                    Back to Login
+                </button>
+            </div>
         </div>
     );
 };

@@ -1,123 +1,123 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import './Signup.css';
-import logo from '../../assets/images/fislogo1.png';
-import sideImage from '../../assets/images/loginside.png'; // Reusing for consistency
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import sideImage from '../../assets/images/loginside.png';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call
-    console.log('Registering user:', formData);
-    setIsSubmitted(true);
-    // In a real app, this would redirect or show a success message
+    if (formData.password !== formData.confirmPassword) {
+      return setError('Passwords do not match');
+    }
+    try {
+      setError('');
+      // Default role is 'newuser' which will trigger the pending approval dashboard
+      await signup(formData.email, formData.password, {
+        name: formData.name,
+        role: 'newuser'
+      });
+      navigate('/dashboard');
+    } catch (err) {
+      setError('Failed to create account: ' + err.message);
+    }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className="signup-container">
-        <div className="approval-card fade-in-up">
-          <div className="icon-wrapper">
-            <span className="sc-icon">⏳</span>
-          </div>
-          <h2>Registration Successful!</h2>
-          <p className="approval-text">
-            Your account has been created and is currently <strong>Waiting for Super Admin approval</strong>.
-          </p>
-          <p className="approval-subtext">
-            You will be notified via email once your account is active.
-          </p>
-          <Link to="/home" className="btn primary mt-3">Back to Home</Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="signup-container">
-      <div className="signup-wrapper">
-        <div className="signup-form-side">
-          <div className="signup-header">
-            <img src={logo} alt="Logo" className="signup-logo" />
-            <h2>Create Account</h2>
-            <p className="subtitle">Join Future Invo HRMS today</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="auth-form">
-            <div className="form-group">
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                placeholder="John Doe"
-                value={formData.fullName}
-                onChange={handleChange}
-                required
-              />
+    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light p-4">
+      <div className="card border-0 shadow-lg overflow-hidden" style={{ maxWidth: '1000px', width: '100%' }}>
+        <div className="row g-0">
+          {/* Form Side */}
+          <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+            <div className="mb-4">
+              <h2 className="fw-bold text-dark mb-2">Create Account</h2>
+              <p className="text-muted">Sign up to get started.</p>
             </div>
 
-            <div className="form-group">
-              <label>Email Address</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
 
-            <div className="form-row">
-              <div className="form-group">
-                <label>Password</label>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label fw-semibold text-secondary">Full Name</label>
+                <input
+                  type="text"
+                  name="name"
+                  className="form-control form-control-lg bg-light border-0"
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-semibold text-secondary">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control form-control-lg bg-light border-0"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mb-3">
+                <label className="form-label fw-semibold text-secondary">Password</label>
                 <input
                   type="password"
                   name="password"
-                  placeholder="••••••••"
+                  className="form-control form-control-lg bg-light border-0"
+                  required
                   value={formData.password}
                   onChange={handleChange}
-                  required
                 />
               </div>
-              <div className="form-group">
-                <label>Confirm Password</label>
+
+              <div className="mb-4">
+                <label className="form-label fw-semibold text-secondary">Confirm Password</label>
                 <input
                   type="password"
                   name="confirmPassword"
-                  placeholder="••••••••"
+                  className="form-control form-control-lg bg-light border-0"
+                  required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  required
                 />
               </div>
-            </div>
 
-            <button type="submit" className="btn primary block mt-2">Sign Up</button>
-          </form>
+              <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold mb-3">
+                Sign Up
+              </button>
 
-          <div className="signup-footer pb-2">
-            <p>Already have an account? <Link to="/login">Sign in</Link></p>
+              <div className="text-center mt-3">
+                <span className="text-muted small">
+                  Already have an account? <Link to="/login" className="text-primary fw-bold text-decoration-none">Login</Link>
+                </span>
+              </div>
+            </form>
           </div>
-        </div>
 
-        <div className="signup-image-side">
-          <img src={sideImage} alt="HRMS Signup Visual" />
-          <div className="image-overlay">
-            <h3>Start your journey</h3>
-            <p>Join thousands of companies managing their HR with ease.</p>
+          {/* Image Side */}
+          <div className="col-lg-6 d-none d-lg-block">
+            <img
+              src={sideImage}
+              alt="HRMS Dashboard"
+              className="img-fluid w-100 h-100"
+              style={{ objectFit: 'cover' }}
+            />
           </div>
         </div>
       </div>

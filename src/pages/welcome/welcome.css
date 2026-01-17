@@ -15,7 +15,7 @@ body.fade-out {
   height: 100vh;
   width: 100%;
   background:
-    linear-gradient(to right, rgba(65, 103, 147, 0.7), rgba(96, 103, 114, 0.7)),
+    linear-gradient(to right, rgba(52, 100, 188, 0.8), rgba(95, 168, 255, 0.7)),
     url("/welcom-bg1.jpg");
   background-size: cover;
   background-position: center;

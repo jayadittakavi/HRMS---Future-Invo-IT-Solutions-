@@ -1,0 +1,42 @@
+/* Signup Page Styles */
+
+/* Primary Button Glow */
+.btn-primary {
+    background: linear-gradient(135deg, #3464bc 0%, #5fa8ff 100%);
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(52, 100, 188, 0.3);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 10px 15px -3px rgba(52, 100, 188, 0.4);
+    transform: translateY(-1px);
+}
+
+/* Image Side */
+.signup-image-side {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.signup-image-side img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+    .card {
+        flex-direction: column;
+        max-width: 550px;
+    }
+
+    .signup-image-side {
+        display: none;
+    }
+}

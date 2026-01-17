@@ -53,14 +53,23 @@ export const AuthProvider = ({ children }) => {
     // Check if user has permission to view a specific dashboard
     const canAccess = (requiredRoles) => {
         if (!user) return false;
-        if (user.role === 'superadmin') return true; // Superadmin accesses everything
+        if (user.role === 'superadmin' || user.role === 'admin') return true; // Superadmin and Admin access everything
         return requiredRoles.includes(user.role);
+    };
+
+    // Helper to switch roles (for testing/demo)
+    const changeRole = (newRole) => {
+        if (!user) return;
+        const updatedUser = { ...user, role: newRole };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
     const value = {
         user,
         login,
         logout,
+        changeRole,
         canAccess,
         loading
     };

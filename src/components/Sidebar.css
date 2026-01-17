@@ -1,0 +1,75 @@
+/* Sidebar.css */
+.sidebar-container {
+    background-color: #3464bc;
+    /* Approximate blue from image, will adjust */
+    background: linear-gradient(180deg, #3464bc 0%, #5fa8ff 100%);
+    color: white;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+}
+
+.sidebar-role-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 1;
+    /* Changed from 0.9 */
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    color: #ffffff;
+}
+
+
+.sidebar-nav-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 1;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    color: #ffffff;
+}
+
+.sidebar-link {
+    background-color: #ffffff;
+    color: #3464bc !important;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    border-radius: 50px;
+    /* Pill shape */
+    margin: 0 1rem 0.75rem 1rem;
+    /* Spacing between buttons */
+    transition: all 0.2s;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    opacity: 1;
+}
+
+.sidebar-link:hover {
+    background-color: #f1f5f9;
+    transform: translateX(2px);
+}
+
+.sidebar-link.active {
+    background-color: #e0f2fe;
+    /* Very light blue to distinguish active */
+    color: #0284c7 !important;
+    font-weight: 700;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #bae6fd;
+}
+
+.sidebar-icon {
+    width: 24px;
+    margin-right: 12px;
+    display: inline-flex;
+    justify-content: center;
+    color: inherit;
+    /* Inherit text color */
+}

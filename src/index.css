@@ -1,20 +1,29 @@
 :root {
     /* Color Palette */
-    --primary-blue: #3b76ef;
-    --dark-blue: #1e3a8a;
+    --primary-blue: #3464bc;
+    --dark-blue: #2a5298;
+    /* Slightly darker for contrast if needed, or stick to #3464bc */
     --light-blue: #eff6ff;
+    --accent-blue: #8ecae6;
+
+    /* Bootstrap Overrides */
+    --bs-primary: #3464bc;
+    --bs-primary-rgb: 52, 100, 188;
+    --bs-link-color: #3464bc;
+    --bs-link-hover-color: #5fa8ff;
 
     /* Gradients */
-    --primary-gradient: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
-    --sidebar-gradient: linear-gradient(180deg, #1e40af 0%, #3b82f6 100%);
-    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+    --primary-gradient: linear-gradient(135deg, #3464bc 0%, #5fa8ff 100%);
+    --sidebar-gradient: linear-gradient(180deg, #3464bc 0%, #5fa8ff 100%);
+    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    /* Using accent-ish lightness */
     --card-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
     --glass-bg: rgba(255, 255, 255, 0.95);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-blue: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
+    --shadow-blue: 0 10px 15px -3px rgba(52, 100, 188, 0.2);
 
     /* Text */
     --text-main: #1e293b;
@@ -31,4 +40,28 @@ body {
     /* Ensures gradient covers full scroll */
     color: var(--text-main);
     min-height: 100vh;
+}
+
+/* Custom Scrollbar Styles (Invisible but scrollable) */
+::-webkit-scrollbar {
+    width: 0px;
+    height: 0px;
+    background: transparent;
+    display: none;
+    /* Chrome/Safari/Webkit */
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: transparent;
+}
+
+/* Firefox fallback */
+* {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* IE and Edge */
 }

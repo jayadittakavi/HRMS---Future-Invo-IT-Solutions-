@@ -1,87 +1,152 @@
 import React, { useState } from 'react';
+import DashboardLayout from '../components/DashboardLayout';
+import '../components/DashboardLayout.css';
+import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../components/charts/CustomCharts';
+import { CompaniesContent } from '../pages/companies/Companies';
+import { BranchesContent } from '../pages/branches/Branches';
+import { DepartmentsContent } from '../pages/departments/Departments';
+import { AssetsContent } from '../pages/assets/Assets';
+import { AssetCategoriesContent } from '../pages/assets/AssetCategories';
+import { EmployeesContent } from '../pages/employees/Employees';
+import { PayrollContent } from '../pages/payroll/Payroll';
+import { FinancialYearContent } from '../pages/financial_year/FinancialYear';
+import { LeaveManagementContent } from '../pages/leave_management/LeaveManagement';
+import { UserManagementContent } from '../pages/user_management/UserManagement';
+import { PayGradeContent } from '../pages/pay_grade/PayGrade';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import '../pages/dashboard/Dashboardstyle.css';
-import logo from '../assets/images/fislogo1.png';
+import { FaUsers, FaMoneyBillWave, FaUserClock, FaTasks } from 'react-icons/fa';
 
 const AdminDashboard = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const { user } = useAuth();
+    const [activeView, setActiveView] = useState('dashboard');
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleNavigate = (path) => {
+        const view = path.replace('/', '');
+        setActiveView(view || 'dashboard');
     };
 
-    const menuItems = [
-        { name: 'Dashboard', icon: '📊', path: '/dashboard' },
-        { name: 'Departments', icon: '👥', path: '/departments' },
-        { name: 'Assets', icon: '💻', path: '/assets' },
-        { name: 'Employees', icon: '👷', path: '/employees' },
-        { name: 'Leave Mgmt', icon: '📅', path: '/leaves' },
-        { name: 'User Management', icon: '⚙️', path: '/users' },
+    // Data for Charts
+    const payrollData = [
+        { label: 'Jan', value: 40, color: '#3b82f6' },
+        { label: 'Feb', value: 45, color: '#10b981' },
+        { label: 'Mar', value: 42, color: '#f59e0b' },
+        { label: 'Apr', value: 48, color: '#ef4444' },
+        { label: 'May', value: 47, color: '#8b5cf6' },
+        { label: 'Jun', value: 60, color: '#06b6d4' },
     ];
 
+    const employeeDistribution = [
+        { label: 'Active', value: 350, color: '#10b981' },
+        { label: 'Leave', value: 30, color: '#f59e0b' },
+        { label: 'Remote', value: 120, color: '#3b82f6' }
+    ];
+
+    const revenueGrowthData = [65, 78, 72, 85, 90, 95];
+
     return (
-        <div className="dashboard-layout">
-            <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-                <div className="sidebar-header">
-                    <img src={logo} alt="HRMS" className="sidebar-logo" />
-                    <span className="brand-name">Future Invo</span>
-                </div>
-                <nav className="sidebar-nav">
-                    <ul>
-                        {menuItems.map((item) => (
-                            <li key={item.name} className={item.name === 'Dashboard' ? 'active' : ''}>
-                                <a href="#" onClick={(e) => e.preventDefault()}>
-                                    <span className="icon">{item.icon}</span>
-                                    <span className="label">{item.name}</span>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-                <div className="sidebar-footer">
-                    <button onClick={handleLogout} className="logout-btn">
-                        <span className="icon">🚪</span><span className="label">Logout</span>
-                    </button>
-                </div>
-            </aside>
+        <DashboardLayout title="" onNavigate={handleNavigate}>
+            <div className="container-fluid p-0">
+                {activeView === 'dashboard' && (
+                    <>
+                        {/* Welcome Header */}
+                        <div className="mb-4">
+                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Admin'}!</h2>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="text-secondary fw-medium">System status:</span>
+                                <span className="badge bg-success text-white fw-bold">OPERATIONAL</span>
+                            </div>
+                        </div>
 
-            <main className="dashboard-content">
-                <header className="dashboard-header">
-                    <button className="menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>☰</button>
-                    <div className="header-right">
-                        <div className="user-profile">
-                            <div className="avatar">AD</div>
-                            <div className="user-info"><p className="user-name">Admin User</p><p className="user-role">Administrator</p></div>
+                        {/* Top Cards Row */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-3">
+                                <div className="dashboard-card bg-gradient-purple">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaUsers /> Total Employees
+                                    </h6>
+                                    <h3 className="dashboard-value">500</h3>
+                                    <p className="small mb-0 fw-bold">↑ 2.5% vs last month</p>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card bg-gradient-blue">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaMoneyBillWave /> Total Payroll
+                                    </h6>
+                                    <h3 className="dashboard-value">$280k</h3>
+                                    <p className="small mb-0">Processed successfully</p>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card bg-gradient-orange">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaUserClock /> On Leave
+                                    </h6>
+                                    <h3 className="dashboard-value">12</h3>
+                                    <p className="small mb-0">Approved requests</p>
+                                </div>
+                            </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card bg-gradient-green">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaTasks /> Open Tasks
+                                    </h6>
+                                    <h3 className="dashboard-value">24</h3>
+                                    <p className="small mb-0 fw-bold">Requires attention</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </header>
 
-                <div className="dashboard-grid">
-                    <div className="welcome-banner">
-                        <h2>Admin Dashboard</h2>
-                        <p>Manage employees, assets, and departments.</p>
-                    </div>
-                    <div className="stats-row">
-                        <div className="d-card stat">
-                            <div className="stat-icon p-blue">👥</div>
-                            <div><h4>Employees</h4><p className="stat-value">500</p></div>
+                        {/* Charts Row 1 */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-8">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Payroll Summary (6 Months)</h6>
+                                    <SimpleBarChart data={payrollData} height="320px" />
+                                </div>
+                            </div>
+                            <div className="col-md-4">
+                                <div className="dashboard-card h-100">
+                                    <h6 className="dashboard-card-title">Employee Dist.</h6>
+                                    <div className="py-3 d-flex justify-content-center">
+                                        <SimpleDonutChart segments={employeeDistribution} size="200px" centerText="Total" />
+                                    </div>
+                                    <div className="text-center mt-3 small text-secondary">
+                                        {employeeDistribution.map((item, idx) => (
+                                            <span key={idx} className="fw-bold me-2" style={{ color: item.color }}>● {item.label}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="d-card stat">
-                            <div className="stat-icon p-orange">📅</div>
-                            <div><h4>Pending Leaves</h4><p className="stat-value">8</p></div>
+
+                        {/* Charts Row 2 */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Revenue Growth</h6>
+                                    <div className="py-4">
+                                        <SimpleLineChart data={revenueGrowthData} height="280px" color="#10b981" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="d-card stat">
-                            <div className="stat-icon p-purple">💻</div>
-                            <div><h4>Total Assets</h4><p className="stat-value">340</p></div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+                    </>
+                )}
+
+                {activeView === 'companies' && <CompaniesContent />}
+                {activeView === 'branches' && <BranchesContent />}
+                {activeView === 'departments' && <DepartmentsContent />}
+                {activeView === 'assets' && <AssetsContent />}
+                {activeView === 'asset-categories' && <AssetCategoriesContent />}
+                {activeView === 'employees' && <EmployeesContent />}
+                {activeView === 'payroll' && <PayrollContent />}
+                {activeView === 'financial-year' && <FinancialYearContent />}
+                {activeView === 'leave-management' && <LeaveManagementContent />}
+                {activeView === 'users' && <UserManagementContent />}
+                {activeView === 'pay-grade' && <PayGradeContent />}
+            </div>
+        </DashboardLayout>
     );
 };
 

@@ -1,78 +1,86 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import './style.css';
 import sideImage from '../../assets/images/loginside.png';
-import logo from '../../assets/images/fislogo1.png';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('superadmin@example.com');
+  const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
-  const navigate = useNavigate();
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      return;
-    }
-
     try {
-      const user = login(email, password);
-      // Redirect to the main dashboard route, which handles role-based rendering
+      setError('');
+      await login(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError('Failed to login. Please try again.');
+      setError('Failed to log in: ' + err.message);
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-wrapper">
-        <div className="login-form-side">
-          <div className="login-header">
-            {/* Logo removed as per design image */}
-            <h2>Login to HRMS your<br />work starts here!</h2>
+    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light p-4">
+      <div className="card border-0 shadow-lg overflow-hidden" style={{ maxWidth: '1000px', width: '100%' }}>
+        <div className="row g-0">
+          {/* Form Side */}
+          <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+            <div className="mb-4">
+              <h2 className="fw-bold text-dark mb-2">Welcome Back!</h2>
+              <p className="text-muted">Please sign in to continue.</p>
+            </div>
+
+            {error && <div className="alert alert-danger" role="alert">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label fw-semibold text-secondary">Email Address</label>
+                <input
+                  type="email"
+                  className="form-control form-control-lg bg-light border-0"
+                  placeholder="Enter your email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label fw-semibold text-secondary">Password</label>
+                <input
+                  type="password"
+                  className="form-control form-control-lg bg-light border-0"
+                  placeholder="Enter your password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold mb-3">
+                Sign In
+              </button>
+
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <Link to="/forgot-password" className="text-decoration-none text-muted small">Forgot Password?</Link>
+                <span className="text-muted small">
+                  Don't have an account? <Link to="/signup" className="text-primary fw-bold text-decoration-none">Sign Up</Link>
+                </span>
+              </div>
+            </form>
           </div>
 
-          <form onSubmit={handleLogin} className="auth-form">
-            {error && <div className="error-message">{error}</div>}
-
-            <div className="form-group">
-              <input
-                type="email"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-              />
-            </div>
-
-            <div className="form-group">
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="input-field"
-              />
-            </div>
-
-            <button type="submit" className="btn primary block">Login</button>
-
-            <div className="form-options">
-              <Link to="/forgot-password" className="forgot-link">Forgot password?</Link>
-              <p className="signup-text">Don't have an account? <Link to="/signup">Sign up now</Link></p>
-            </div>
-          </form>
-        </div>
-
-        <div className="login-image-side">
-          <img src={sideImage} alt="HRMS Dashboard Preview" />
+          {/* Image Side */}
+          <div className="col-lg-6 d-none d-lg-block">
+            <img
+              src={sideImage}
+              alt="HRMS Dashboard"
+              className="img-fluid w-100 h-100"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
         </div>
       </div>
     </div>

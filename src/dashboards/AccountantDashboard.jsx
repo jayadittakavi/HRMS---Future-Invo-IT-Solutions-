@@ -1,82 +1,134 @@
 import React, { useState } from 'react';
+import DashboardLayout from '../components/DashboardLayout';
+import { PayrollContent } from '../pages/payroll/Payroll';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import '../pages/dashboard/Dashboardstyle.css';
-import logo from '../assets/images/fislogo1.png';
+import { SimpleLineChart, SimpleBarChart, SimpleDonutChart } from '../components/charts/CustomCharts';
+import { FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
 
 const AccountantDashboard = () => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const { user } = useAuth();
+    const [activeView, setActiveView] = useState('dashboard');
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    const handleNavigate = (path) => {
+        const view = path.replace('/', '');
+        setActiveView(view || 'dashboard');
     };
 
-    const menuItems = [
-        { name: 'Dashboard', icon: '📊', path: '/dashboard' },
-        { name: 'Payroll', icon: '💰', path: '/payroll' },
-        { name: 'Invoices', icon: '🧾', path: '/invoices' },
-        { name: 'Expenses', icon: '💸', path: '/expenses' },
-        { name: 'Reports', icon: '📈', path: '/reports' },
+    const expenseTrend = [15, 20, 18, 25, 22, 30, 28, 35, 32, 40];
+    const budgetData = [
+        { label: 'Q1', value: 80, color: '#3b82f6' },
+        { label: 'Q2', value: 65, color: '#10b981' },
+        { label: 'Q3', value: 90, color: '#f59e0b' },
+        { label: 'Q4', value: 45, color: '#ef4444' },
+    ];
+
+    const invoiceStatusData = [
+        { label: 'Paid', value: 65, color: '#10b981' },
+        { label: 'Pending', value: 25, color: '#f59e0b' },
+        { label: 'Overdue', value: 10, color: '#ef4444' }
     ];
 
     return (
-        <div className="dashboard-layout">
-            <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
-                <div className="sidebar-header">
-                    <img src={logo} alt="HRMS" className="sidebar-logo" />
-                    <span className="brand-name">Future Invo</span>
-                </div>
-                <nav className="sidebar-nav">
-                    <ul>
-                        {menuItems.map((item) => (
-                            <li key={item.name} className={item.name === 'Dashboard' ? 'active' : ''}>
-                                <a href="#" onClick={(e) => e.preventDefault()}>
-                                    <span className="icon">{item.icon}</span>
-                                    <span className="label">{item.name}</span>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </nav>
-                <div className="sidebar-footer">
-                    <button onClick={handleLogout} className="logout-btn">
-                        <span className="icon">🚪</span><span className="label">Logout</span>
-                    </button>
-                </div>
-            </aside>
+        <DashboardLayout title="" onNavigate={handleNavigate}>
+            <div className="container-fluid p-0">
+                {activeView === 'dashboard' && (
+                    <>
+                        {/* Accountant Dashboard Overview */}
+                        <div className="mb-4">
+                            <div className="bg-light rounded-3 p-4 border shadow-sm">
+                                <h2 className="h4 fw-bold text-dark mb-2">Welcome {user?.name || 'Accountant'}!</h2>
+                                <p className="mb-0 text-muted">Manage payroll, expenses, and financial reports.</p>
+                            </div>
+                        </div>
 
-            <main className="dashboard-content">
-                <header className="dashboard-header">
-                    <button className="menu-toggle" onClick={() => setIsSidebarOpen(!isSidebarOpen)}>☰</button>
-                    <div className="header-right">
-                        <div className="user-profile">
-                            <div className="avatar">AC</div>
-                            <div className="user-info"><p className="user-name">Accountant</p><p className="user-role">Finance</p></div>
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-6">
+                                <div className="card border-0 shadow-sm h-100">
+                                    <div className="card-body d-flex align-items-center">
+                                        <div className="bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3 display-6">
+                                            <FaMoneyCheckAlt />
+                                        </div>
+                                        <div>
+                                            <h6 className="text-muted mb-1">Payroll Processed</h6>
+                                            <h3 className="mb-0 fw-bold">95%</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="card border-0 shadow-sm h-100">
+                                    <div className="card-body d-flex align-items-center">
+                                        <div className="bg-warning bg-opacity-10 text-warning rounded-3 p-3 me-3 display-6">
+                                            <FaFileInvoiceDollar />
+                                        </div>
+                                        <div>
+                                            <h6 className="text-muted mb-1">Pending Invoices</h6>
+                                            <h3 className="mb-0 fw-bold">4</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </header>
 
-                <div className="dashboard-grid">
-                    <div className="welcome-banner">
-                        <h2>Accountant Dashboard</h2>
-                        <p>Manage payroll, expenses, and financial reports.</p>
-                    </div>
-                    <div className="stats-row">
-                        <div className="d-card stat">
-                            <div className="stat-icon p-blue">💰</div>
-                            <div><h4>Payroll Processed</h4><p className="stat-value">95%</p></div>
+                        {/* Charts Row 1 */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-6">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Monthly Expenses Trend</h6>
+                                    <div className="p-3">
+                                        <SimpleLineChart data={expenseTrend} height="280px" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Budget Utilization</h6>
+                                    <SimpleBarChart data={budgetData} height="280px" />
+                                </div>
+                            </div>
                         </div>
-                        <div className="d-card stat">
-                            <div className="stat-icon p-orange">🧾</div>
-                            <div><h4>Pending Invoices</h4><p className="stat-value">4</p></div>
+
+                        {/* Charts Row 2 */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Invoice Status</h6>
+                                    <div className="py-2 d-flex justify-content-center">
+                                        <SimpleDonutChart segments={invoiceStatusData} size="200px" centerText="Total" />
+                                    </div>
+                                    <div className="text-center mt-2 small text-secondary">
+                                        {invoiceStatusData.map((item, idx) => (
+                                            <span key={idx} className="fw-bold me-2" style={{ color: item.color }}>● {item.label}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </>
+                )}
+
+                {activeView === 'payroll' && <PayrollContent />}
+
+                {activeView === 'invoices' && (
+                    <div className="p-5 text-center">
+                        <h3 className="text-muted">Invoice Management</h3>
+                        <p>Process and track company invoices.</p>
                     </div>
-                </div>
-            </main>
-        </div>
+                )}
+                {activeView === 'expenses' && (
+                    <div className="p-5 text-center">
+                        <h3 className="text-muted">Expense Tracking</h3>
+                        <p>Manage employee reimbursements and company expenses.</p>
+                    </div>
+                )}
+                {activeView === 'reports' && (
+                    <div className="p-5 text-center">
+                        <h3 className="text-muted">Financial Reports</h3>
+                        <p>View profit/loss statements and payroll summaries.</p>
+                    </div>
+                )}
+            </div>
+        </DashboardLayout>
     );
 };
 
