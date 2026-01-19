@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import sideImage from '../../assets/images/loginside.png';
+import { useNavigate } from 'react-router-dom';
+import sideImage from '../../assets/images/loginimage.png';
 
 const ResetPassword = () => {
     const [formData, setFormData] = useState({

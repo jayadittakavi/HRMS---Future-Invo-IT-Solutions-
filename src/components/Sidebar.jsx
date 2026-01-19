@@ -24,8 +24,7 @@ import {
     MdFolder,
     MdRateReview,
     MdPerson,
-    MdAccessTime,
-    MdSettings
+    MdAccessTime
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
@@ -52,8 +51,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                 { name: 'Financial Year', icon: <MdCalendarToday size={20} />, path: '/financial-year' },
                 { name: 'Leave Management', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                 { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
-                { name: 'User Management', icon: <MdManageAccounts size={20} />, path: '/users' },
-                { name: 'Settings', icon: <MdSettings size={20} />, path: '/settings' }
+                { name: 'User Management', icon: <MdManageAccounts size={20} />, path: '/users' }
             );
         } else if (role === 'hr') {
             links.push(

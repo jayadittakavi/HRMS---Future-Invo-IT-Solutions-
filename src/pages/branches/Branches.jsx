@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const BranchesContent = () => {
     // Mock Data
-    const [branches, setBranches] = useState([
+    const [branches] = useState([
         { id: 1, name: 'Bangalore Main Branch', company: 'TrickuWeb Technologies', address: 'Tech Park, Bangalore', location: '12.97, 77.59' },
         { id: 2, name: 'Hyderabad Main Branch', company: 'InnovateSoft Solutions', address: 'HITEC City, Hyderabad', location: '17.38, 78.48' },
         { id: 3, name: 'Pune Main Branch', company: 'TechForward India', address: 'Hinjewadi, Pune', location: '18.59, 73.72' },

@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const LeaveManagementContent = () => {
     // Mock Data
-    const [leaveRequests, setLeaveRequests] = useState([
+    const [leaveRequests] = useState([
         { id: 1, employee: 'John Doe', type: 'Sick Leave', from: '2024-05-20', to: '2024-05-21', days: 2, status: 'Pending' },
         { id: 2, employee: 'Sarah Smith', type: 'Annual Leave', from: '2024-06-10', to: '2024-06-15', days: 5, status: 'Approved' },
         { id: 3, employee: 'Mike Ross', type: 'Casual Leave', from: '2024-05-01', to: '2024-05-01', days: 1, status: 'Rejected' },

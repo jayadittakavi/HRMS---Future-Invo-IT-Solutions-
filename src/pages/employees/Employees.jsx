@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const EmployeesContent = () => {
     // Mock Data
-    const [employees, setEmployees] = useState([
+    const [employees] = useState([
         { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', pay: 'N/A', type: 'Admin' },
         { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', pay: 'N/A', type: 'Manager' },
         { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', pay: 'N/A', type: 'Employee' },

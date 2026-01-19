@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const AssetCategoriesContent = () => {
     // Mock Data
-    const [categories, setCategories] = useState([
+    const [categories] = useState([
         { id: 1, name: 'IT Equipment', description: 'Computers, laptops, servers', created: '27/09/2025' },
         { id: 2, name: 'Office Furniture', description: 'Desks, chairs, tables', created: '27/09/2025' },
         { id: 3, name: 'Software Licenses', description: 'Licenses and subscriptions', created: '27/09/2025' },

@@ -7,7 +7,7 @@ const Settings = () => {
     const [themeColor, setThemeColor] = useState('light');
     const [sidebarColor, setSidebarColor] = useState('dark');
 
-    const handleNavigate = (path) => {
+    const handleNavigate = () => {
         // Handle navigation if needed
     };
 

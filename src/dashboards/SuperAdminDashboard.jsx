@@ -78,9 +78,8 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Top Stats Row */}
+                        {/* Stats Row 1 */}
                         <div className="row g-4 mb-4">
-                            {/* Employees Net Pay */}
                             <div className="col-md-4">
                                 <div className="dashboard-card bg-gradient-purple">
                                     <div className="d-flex align-items-center mb-3">
@@ -95,10 +94,8 @@ const SuperAdminDashboard = () => {
                                     <p className="small mt-1 mb-0">Pay Date: <span className="fw-bold">31 May 2024</span></p>
                                 </div>
                             </div>
-
-                            {/* No. of Employees */}
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
+                                <div className="dashboard-card bg-gradient-orange">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaUsers size={24} />
@@ -114,8 +111,6 @@ const SuperAdminDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* To Do Tasks */}
                             <div className="col-md-4">
                                 <div className="dashboard-card bg-gradient-green">
                                     <div className="d-flex align-items-center mb-3">
@@ -135,9 +130,8 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Second Stats Row */}
+                        {/* Stats Row 2 */}
                         <div className="row g-4 mb-4">
-                            {/* Deduction Summary */}
                             <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Deduction Summary</h6>
@@ -148,8 +142,6 @@ const SuperAdminDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Employee Summary */}
                             <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Employee Summary</h6>
@@ -157,8 +149,6 @@ const SuperAdminDashboard = () => {
                                     <p className="text-secondary small mb-0">Active Employees</p>
                                 </div>
                             </div>
-
-                            {/* Payment Updates */}
                             <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Payment Updates</h6>
@@ -171,19 +161,16 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Charts Row 1: Payroll & Deductions */}
+                        {/* Charts Row 1 */}
                         <div className="row g-4 mb-4">
-                            {/* Payroll Cost Summary Chart */}
                             <div className="col-md-8">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Payroll Cost Summary (This Year)</h6>
                                     <SimpleBarChart data={chartData} height="320px" />
                                 </div>
                             </div>
-
-                            {/* Deduction Distribution Chart */}
                             <div className="col-md-4">
-                                <div className="dashboard-card h-100">
+                                <div className="dashboard-card">
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h6 className="dashboard-card-title mb-0">Deductions Breakdown</h6>
                                     </div>
@@ -199,9 +186,9 @@ const SuperAdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Charts Row 2: Revenue Trend */}
+                        {/* Charts Row 2 & Calendar */}
                         <div className="row g-4 mb-4">
-                            <div className="col-md-12">
+                            <div className="col-md-8">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Revenue Trend (2024)</h6>
                                     <div className="py-2">
@@ -209,11 +196,7 @@ const SuperAdminDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Calendar Row */}
-                        <div className="row g-4">
-                            <div className="col-md-12">
+                            <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <div className="d-flex justify-content-between align-items-center mb-3">
                                         <h6 className="fw-bold text-dark mb-0">January 2026 Calendar</h6>

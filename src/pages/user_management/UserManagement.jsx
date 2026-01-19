@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const UserManagementContent = () => {
     // Mock Data
-    const [users, setUsers] = useState([
+    const [users] = useState([
         { id: 1, name: 'Meera Krishnan', email: 'meera@example.com', role: 'Super Admin', status: 'Active', lastLogin: 'Today, 10:00 AM' },
         { id: 2, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active', lastLogin: 'Yesterday, 05:30 PM' },
         { id: 3, name: 'Jane Smith', email: 'jane@example.com', role: 'Employee', status: 'Inactive', lastLogin: '2 weeks ago' },

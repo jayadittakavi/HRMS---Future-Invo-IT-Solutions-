@@ -41,38 +41,39 @@ const AccountantDashboard = () => {
                             </div>
                         </div>
 
+                        {/* Stats Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-6">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-body d-flex align-items-center">
-                                        <div className="bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3 display-6">
-                                            <FaMoneyCheckAlt />
+                                <div className="dashboard-card bg-gradient-blue">
+                                    <div className="d-flex align-items-center">
+                                        <div className="rounded-3 p-3 me-3 text-white">
+                                            <FaMoneyCheckAlt size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="text-muted mb-1">Payroll Processed</h6>
-                                            <h3 className="mb-0 fw-bold">95%</h3>
+                                            <h6 className="dashboard-card-title mb-1">Payroll Processed</h6>
+                                            <h3 className="dashboard-value mb-0">95%</h3>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-body d-flex align-items-center">
-                                        <div className="bg-warning bg-opacity-10 text-warning rounded-3 p-3 me-3 display-6">
-                                            <FaFileInvoiceDollar />
+                                <div className="dashboard-card bg-gradient-orange">
+                                    <div className="d-flex align-items-center">
+                                        <div className="rounded-3 p-3 me-3 text-white">
+                                            <FaFileInvoiceDollar size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="text-muted mb-1">Pending Invoices</h6>
-                                            <h3 className="mb-0 fw-bold">4</h3>
+                                            <h6 className="dashboard-card-title mb-1">Pending Invoices</h6>
+                                            <h3 className="dashboard-value mb-0">4</h3>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Charts Row 1 */}
+                        {/* Charts Row */}
                         <div className="row g-4 mb-4">
-                            <div className="col-md-6">
+                            <div className="col-md-8">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Monthly Expenses Trend</h6>
                                     <div className="p-3">
@@ -80,7 +81,7 @@ const AccountantDashboard = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="col-md-6">
+                            <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Budget Utilization</h6>
                                     <SimpleBarChart data={budgetData} height="280px" />
@@ -88,9 +89,9 @@ const AccountantDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Charts Row 2 */}
+                        {/* Additional Row */}
                         <div className="row g-4 mb-4">
-                            <div className="col-md-12">
+                            <div className="col-md-4">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Invoice Status</h6>
                                     <div className="py-2 d-flex justify-content-center">

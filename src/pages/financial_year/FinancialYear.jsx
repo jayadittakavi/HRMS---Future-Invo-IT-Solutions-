@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const FinancialYearContent = () => {
     // Mock Data
-    const [years, setYears] = useState([
+    const [years] = useState([
         { id: 1, name: 'FY 2024-2025', start: '01 Apr 2024', end: '31 Mar 2025', status: 'Active' },
         { id: 2, name: 'FY 2023-2024', start: '01 Apr 2023', end: '31 Mar 2024', status: 'Closed' },
         { id: 3, name: 'FY 2022-2023', start: '01 Apr 2022', end: '31 Mar 2023', status: 'Closed' },

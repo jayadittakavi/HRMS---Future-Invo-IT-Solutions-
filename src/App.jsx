@@ -24,7 +24,6 @@ import Employees from "./pages/employees/Employees";
 /* Dashboard Manager (Role Based) */
 import DashboardManager from "./dashboards/DashboardManager";
 
-import Settings from "./pages/settings/Settings";
 import Profile from "./pages/profile/Profile";
 
 export default function App() {
@@ -65,7 +64,6 @@ export default function App() {
           <Route path="/employees" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
           <Route path="/leaves" element={<ProtectedRoute><PlaceholderPage title="Leave Management" /></ProtectedRoute>} />
           <Route path="/payroll" element={<ProtectedRoute><PlaceholderPage title="Payroll" /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/departments" element={<ProtectedRoute><Departments /></ProtectedRoute>} />
           <Route path="/assets" element={<ProtectedRoute><Assets /></ProtectedRoute>} />

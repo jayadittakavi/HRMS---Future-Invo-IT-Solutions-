@@ -6,7 +6,7 @@ import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaBriefcase, F
 const Profile = () => {
     const { user } = useAuth();
 
-    const handleNavigate = (path) => {
+    const handleNavigate = () => {
         // Handle navigation if needed
     };
 

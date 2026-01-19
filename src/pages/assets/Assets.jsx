@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const AssetsContent = () => {
     // Mock Data
-    const [assets, setAssets] = useState([
+    const [assets] = useState([
         { id: 1, name: 'MacBook Pro M2', category: 'IT Equipment', serial: 'MBP2023001', assignedTo: 'Praveen Kumar', status: 'Assigned' },
         { id: 2, name: 'Dell XPS 15', category: 'IT Equipment', serial: 'DXPS15002', assignedTo: 'Nitin Patel', status: 'Assigned' },
         { id: 3, name: 'Office Chair', category: 'Office Furniture', serial: 'OCE005', assignedTo: 'Priyanka Sharma', status: 'Assigned' },

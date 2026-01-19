@@ -57,7 +57,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Top Cards Row */}
+                        {/* Stats Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-3">
                                 <div className="dashboard-card bg-gradient-purple">
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card h-100">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Employee Dist.</h6>
                                     <div className="py-3 d-flex justify-content-center">
                                         <SimpleDonutChart segments={employeeDistribution} size="200px" centerText="Total" />
@@ -120,7 +120,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        {/* Charts Row 2 */}
+                        {/* Revenue Growth */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-12">
                                 <div className="dashboard-card">

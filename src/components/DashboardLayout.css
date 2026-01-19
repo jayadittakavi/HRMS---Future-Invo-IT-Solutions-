@@ -7,25 +7,65 @@
 /* Custom Card Styles to match design */
 .dashboard-card {
     border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
-    border-radius: 0.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    /* Soft shadow */
+    border-radius: 1rem;
+    /* Pinterest-like rounding */
     height: 100%;
     background-color: #fff;
-    padding: 1.25rem;
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    /* Lift effect */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
 .dashboard-card-title {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: #3464bc;
     margin-bottom: 1rem;
+    letter-spacing: 0.01em;
 }
 
 .dashboard-value {
-    font-size: 1.75rem;
-    font-weight: 700;
+    font-size: 1.85rem;
+    font-weight: 800;
     color: #344767;
     margin-bottom: 0;
+}
+
+/* Pinterest Masonry Grid */
+.pinterest-grid {
+    column-count: 1;
+    column-gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .pinterest-grid {
+        column-count: 2;
+    }
+}
+
+@media (min-width: 1200px) {
+    .pinterest-grid {
+        column-count: 3;
+    }
+}
+
+.pinterest-item {
+    break-inside: avoid;
+    margin-bottom: 1.5rem;
+}
+
+/* Ensure images/charts within items don't break layout */
+.pinterest-item img,
+.pinterest-item svg {
+    max-width: 100%;
+    height: auto;
 }
 
 /* Custom Bar Chart (CSS Only) */
@@ -47,7 +87,8 @@
 
 .chart-bar {
     width: 100%;
-    border-radius: 4px;
+    border-radius: 8px 8px 0 0;
+    /* Softer radius on bars */
     transition: height 0.5s ease;
     position: relative;
 }
@@ -61,6 +102,7 @@
     font-size: 0.75rem;
     color: #6c757d;
     text-align: center;
+    font-weight: 500;
 }
 
 /* Custom Calendar Grid */
@@ -81,13 +123,15 @@
 .calendar-day {
     font-size: 0.85rem;
     color: #344767;
-    padding: 6px 0;
-    border-radius: 5px;
+    padding: 8px 0;
+    border-radius: 8px;
+    /* Softer rounding */
     cursor: default;
+    transition: background-color 0.2s;
 }
 
 .calendar-day:hover:not(.empty) {
-    background-color: #f8f9fa;
+    background-color: #f0f2f5;
 }
 
 .calendar-day.active {
@@ -95,6 +139,7 @@
     /* Primary Blue */
     color: white;
     font-weight: 600;
+    box-shadow: 0 4px 6px rgba(52, 100, 188, 0.2);
 }
 
 .calendar-day.empty {
@@ -104,8 +149,8 @@
 /* Custom Table Styles */
 .table-card {
     background: #fff;
-    border-radius: 0.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.04);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     border: none;
 }
@@ -143,11 +188,12 @@
 }
 
 .action-btn {
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.85rem;
     font-size: 0.75rem;
     font-weight: 600;
-    border-radius: 0.25rem;
+    border-radius: 0.5rem;
     margin-right: 0.5rem;
+    transition: all 0.2s;
 }
 
 .action-btn.edit {
@@ -156,17 +202,25 @@
     border: none;
 }
 
+.action-btn.edit:hover {
+    background-color: #dee2e6;
+}
+
 .action-btn.delete {
     background-color: #fddddd;
     color: #dc3545;
     border: none;
 }
 
+.action-btn.delete:hover {
+    background-color: #fccaca;
+}
+
 .company-logo-placeholder {
     width: 40px;
     height: 40px;
     background-color: #f8f9fa;
-    border-radius: 50%;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,7 +230,7 @@
 }
 
 .status-badge {
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.85rem;
     background-color: #e8f5e9;
     color: #4caf50;
     font-size: 0.75rem;
@@ -186,7 +240,7 @@
 }
 
 .role-badge {
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.85rem;
     font-size: 0.75rem;
     font-weight: 700;
     border-radius: 2rem;
@@ -205,4 +259,67 @@
 .role-badge.employee {
     background-color: #f3f3f3;
     color: #344767;
+}
+
+/* Gradient Cards */
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #7928ca 0%, #ff0080 100%);
+    color: #fff !important;
+}
+
+.bg-gradient-blue {
+    /* Formal Blue */
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #fff !important;
+}
+
+.bg-gradient-green {
+    /* Formal Blue - Replaces Green */
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: #fff !important;
+}
+
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #f53939 0%, #fbcf33 100%);
+    color: #fff !important;
+}
+
+/* Text & Icon overrides for gradient cards */
+.bg-gradient-purple .dashboard-card-title,
+.bg-gradient-blue .dashboard-card-title,
+.bg-gradient-green .dashboard-card-title,
+.bg-gradient-orange .dashboard-card-title,
+.bg-gradient-purple .dashboard-value,
+.bg-gradient-blue .dashboard-value,
+.bg-gradient-green .dashboard-value,
+.bg-gradient-orange .dashboard-value,
+.bg-gradient-purple .text-success,
+.bg-gradient-purple .text-primary,
+.bg-gradient-purple .text-warning,
+.bg-gradient-purple .text-danger,
+.bg-gradient-purple .text-secondary,
+.bg-gradient-blue .text-success,
+.bg-gradient-blue .text-primary,
+.bg-gradient-blue .text-warning,
+.bg-gradient-blue .text-danger,
+.bg-gradient-blue .text-secondary,
+.bg-gradient-green .text-success,
+.bg-gradient-green .text-primary,
+.bg-gradient-green .text-warning,
+.bg-gradient-green .text-danger,
+.bg-gradient-green .text-secondary,
+.bg-gradient-orange .text-success,
+.bg-gradient-orange .text-primary,
+.bg-gradient-orange .text-warning,
+.bg-gradient-orange .text-danger,
+.bg-gradient-orange .text-secondary {
+    color: #fff !important;
+}
+
+.bg-gradient-purple svg,
+.bg-gradient-blue svg,
+.bg-gradient-green svg,
+.bg-gradient-orange svg {
+    color: #fff !important;
+    fill: #fff !important;
 }

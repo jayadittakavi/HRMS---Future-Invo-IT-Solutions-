@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const PayGradeContent = () => {
     // Mock Data for Table
-    const [payGrades, setPayGrades] = useState([
+    const [payGrades] = useState([
         { id: 1, name: 'Grade A', min: '₹30,000', max: '₹50,000', currency: 'INR', employeeCount: 15 },
         { id: 2, name: 'Grade B', min: '₹50,001', max: '₹80,000', currency: 'INR', employeeCount: 25 },
         { id: 3, name: 'Grade C', min: '₹80,001', max: '₹1,20,000', currency: 'INR', employeeCount: 10 },

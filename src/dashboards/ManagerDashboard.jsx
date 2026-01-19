@@ -34,37 +34,38 @@ const ManagerDashboard = () => {
                             </div>
                         </div>
 
+                        {/* Stats Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-purple">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaUsersCog className="text-primary" /> Team Members
+                                        <FaUsersCog className="fs-5" /> Team Members
                                     </h6>
                                     <h3 className="dashboard-value">12</h3>
-                                    <p className="text-secondary small mb-0">Active in projects</p>
+                                    <p className="small mb-0">Active in projects</p>
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-orange">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaClipboardList className="text-warning" /> Action Items
+                                        <FaClipboardList className="fs-5" /> Action Items
                                     </h6>
                                     <h3 className="dashboard-value">5</h3>
-                                    <p className="text-warning small fw-bold mb-0">Pending Review</p>
+                                    <p className="small fw-bold mb-0">Pending Review</p>
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-green">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaStar className="text-success" /> Avg Performance
+                                        <FaStar className="fs-5" /> Avg Performance
                                     </h6>
                                     <h3 className="dashboard-value">4.5</h3>
-                                    <p className="text-success small fw-bold mb-0">Top 10%</p>
+                                    <p className="small fw-bold mb-0">Top 10%</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Status Chart */}
+                        {/* Charts Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-6">
                                 <div className="dashboard-card">
@@ -94,6 +95,7 @@ const ManagerDashboard = () => {
                             </div>
                         </div>
 
+                        {/* Recent Activity Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
                                 <div className="dashboard-card">

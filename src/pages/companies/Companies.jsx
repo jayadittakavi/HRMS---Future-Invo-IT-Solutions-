@@ -4,7 +4,7 @@ import '../../components/DashboardLayout.css';
 
 export const CompaniesContent = () => {
     // Mock Data
-    const [companies, setCompanies] = useState([
+    const [companies] = useState([
         { id: 1, name: 'TrickuWeb Technologies', email: 'support@trickuweb.com', address: 'Tech Park, Bangalore', status: 'Active' },
         { id: 2, name: 'InnovateSoft Solutions', email: 'support@innovatesoft.com', address: 'IT Hub, Hyderabad', status: 'Active' },
         { id: 3, name: 'NextGen Systems', email: 'info@nextgensys.com', address: 'Tech Valley, Noida', status: 'Active' },

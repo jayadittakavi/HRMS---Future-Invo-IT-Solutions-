@@ -47,6 +47,7 @@ const HRDashboard = () => {
                             </div>
                         </div>
 
+                        {/* Stats Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
                                 <div className="dashboard-card bg-gradient-purple">
@@ -79,14 +80,14 @@ const HRDashboard = () => {
 
                         {/* Charts Row 1 */}
                         <div className="row g-4 mb-4">
-                            <div className="col-md-8">
+                            <div className="col-md-6">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Recruitment Funnel</h6>
                                     <SimpleBarChart data={hiringData} height="300px" />
                                 </div>
                             </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card h-100">
+                            <div className="col-md-6">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Department Headcount</h6>
                                     <div className="py-3 d-flex justify-content-center">
                                         <SimpleDonutChart segments={deptDistribution} size="200px" centerText="100%" />
@@ -104,7 +105,7 @@ const HRDashboard = () => {
 
                         {/* Charts Row 2 */}
                         <div className="row g-4 mb-4">
-                            <div className="col-md-12">
+                            <div className="col-md-8">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Application Trends (6 Months)</h6>
                                     <div className="py-3">
@@ -112,11 +113,32 @@ const HRDashboard = () => {
                                     </div>
                                 </div>
                             </div>
+                            <div className="col-md-4">
+                                <div className="dashboard-card">
+                                    <h6 className="dashboard-card-title">Upcoming Interviews</h6>
+                                    <ul className="list-group list-group-flush">
+                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom mb-2">
+                                            <div>
+                                                <h6 className="mb-0 fw-bold small text-dark">Frontend Dev</h6>
+                                                <small className="text-muted">10:00 AM - Alice C.</small>
+                                            </div>
+                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
+                                        </li>
+                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-0">
+                                            <div>
+                                                <h6 className="mb-0 fw-bold small text-dark">UI Designer</h6>
+                                                <small className="text-muted">02:00 PM - Bob M.</small>
+                                            </div>
+                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* HR Tables or Lists */}
-                        <div className="row g-4">
-                            <div className="col-md-8">
+                        {/* Application Table */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title">Recent Applications</h6>
                                     <div className="table-responsive">
@@ -151,27 +173,6 @@ const HRDashboard = () => {
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Upcoming Interviews</h6>
-                                    <ul className="list-group list-group-flush">
-                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom mb-2">
-                                            <div>
-                                                <h6 className="mb-0 fw-bold small text-dark">Frontend Dev</h6>
-                                                <small className="text-muted">10:00 AM - Alice C.</small>
-                                            </div>
-                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-0">
-                                            <div>
-                                                <h6 className="mb-0 fw-bold small text-dark">UI Designer</h6>
-                                                <small className="text-muted">02:00 PM - Bob M.</small>
-                                            </div>
-                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
-                                        </li>
-                                    </ul>
                                 </div>
                             </div>
                         </div>
