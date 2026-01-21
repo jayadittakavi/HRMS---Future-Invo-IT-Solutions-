@@ -46,35 +46,35 @@ const EmployeeDashboard = () => {
                         {/* Top Cards */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaCalendarCheck className="fs-5" /> Attendance
+                                        <FaCalendarCheck className="fs-5 text-success" /> Attendance
                                     </h6>
                                     <h3 className="dashboard-value">98%</h3>
-                                    <p className="small mb-0 fw-bold">Present this month</p>
+                                    <p className="text-success small mb-0 fw-bold">Present this month</p>
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-purple">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaUmbrellaBeach className="fs-5" /> Leave Balance
+                                        <FaUmbrellaBeach className="fs-5 text-primary" /> Leave Balance
                                     </h6>
                                     <h3 className="dashboard-value">12</h3>
-                                    <p className="small mb-0">Days remaining</p>
+                                    <p className="text-secondary small mb-0">Days remaining</p>
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-orange">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaTasks className="fs-5" /> Pending Tasks
+                                        <FaTasks className="fs-5 text-danger" /> Pending Tasks
                                     </h6>
                                     <h3 className="dashboard-value">3</h3>
-                                    <p className="small fw-bold mb-0">Due today</p>
+                                    <p className="text-warning small fw-bold mb-0">Due today</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Charts Row */}
+                        {/* Charts Row (New) */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
                                 <div className="dashboard-card">
@@ -98,7 +98,7 @@ const EmployeeDashboard = () => {
                         </div>
 
                         {/* Recent Payslips & Tasks */}
-                        <div className="row g-4 mb-4">
+                        <div className="row g-4">
                             <div className="col-md-8">
                                 <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">

@@ -12,10 +12,12 @@ import { LeaveManagementContent } from '../pages/leave_management/LeaveManagemen
 import { UserManagementContent } from '../pages/user_management/UserManagement';
 import { PayGradeContent } from '../pages/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, SimpleAreaChart } from '../components/charts/CustomCharts';
+import { useAuth } from '../context/AuthContext';
 import React, { useState } from 'react';
 import { FaWallet, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaChartLine } from 'react-icons/fa';
 
 const SuperAdminDashboard = () => {
+    const { user } = useAuth();
     const [activeView, setActiveView] = useState('dashboard');
 
     const handleNavigate = (path) => {
@@ -71,7 +73,7 @@ const SuperAdminDashboard = () => {
                     <>
                         {/* Welcome & Status Section */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome Meera Krishnan!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
                                 <span className="badge bg-warning text-dark fw-bold px-3">APPROVED</span>

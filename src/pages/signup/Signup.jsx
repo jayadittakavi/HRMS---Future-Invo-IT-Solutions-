@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { signupService } from '../../signupService';
 import sideImage from '../../assets/images/sigupbg.png';
 
 const Signup = () => {
@@ -29,21 +30,16 @@ const Signup = () => {
     try {
       setError('');
 
-      const response = await fetch('/api/auth/super-admin/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          password: formData.password,
-          confirm_password: formData.confirmPassword,
-          role: 'SUPER_ADMIN'
-        }),
-      });
+      const userData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+        confirm_password: formData.confirmPassword,
+        role: 'SUPER_ADMIN'
+      };
 
+      const response = await signupService.signupSuperAdmin(userData);
       const data = await response.json();
 
       if (!response.ok) {

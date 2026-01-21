@@ -1,67 +1,229 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-    /* Color Palette */
-    --primary-blue: #3464bc;
-    --dark-blue: #2a5298;
-    /* Slightly darker for contrast if needed, or stick to #3464bc */
-    --light-blue: #eff6ff;
-    --accent-blue: #8ecae6;
+    /* --- THEME CONFIGURATION --- */
 
-    /* Bootstrap Overrides */
-    --bs-primary: #3464bc;
-    --bs-primary-rgb: 52, 100, 188;
-    --bs-link-color: #3464bc;
-    --bs-link-hover-color: #5fa8ff;
+    /* 1. Base Colors (Skins) - Default: Blue */
+    --primary-color: #0ea5e9;
+    /* Main Brand Color */
+    --primary-dark: #0284c7;
+    /* Darker shade for hover/active */
+    --primary-light: #e0f2fe;
+    /* Lighter shade for backgrounds */
+    --accent-color: #38bdf8;
+    /* Accent */
 
-    /* Gradients */
-    --primary-gradient: linear-gradient(135deg, #3464bc 0%, #5fa8ff 100%);
-    --sidebar-gradient: linear-gradient(180deg, #3464bc 0%, #5fa8ff 100%);
-    --bg-gradient: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    /* Using accent-ish lightness */
-    --card-gradient: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-    --glass-bg: rgba(255, 255, 255, 0.95);
+    /* 2. Theme Colors (Light Mode Default) */
+    --bg-body: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 50%, #ccfbf1 100%);
+    --bg-card: rgba(255, 255, 255, 0.25);
+    --bg-sidebar: #ffffff;
+    --text-main: #0f172a;
+    --text-secondary: #334155;
+    --text-muted: #94a3b8;
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-blue: 0 10px 15px -3px rgba(52, 100, 188, 0.2);
+    /* 3. Glassmorphism */
+    --glass-border: 1px solid rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --glass-blur: blur(10px);
 
-    /* Text */
-    --text-main: #1e293b;
-    --text-secondary: #64748b;
-    --text-light: #94a3b8;
+    --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+    /* Bootstrap Overrides mapped to variables */
+    --bs-primary: var(--primary-color);
+    --bs-link-color: var(--primary-color);
+    --bs-link-hover-color: var(--primary-dark);
 }
 
+/* --- DARK MODE OVERRIDES --- */
+[data-theme="dark"] {
+    --bg-body: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    /* Slate 900 -> Slate 800 */
+    --bg-card: rgba(30, 41, 59, 0.7);
+    /* Darker glass */
+    --bg-sidebar: #1e293b;
+    --text-main: #f8fafc;
+    /* Slate 50 */
+    --text-secondary: #cbd5e1;
+    /* Slate 300 */
+    --text-muted: #94a3b8;
+    /* Slate 400 */
+
+    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* --- SKIN PRESETS (Applied via data-skin attribute on body) --- */
+
+/* Purple Skin */
+[data-skin="purple"] {
+    --primary-color: #8b5cf6;
+    --primary-dark: #7c3aed;
+    --primary-light: #f3e8ff;
+    --accent-color: #a78bfa;
+}
+
+/* Green Skin */
+[data-skin="green"] {
+    --primary-color: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #d1fae5;
+    --accent-color: #34d399;
+}
+
+/* Orange Skin */
+[data-skin="orange"] {
+    --primary-color: #f97316;
+    --primary-dark: #ea580c;
+    --primary-light: #ffedd5;
+    --accent-color: #fb923c;
+}
+
+/* Red Skin */
+[data-skin="red"] {
+    --primary-color: #ef4444;
+    --primary-dark: #dc2626;
+    --primary-light: #fee2e2;
+    --accent-color: #f87171;
+}
+
+/* Teal Skin */
+[data-skin="teal"] {
+    --primary-color: #14b8a6;
+    --primary-dark: #0d9488;
+    --primary-light: #ccfbf1;
+    --accent-color: #2dd4bf;
+}
+
+
+/* Global Util Usage */
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background: var(--bg-gradient);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Modern Font */
+    background: var(--bg-body);
     background-attachment: fixed;
-    /* Ensures gradient covers full scroll */
+    background-size: cover;
     color: var(--text-main);
     min-height: 100vh;
+    transition: background 0.5s ease;
 }
 
-/* Custom Scrollbar Styles (Invisible but scrollable) */
-::-webkit-scrollbar {
-    width: 0px;
-    height: 0px;
-    background: transparent;
-    display: none;
-    /* Chrome/Safari/Webkit */
+input,
+button,
+select,
+textarea {
+    font-family: inherit;
 }
 
-::-webkit-scrollbar-track {
-    background: transparent;
+/* Update standard classes to use variables */
+.text-primary {
+    color: var(--primary-color) !important;
 }
 
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.btn-primary {
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+/* Card Updates for Theme */
+.dashboard-card {
+    background: var(--bg-card);
+    border: var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    color: var(--text-main);
+}
+
+.dashboard-value {
+    color: var(--text-main);
+}
+
+.dashboard-card-title {
+    color: var(--text-secondary);
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar-thumb {
-    background: transparent;
+    background: rgba(100, 116, 139, 0.5);
+    /* Neutral for light/dark */
 }
 
-/* Firefox fallback */
 * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    /* IE and Edge */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+}
+
+/* --- Solid Color Cards (Atrio Style) --- */
+.dashboard-card-solid {
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s;
+}
+
+.dashboard-card-solid:hover {
+    transform: translateY(-2px);
+}
+
+.bg-solid-purple {
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.bg-solid-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.bg-solid-teal {
+    background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+}
+
+.bg-solid-orange {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.card-icon-floater {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2.5rem;
+    opacity: 0.2;
+}
+
+.progress-thin {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    margin-top: 1rem;
+    overflow: hidden;
+}
+
+.progress-thin-bar {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
 }

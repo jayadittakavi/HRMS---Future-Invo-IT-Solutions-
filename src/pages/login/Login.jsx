@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import sideImage from '../../assets/images/loginimage.png';
+import { loginService } from './service/service';
 
 const Login = () => {
   const [email, setEmail] = useState('superadmin@example.com');
@@ -16,8 +17,46 @@ const Login = () => {
     e.preventDefault();
     try {
       setError('');
-      await login(email, password);
-      navigate('/dashboard');
+
+      const response = await loginService.login(email, password);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        // Redirect based on role
+        const role = data.user.role;
+        switch (role) {
+          case 'superadmin':
+            navigate('/dashboard/super-admin');
+            break;
+          case 'admin':
+            navigate('/dashboard/admin');
+            break;
+          case 'manager':
+            navigate('/dashboard/manager');
+            break;
+          case 'hr':
+            navigate('/dashboard/hr');
+            break;
+          case 'accountant':
+            navigate('/dashboard/accountant');
+            break;
+          case 'newuser':
+            navigate('/dashboard/new-user');
+            break;
+          case 'employee':
+          default:
+            navigate('/dashboard/employee');
+        }
+        // Force reload to update context if necessary
+        window.location.reload();
+      }
     } catch (err) {
       setError('Failed to log in: ' + err.message);
     }
