@@ -1,40 +1,71 @@
-/* DashboardLayout specific styles */
+/* Glassmorphism Dashboard Layout */
+
+.glass-dashboard-bg {
+    /* Smooth Blue-Lavender Gradient replaced with Image */
+    background: url('../assets/images/super-admin-bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #334155;
+}
+
+.glass-sidebar-wrapper {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.65) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
 
 .transition-all {
     transition: all 0.3s ease-in-out;
 }
 
-/* Custom Card Styles to match design */
+/* Glassy Card Styles */
 .dashboard-card {
-    border: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    /* Soft shadow */
-    border-radius: 1rem;
-    /* Pinterest-like rounding */
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 1.25rem;
+    /* Softer rounded corners */
     height: 100%;
-    background-color: #fff;
+    background: rgba(255, 255, 255, 0.55);
     padding: 1.5rem;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dashboard-card:hover {
     transform: translateY(-5px);
-    /* Lift effect */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 .dashboard-card-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #3464bc;
+    color: #475569;
+    /* Softer slate/blue text */
     margin-bottom: 1rem;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
 }
 
 .dashboard-value {
-    font-size: 1.85rem;
+    font-size: 2rem;
     font-weight: 800;
-    color: #344767;
+    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 0;
 }
 

@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import sideImage from '../../assets/images/loginimage.png';
 import { loginService } from './service/service';
+import './login.css';
 
 const Login = () => {
   const [email, setEmail] = useState('superadmin@example.com');
@@ -63,13 +64,13 @@ const Login = () => {
   };
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-4" style={{ backgroundColor: '#eef2ff' }}>
-      <div className="card border-0 shadow-lg overflow-hidden" style={{ maxWidth: '900px', width: '100%' }}>
+    <div className="container-fluid login-container">
+      <div className="card login-card">
         <div className="row g-0 h-100">
           {/* Form Side */}
           <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
             <div className="mb-4">
-              <h3 className="fw-bold mb-2" style={{ color: '#1e40af' }}>Login to HRMS your work starts here!</h3>
+              <h3 className="login-title">Login to HRMS your work starts here!</h3>
             </div>
 
             {error && <div className="alert alert-danger" role="alert">{error}</div>}
@@ -108,15 +109,12 @@ const Login = () => {
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary w-100 fw-bold mb-3" style={{ backgroundColor: '#1e40af', borderColor: '#1e40af' }}>
+              <button type="submit" className="btn btn-primary login-btn">
                 Login
               </button>
 
               <div className="d-flex justify-content-between align-items-center mt-3">
-                <Link to="/forgot-password" style={{ color: '#1e40af', textDecoration: 'none', fontSize: '0.9rem' }}>Forgot password?</Link>
-                <span className="small text-muted">
-                  Don't have an account? <Link to="/signup" style={{ color: '#1e40af', textDecoration: 'none' }}>Sign up now</Link>
-                </span>
+                <Link to="/forgot-password" className="forgot-password-link">Forgot password?</Link>
               </div>
             </form>
           </div>
@@ -126,8 +124,7 @@ const Login = () => {
             <img
               src={sideImage}
               alt="HRMS Dashboard"
-              className="img-fluid w-100 h-100 position-absolute top-0 start-0"
-              style={{ objectFit: 'cover' }}
+              className="img-fluid login-image"
             />
           </div>
         </div>

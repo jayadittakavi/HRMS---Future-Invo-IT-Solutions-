@@ -11,9 +11,9 @@ const DashboardLayout = ({ children, title, onNavigate }) => {
     };
 
     return (
-        <div className="d-flex vh-100 bg-light overflow-hidden">
+        <div className="d-flex vh-100 glass-dashboard-bg overflow-hidden">
             {/* Sidebar Wrapper */}
-            <div className={`bg-white border-end transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: isSidebarOpen ? '280px' : '0', overflow: 'hidden', transition: 'width 0.3s' }}>
+            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: isSidebarOpen ? '280px' : '0', overflow: 'hidden', transition: 'width 0.3s' }}>
                 <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} onNavigate={onNavigate} />
             </div>
 

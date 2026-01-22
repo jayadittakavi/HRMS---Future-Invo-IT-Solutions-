@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { verifySignupOtpService } from './service/service';
+import { signupService } from '../signupService';
 import { useAuth } from '../../../context/AuthContext';
 import sideImage from '../../../assets/images/loginimage.png';
 import './SignupOtp.css';
@@ -72,7 +72,7 @@ const SignupOtp = () => {
         try {
             setError('');
 
-            const response = await verifySignupOtpService.verify(email, otpValue);
+            const response = await signupService.verifySignupOtp({ email, otp: otpValue });
             const data = await response.json();
 
             if (!response.ok) {
@@ -101,23 +101,23 @@ const SignupOtp = () => {
     };
 
     return (
-        <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-4" style={{ backgroundColor: '#eef2ff' }}>
-            <div className="card border-0 shadow-lg overflow-hidden" style={{ maxWidth: '900px', width: '100%' }}>
+        <div className="container-fluid otp-container">
+            <div className="card otp-card">
                 <div className="row g-0 h-100">
                     {/* Form Side */}
                     <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
                         <div className="mb-4 text-center">
-                            <h3 className="fw-bold mb-2" style={{ color: '#1e40af' }}>Verify Signup OTP</h3>
-                            <p className="text-secondary small">Enter the 6-digit code sent to <strong>{email}</strong></p>
+                            <h3 className="otp-title">Verify Signup OTP</h3>
+                            <p className="otp-description">Enter the 6-digit code sent to <strong>{email}</strong></p>
                         </div>
 
                         {error && <div className="alert alert-danger text-center p-2 small" role="alert">{error}</div>}
 
                         <form onSubmit={handleSubmit}>
-                            <div className="d-flex justify-content-between mb-4 gap-2">
+                            <div className="otp-input-group">
                                 {otp.map((data, index) => (
                                     <input
-                                        className="otp-input form-control text-center fw-bold fs-4"
+                                        className="otp-input form-control"
                                         type="text"
                                         name="otp"
                                         maxLength="1"
@@ -126,18 +126,11 @@ const SignupOtp = () => {
                                         onChange={(e) => handleChange(e.target, index)}
                                         onKeyDown={(e) => handleKeyDown(e, index)}
                                         onFocus={(e) => e.target.select()}
-                                        style={{
-                                            width: '45px',
-                                            height: '55px',
-                                            border: '1px solid #cbd5e1',
-                                            borderRadius: '0.5rem',
-                                            color: '#1e40af'
-                                        }}
                                     />
                                 ))}
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100 fw-bold mb-3" style={{ backgroundColor: '#1e40af', borderColor: '#1e40af', padding: '10px' }}>
+                            <button type="submit" className="btn btn-primary verify-btn">
                                 Verify & Proceed
                             </button>
 
@@ -147,8 +140,8 @@ const SignupOtp = () => {
                                     <button
                                         type="button"
                                         onClick={handleResend}
-                                        className={`btn btn-link p-0 text-decoration-none fw-bold ${!canResend ? 'text-muted' : ''}`}
-                                        style={{ color: canResend ? '#1e40af' : '#6c757d', pointerEvents: canResend ? 'auto' : 'none' }}
+                                        className={`btn btn-link resend-btn ${canResend ? 'active' : 'disabled'}`}
+                                        disabled={!canResend}
                                     >
                                         Resend {timeLeft > 0 && `(${timeLeft}s)`}
                                     </button>
@@ -162,8 +155,7 @@ const SignupOtp = () => {
                         <img
                             src={sideImage}
                             alt="Verification"
-                            className="img-fluid w-100 h-100 position-absolute top-0 start-0"
-                            style={{ objectFit: 'cover' }}
+                            className="img-fluid otp-image"
                         />
                     </div>
                 </div>

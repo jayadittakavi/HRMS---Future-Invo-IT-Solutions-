@@ -1,68 +1,66 @@
-/* Sidebar.css */
+/* Glass Sidebar Styles */
 .sidebar-container {
-    background-color: #3464bc;
-    /* Approximate blue from image, will adjust */
-    background: linear-gradient(180deg, #3464bc 0%, #5fa8ff 100%);
-    color: white;
+    background-color: transparent;
+    background: transparent;
+    color: #334155;
+    height: 100%;
 }
 
 .sidebar-header {
     padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-role-label {
     font-size: 0.85rem;
-    font-weight: 500;
-    opacity: 1;
-    /* Changed from 0.9 */
+    font-weight: 600;
+    opacity: 0.9;
     margin-bottom: 0.5rem;
     padding-left: 1.5rem;
-    color: #ffffff;
+    color: #475569;
 }
-
 
 .sidebar-nav-label {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 1;
-    margin-top: 1rem;
-    margin-bottom: 0.5rem;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
     padding-left: 1.5rem;
-    color: #ffffff;
+    color: #64748b;
 }
 
 .sidebar-link {
-    background-color: #ffffff;
-    color: #3464bc !important;
+    background: rgba(255, 255, 255, 0.4);
+    color: #334155 !important;
     text-decoration: none;
     padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
-    border-radius: 50px;
-    /* Pill shape */
-    margin: 0 1rem 0.75rem 1rem;
-    /* Spacing between buttons */
-    transition: all 0.2s;
+    border-radius: 12px;
+    margin: 0 1rem 0.6rem 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 600;
     font-size: 0.9rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    opacity: 1;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .sidebar-link:hover {
-    background-color: #f1f5f9;
-    transform: translateX(2px);
+    background: rgba(255, 255, 255, 0.8);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #fff;
+    color: #2563eb !important;
 }
 
 .sidebar-link.active {
-    background-color: #e0f2fe;
-    /* Very light blue to distinguish active */
-    color: #0284c7 !important;
-    font-weight: 700;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 1px solid #bae6fd;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff !important;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    border: none;
 }
 
 .sidebar-icon {

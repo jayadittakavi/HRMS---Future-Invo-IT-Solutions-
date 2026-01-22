@@ -2,20 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import RoleSwitcher from './RoleSwitcher';
-import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt } from 'react-icons/fa';
+import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
 const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
     const { user } = useAuth();
 
     return (
-        <header className="border-bottom py-3 px-4 d-flex align-items-center justify-content-between sticky-top"
-            style={{
-                minHeight: '70px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                backdropFilter: 'blur(10px)',
-                WebkitBackdropFilter: 'blur(10px)',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
-            }}>
+        <header className="border-bottom py-3 px-4 d-flex align-items-center justify-content-between sticky-top glass-header"
+            style={{ minHeight: '70px' }}>
             {/* Left Side: Toggle & User Name */}
             <div className="d-flex align-items-center gap-3">
                 <button
@@ -75,6 +69,12 @@ const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
                     <RoleSwitcher />
                     <button className="btn btn-link text-dark p-0" title="Profile">
                         <FaUserCircle size={28} />
+                    </button>
+                    <button className="btn btn-link text-secondary p-0 position-relative" title="Notifications">
+                        <FaBell size={20} />
+                        <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
+                            <span className="visually-hidden">New alerts</span>
+                        </span>
                     </button>
                     <button className="btn btn-link text-secondary p-0" title="Settings" onClick={onOpenSettings}>
                         <FaCog size={20} />

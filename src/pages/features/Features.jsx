@@ -1,16 +1,25 @@
 import React from 'react';
-import Navbar from '../components/Navbar';
+import './Features.css';
+import Navbar from '../home/Navbar';
+import featuresBg from '../../assets/images/features-bg.png';
 
 const Features = () => {
     return (
-        <div className="bg-white min-vh-100 d-flex flex-column">
+        <div className="features-container d-flex flex-column" style={{
+            backgroundImage: `url(${featuresBg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundAttachment: 'fixed'
+        }}>
             <Navbar />
 
             <main className="flex-grow-1">
-                <div className="bg-primary bg-gradient text-white py-5">
-                    <div className="container py-5 text-center">
-                        <h1 className="display-4 fw-bold mb-3">Powerful HR Features</h1>
-                        <p className="lead opacity-75 mb-0 max-w-2xl mx-auto">Discover the tools that will transform your workforce management.</p>
+                {/* Transparent Header Section */}
+                <div className="features-header">
+                    <div className="container">
+                        <h1 className="features-title">Powerful HR Features</h1>
+                        <p className="features-subtitle">Discover the tools that will transform your workforce management.</p>
                     </div>
                 </div>
 
@@ -28,12 +37,12 @@ const Features = () => {
                             { icon: "📊", title: "Smart Analytics", desc: "Gain actionable insights into your workforce trends with interactive dashboards and custom reports." }
                         ].map((feature, index) => (
                             <div className="col-md-6 col-lg-4" key={index}>
-                                <div className="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
-                                    <div className="card-body p-4">
-                                        <div className="display-5 mb-3">{feature.icon}</div>
-                                        <h3 className="h5 fw-bold text-dark mb-2">{feature.title}</h3>
-                                        <p className="text-muted mb-0">{feature.desc}</p>
+                                <div className="card h-100 feature-glass-card border-0 shadow-sm p-4">
+                                    <div className="feature-icon-box">
+                                        <span role="img" aria-label={feature.title}>{feature.icon}</span>
                                     </div>
+                                    <h3 className="h5 fw-bold text-dark mb-2">{feature.title}</h3>
+                                    <p className="text-muted mb-0">{feature.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -41,7 +50,7 @@ const Features = () => {
                 </div>
             </main>
 
-            <footer className="bg-dark text-white py-4 mt-auto">
+            <footer className="bg-dark text-white py-4 mt-auto opacity-90">
                 <div className="container text-center">
                     <small>© 2024 Future Invo HRMS. All rights reserved.</small>
                 </div>
