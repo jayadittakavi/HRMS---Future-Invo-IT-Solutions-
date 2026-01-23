@@ -72,8 +72,8 @@ export const LeaveManagementContent = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <button className="action-btn edit" onClick={() => handleApprove(req)}>Approve</button>
-                                        <button className="action-btn delete" onClick={() => handleReject(req)}>Reject</button>
+                                        <button className="action-btn edit" onClick={() => handleApprove(req)} style={{ fontSize: '0.8rem' }}>Approve</button>
+                                        <button className="action-btn delete" onClick={() => handleReject(req)} style={{ fontSize: '0.8rem' }}>Reject</button>
                                     </td>
                                 </tr>
                             ))}

@@ -1,13 +1,10 @@
 /* Glassmorphism Dashboard Layout */
 
 .glass-dashboard-bg {
-    /* Smooth Blue-Lavender Gradient replaced with Image */
-    background: url('../assets/images/super-admin-bg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+    background-color: #f3f4f6;
+    /* Clean light gray background */
     color: #334155;
+    min-height: 100vh;
 }
 
 .glass-sidebar-wrapper {
@@ -29,44 +26,117 @@
     transition: all 0.3s ease-in-out;
 }
 
-/* Glassy Card Styles */
+/* Glassy Card Styles - Premium Upgrade */
 .dashboard-card {
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 1.25rem;
-    /* Softer rounded corners */
+    background: #ffffff;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    /* Tailwind-like soft shadow */
+    border-radius: 16px;
+    /* Modern cleaner radius */
     height: 100%;
-    background: rgba(255, 255, 255, 0.55);
     padding: 1.5rem;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .dashboard-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
-    border-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08), 0 8px 16px -4px rgba(0, 0, 0, 0.04);
+    border-color: rgba(203, 213, 225, 0.8);
 }
 
 .dashboard-card-title {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: #475569;
-    /* Softer slate/blue text */
-    margin-bottom: 1rem;
-    letter-spacing: 0.02em;
+    color: #64748b;
+    /* Slate 500 */
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .dashboard-value {
-    font-size: 2rem;
+    font-size: 2.25rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 0;
+    color: #1e293b;
+    /* Slate 800 - High contrast */
+    margin-bottom: 0.25rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+/* Gradients for "Stat" cards */
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+}
+
+.bg-gradient-blue .dashboard-value {
+    color: #1e40af;
+}
+
+.bg-gradient-blue .dashboard-card-title {
+    color: #3b82f6;
+}
+
+.bg-gradient-blue svg {
+    color: #3b82f6 !important;
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    border: 1px solid #e9d5ff;
+}
+
+.bg-gradient-purple .dashboard-value {
+    color: #6b21a8;
+}
+
+.bg-gradient-purple .dashboard-card-title {
+    color: #a855f7;
+}
+
+.bg-gradient-purple svg {
+    color: #a855f7 !important;
+}
+
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+    border: 1px solid #fed7aa;
+}
+
+.bg-gradient-orange .dashboard-value {
+    color: #9a3412;
+}
+
+.bg-gradient-orange .dashboard-card-title {
+    color: #f97316;
+}
+
+.bg-gradient-orange svg {
+    color: #f97316 !important;
+}
+
+.bg-gradient-green {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #bbf7d0;
+}
+
+.bg-gradient-green .dashboard-value {
+    color: #166534;
+}
+
+.bg-gradient-green .dashboard-card-title {
+    color: #22c55e;
+}
+
+.bg-gradient-green svg {
+    color: #22c55e !important;
 }
 
 /* Pinterest Masonry Grid */
@@ -184,11 +254,17 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     border: none;
+    overflow-x: auto;
+    /* Ensure tables are scrollable on small screens */
 }
 
 .custom-table {
     margin-bottom: 0;
     vertical-align: middle;
+    width: 100%;
+    /* Force table to fill width */
+    min-width: 600px;
+    /* Force minimum width to trigger scroll if needed */
 }
 
 .custom-table th {
@@ -219,32 +295,37 @@
 }
 
 .action-btn {
-    padding: 0.35rem 0.85rem;
-    font-size: 0.75rem;
+    padding: 0.35rem 0.5rem;
+    font-size: 1.2rem;
     font-weight: 600;
     border-radius: 0.5rem;
     margin-right: 0.5rem;
     transition: all 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
 }
 
 .action-btn.edit {
-    background-color: #e9ecef;
+    background-color: transparent;
     color: #344767;
-    border: none;
 }
 
 .action-btn.edit:hover {
-    background-color: #dee2e6;
+    color: #2196f3;
+    background-color: transparent;
+    transform: scale(1.1);
 }
 
 .action-btn.delete {
-    background-color: #fddddd;
+    background-color: transparent;
     color: #dc3545;
-    border: none;
 }
 
 .action-btn.delete:hover {
-    background-color: #fccaca;
+    color: #ff0000;
+    background-color: transparent;
+    transform: scale(1.1);
 }
 
 .company-logo-placeholder {
@@ -315,42 +396,72 @@
     color: #fff !important;
 }
 
-/* Text & Icon overrides for gradient cards */
-.bg-gradient-purple .dashboard-card-title,
-.bg-gradient-blue .dashboard-card-title,
-.bg-gradient-green .dashboard-card-title,
-.bg-gradient-orange .dashboard-card-title,
-.bg-gradient-purple .dashboard-value,
-.bg-gradient-blue .dashboard-value,
-.bg-gradient-green .dashboard-value,
-.bg-gradient-orange .dashboard-value,
-.bg-gradient-purple .text-success,
-.bg-gradient-purple .text-primary,
-.bg-gradient-purple .text-warning,
-.bg-gradient-purple .text-danger,
-.bg-gradient-purple .text-secondary,
-.bg-gradient-blue .text-success,
-.bg-gradient-blue .text-primary,
-.bg-gradient-blue .text-warning,
-.bg-gradient-blue .text-danger,
-.bg-gradient-blue .text-secondary,
-.bg-gradient-green .text-success,
-.bg-gradient-green .text-primary,
-.bg-gradient-green .text-warning,
-.bg-gradient-green .text-danger,
-.bg-gradient-green .text-secondary,
-.bg-gradient-orange .text-success,
-.bg-gradient-orange .text-primary,
-.bg-gradient-orange .text-warning,
-.bg-gradient-orange .text-danger,
-.bg-gradient-orange .text-secondary {
-    color: #fff !important;
+
+/* Icon Containers (Matching the screenshot design) */
+.icon-container {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
 }
 
-.bg-gradient-purple svg,
-.bg-gradient-blue svg,
-.bg-gradient-green svg,
-.bg-gradient-orange svg {
-    color: #fff !important;
-    fill: #fff !important;
+.icon-blue {
+    background-color: #dbeafe;
+    /* Light Blue */
+    color: #3b82f6;
+}
+
+.icon-purple {
+    background-color: #f3e8ff;
+    /* Light Purple */
+    color: #a855f7;
+}
+
+.icon-orange {
+    background-color: #ffedd5;
+    /* Light Orange */
+    color: #f97316;
+}
+
+.icon-green {
+    background-color: #dcfce7;
+    /* Light Green */
+    color: #22c55e;
+}
+
+/* --- Mobile / Responsive Enhancements --- */
+@media (max-width: 991.98px) {
+    /* Tablet & Mobile tweaks */
+
+    /* Force sidebar to be fixed overlay on smaller screens */
+    .glass-sidebar-wrapper {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 1050;
+        /* Higher than content */
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* If sidebar is width 0, it's hidden (desktop behavior used here too) */
+    /* If sidebar is width 280px, it covers content. */
+}
+
+/* Mobile specific */
+@media (max-width: 576px) {
+    .glass-header {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .dashboard-value {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-card {
+        padding: 1rem;
+    }
 }

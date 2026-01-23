@@ -15,6 +15,7 @@ import { UserManagementContent } from '../pages/user_management/UserManagement';
 import { PayGradeContent } from '../pages/pay_grade/PayGrade';
 import { useAuth } from '../context/AuthContext';
 import { FaUsers, FaMoneyBillWave, FaUserClock, FaTasks } from 'react-icons/fa';
+import BranchMap from '../components/BranchMap';
 
 const AdminDashboard = () => {
     const { user } = useAuth();
@@ -129,6 +130,13 @@ const AdminDashboard = () => {
                                         <SimpleLineChart data={revenueGrowthData} height="280px" color="#10b981" />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Map Row */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
+                                <BranchMap />
                             </div>
                         </div>
                     </>

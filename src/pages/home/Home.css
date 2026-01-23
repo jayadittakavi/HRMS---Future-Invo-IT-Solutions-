@@ -125,3 +125,12 @@
     background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(5px);
 }
+
+/* Hover Arrow Effect */
+.hover-arrow svg {
+    transition: transform 0.3s ease;
+}
+
+.hover-arrow:hover svg {
+    transform: translateX(5px);
+}

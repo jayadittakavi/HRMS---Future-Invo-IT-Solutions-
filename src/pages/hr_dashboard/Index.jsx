@@ -6,6 +6,7 @@ import { EmployeesContent } from '../pages/employees/Employees';
 import { AttendanceContent } from '../pages/attendance/Attendance';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../components/charts/CustomCharts';
 import { FaUsers, FaUserPlus, FaChalkboardTeacher } from 'react-icons/fa';
+import BranchMap from '../components/BranchMap';
 
 const HRDashboard = () => {
     const { user } = useAuth();
@@ -111,6 +112,13 @@ const HRDashboard = () => {
                                         <SimpleLineChart data={applicationTrendData} height="280px" color="#8b5cf6" />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Map Row */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
+                                <BranchMap />
                             </div>
                         </div>
 

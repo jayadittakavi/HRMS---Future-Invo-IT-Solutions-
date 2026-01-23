@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Sidebar from './Sidebar';
-import DashboardHeader from './DashboardHeader';
-import SettingsDrawer from './SettingsDrawer';
-import './DashboardLayout.css'; // Keeping for specific layout tweaks not covered by Bootstrap utils if needed, or remove if fully bootstrap
+import Sidebar from '../../components/Sidebar';
+import DashboardHeader from '../../components/DashboardHeader';
+import SettingsDrawer from '../settings/SettingsDrawer';
+import '../../components/DashboardLayout.css'; // Point to the main css or local if strictly needed
 
 const DashboardLayout = ({ children, title, onNavigate }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);

@@ -115,25 +115,21 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
             style={{ width: isOpen ? '260px' : '0', overflow: 'hidden', transition: 'width 0.3s ease' }}
         >
             {/* Logo Area */}
-            <div className="sidebar-header d-flex align-items-center">
-                <div className="bg-white p-1 rounded d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', marginRight: '12px' }}>
+            <div className="sidebar-header d-flex align-items-center mb-4 ps-2">
+                <div className="bg-white p-1 rounded d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px', marginRight: '12px' }}>
                     <img src={logo} alt="HRMS Logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
                 </div>
                 <div>
-                    <h5 className="mb-0 fw-bold text-white lh-1">HRMS</h5>
-                    <small className="text-white-50" style={{ fontSize: '0.65rem' }}>Future Invo IT Solutions</small>
+                    <h5 className="mb-0 fw-bold text-dark lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
                 </div>
             </div>
 
             {/* Role Info */}
-            <div className="sidebar-role-label text-white">
-                Role : <span className="text-white fw-bold">{displayRole === 'Superadmin' ? 'Super Admin' : displayRole}</span>
+            <div className="sidebar-role-label text-dark">
+                Role : <span className="text-dark fw-bold">{displayRole === 'Superadmin' ? 'Super Admin' : displayRole}</span>
             </div>
 
-            {/* Navigation Label */}
-            <div className="sidebar-nav-label text-white">
-                Navigation
-            </div>
+
 
             {/* Links */}
             <div className="flex-grow-1 overflow-auto">

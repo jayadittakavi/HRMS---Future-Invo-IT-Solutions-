@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaBriefcase, FaCalendarAlt } from 'react-icons/fa';
 
 const Profile = () => {
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
 
     const handleNavigate = () => {
         // Handle navigation if needed
@@ -18,10 +18,34 @@ const Profile = () => {
                     <div className="col-md-4">
                         <div className="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
                             <div className="position-relative d-inline-block mx-auto mb-3">
-                                <div className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center shadow-lg" style={{ width: '120px', height: '120px', fontSize: '3rem' }}>
-                                    {user?.name?.charAt(0) || 'U'}
+                                <div
+                                    className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center shadow-lg overflow-hidden cursor-pointer"
+                                    style={{ width: '120px', height: '120px', fontSize: '3rem', cursor: 'pointer' }}
+                                    onClick={() => document.getElementById('profile-upload').click()}
+                                >
+                                    {user?.profilePic ? (
+                                        <img src={user.profilePic} alt="Profile" className="w-100 h-100 object-fit-cover" />
+                                    ) : (
+                                        user?.name?.charAt(0) || 'U'
+                                    )}
                                 </div>
                                 <div className="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-2"></div>
+                                <input
+                                    type="file"
+                                    id="profile-upload"
+                                    className="d-none"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                updateProfile({ profilePic: reader.result });
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
                             </div>
                             <h4 className="fw-bold text-dark mb-1">{user?.name || 'User Name'}</h4>
                             <p className="text-muted mb-3">{user?.role || 'Role'}</p>

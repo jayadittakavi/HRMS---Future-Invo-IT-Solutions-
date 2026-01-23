@@ -1,15 +1,32 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import RoleSwitcher from './RoleSwitcher';
-import { FaCog, FaUserCircle, FaSearch, FaBell } from 'react-icons/fa';
+import { useTheme } from '../context/ThemeContext';
+import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
-const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
+const DashboardHeader = ({ toggleSidebar }) => {
     const { user } = useAuth();
+    const { toggleSettingsDrawer, skin } = useTheme();
+
+    // Map skin to light background tints
+    const skinColors = {
+        blue: 'rgba(235, 248, 255, 0.95)',    // Light Blue
+        purple: 'rgba(243, 232, 255, 0.95)',  // Light Purple
+        green: 'rgba(220, 252, 231, 0.95)',   // Light Green
+        orange: 'rgba(255, 237, 213, 0.95)', // Light Orange
+        teal: 'rgba(204, 251, 241, 0.95)',    // Light Teal
+        red: 'rgba(254, 226, 226, 0.95)',     // Light Red
+    };
+
+    const headerBg = skinColors[skin] || 'rgba(255, 255, 255, 0.65)'; // Fallback
 
     return (
         <header className="border-bottom py-3 px-4 d-flex align-items-center justify-content-between sticky-top glass-header"
-            style={{ minHeight: '70px' }}>
+            style={{
+                minHeight: '70px',
+                background: headerBg,
+                transition: 'background 0.3s ease'
+            }}>
             {/* Left Side: Toggle & User Name */}
             <div className="d-flex align-items-center gap-3">
                 <button
@@ -19,7 +36,9 @@ const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
                 >
                     <span className="fs-4">☰</span>
                 </button>
+
                 <div className="vr d-none d-sm-block mx-2"></div>
+
                 <span className="fw-bold text-dark small">
                     {user?.name || 'User'}
                 </span>
@@ -32,6 +51,7 @@ const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
                     <Link to="/" className="text-decoration-none text-secondary fw-medium small hover-primary">Home</Link>
                     <Link to="/dashboard" className="text-decoration-none text-secondary fw-medium small hover-primary">My Space</Link>
                     <Link to="/features" className="text-decoration-none text-secondary fw-medium small hover-primary">Features</Link>
+                    <Link to="/calendar" className="text-decoration-none text-secondary fw-medium small hover-primary">Calendar</Link>
                     <Link to="/about" className="text-decoration-none text-secondary fw-medium small hover-primary">About</Link>
                     <Link to="/contact" className="text-decoration-none text-secondary fw-medium small hover-primary">Contact</Link>
                 </nav>
@@ -63,20 +83,19 @@ const DashboardHeader = ({ toggleSidebar, onOpenSettings }) => {
                         </span>
                     </div>
 
-                    <RoleSwitcher />
 
-                    <button className="btn btn-link text-dark p-0" title="Profile">
+
+
+                    <Link to="/profile" className="btn btn-link text-dark p-0" title="Profile">
                         <FaUserCircle size={28} />
-                    </button>
-
+                    </Link>
                     <button className="btn btn-link text-secondary p-0 position-relative" title="Notifications">
                         <FaBell size={20} />
                         <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                             <span className="visually-hidden">New alerts</span>
                         </span>
                     </button>
-
-                    <button className="btn btn-link text-secondary p-0" title="Settings" onClick={onOpenSettings}>
+                    <button className="btn btn-link text-secondary p-0" title="Settings" onClick={toggleSettingsDrawer}>
                         <FaCog size={20} />
                     </button>
                 </div>

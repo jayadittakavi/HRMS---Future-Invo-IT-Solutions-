@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
 import '../../components/DashboardLayout.css';
 
@@ -57,8 +58,8 @@ export const AssetCategoriesContent = () => {
                                     <td>{cat.description}</td>
                                     <td>{cat.created}</td>
                                     <td>
-                                        <button className="action-btn edit" onClick={() => handleEdit(cat)}>Edit</button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(cat)}>Delete</button>
+                                        <button className="action-btn edit" onClick={() => handleEdit(cat)}><FaEdit /></button>
+                                        <button className="action-btn delete" onClick={() => handleDelete(cat)}><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}

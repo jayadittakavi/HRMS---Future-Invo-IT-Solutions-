@@ -12,6 +12,19 @@ export const loginService = {
         else if (email.includes('accountant')) role = 'accountant';
         else if (email.includes('new')) role = 'newuser';
 
+        // Check if there is a registered user in localStorage
+        const storedUserStr = localStorage.getItem('mock_registered_user');
+        let storedUser = null;
+        let userName = "Mock User";
+
+        if (storedUserStr) {
+            storedUser = JSON.parse(storedUserStr);
+            if (storedUser.email === email) {
+                role = storedUser.role || role; // Use stored role if available
+                userName = storedUser.name || `${storedUser.first_name} ${storedUser.last_name}`;
+            }
+        }
+
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve({
@@ -22,7 +35,7 @@ export const loginService = {
                         user: {
                             role: role,
                             email: email,
-                            name: "Mock User"
+                            name: userName
                         }
                     })
                 });

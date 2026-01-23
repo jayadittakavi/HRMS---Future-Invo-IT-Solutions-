@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaEye, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
 import '../../components/DashboardLayout.css';
 
@@ -54,8 +55,8 @@ export const PayrollContent = () => {
                                         </span>
                                     </td>
                                     <td>
-                                        <button className="action-btn edit">View</button>
-                                        <button className="action-btn delete">Delete</button>
+                                        <button className="action-btn edit" title="View"><FaEye /></button>
+                                        <button className="action-btn delete" title="Delete"><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}

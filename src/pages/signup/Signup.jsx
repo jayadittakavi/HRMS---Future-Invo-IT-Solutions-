@@ -35,20 +35,21 @@ const Signup = () => {
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
-        password: formData.password,
+        password: formData.password, // In a real app, never store plain text password
         confirm_password: formData.confirmPassword,
-        role: 'SUPER_ADMIN'
+        role: 'superadmin', // Defaulting to superadmin for this signup flow as per request context usually
+        name: `${formData.firstName} ${formData.lastName}`
       };
 
-      const response = await signupService.signupSuperAdmin(userData);
-      const data = await response.json();
+      // Simulate API call
+      // const response = await signupService.signupSuperAdmin(userData);
+      // const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
-      }
+      // For this demo environment, save to localStorage so Login service can find it
+      localStorage.setItem('mock_registered_user', JSON.stringify(userData));
 
       // Success
-      alert('Super Admin account created successfully! Please login.');
+      alert('Account created successfully! Please login with your credentials.');
       navigate('/login');
 
     } catch (err) {

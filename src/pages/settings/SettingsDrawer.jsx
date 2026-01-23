@@ -1,18 +1,19 @@
 import React from 'react';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../../context/ThemeContext';
 import { FaTimes, FaSun, FaMoon, FaCheck, FaPalette, FaHdd, FaMicrochip, FaUndo } from 'react-icons/fa';
 
-const SettingsDrawer = ({ isOpen, onClose }) => {
+const SettingsDrawer = () => {
     const {
         theme, toggleTheme,
         skin, changeSkin,
         sidebarType, changeSidebarType,
-        settings, toggleSetting
+        settings, toggleSetting,
+        showSettingsDrawer, toggleSettingsDrawer
     } = useTheme();
 
     const [activeTab, setActiveTab] = React.useState('skins');
 
-    if (!isOpen) return null;
+    if (!showSettingsDrawer) return null;
 
     const skins = [
         { id: 'blue', color: '#0ea5e9', name: 'Blue' },
@@ -29,7 +30,7 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
             <div
                 className="position-fixed top-0 start-0 w-100 h-100"
                 style={{ background: 'rgba(0,0,0,0.3)', zIndex: 1040, backdropFilter: 'blur(2px)' }}
-                onClick={onClose}
+                onClick={toggleSettingsDrawer}
             ></div>
 
             {/* Drawer */}
@@ -59,7 +60,7 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
                     >
                         SETTINGS
                     </div>
-                    <button className="btn btn-link text-secondary p-0 position-absolute end-0 top-0 mt-3 me-3" onClick={onClose} style={{ zIndex: 10 }}>
+                    <button className="btn btn-link text-secondary p-0 position-absolute end-0 top-0 mt-3 me-3" onClick={toggleSettingsDrawer} style={{ zIndex: 10 }}>
                         <FaTimes size={16} />
                     </button>
                 </div>
@@ -93,7 +94,7 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
                             {/* THEME COLORS */}
                             <div className="mb-4">
                                 <h6 className="fw-bold small text-uppercase mb-3" style={{ fontSize: '0.7rem' }}>THEME COLORS</h6>
-                                <div className="btn-group btn-group-sm w-50">
+                                <div className="btn-group btn-group-sm w-100">
                                     <button
                                         className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
                                         onClick={() => theme !== 'light' && toggleTheme()}
@@ -167,7 +168,7 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
                         </>
                     ) : (
                         <>
-                            {/* Detailed Settings (Reused from previous step) */}
+                            {/* Detailed Settings */}
                             <div className="mb-4">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <span style={{ fontSize: '0.9rem' }}>Report Panel Usage</span>
@@ -196,6 +197,13 @@ const SettingsDrawer = ({ isOpen, onClose }) => {
                                         <input className="form-check-input" type="checkbox" checked={settings.offline} onChange={() => toggleSetting('offline')}
                                             style={{ backgroundColor: settings.offline ? '#ef4444' : '', borderColor: 'transparent' }} />
                                     </div>
+                                </div>
+                                <div className="mt-4 pt-3 border-top">
+                                    <h6 className="fw-bold small text-uppercase mb-3" style={{ fontSize: '0.7rem' }}>Quick Links</h6>
+                                    <a href="/profile" className="btn btn-outline-secondary w-100 btn-sm text-start d-flex justify-content-between align-items-center">
+                                        <span>Edit Profile</span>
+                                        <FaUndo size={12} className="transform-rotate-180" style={{ transform: 'rotate(180deg)' }} />
+                                    </a>
                                 </div>
                             </div>
                         </>

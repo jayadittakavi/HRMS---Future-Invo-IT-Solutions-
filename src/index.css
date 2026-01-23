@@ -3,30 +3,31 @@
 :root {
     /* --- THEME CONFIGURATION --- */
 
-    /* 1. Base Colors (Skins) - Default: Blue */
-    --primary-color: #0ea5e9;
-    /* Main Brand Color */
-    --primary-dark: #0284c7;
-    /* Darker shade for hover/active */
-    --primary-light: #e0f2fe;
-    /* Lighter shade for backgrounds */
-    --accent-color: #38bdf8;
-    /* Accent */
+    /* 1. Base Colors (Skins) - Default: Corporate Blue */
+    --primary-color: #2563eb;
+    /* Royal Blue */
+    --primary-dark: #1d4ed8;
+    /* Darker shade */
+    --primary-light: #eff6ff;
+    /* Very lightest shade */
+    --accent-color: #60a5fa;
+    /* Accent Blue */
 
     /* 2. Theme Colors (Light Mode Default) */
-    --bg-body: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 50%, #ccfbf1 100%);
-    --bg-card: rgba(255, 255, 255, 0.25);
+    --bg-body: #f8fafc;
+    /* Slate 50 - Cleaner than gradients */
+    --bg-card: #ffffff;
     --bg-sidebar: #ffffff;
     --text-main: #0f172a;
-    --text-secondary: #334155;
+    --text-secondary: #475569;
     --text-muted: #94a3b8;
 
-    /* 3. Glassmorphism */
-    --glass-border: 1px solid rgba(255, 255, 255, 0.4);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-    --glass-blur: blur(10px);
+    /* 3. Glassmorphism - Removed/Reduced for Cleaner Look */
+    --glass-border: 1px solid #e2e8f0;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    --glass-blur: none;
 
-    --bs-body-font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    --bs-body-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 
     /* Bootstrap Overrides mapped to variables */
     --bs-primary: var(--primary-color);
@@ -36,20 +37,15 @@
 
 /* --- DARK MODE OVERRIDES --- */
 [data-theme="dark"] {
-    --bg-body: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    /* Slate 900 -> Slate 800 */
-    --bg-card: rgba(30, 41, 59, 0.7);
-    /* Darker glass */
+    --bg-body: #0f172a;
+    --bg-card: #1e293b;
     --bg-sidebar: #1e293b;
     --text-main: #f8fafc;
-    /* Slate 50 */
     --text-secondary: #cbd5e1;
-    /* Slate 300 */
     --text-muted: #94a3b8;
-    /* Slate 400 */
 
-    --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --glass-border: 1px solid #334155;
+    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
 }
 
 /* --- SKIN PRESETS (Applied via data-skin attribute on body) --- */
@@ -214,16 +210,71 @@ textarea {
     opacity: 0.2;
 }
 
-.progress-thin {
-    height: 4px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 2px;
-    margin-top: 1rem;
-    overflow: hidden;
+/* Icon Container Gradients */
+.icon-container {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
 }
 
-.progress-thin-bar {
-    height: 100%;
-    background: white;
-    border-radius: 2px;
+.dashboard-card:hover .icon-container {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.icon-blue {
+    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.icon-purple {
+    background: linear-gradient(135deg, #f3e8ff 0%, #faf5ff 100%);
+    color: #9333ea;
+    border: 1px solid #e9d5ff;
+}
+
+.icon-orange {
+    background: linear-gradient(135deg, #ffedd5 0%, #fff7ed 100%);
+    color: #ea580c;
+    border: 1px solid #fed7aa;
+}
+
+.icon-green {
+    background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 100%);
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Badge Refinements */
+.badge-soft {
+    padding: 0.35em 0.8em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+}
+
+.badge-soft-success {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge-soft-warning {
+    background-color: #fef9c3;
+    color: #854d0e;
+}
+
+.badge-soft-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-soft-info {
+    background-color: #e0f2fe;
+    color: #075985;
 }

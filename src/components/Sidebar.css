@@ -1,14 +1,14 @@
-/* Glass Sidebar Styles */
+/* Clean Sidebar Styles */
 .sidebar-container {
-    background-color: transparent;
-    background: transparent;
+    background-color: #ffffff;
+    border-right: 1px solid #e2e8f0;
     color: #334155;
     height: 100%;
 }
 
 .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .sidebar-role-label {
@@ -33,34 +33,48 @@
 }
 
 .sidebar-link {
-    background: rgba(255, 255, 255, 0.4);
-    color: #334155 !important;
+    background: transparent;
+    color: #475569 !important;
+    /* Slate 600 */
     text-decoration: none;
-    padding: 0.75rem 1rem;
+    padding: 0.65rem 1rem;
     display: flex;
     align-items: center;
-    border-radius: 12px;
-    margin: 0 1rem 0.6rem 1rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 8px;
+    /* Slightly squarer modern look */
+    margin: 0 0.8rem 0.4rem 0.8rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid transparent;
 }
 
 .sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.8);
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border-color: #fff;
-    color: #2563eb !important;
+    background: #f1f5f9;
+    /* Slate 100 */
+    color: #0f172a !important;
+    /* Slate 900 */
+    transform: none;
+    /* No movement, just color change for stability */
+    border-color: transparent;
 }
 
 .sidebar-link.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    color: #ffffff !important;
+    background: #eff6ff;
+    /* Blue 50 */
+    color: #2563eb !important;
+    /* Blue 600 */
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    box-shadow: none;
     border: none;
+}
+
+.sidebar-link.active::before {
+    /* Optional: Side accent bar for active state if desired, keeping it clean for now */
+    content: '';
+    position: absolute;
+    left: 0;
+    height: 100%;
 }
 
 .sidebar-icon {

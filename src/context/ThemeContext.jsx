@@ -7,29 +7,72 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-    const [darkMode, setDarkMode] = useState(false);
-    const [sidebarColor, setSidebarColor] = useState('#1e293b'); // Default dark sidebar
-    const [headerColor, setHeaderColor] = useState('#ffffff'); // Default white header
-    const [skinColor, setSkinColor] = useState('#3b82f6'); // Default blue skin
+    // Core Theme State
+    const [theme, setTheme] = useState('light'); // 'light' or 'dark'
+    const [skin, setSkin] = useState('blue');
+    const [sidebarType, setSidebarType] = useState('white'); // 'white' or 'dark' (mapped to sidebar styles)
 
+    // Additional Settings State
+    const [settings, setSettings] = useState({
+        reportPanel: true,
+        notifications: true,
+        autoUpdates: false,
+        offline: false
+    });
+
+    // Drawer Visibility State
+    const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
+
+    // Toggle Settings Drawer
+    const toggleSettingsDrawer = () => {
+        setShowSettingsDrawer(prev => !prev);
+    };
+
+    // Toggle Theme (Light/Dark)
+    const toggleTheme = () => {
+        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+    };
+
+    // Change Skin
+    const changeSkin = (skinId) => {
+        setSkin(skinId);
+        // In a real app, you would apply skin classes to body here
+        document.body.setAttribute('data-skin', skinId);
+    };
+
+    // Change Sidebar Type
+    const changeSidebarType = (type) => {
+        setSidebarType(type);
+    };
+
+    // Toggle Individual Settings
+    const toggleSetting = (key) => {
+        setSettings(prev => ({
+            ...prev,
+            [key]: !prev[key]
+        }));
+    };
+
+    // Effect to apply dark mode class
     useEffect(() => {
-        // Apply theme classes or styles to body/root if needed
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
+        if (theme === 'dark') {
+            document.body.setAttribute('data-theme', 'dark');
         } else {
-            document.body.classList.remove('dark-mode');
+            document.body.removeAttribute('data-theme');
         }
-    }, [darkMode]);
+    }, [theme]);
 
     const value = {
-        darkMode,
-        setDarkMode,
-        sidebarColor,
-        setSidebarColor,
-        headerColor,
-        setHeaderColor,
-        skinColor,
-        setSkinColor
+        theme,
+        toggleTheme,
+        skin,
+        changeSkin,
+        sidebarType,
+        changeSidebarType,
+        settings,
+        toggleSetting,
+        showSettingsDrawer,
+        toggleSettingsDrawer
     };
 
     return (

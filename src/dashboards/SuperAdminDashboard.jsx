@@ -13,7 +13,8 @@ import { UserManagementContent } from '../pages/user_management/UserManagement';
 import { PayGradeContent } from '../pages/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, SimpleAreaChart } from '../components/charts/CustomCharts';
 import React, { useState } from 'react';
-import { FaWallet, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaChartLine } from 'react-icons/fa';
+import superAdminBg from '../assets/images/superadmin_bg.jpg';
+import { FaWallet, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaChartLine, FaRegCalendarAlt } from 'react-icons/fa';
 
 const SuperAdminDashboard = () => {
     const [activeView, setActiveView] = useState('dashboard');
@@ -65,171 +66,152 @@ const SuperAdminDashboard = () => {
     };
 
     return (
-        <DashboardLayout title="" onNavigate={handleNavigate}>
+        <DashboardLayout title="" onNavigate={handleNavigate} bgImage={superAdminBg}>
             <div className="container-fluid p-0">
                 {activeView === 'dashboard' && (
                     <>
-                        {/* Welcome & Status Section */}
-                        <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome Meera Krishnan!</h2>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
-                                <span className="badge bg-warning text-dark fw-bold px-3">APPROVED</span>
+                        {/* Welcome Section */}
+                        <div className="d-flex justify-content-between align-items-end mb-4">
+                            <div>
+                                <h2 className="h4 fw-bold text-dark mb-1">Dashboard Overview</h2>
+                                <p className="text-secondary small mb-0">Welcome back, Meera Krishnan</p>
                             </div>
                         </div>
 
-                        {/* Top Stats Row */}
+                        {/* Top Stats Row - 4 Cards */}
                         <div className="row g-4 mb-4">
-                            {/* Employees Net Pay */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-purple">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <div className="rounded-3 p-3 me-3">
-                                            <FaWallet size={24} />
-                                        </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card h-100 border-0 shadow-sm">
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
                                         <div>
-                                            <h6 className="dashboard-card-title mb-1">Employees Net Pay</h6>
-                                            <h3 className="dashboard-value mb-0">₹17.25 Cr</h3>
+                                            <p className="mb-0 text-muted small fw-bold text-uppercase tracking-wide">Total Workforce</p>
+                                            <h3 className="mb-0 text-dark fw-bold mt-1">1,308</h3>
+                                        </div>
+                                        <div className="icon-container icon-blue">
+                                            <FaUsers />
                                         </div>
                                     </div>
-                                    <p className="small mt-1 mb-0">Pay Date: <span className="fw-bold">31 May 2024</span></p>
+                                    <div className="d-flex align-items-center">
+                                        <span className="badge badge-soft-success me-2">
+                                            <span className="fw-bold">+12%</span>
+                                        </span>
+                                        <span className="text-secondary small">vs last month</span>
+                                    </div>
                                 </div>
                             </div>
-
-                            {/* No. of Employees */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <div className="rounded-3 p-3 me-3">
-                                            <FaUsers size={24} />
-                                        </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card h-100 border-0 shadow-sm">
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
                                         <div>
-                                            <h6 className="dashboard-card-title mb-1">No. of Employees</h6>
-                                            <h3 className="dashboard-value mb-0">1308</h3>
+                                            <p className="mb-0 text-muted small fw-bold text-uppercase tracking-wide">Total Payroll</p>
+                                            <h3 className="mb-0 text-dark fw-bold mt-1">₹17.2 Cr</h3>
+                                        </div>
+                                        <div className="icon-container icon-purple">
+                                            <FaWallet />
                                         </div>
                                     </div>
-                                    <div className="d-flex justify-content-between align-items-center">
-                                        <span className="small fw-bold">↑ 12 New Joined</span>
-                                        <button className="btn btn-sm btn-light text-primary rounded-pill px-3 fw-bold">View All</button>
+                                    <div className="d-flex align-items-center">
+                                        <span className="badge badge-soft-info me-2">May 2024</span>
+                                        <span className="text-secondary small">Processed</span>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* To Do Tasks */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-green">
-                                    <div className="d-flex align-items-center mb-3">
-                                        <div className="rounded-3 p-3 me-3">
-                                            <FaClipboardList size={24} />
-                                        </div>
+                            <div className="col-md-3">
+                                <div className="dashboard-card h-100 border-0 shadow-sm">
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
                                         <div>
-                                            <h6 className="dashboard-card-title mb-1">Action Items</h6>
-                                            <h3 className="dashboard-value mb-0">3 Pending</h3>
+                                            <p className="mb-0 text-muted small fw-bold text-uppercase tracking-wide">Deductions</p>
+                                            <h3 className="mb-0 text-dark fw-bold mt-1">₹1.55 Cr</h3>
+                                        </div>
+                                        <div className="icon-container icon-orange">
+                                            <FaFileInvoiceDollar />
                                         </div>
                                     </div>
-                                    <ul className="list-unstyled small mb-0">
-                                        <li className="mb-1 d-flex align-items-center"><span className="badge bg-white text-success me-2 rounded-pill" style={{ width: '8px', height: '8px', padding: 0 }}> </span>136 Reimbursements</li>
-                                        <li className="mb-0 d-flex align-items-center"><span className="badge bg-warning text-dark me-2 rounded-pill" style={{ width: '8px', height: '8px', padding: 0 }}> </span>55 Salary Revisions</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Second Stats Row */}
-                        <div className="row g-4 mb-4">
-                            {/* Deduction Summary */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Deduction Summary</h6>
-                                    <div className="text-secondary small">
-                                        <div className="mb-1">EPF: ₹39,73,913</div>
-                                        <div className="mb-1">ESI: ₹891,010</div>
-                                        <div className="mb-0">TDS: ₹1,15,89,089</div>
+                                    <div className="d-flex align-items-center">
+                                        <span className="badge badge-soft-warning me-2">Pending</span>
+                                        <span className="text-secondary small">Review Needed</span>
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Employee Summary */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Employee Summary</h6>
-                                    <h3 className="dashboard-value">1308</h3>
-                                    <p className="text-secondary small mb-0">Active Employees</p>
-                                </div>
-                            </div>
-
-                            {/* Payment Updates */}
-                            <div className="col-md-4">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Payment Updates</h6>
-                                    <ul className="list-unstyled text-secondary small mb-0">
-                                        <li className="mb-1">✓ Salary Processed</li>
-                                        <li className="mb-1">✓ Tax Calculated</li>
-                                        <li>✓ Payslips Generated</li>
-                                    </ul>
+                            <div className="col-md-3">
+                                <div className="dashboard-card h-100 border-0 shadow-sm">
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                        <div>
+                                            <p className="mb-0 text-muted small fw-bold text-uppercase tracking-wide">Pending Actions</p>
+                                            <h3 className="mb-0 text-dark fw-bold mt-1">24</h3>
+                                        </div>
+                                        <div className="icon-container icon-green">
+                                            <FaClipboardList />
+                                        </div>
+                                    </div>
+                                    <div className="d-flex align-items-center">
+                                        <span className="badge badge-soft-danger me-2">3 Urgent</span>
+                                        <span className="text-secondary small">Requires Attention</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Charts Row 1: Payroll & Deductions */}
+                        {/* Main Content Area: Charts */}
                         <div className="row g-4 mb-4">
-                            {/* Payroll Cost Summary Chart */}
+                            {/* Primary Chart */}
                             <div className="col-md-8">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Payroll Cost Summary (This Year)</h6>
-                                    <SimpleBarChart data={chartData} height="320px" />
+                                <div className="dashboard-card h-100">
+                                    <div className="d-flex justify-content-between align-items-center mb-4">
+                                        <h6 className="dashboard-card-title mb-0">Payroll Trend (This Year)</h6>
+                                        <select className="form-select form-select-sm w-auto border-0 bg-light">
+                                            <option>2024</option>
+                                            <option>2023</option>
+                                        </select>
+                                    </div>
+                                    <SimpleBarChart data={chartData} height="300px" />
                                 </div>
                             </div>
 
-                            {/* Deduction Distribution Chart */}
+                            {/* Secondary Chart */}
                             <div className="col-md-4">
                                 <div className="dashboard-card h-100">
-                                    <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 className="dashboard-card-title mb-0">Deductions Breakdown</h6>
-                                    </div>
+                                    <h6 className="dashboard-card-title mb-4">Deductions Breakdown</h6>
                                     <div className="py-2 d-flex justify-content-center">
-                                        <SimpleDonutChart segments={deductionData} size="200px" centerText="Total" />
+                                        <SimpleDonutChart segments={deductionData} size="220px" centerText="Total" />
                                     </div>
-                                    <div className="text-center mt-3 small text-secondary">
+                                    <div className="d-flex justify-content-center gap-3 mt-4 flex-wrap">
                                         {deductionData.map((item, idx) => (
-                                            <span key={idx} className="fw-bold me-2" style={{ color: item.color }}>● {item.label}</span>
+                                            <div key={idx} className="d-flex align-items-center gap-2">
+                                                <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: item.color }}></span>
+                                                <span className="small text-secondary fw-medium">{item.label}</span>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Charts Row 2: Revenue Trend */}
-                        <div className="row g-4 mb-4">
-                            <div className="col-md-12">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Revenue Trend (2024)</h6>
-                                    <div className="py-2">
-                                        <SimpleLineChart data={revenueData} height="280px" color="#10b981" />
-                                    </div>
+                        {/* Revenue & Calendar Row */}
+                        <div className="row g-4">
+                            <div className="col-md-6">
+                                <div className="dashboard-card h-100">
+                                    <h6 className="dashboard-card-title mb-4">Revenue Growth</h6>
+                                    <SimpleLineChart data={revenueData} height="250px" color="#10b981" />
                                 </div>
                             </div>
-                        </div>
-
-                        {/* Calendar Row */}
-                        <div className="row g-4">
-                            <div className="col-md-12">
-                                <div className="dashboard-card">
+                            <div className="col-md-6">
+                                <div className="dashboard-card h-100">
                                     <div className="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 className="fw-bold text-dark mb-0">January 2026 Calendar</h6>
-                                        <div>
-                                            <button className="btn btn-sm btn-light border me-1 px-2 py-0">&lt;</button>
-                                            <button className="btn btn-sm btn-primary px-2 py-0">&gt;</button>
+                                        <h6 className="fw-bold text-dark mb-0">January 2026</h6>
+                                        <div className="d-flex gap-1">
+                                            <button className="btn btn-sm btn-light border px-2 py-0">&lt;</button>
+                                            <button className="btn btn-sm btn-light border px-2 py-0">&gt;</button>
                                         </div>
                                     </div>
                                     <div className="calendar-grid">
-                                        <div className="calendar-header-day">Sun</div>
-                                        <div className="calendar-header-day">Mon</div>
-                                        <div className="calendar-header-day">Tue</div>
-                                        <div className="calendar-header-day">Wed</div>
-                                        <div className="calendar-header-day">Thu</div>
-                                        <div className="calendar-header-day">Fri</div>
-                                        <div className="calendar-header-day">Sat</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">S</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">M</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">T</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">W</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">T</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">F</div>
+                                        <div className="calendar-header-day text-uppercase text-secondary small">S</div>
                                         {renderCalendarDays()}
                                     </div>
                                 </div>

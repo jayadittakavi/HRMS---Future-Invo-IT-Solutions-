@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import SettingsDrawer from "./pages/settings/SettingsDrawer";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -24,7 +25,9 @@ import Departments from "./pages/departments/Departments";
 import Assets from "./pages/assets/Assets";
 import AssetCategories from "./pages/assets/AssetCategories";
 import Employees from "./pages/employees/Employees";
+
 import Calendar from "./pages/calendar/Calendar";
+import SetupOrganization from "./pages/setup_organization/SetupOrganization";
 
 /* Dashboard Manager (Redirector) */
 import DashboardManager from "./dashboards/DashboardManager";
@@ -61,6 +64,7 @@ export default function App() {
             <Route path="/reset-otp" element={<ResetOtp />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/setup-organization" element={<SetupOrganization />} />
 
             {/* Dashboard Redirector */}
             <Route
@@ -169,6 +173,7 @@ export default function App() {
             <Route path="*" element={<Login />} />
 
           </Routes>
+          <SettingsDrawer />
         </BrowserRouter>
       </ThemeProvider>
     </AuthProvider>

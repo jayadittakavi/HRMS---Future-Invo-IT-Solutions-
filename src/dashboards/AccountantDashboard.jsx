@@ -35,37 +35,30 @@ const AccountantDashboard = () => {
                     <>
                         {/* Accountant Dashboard Overview */}
                         <div className="mb-4">
-                            <div className="bg-light rounded-3 p-4 border shadow-sm">
-                                <h2 className="h4 fw-bold text-dark mb-2">Welcome {user?.name || 'Accountant'}!</h2>
-                                <p className="mb-0 text-muted">Manage payroll, expenses, and financial reports.</p>
+                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Accountant'}!</h2>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="text-secondary fw-medium">Financial Overview:</span>
+                                <span className="badge bg-success text-white fw-bold">HEALTHY</span>
                             </div>
                         </div>
 
                         <div className="row g-4 mb-4">
                             <div className="col-md-6">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-body d-flex align-items-center">
-                                        <div className="bg-primary bg-opacity-10 text-primary rounded-3 p-3 me-3 display-6">
-                                            <FaMoneyCheckAlt />
-                                        </div>
-                                        <div>
-                                            <h6 className="text-muted mb-1">Payroll Processed</h6>
-                                            <h3 className="mb-0 fw-bold">95%</h3>
-                                        </div>
-                                    </div>
+                                <div className="dashboard-card bg-gradient-blue">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaMoneyCheckAlt /> Payroll Processed
+                                    </h6>
+                                    <h3 className="dashboard-value">95%</h3>
+                                    <p className="small mb-0">Success rate</p>
                                 </div>
                             </div>
                             <div className="col-md-6">
-                                <div className="card border-0 shadow-sm h-100">
-                                    <div className="card-body d-flex align-items-center">
-                                        <div className="bg-warning bg-opacity-10 text-warning rounded-3 p-3 me-3 display-6">
-                                            <FaFileInvoiceDollar />
-                                        </div>
-                                        <div>
-                                            <h6 className="text-muted mb-1">Pending Invoices</h6>
-                                            <h3 className="mb-0 fw-bold">4</h3>
-                                        </div>
-                                    </div>
+                                <div className="dashboard-card bg-gradient-orange">
+                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
+                                        <FaFileInvoiceDollar /> Pending Invoices
+                                    </h6>
+                                    <h3 className="dashboard-value">4</h3>
+                                    <p className="small mb-0">Action required</p>
                                 </div>
                             </div>
                         </div>

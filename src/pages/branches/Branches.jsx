@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
 import '../../components/DashboardLayout.css';
 
@@ -59,8 +60,8 @@ export const BranchesContent = () => {
                                     <td>{branch.address}</td>
                                     <td>{branch.location}</td>
                                     <td>
-                                        <button className="action-btn edit" onClick={() => handleEdit(branch)}>Edit</button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(branch)}>Delete</button>
+                                        <button className="action-btn edit" onClick={() => handleEdit(branch)}><FaEdit /></button>
+                                        <button className="action-btn delete" onClick={() => handleDelete(branch)}><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}

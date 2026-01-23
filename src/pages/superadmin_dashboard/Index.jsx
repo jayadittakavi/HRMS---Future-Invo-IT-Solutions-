@@ -15,6 +15,7 @@ import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, SimpleAreaChart } fr
 import { useAuth } from '../context/AuthContext';
 import React, { useState } from 'react';
 import { FaWallet, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaChartLine } from 'react-icons/fa';
+import BranchMap from '../components/BranchMap';
 
 const SuperAdminDashboard = () => {
     const { user } = useAuth();
@@ -210,6 +211,13 @@ const SuperAdminDashboard = () => {
                                         <SimpleLineChart data={revenueData} height="280px" color="#10b981" />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Map Row */}
+                        <div className="row g-4 mb-4">
+                            <div className="col-md-12">
+                                <BranchMap />
                             </div>
                         </div>
 

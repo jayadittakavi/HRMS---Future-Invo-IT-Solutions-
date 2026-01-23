@@ -57,7 +57,6 @@ export const AuthProvider = ({ children }) => {
         return requiredRoles.includes(user.role);
     };
 
-    // Helper to switch roles (for testing/demo)
     const changeRole = (newRole) => {
         if (!user) return;
         const updatedUser = { ...user, role: newRole };
@@ -65,11 +64,28 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('user', JSON.stringify(updatedUser));
     };
 
+    const updateProfile = (updates) => {
+        if (!user) return;
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+
+        // Also update the registered user reference if it exists, for consistency
+        const storedRegUser = localStorage.getItem('mock_registered_user');
+        if (storedRegUser) {
+            const regUser = JSON.parse(storedRegUser);
+            if (regUser.email === user.email) {
+                localStorage.setItem('mock_registered_user', JSON.stringify({ ...regUser, ...updates }));
+            }
+        }
+    };
+
     const value = {
         user,
         login,
         logout,
         changeRole,
+        updateProfile,
         canAccess,
         loading
     };

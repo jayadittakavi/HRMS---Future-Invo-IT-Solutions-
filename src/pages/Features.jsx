@@ -1,13 +1,23 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 
+import featuresBg from '../assets/images/features-bg.png';
+
 const Features = () => {
     return (
         <div className="bg-white min-vh-100 d-flex flex-column">
             <Navbar />
 
             <main className="flex-grow-1">
-                <div className="bg-primary bg-gradient text-white py-5">
+                <div
+                    className="text-white py-5"
+                    style={{
+                        backgroundImage: `url(${featuresBg})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                    }}
+                >
                     <div className="container py-5 text-center">
                         <h1 className="display-4 fw-bold mb-3">Powerful HR Features</h1>
                         <p className="lead opacity-75 mb-0 max-w-2xl mx-auto">Discover the tools that will transform your workforce management.</p>

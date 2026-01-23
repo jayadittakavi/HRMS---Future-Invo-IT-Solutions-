@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaArrowRight } from 'react-icons/fa';
 import Navbar from './Navbar'; // Changed import path to match local file structure if they are in same dir? No, wait. 
 // Step 45 showed: import Navbar from '../../components/Navbar'; but Step 44 showed Navbar is in src/pages/home/Navbar.jsx
 // Step 80 list_dir shows Navbar.jsx is in src/pages/home.
@@ -142,28 +143,37 @@ const Home = () => {
           <div className="row gx-5">
             <div className="col-lg-4 mb-5">
               <div className="card h-100 shadow-sm border-0 rounded-4 glass-card text-dark">
-                <div className="card-body p-4">
+                <div className="card-body p-4 d-flex flex-column">
                   <div className="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3 p-3 d-inline-block feature-icon-wrapper">👥</div>
                   <h2 className="h4 fw-bold">Employee Management</h2>
-                  <p className="mb-0 text-muted">Centralized database for all your employee records, documents, and history.</p>
+                  <p className="mb-4 text-muted flex-grow-1">Centralized database for all your employee records, documents, and history.</p>
+                  <Link to="/employees" className="text-primary text-decoration-none fw-bold small d-inline-flex align-items-center gap-1 hover-arrow">
+                    Learn more <FaArrowRight />
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mb-5">
               <div className="card h-100 shadow-sm border-0 rounded-4 glass-card text-dark">
-                <div className="card-body p-4">
+                <div className="card-body p-4 d-flex flex-column">
                   <div className="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3 p-3 d-inline-block feature-icon-wrapper">🏢</div>
                   <h2 className="h4 fw-bold">Company Structure</h2>
-                  <p className="mb-0 text-muted">Manage multiple branches, departments, and roles with ease and flexibility.</p>
+                  <p className="mb-4 text-muted flex-grow-1">Manage multiple branches, departments, and roles with ease and flexibility.</p>
+                  <Link to="/setup-organization" className="text-primary text-decoration-none fw-bold small d-inline-flex align-items-center gap-1 hover-arrow">
+                    Learn more <FaArrowRight />
+                  </Link>
                 </div>
               </div>
             </div>
             <div className="col-lg-4 mb-5">
               <div className="card h-100 shadow-sm border-0 rounded-4 glass-card text-dark">
-                <div className="card-body p-4">
+                <div className="card-body p-4 d-flex flex-column">
                   <div className="feature-icon bg-primary bg-gradient text-white rounded-3 mb-3 p-3 d-inline-block feature-icon-wrapper">💻</div>
                   <h2 className="h4 fw-bold">Asset Tracking</h2>
-                  <p className="mb-0 text-muted">Keep track of company assets assigned to employees, from laptops to licenses.</p>
+                  <p className="mb-4 text-muted flex-grow-1">Keep track of company assets assigned to employees, from laptops to licenses.</p>
+                  <Link to="/assets" className="text-primary text-decoration-none fw-bold small d-inline-flex align-items-center gap-1 hover-arrow">
+                    Learn more <FaArrowRight />
+                  </Link>
                 </div>
               </div>
             </div>

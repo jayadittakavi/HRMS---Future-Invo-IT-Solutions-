@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
 import '../../components/DashboardLayout.css';
 
@@ -67,8 +68,8 @@ export const UserManagementContent = () => {
                                     </td>
                                     <td>{user.lastLogin}</td>
                                     <td>
-                                        <button className="action-btn edit" onClick={() => handleEdit(user)}>Edit</button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(user)}>Delete</button>
+                                        <button className="action-btn edit" onClick={() => handleEdit(user)}><FaEdit /></button>
+                                        <button className="action-btn delete" onClick={() => handleDelete(user)}><FaTrash /></button>
                                     </td>
                                 </tr>
                             ))}
