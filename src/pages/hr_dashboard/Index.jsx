@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
+import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
-import '../components/DashboardLayout.css';
 import { EmployeesContent } from '../pages/employees/Employees';
 import { AttendanceContent } from '../pages/attendance/Attendance';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../components/charts/CustomCharts';
@@ -50,7 +49,7 @@ const HRDashboard = () => {
 
                         <div className="row g-4 mb-4">
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-purple">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaUsers /> Total Staff
                                     </h6>
@@ -59,7 +58,7 @@ const HRDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-orange">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaUserPlus /> Open Positions
                                     </h6>
@@ -68,7 +67,7 @@ const HRDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaChalkboardTeacher /> Onboarding
                                     </h6>

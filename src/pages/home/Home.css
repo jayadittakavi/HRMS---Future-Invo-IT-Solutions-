@@ -1,136 +1,130 @@
-/* Home Page CSS */
+/* GLOBAL */
+body {
+    background: #0f0c29;
+}
 
-.home-container {
-    background-image: url('../../assets/images/home-background.png');
-    background-size: cover;
-    background-position: top center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
+/* HERO */
+.hero-section {
     min-height: 100vh;
-    font-family: 'Inter', sans-serif;
+    background: radial-gradient(circle at right,
+            #fbc2eb,
+            #a18cd1,
+            #1f1c2c);
+    display: flex;
+    align-items: center;
+    color: white;
 }
 
-/* Glassy Navbar Effect */
-.glass-navbar {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.hero-header {
-    background: transparent;
-    padding-top: 6rem !important;
-    padding-bottom: 4rem !important;
-    text-align: center;
-}
-
-/* Hero Title Styles */
-.hero-title {
+.hero-content h1 {
     font-size: 3.5rem;
     font-weight: 700;
-    color: #1e293b;
-    margin-bottom: 1.5rem;
-    line-height: 1.2;
 }
 
-.hero-subtitle {
-    font-size: 1.1rem;
-    color: #475569;
+.hero-content span {
+    color: #ffb703;
+}
+
+.hero-content p {
     max-width: 600px;
-    margin: 0 auto;
-    margin-bottom: 2rem;
+    opacity: 0.9;
+    margin-top: 15px;
 }
 
-/* Floating Glass Cards Container */
-.floating-cards-container {
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-    margin-top: 3rem;
-    flex-wrap: wrap;
-    position: relative;
-    padding-bottom: 3rem;
+.hero-buttons {
+    margin-top: 30px;
 }
 
-/* Individual Glass Cards matching the image vibe */
-.glass-card {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
-    padding: 1.5rem;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-    transition: transform 0.3s ease;
+.primary-btn {
+    background: linear-gradient(135deg, #ffb703, #fb8500);
+    color: #000;
+    margin-right: 15px;
 }
 
-.glass-card:hover {
-    transform: translateY(-5px);
+.secondary-btn {
+    border: 1px solid white;
+    color: white;
 }
 
-.glass-card.project-stat {
-    width: 280px;
-    height: 220px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+/* SECTIONS */
+section {
+    padding: 80px 0;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: white;
+}
+
+/* CARDS */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.info-card,
+.feature-card,
+.price-card {
+    background: linear-gradient(145deg, #1f1c2c, #302b63);
+    padding: 30px;
+    border-radius: 18px;
+    color: white;
+    transition: transform 0.3s;
+}
+
+.info-card:hover,
+.feature-card:hover,
+.price-card:hover {
+    transform: translateY(-8px);
+}
+
+.feature-card {
+    text-align: center;
+    font-weight: 600;
+}
+
+/* PRICING */
+.price-card p {
+    font-size: 1.5rem;
+    color: #ffb703;
+}
+
+.highlight {
+    background: linear-gradient(145deg, #ff512f, #dd2476);
+}
+
+/* SUBSCRIBE */
+.subscribe-section {
+    background: linear-gradient(135deg, #141e30, #243b55);
     text-align: center;
 }
 
-.glass-card.usability-testing {
-    width: 320px;
-    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-    color: white;
+.subscribe-box {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.subscribe-box input {
+    padding: 12px;
+    width: 280px;
+    border-radius: 30px 0 0 30px;
     border: none;
-    transform: rotate(-3deg);
-    z-index: 10;
 }
 
-.glass-card.design-system {
-    width: 300px;
-}
-
-.glass-card.team-meeting {
-    width: 300px;
-    margin-top: -40px;
-}
-
-.glass-card-title {
-    font-size: 0.9rem;
+.subscribe-box button {
+    padding: 12px 25px;
+    border-radius: 0 30px 30px 0;
+    background: #ffb703;
+    border: none;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    opacity: 0.9;
 }
 
-/* Stats Circle Chart Mock */
-.circle-chart {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    border: 10px solid #e2e8f0;
-    border-top-color: #6366f1;
-    border-right-color: #22c55e;
-    margin-bottom: 10px;
-}
-
-/* Feature Icon Wrapper */
-.feature-icon-wrapper {
-    font-size: 2rem;
-}
-
-/* Sections Glass Background */
-.section-glass {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(5px);
-}
-
-/* Hover Arrow Effect */
-.hover-arrow svg {
-    transition: transform 0.3s ease;
-}
-
-.hover-arrow:hover svg {
-    transform: translateX(5px);
+/* FOOTER */
+.footer {
+    background: #0b0a1f;
+    text-align: center;
+    padding: 20px;
+    color: #aaa;
 }

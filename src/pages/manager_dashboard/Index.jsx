@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
+import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
-import '../components/DashboardLayout.css';
 import { SimpleDonutChart, SimpleBarChart } from '../components/charts/CustomCharts';
 import { FaUsersCog, FaClipboardList, FaStar } from 'react-icons/fa';
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, addMonths, subMonths, isSameMonth, isSameDay, addDays, isToday } from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import '../../components/DashboardLayout.css'; // Keep for dashboard-card styles
 
 const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -71,8 +72,8 @@ const Calendar = () => {
                     <div
                         key={day}
                         className={`flex-grow-1 border-end border-bottom p-2 position-relative ${!isSameMonth(day, monthStart)
-                                ? 'text-muted bg-light opacity-50'
-                                : isSameDay(day, selectedDate) ? 'bg-white' : 'bg-white'
+                            ? 'text-muted bg-light opacity-50'
+                            : isSameDay(day, selectedDate) ? 'bg-white' : 'bg-white'
                             }`}
                         style={{ height: '120px', cursor: 'pointer', minWidth: '0' }}
                         onClick={() => onDateClick(cloneDay)}
@@ -84,8 +85,8 @@ const Calendar = () => {
                         <div className="mt-2 d-flex flex-column gap-1">
                             {dayEvents.map(ev => (
                                 <div key={ev.id} className={`badge text-start text-truncate fw-normal px-2 ${ev.type === 'work' ? 'bg-purple-subtle text-purple' :
-                                        ev.type === 'urgent' ? 'bg-danger-subtle text-danger' :
-                                            'bg-success-subtle text-success'
+                                    ev.type === 'urgent' ? 'bg-danger-subtle text-danger' :
+                                        'bg-success-subtle text-success'
                                     }`} style={{ fontSize: '0.7rem' }}>
                                     • {ev.title}
                                 </div>
@@ -123,7 +124,7 @@ const Calendar = () => {
                     <div
                         key={day}
                         className={`flex-grow-1 text-center py-2 small rounded-circle cursor-pointer ${isSameDay(day, selectedDate) ? 'bg-primary text-white' :
-                                !isSameMonth(day, monthStart) ? 'text-muted' : 'text-dark'
+                            !isSameMonth(day, monthStart) ? 'text-muted' : 'text-dark'
                             }`}
                         style={{ width: '30px', height: '30px', lineHeight: '15px' }}
                         onClick={() => setSelectedDate(cloneDay)}
@@ -138,7 +139,7 @@ const Calendar = () => {
         }
 
         return (
-            <div className="dashboard-card p-4 mb-4">
+            <div className="dashboard-card p-4 mb-4" style={{ height: 'auto' }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h6 className="fw-bold mb-0">{format(selectedDate, 'MMMM yyyy')}</h6>
                     <div className="d-flex gap-1">
@@ -165,7 +166,7 @@ const Calendar = () => {
 
     const renderEventList = () => {
         return (
-            <div className="dashboard-card p-4">
+            <div className="dashboard-card p-4" style={{ height: 'auto' }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h6 className="fw-bold mb-0">Today's Events</h6>
                     <FaPlus className="text-secondary cursor-pointer" />
@@ -194,24 +195,31 @@ const Calendar = () => {
     };
 
     return (
-        <DashboardLayout title="">
-            <div className="row g-4">
-                {/* Left Sidebar */}
-                <div className="col-lg-3 col-md-4">
-                    {renderMiniCalendar()}
-                    {renderEventList()}
-                </div>
+        <div className="bg-white min-vh-100 d-flex flex-column">
+            <Navbar />
+            <main className="flex-grow-1 p-4 bg-light">
+                <div className="container">
+                    <div className="row g-4 d-flex align-items-start">
+                        {/* Added align-items-start to ensure columns don't stretch unnaturally if not needed, though stretching is fine if content is handled */}
+                        {/* Left Sidebar */}
+                        <div className="col-lg-3 col-md-4">
+                            {renderMiniCalendar()}
+                            {renderEventList()}
+                        </div>
 
-                {/* Main Calendar */}
-                <div className="col-lg-9 col-md-8">
-                    <div className="dashboard-card p-4 h-100">
-                        {renderHeader()}
-                        {renderDays()}
-                        {renderCells()}
+                        {/* Main Calendar */}
+                        <div className="col-lg-9 col-md-8">
+                            <div className="dashboard-card p-4" style={{ height: 'auto', minHeight: '100%' }}>
+                                {renderHeader()}
+                                {renderDays()}
+                                {renderCells()}
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </DashboardLayout>
+            </main>
+            <Footer />
+        </div>
     );
 };
 

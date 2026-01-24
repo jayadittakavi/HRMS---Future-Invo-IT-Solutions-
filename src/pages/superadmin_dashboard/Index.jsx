@@ -1,5 +1,4 @@
-import DashboardLayout from '../components/DashboardLayout';
-import '../components/DashboardLayout.css';
+import DashboardLayout from '../../components/DashboardLayout';
 import { CompaniesContent } from '../pages/companies/Companies';
 import { BranchesContent } from '../pages/branches/Branches';
 import { DepartmentsContent } from '../pages/departments/Departments';
@@ -85,7 +84,7 @@ const SuperAdminDashboard = () => {
                         <div className="row g-4 mb-4">
                             {/* Employees Net Pay */}
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-purple">
+                                <div className="dashboard-card">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaWallet size={24} />
@@ -101,7 +100,7 @@ const SuperAdminDashboard = () => {
 
                             {/* No. of Employees */}
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
+                                <div className="dashboard-card">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaUsers size={24} />
@@ -120,7 +119,7 @@ const SuperAdminDashboard = () => {
 
                             {/* To Do Tasks */}
                             <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-green">
+                                <div className="dashboard-card">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaClipboardList size={24} />

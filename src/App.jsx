@@ -6,6 +6,8 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /* Pages */
+/* Pages */
+import Welcome from "./pages/welcome/Welcome";
 import Home from "./pages/home/Index";
 import Features from "./pages/Features";
 import About from "./pages/About";
@@ -52,7 +54,8 @@ export default function App() {
           <Routes>
 
             {/* Public Routes */}
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Welcome />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/features" element={<Features />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
@@ -65,6 +68,7 @@ export default function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/setup-organization" element={<SetupOrganization />} />
+            <Route path="/calendar" element={<Calendar />} />
 
             {/* Dashboard Redirector */}
             <Route
@@ -153,7 +157,7 @@ export default function App() {
             <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
 
             {/* Additional Dashboard Routes */}
-            <Route path="/calendar" element={<ProtectedRoute><Calendar /></ProtectedRoute>} />
+
             <Route path="/companies" element={<ProtectedRoute requiredRoles={['superadmin']}><Companies /></ProtectedRoute>} />
             <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin']}><Branches /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />

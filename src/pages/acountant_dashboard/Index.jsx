@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
+import DashboardLayout from '../../components/DashboardLayout';
 import { PayrollContent } from '../pages/payroll/Payroll';
 import { useAuth } from '../context/AuthContext';
 import { SimpleLineChart, SimpleBarChart, SimpleDonutChart } from '../components/charts/CustomCharts';

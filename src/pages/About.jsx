@@ -1,6 +1,8 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 
+import Footer from '../components/Footer';
+
 const About = () => {
     return (
         <div className="bg-white min-vh-100 d-flex flex-column">
@@ -56,11 +58,7 @@ const About = () => {
                 </div>
             </main>
 
-            <footer className="bg-dark text-white py-4 mt-auto">
-                <div className="container text-center">
-                    <small>© 2024 Future Invo HRMS. All rights reserved.</small>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

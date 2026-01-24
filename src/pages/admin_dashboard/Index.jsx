@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../components/DashboardLayout';
-import '../components/DashboardLayout.css';
+import DashboardLayout from '../../components/DashboardLayout';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../components/charts/CustomCharts';
 import { CompaniesContent } from '../pages/companies/Companies';
 import { BranchesContent } from '../pages/branches/Branches';
@@ -61,7 +60,7 @@ const AdminDashboard = () => {
                         {/* Top Cards Row */}
                         <div className="row g-4 mb-4">
                             <div className="col-md-3">
-                                <div className="dashboard-card bg-gradient-purple">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaUsers /> Total Employees
                                     </h6>
@@ -70,7 +69,7 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                                <div className="dashboard-card bg-gradient-blue">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaMoneyBillWave /> Total Payroll
                                     </h6>
@@ -79,7 +78,7 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                                <div className="dashboard-card bg-gradient-orange">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaUserClock /> On Leave
                                     </h6>
@@ -88,7 +87,7 @@ const AdminDashboard = () => {
                                 </div>
                             </div>
                             <div className="col-md-3">
-                                <div className="dashboard-card bg-gradient-green">
+                                <div className="dashboard-card">
                                     <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                                         <FaTasks /> Open Tasks
                                     </h6>

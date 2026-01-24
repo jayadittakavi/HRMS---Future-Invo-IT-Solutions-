@@ -1,10 +1,17 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaBriefcase, FaCalendarAlt } from 'react-icons/fa';
 
 const Profile = () => {
-    const { user, updateProfile } = useAuth();
+    const { user, updateProfile, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
     const handleNavigate = () => {
         // Handle navigation if needed
@@ -51,7 +58,7 @@ const Profile = () => {
                             <p className="text-muted mb-3">{user?.role || 'Role'}</p>
                             <div className="d-flex justify-content-center gap-2 mb-4">
                                 <button className="btn btn-primary rounded-pill px-4 btn-sm">Edit Profile</button>
-                                <button className="btn btn-outline-primary rounded-pill px-4 btn-sm">Message</button>
+                                <button className="btn btn-outline-danger rounded-pill px-4 btn-sm" onClick={handleLogout}>Logout</button>
                             </div>
 
                             <hr className="text-muted opacity-25" />
