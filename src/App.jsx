@@ -174,6 +174,45 @@ export default function App() {
             <Route path="/my-payslips" element={<ProtectedRoute><PlaceholderPage title="My Payslips" /></ProtectedRoute>} />
 
             {/* Fallback */}
+            {/* Admin Routes */}
+            <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
+            <Route path="/attendance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Attendance /></ProtectedRoute>} />
+            <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Payroll Management" /></ProtectedRoute>} />
+            <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
+
+            {/* HR Routes */}
+            <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['hr', 'admin']}><Employees /></ProtectedRoute>} />
+            <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Training" /></ProtectedRoute>} />
+            <Route path="/performance-reviews" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Performance Reviews" /></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Documents" /></ProtectedRoute>} />
+            <Route path="/hr-reports" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="HR Reports" /></ProtectedRoute>} />
+
+            {/* Manager Routes */}
+            <Route path="/team-members" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Members" /></ProtectedRoute>} />
+            <Route path="/team-attendance" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Attendance" /></ProtectedRoute>} />
+            <Route path="/leave-approvals" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Leave Approvals" /></ProtectedRoute>} />
+            <Route path="/performance-feedback" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Performance Feedback" /></ProtectedRoute>} />
+            <Route path="/goals" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Goals & Targets" /></ProtectedRoute>} />
+            <Route path="/team-reports" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Reports" /></ProtectedRoute>} />
+
+            {/* Accountant Routes */}
+            <Route path="/payroll-processing" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Payroll Processing" /></ProtectedRoute>} />
+            <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
+            <Route path="/payslips" element={<ProtectedRoute requiredRoles={['accountant', 'employee']}><PlaceholderPage title="Payslips" /></ProtectedRoute>} />
+            <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
+            <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Financial Reports" /></ProtectedRoute>} />
+
+            {/* Employee Routes */}
+            <Route path="/my-documents" element={<ProtectedRoute requiredRoles={['employee']}><PlaceholderPage title="My Documents" /></ProtectedRoute>} />
+            <Route path="/change-password" element={<ProtectedRoute><PlaceholderPage title="Change Password" /></ProtectedRoute>} />
+
+            {/* New User Routes */}
+            <Route path="/welcome" element={<ProtectedRoute requiredRoles={['newuser']}><NewUserDashboard /></ProtectedRoute>} />
+            <Route path="/complete-profile" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Complete Profile" /></ProtectedRoute>} />
+            <Route path="/upload-documents" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Upload Documents" /></ProtectedRoute>} />
+            <Route path="/policies" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="View Policies" /></ProtectedRoute>} />
+            <Route path="/support" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Help & Support" /></ProtectedRoute>} />
+
             <Route path="*" element={<Login />} />
 
           </Routes>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
-import Navbar from './Navbar';
+import DashboardHeader from './DashboardHeader';
 import './DashboardLayout.css'; // Keeping for specific layout tweaks not covered by Bootstrap utils if needed, or remove if fully bootstrap
 
 const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
@@ -11,7 +11,7 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
     };
 
     return (
-        <div className="d-flex vh-100 glass-dashboard-bg overflow-hidden position-relative">
+        <div className="d-flex vh-100 glass-dashboard-bg overflow-hidden position-relative p-0 m-0">
             {/* Mobile Backdrop */}
             {isSidebarOpen && (
                 <div
@@ -33,7 +33,7 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
 
             {/* Main Content Wrapper */}
             <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden">
-                <Navbar toggleSidebar={toggleSidebar} hideLogo={true} />
+                <DashboardHeader toggleSidebar={toggleSidebar} />
 
                 {/* Scrollable Content Area */}
                 <div className="flex-grow-1 overflow-auto p-4">

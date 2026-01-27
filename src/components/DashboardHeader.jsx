@@ -21,7 +21,7 @@ const DashboardHeader = ({ toggleSidebar }) => {
     const headerBg = skinColors[skin] || 'rgba(255, 255, 255, 0.65)'; // Fallback
 
     return (
-        <header className="border-bottom py-3 px-4 d-flex align-items-center justify-content-between sticky-top glass-header"
+        <header className="border-bottom py-3 px-3 d-flex align-items-center justify-content-between sticky-top glass-header"
             style={{
                 minHeight: '70px',
                 background: headerBg,
@@ -37,26 +37,13 @@ const DashboardHeader = ({ toggleSidebar }) => {
                     <span className="fs-4">☰</span>
                 </button>
 
-                <div className="vr d-none d-sm-block mx-2"></div>
-
-                <span className="fw-bold text-dark small">
-                    {user?.name || 'User'}
+                <span className="fw-bold text-dark fs-5">
+                    {user?.name || 'Dashboard'}
                 </span>
             </div>
 
             {/* Right Side: Navigation & Actions */}
             <div className="d-flex align-items-center gap-4">
-                {/* Navigation Menu */}
-                <nav className="d-none d-md-flex align-items-center gap-4">
-                    <Link to="/" className="text-decoration-none text-secondary fw-medium small hover-primary">Home</Link>
-                    <Link to="/dashboard" className="text-decoration-none text-secondary fw-medium small hover-primary">My Space</Link>
-                    <Link to="/features" className="text-decoration-none text-secondary fw-medium small hover-primary">Features</Link>
-                    <Link to="/calendar" className="text-decoration-none text-secondary fw-medium small hover-primary">Calendar</Link>
-                    <Link to="/about" className="text-decoration-none text-secondary fw-medium small hover-primary">About</Link>
-                    <Link to="/contact" className="text-decoration-none text-secondary fw-medium small hover-primary">Contact</Link>
-                </nav>
-
-                <div className="vr d-none d-md-block mx-2"></div>
 
                 {/* User Actions: Search, Settings & Profile */}
                 <div className="d-flex align-items-center gap-3">

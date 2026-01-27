@@ -3,6 +3,7 @@ import DashboardLayout from '../components/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import '../components/DashboardLayout.css';
 import { SimpleDonutChart, SimpleBarChart } from '../components/charts/CustomCharts';
+import { AttendanceContent } from '../pages/attendance/Attendance';
 import { FaUsersCog, FaClipboardList, FaStar } from 'react-icons/fa';
 
 const ManagerDashboard = () => {
@@ -139,6 +140,7 @@ const ManagerDashboard = () => {
                         <p>Approve or reject team leave requests.</p>
                     </div>
                 )}
+                {activeView === 'team-attendance' && <AttendanceContent />}
                 {activeView === 'performance' && (
                     <div className="p-5 text-center">
                         <h3 className="text-muted">Performance Reviews</h3>

@@ -1,5 +1,18 @@
 /* DashboardLayout specific styles - GLASSPHORISM OVERHAUL */
 
+.glass-sidebar-wrapper {
+    margin: 0;
+    padding: 0;
+    border-right: none;
+    z-index: 100;
+}
+
+.glass-header {
+    margin: 0;
+    border-left: none;
+    /* Ensure no border separating if they touch */
+}
+
 .transition-all {
     transition: all 0.3s ease-in-out;
 }

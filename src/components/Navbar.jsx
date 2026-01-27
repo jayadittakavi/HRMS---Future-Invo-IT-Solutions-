@@ -35,7 +35,7 @@ const Navbar = ({ toggleSidebar, hideLogo }) => {
                 {!hideLogo && (
                     <Link className="navbar-brand d-flex align-items-center" to="/">
                         <img src={logo} alt="HRMS Logo" height="35" className="me-2 rounded-3" />
-                        <span className="fw-bold text-primary d-none d-sm-block">Future Invo HRMS</span>
+                        <span className="fw-bold d-none d-sm-block" style={{ color: '#006096' }}>Future Invo HRMS</span>
                     </Link>
                 )}
 
@@ -107,7 +107,7 @@ const Navbar = ({ toggleSidebar, hideLogo }) => {
                                 <FaCog size={20} />
                             </button>
 
-                            <button className="btn btn-link text-primary p-0" title="Profile" onClick={handleProfileClick}>
+                            <button className="btn btn-link p-0" title="Profile" onClick={handleProfileClick} style={{ color: '#006096' }}>
                                 <FaUserCircle size={28} />
                             </button>
                         </li>

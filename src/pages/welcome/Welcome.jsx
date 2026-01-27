@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './welcome.css';
 import logo from '../../assets/images/fislogo1.png'; // Assuming this is the main logo
-import bgImage from '../../assets/images/welcome_page_background.png';
+import bgImage from '../../assets/images/welcom bg1.jpg';
 
 const Welcome = () => {
   const navigate = useNavigate();

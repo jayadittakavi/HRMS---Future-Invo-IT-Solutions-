@@ -35,8 +35,11 @@
 }
 
 .welcome-logo {
-  max-width: 150px;
-  height: auto;
+  width: 350px;
+  height: 350px;
+  border-radius: 50%;
+  /* Increased radius */
+  object-fit: cover;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3));
 }
 
