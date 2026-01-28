@@ -8,6 +8,7 @@ const Settings = () => {
     const [sidebarColor, setSidebarColor] = useState('dark');
     const [showSmtpConfig, setShowSmtpConfig] = useState(false);
     const [showSmsConfig, setShowSmsConfig] = useState(false);
+    const [auditTab, setAuditTab] = useState('login'); // login, password, data, permissions
 
     // Apply Theme Changes & Skins
     React.useEffect(() => {
@@ -404,94 +405,230 @@ const Settings = () => {
                                         </div>
 
                                         {/* Audit Logs Tabs/Section */}
-                                        <ul className="nav nav-tabs mb-3 border-bottom-0">
-                                            <li className="nav-item">
-                                                <button className="nav-link active small fw-bold px-3 py-1 bg-transparent text-primary border-bottom border-primary border-2">Login History</button>
-                                            </li>
-                                            <li className="nav-item">
-                                                <button className="nav-link small fw-bold px-3 py-1 text-muted">Data Edit History</button>
-                                            </li>
-                                            <li className="nav-item">
-                                                <button className="nav-link small fw-bold px-3 py-1 text-muted">Permission Changes</button>
-                                            </li>
-                                        </ul>
-
-                                        {/* Login History Table */}
-                                        <div className="table-responsive border rounded-3 mb-4">
-                                            <table className="table table-hover align-middle mb-0">
-                                                <thead className="bg-light">
-                                                    <tr>
-                                                        <th className="small text-secondary border-0 ps-3">Date & Time</th>
-                                                        <th className="small text-secondary border-0">User</th>
-                                                        <th className="small text-secondary border-0">Event</th>
-                                                        <th className="small text-secondary border-0">IP Address</th>
-                                                        <th className="small text-secondary border-0">Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <tr>
-                                                        <td className="ps-3 small">Jan 27, 2026, 09:12 AM</td>
-                                                        <td className="fw-bold small">Admin User</td>
-                                                        <td className="small">System Login</td>
-                                                        <td className="small text-muted">192.168.1.45</td>
-                                                        <td><span className="badge bg-success bg-opacity-10 text-success">Success</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="ps-3 small">Jan 27, 2026, 09:10 AM</td>
-                                                        <td className="fw-bold small">Alert System</td>
-                                                        <td className="small text-danger fw-bold">Failed Login</td>
-                                                        <td className="small text-muted">192.168.1.105</td>
-                                                        <td><span className="badge bg-danger bg-opacity-10 text-danger">Blocked</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td className="ps-3 small">Jan 26, 2026, 06:45 PM</td>
-                                                        <td className="fw-bold small">HR Manager</td>
-                                                        <td className="small">Password Change</td>
-                                                        <td className="small text-muted">10.0.0.12</td>
-                                                        <td><span className="badge bg-success bg-opacity-10 text-success">Success</span></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-
-                                        {/* Data Edit History Example */}
-                                        <h6 className="fw-bold mb-3 small text-uppercase text-secondary mt-4">Recent Critical Data Changes</h6>
-                                        <div className="list-group shadow-sm rounded-3 overflow-hidden">
-                                            <div className="list-group-item border-0 border-bottom p-3">
-                                                <div className="d-flex justify-content-between">
-                                                    <div>
-                                                        <span className="fw-bold text-dark d-block">Salary Structure Updated</span>
-                                                        <small className="text-muted">Modified base salary for Grade A employees.</small>
-                                                    </div>
-                                                    <div className="text-end">
-                                                        <span className="badge bg-warning text-dark mb-1">Data Edit</span>
-                                                        <div className="small text-secondary">By: Super Admin</div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 p-2 bg-light rounded small text-secondary font-monospace">
-                                                    Original: $5000 | New: $5500 | Time: 10:30 AM
-                                                </div>
+                                        <div className="card border shadow-sm rounded-3 overflow-hidden mt-4">
+                                            <div className="card-header bg-light border-bottom p-0">
+                                                <ul className="nav nav-tabs nav-fill border-bottom-0">
+                                                    <li className="nav-item">
+                                                        <button
+                                                            className={`nav-link py-3 rounded-0 border-0 ${auditTab === 'login' ? 'active fw-bold border-bottom border-primary border-3 bg-white text-primary' : 'text-muted'}`}
+                                                            onClick={() => setAuditTab('login')}
+                                                        >
+                                                            Login History
+                                                        </button>
+                                                    </li>
+                                                    <li className="nav-item">
+                                                        <button
+                                                            className={`nav-link py-3 rounded-0 border-0 ${auditTab === 'password' ? 'active fw-bold border-bottom border-primary border-3 bg-white text-primary' : 'text-muted'}`}
+                                                            onClick={() => setAuditTab('password')}
+                                                        >
+                                                            Password Logs
+                                                        </button>
+                                                    </li>
+                                                    <li className="nav-item">
+                                                        <button
+                                                            className={`nav-link py-3 rounded-0 border-0 ${auditTab === 'data' ? 'active fw-bold border-bottom border-primary border-3 bg-white text-primary' : 'text-muted'}`}
+                                                            onClick={() => setAuditTab('data')}
+                                                        >
+                                                            Data Edit History
+                                                        </button>
+                                                    </li>
+                                                    <li className="nav-item">
+                                                        <button
+                                                            className={`nav-link py-3 rounded-0 border-0 ${auditTab === 'permissions' ? 'active fw-bold border-bottom border-primary border-3 bg-white text-primary' : 'text-muted'}`}
+                                                            onClick={() => setAuditTab('permissions')}
+                                                        >
+                                                            Permission Changes
+                                                        </button>
+                                                    </li>
+                                                </ul>
                                             </div>
 
-                                            <div className="list-group-item border-0 p-3">
-                                                <div className="d-flex justify-content-between">
-                                                    <div>
-                                                        <span className="fw-bold text-dark d-block">Permission Level Changed</span>
-                                                        <small className="text-muted">Granted 'Payroll Access' to Accountant Role.</small>
+                                            <div className="card-body p-0">
+                                                {/* DATA: LOGIN HISTORY */}
+                                                {auditTab === 'login' && (
+                                                    <div className="table-responsive">
+                                                        <table className="table table-hover align-middle mb-0 text-nowrap">
+                                                            <thead className="bg-light sticky-top">
+                                                                <tr>
+                                                                    <th className="small text-secondary ps-4 py-3 border-0">Timestamp</th>
+                                                                    <th className="small text-secondary py-3 border-0">User</th>
+                                                                    <th className="small text-secondary py-3 border-0">Event</th>
+                                                                    <th className="small text-secondary py-3 border-0">IP Address</th>
+                                                                    <th className="small text-secondary py-3 border-0">Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 28, 2026, 10:45 AM</td>
+                                                                    <td className="fw-bold small text-dark">Super Admin</td>
+                                                                    <td className="small">System Login</td>
+                                                                    <td className="small text-muted font-monospace">192.168.1.12</td>
+                                                                    <td><span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Success</span></td>
+                                                                </tr>
+                                                                <tr className="bg-danger bg-opacity-10">
+                                                                    <td className="ps-4 small text-danger fw-bold">Jan 28, 2026, 10:15 AM</td>
+                                                                    <td className="fw-bold small text-dark">Unknown</td>
+                                                                    <td className="small text-danger fw-bold">Unauthorized Login Attempt</td>
+                                                                    <td className="small text-danger font-monospace">45.23.11.90</td>
+                                                                    <td><span className="badge bg-danger text-white rounded-pill px-3">Blocked</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 27, 2026, 05:30 PM</td>
+                                                                    <td className="fw-bold small text-dark">HR Manager</td>
+                                                                    <td className="small">Logout</td>
+                                                                    <td className="small text-muted font-monospace">192.168.1.45</td>
+                                                                    <td><span className="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3">Success</span></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 27, 2026, 09:00 AM</td>
+                                                                    <td className="fw-bold small text-dark">Accountant</td>
+                                                                    <td className="small">System Login</td>
+                                                                    <td className="small text-muted font-monospace">192.168.1.22</td>
+                                                                    <td><span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Success</span></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
-                                                    <div className="text-end">
-                                                        <span className="badge bg-info text-dark mb-1">Permissions</span>
-                                                        <div className="small text-secondary">By: Admin User</div>
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 p-2 bg-light rounded small text-secondary font-monospace">
-                                                    Role: Accountant | Action: Grant | Resource: Payroll
-                                                </div>
-                                            </div>
-                                        </div>
+                                                )}
 
-                                        <div className="mt-4 text-center">
-                                            <button className="btn btn-outline-secondary btn-sm">View Full Audit Logs</button>
+                                                {/* DATA: PASSWORD LOGS */}
+                                                {auditTab === 'password' && (
+                                                    <div className="table-responsive">
+                                                        <table className="table table-hover align-middle mb-0 text-nowrap">
+                                                            <thead className="bg-light sticky-top">
+                                                                <tr>
+                                                                    <th className="small text-secondary ps-4 py-3 border-0">Timestamp</th>
+                                                                    <th className="small text-secondary py-3 border-0">User Affected</th>
+                                                                    <th className="small text-secondary py-3 border-0">Action By</th>
+                                                                    <th className="small text-secondary py-3 border-0">Type</th>
+                                                                    <th className="small text-secondary py-3 border-0">Details</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 26, 2026, 02:15 PM</td>
+                                                                    <td className="fw-bold small text-dark">John Doe (Emp)</td>
+                                                                    <td className="small text-primary">John Doe</td>
+                                                                    <td className="small"><span className="badge bg-info bg-opacity-10 text-info">Self Update</span></td>
+                                                                    <td className="small text-muted">Changed account password</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 25, 2026, 11:00 AM</td>
+                                                                    <td className="fw-bold small text-dark">Sarah Smith (HR)</td>
+                                                                    <td className="small text-danger fw-bold">Super Admin</td>
+                                                                    <td className="small"><span className="badge bg-warning bg-opacity-10 text-warning">Admin Reset</span></td>
+                                                                    <td className="small text-muted">Force reset due to security policy</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 20, 2026, 09:30 AM</td>
+                                                                    <td className="fw-bold small text-dark">Mike Ross (Mgr)</td>
+                                                                    <td className="small text-primary">System</td>
+                                                                    <td className="small"><span className="badge bg-secondary bg-opacity-10 text-secondary">Expiry</span></td>
+                                                                    <td className="small text-muted">Password expired, prompted change</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+
+                                                {/* DATA: DATA EDIT Logs */}
+                                                {auditTab === 'data' && (
+                                                    <div className="table-responsive">
+                                                        <table className="table table-hover align-middle mb-0 text-nowrap">
+                                                            <thead className="bg-light sticky-top">
+                                                                <tr>
+                                                                    <th className="small text-secondary ps-4 py-3 border-0">Timestamp</th>
+                                                                    <th className="small text-secondary py-3 border-0">Data Entity</th>
+                                                                    <th className="small text-secondary py-3 border-0">Action</th>
+                                                                    <th className="small text-secondary py-3 border-0">Modified By</th>
+                                                                    <th className="small text-secondary py-3 border-0">Changes (Old &rarr; New)</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 28, 2026, 01:20 PM</td>
+                                                                    <td className="fw-bold small text-dark">Employee Salary</td>
+                                                                    <td className="small"><span className="badge bg-primary bg-opacity-10 text-primary">Update</span></td>
+                                                                    <td className="small text-dark fw-bold">Super Admin</td>
+                                                                    <td className="small font-monospace">
+                                                                        <span className="text-danger strikethrough me-2">₹50,000</span>
+                                                                        <span className="text-secondary me-2">&rarr;</span>
+                                                                        <span className="text-success fw-bold">₹55,000</span>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 27, 2026, 04:10 PM</td>
+                                                                    <td className="fw-bold small text-dark">Company Settings</td>
+                                                                    <td className="small"><span className="badge bg-warning bg-opacity-10 text-warning">Config</span></td>
+                                                                    <td className="small text-dark fw-bold">Admin</td>
+                                                                    <td className="small text-muted">Changed 'Tax Year' to 2026-2027</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 27, 2026, 11:45 AM</td>
+                                                                    <td className="fw-bold small text-dark">Leave Policy</td>
+                                                                    <td className="small"><span className="badge bg-danger bg-opacity-10 text-danger">Delete</span></td>
+                                                                    <td className="small text-dark fw-bold">HR Manager</td>
+                                                                    <td className="small text-muted">Removed 'Casual Leave - Type B'</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+
+                                                {/* DATA: PERMISSION Logs */}
+                                                {auditTab === 'permissions' && (
+                                                    <div className="table-responsive">
+                                                        <table className="table table-hover align-middle mb-0 text-nowrap">
+                                                            <thead className="bg-light sticky-top">
+                                                                <tr>
+                                                                    <th className="small text-secondary ps-4 py-3 border-0">Timestamp</th>
+                                                                    <th className="small text-secondary py-3 border-0">Role / User</th>
+                                                                    <th className="small text-secondary py-3 border-0">Changes Made</th>
+                                                                    <th className="small text-secondary py-3 border-0">Executed By</th>
+                                                                    <th className="small text-secondary py-3 border-0">Outcome</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 28, 2026, 12:00 PM</td>
+                                                                    <td className="fw-bold small text-dark">Role: Accountant</td>
+                                                                    <td className="small text-dark">
+                                                                        <span className="badge bg-success bg-opacity-10 text-success me-1">+ Grant</span>
+                                                                        Payroll Processing Access
+                                                                    </td>
+                                                                    <td className="small fw-bold">Super Admin</td>
+                                                                    <td className="small text-success">Applied</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 26, 2026, 09:15 AM</td>
+                                                                    <td className="fw-bold small text-dark">User: John Doe</td>
+                                                                    <td className="small text-dark">
+                                                                        <span className="badge bg-danger bg-opacity-10 text-danger me-1">- Revoke</span>
+                                                                        Delete Employee Capability
+                                                                    </td>
+                                                                    <td className="small fw-bold">Admin</td>
+                                                                    <td className="small text-success">Applied</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="ps-4 small text-muted">Jan 25, 2026, 03:00 PM</td>
+                                                                    <td className="fw-bold small text-dark">Role: Manager</td>
+                                                                    <td className="small text-dark">
+                                                                        <span className="badge bg-success bg-opacity-10 text-success me-1">+ Grant</span>
+                                                                        View Department Reports
+                                                                    </td>
+                                                                    <td className="small fw-bold">Super Admin</td>
+                                                                    <td className="small text-success">Applied</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="card-footer bg-white text-center py-3 border-top">
+                                                <button className="btn btn-outline-secondary btn-sm" onClick={() => alert('Exporting Logs to CSV...')}>
+                                                    <FaShieldAlt className="me-2" /> Export Security Audit Report
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 )}

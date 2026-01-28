@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import './Attendance.css';
 import {
-    FaSearch,
-    FaFileExport,
     FaCheckCircle,
     FaTimesCircle,
     FaCalendarAlt,
@@ -19,7 +16,7 @@ export const AttendanceContent = ({ personal = false }) => {
     const [filterDateTo, setFilterDateTo] = useState('2025-10-02');
     const [filterDay, setFilterDay] = useState('All');
     const [filterMonth, setFilterMonth] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
+    // const [searchTerm, setSearchTerm] = useState('');
 
     /* Mock Data - Admin View (Matching image columns: Name, Attendance, Logged Time, Login At, Logout At, Date, Device, Action) */
     const attendanceData = [

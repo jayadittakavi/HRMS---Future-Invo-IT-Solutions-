@@ -1,0 +1,85 @@
+/* Clean Sidebar Styles - Dark Glass Mode */
+.sidebar-container {
+    background-color: #0f172a;
+    /* Dark Ocean Blue */
+    border-right: none;
+    color: rgba(255, 255, 255, 0.9);
+    height: 100%;
+}
+
+.sidebar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-role-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-nav-label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.sidebar-link {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.7) !important;
+    text-decoration: none;
+    padding: 0.65rem 1rem;
+    display: flex;
+    align-items: center;
+    border-radius: 8px;
+    margin: 0 0.8rem 0.4rem 0.8rem;
+    transition: all 0.2s ease-in-out;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: 1px solid transparent;
+}
+
+.sidebar-link:hover {
+    background: linear-gradient(90deg, rgba(255, 126, 95, 0.15) 0%, rgba(254, 180, 123, 0.05) 100%);
+    color: #ff9f43 !important;
+    transform: translateX(4px);
+    border-color: rgba(255, 159, 67, 0.3);
+}
+
+/* Active state removed as per user request to only highlight on hover */
+/* 
+.sidebar-link.active {
+/* 
+.sidebar-link.active {
+    background: linear-gradient(90deg, rgba(255, 126, 95, 0.2) 0%, rgba(254, 180, 123, 0.1) 100%);
+    color: #ff9f43 !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 159, 67, 0.3);
+}
+
+.sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    height: 100%;
+}
+*/
+
+.sidebar-icon {
+    width: 24px;
+    margin-right: 12px;
+    display: inline-flex;
+    justify-content: center;
+    color: inherit;
+    /* Inherit text color */
+}

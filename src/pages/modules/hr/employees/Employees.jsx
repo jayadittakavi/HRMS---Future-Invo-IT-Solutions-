@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import "../../../../components/layout/DashboardLayout.css";
 
 export const EmployeesContent = () => {
     // Mock Data
@@ -86,7 +86,7 @@ export const EmployeesContent = () => {
                                     <td>{emp.user}</td>
                                     <td>{emp.name}</td>
                                     <td>+91 9876543210</td>
-                                    <td>{['Male', 'Female'][Math.floor(Math.random() * 2)]}</td>
+                                    <td>Female</td>
                                     <td>Mumbai</td>
                                     <td>---</td>
                                     <td>27-09-2025</td>

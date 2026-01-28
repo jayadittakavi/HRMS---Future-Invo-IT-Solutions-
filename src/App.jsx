@@ -5,46 +5,61 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-/* Pages */
-/* Pages */
-import Welcome from "./pages/welcome/Welcome";
-import Home from "./pages/home/Index";
-import Features from "./pages/Features";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Login from "./pages/login/Login";
-import Signup from "./pages/signup/Signup";
-import SignupOtp from "./pages/signup/otp/SignupOtp";
-import Otp from "./pages/otp/Otp";
-import ResetOtp from "./pages/otp/ResetOtp";
-import ForgotPassword from "./pages/forgetpassword/Forgetpassword";
-import ResetPassword from "./pages/resetpassword/ResetPassword";
-import Attendance from "./pages/attendance/Attendance";
-import PlaceholderPage from "./pages/PlaceholderPage";
-import Companies from "./pages/companies/Companies";
-import Branches from "./pages/branches/Branches";
-import Departments from "./pages/departments/Departments";
-import Assets from "./pages/assets/Assets";
-import AssetCategories from "./pages/assets/AssetCategories";
-import Employees from "./pages/employees/Employees";
+/* Public Pages */
+import Welcome from "./pages/public/welcome/Welcome";
+import Home from "./pages/public/home/Index";
+import Features from "./pages/public/Features";
+import About from "./pages/public/About";
+import Contact from "./pages/public/Contact";
 
-import Calendar from "./pages/calendar/Calendar";
-import SetupOrganization from "./pages/setup_organization/SetupOrganization";
+/* Auth Pages */
+import Login from "./pages/auth/login/Login";
+import Signup from "./pages/auth/signup/Signup";
+import SignupOtp from "./pages/auth/signup/otp/SignupOtp";
+import Otp from "./pages/auth/otp/Otp";
+import ResetOtp from "./pages/auth/otp/ResetOtp";
+import ForgotPassword from "./pages/auth/forgetpassword/Forgetpassword";
+import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
 
-/* Dashboard Manager (Redirector) */
-import DashboardManager from "./dashboards/DashboardManager";
+/* Dashboard Layout & Manager */
+import DashboardManager from "./pages/dashboards/DashboardManager";
 
 /* Individual Dashboards */
-import SuperAdminDashboard from './dashboards/SuperAdminDashboard';
-import AdminDashboard from './dashboards/AdminDashboard';
-import ManagerDashboard from './dashboards/ManagerDashboard';
-import HRDashboard from './dashboards/HRDashboard';
-import EmployeeDashboard from './dashboards/EmployeeDashboard';
-import AccountantDashboard from './dashboards/AccountantDashboard';
-import NewUserDashboard from './dashboards/NewUserDashboard';
+import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
+import AdminDashboard from './pages/dashboards/AdminDashboard';
+import ManagerDashboard from './pages/dashboards/ManagerDashboard';
+import HRDashboard from './pages/dashboards/HRDashboard';
+import EmployeeDashboard from './pages/dashboards/EmployeeDashboard';
+import AccountantDashboard from './pages/dashboards/AccountantDashboard';
+import NewUserDashboard from './pages/dashboards/NewUserDashboard';
 
-import Profile from "./pages/profile/Profile";
-import UserManagement from "./pages/user_management/UserManagement";
+/* Module Pages */
+/* Core */
+import Companies from "./pages/modules/core/companies/Companies";
+import Branches from "./pages/modules/core/branches/Branches";
+import Departments from "./pages/modules/core/departments/Departments";
+import SetupOrganization from "./pages/modules/core/setup_organization/SetupOrganization";
+import UserManagement from "./pages/modules/core/user_management/UserManagement";
+
+/* HR */
+import Employees from "./pages/modules/hr/employees/Employees";
+import Attendance from "./pages/modules/hr/attendance/Attendance";
+import LeaveManagement from "./pages/modules/hr/leave_management/LeaveManagement";
+import Profile from "./pages/modules/hr/profile/Profile";
+import MyDocuments from "./pages/modules/hr/documents/MyDocuments";
+import MyPerformance from "./pages/modules/hr/performance/MyPerformance";
+
+/* Finance */
+import Payroll from "./pages/modules/finance/payroll/Payroll";
+import Loans from "./pages/modules/finance/loans/Loans";
+import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
+import Calendar from "./pages/modules/operations/calendar/Calendar";
+import Assets from "./pages/modules/operations/assets/Assets";
+import AssetCategories from "./pages/modules/operations/assets/AssetCategories";
+import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
+
+import ChangePassword from "./pages/settings/ChangePassword";
+import PlaceholderPage from "./pages/public/PlaceholderPage";
 
 export default function App() {
   return (
@@ -60,7 +75,6 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signup-otp" element={<SignupOtp />} />
             <Route path="/otp" element={<Otp />} />
@@ -146,12 +160,20 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/attendance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'accountant']}><Attendance /></ProtectedRoute>} />
+            import DailyTask from "./pages/daily_task/DailyTask";
+            import Loans from "./pages/loans/Loans";
+            import TravelExpenses from "./pages/travel_expenses/TravelExpenses";
 
-            <Route path="/employees" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Employees /></ProtectedRoute>} />
-            <Route path="/leaves" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Leave Management" /></ProtectedRoute>} />
-            <Route path="/payroll" element={<ProtectedRoute requiredRoles={['accountant', 'superadmin']}><PlaceholderPage title="Payroll" /></ProtectedRoute>} />
-            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/departments" element={<ProtectedRoute requiredRoles={['superadmin']}><Departments /></ProtectedRoute>} />
+            // ... (in the routes section)
+
+            <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><DailyTask /></ProtectedRoute>} />
+            <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
+            <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Loans /></ProtectedRoute>} />
+            <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><TravelExpenses /></ProtectedRoute>} />
+            <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
+            <Route path="/leaves" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Leaves" /></ProtectedRoute>} />
+            <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
             <Route path="/asset-categories" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><AssetCategories /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
@@ -169,15 +191,20 @@ export default function App() {
             <Route path="/performance" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Performance" /></ProtectedRoute>} />
             <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
             <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />
-            <Route path="/my-leaves" element={<ProtectedRoute><PlaceholderPage title="My Leaves" /></ProtectedRoute>} />
-            <Route path="/my-attendance" element={<ProtectedRoute><PlaceholderPage title="My Attendance" /></ProtectedRoute>} />
-            <Route path="/my-payslips" element={<ProtectedRoute><PlaceholderPage title="My Payslips" /></ProtectedRoute>} />
+
+            {/* Employee Personal Routes */}
+            <Route path="/my-leaves" element={<ProtectedRoute><LeaveManagement personal={true} /></ProtectedRoute>} />
+            <Route path="/my-attendance" element={<ProtectedRoute><Attendance personal={true} /></ProtectedRoute>} />
+            <Route path="/my-payslips" element={<ProtectedRoute><Payroll personal={true} /></ProtectedRoute>} />
+            <Route path="/my-documents" element={<ProtectedRoute><MyDocuments /></ProtectedRoute>} />
+            <Route path="/my-performance" element={<ProtectedRoute><MyPerformance /></ProtectedRoute>} />
+            <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
             {/* Fallback */}
             {/* Admin Routes */}
             <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
-            <Route path="/attendance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Attendance /></ProtectedRoute>} />
-            <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Payroll Management" /></ProtectedRoute>} />
+            {/* <Route path="/attendance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Attendance /></ProtectedRoute>} /> */}
+            <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
             <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
 
             {/* HR Routes */}
@@ -202,9 +229,8 @@ export default function App() {
             <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
             <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Financial Reports" /></ProtectedRoute>} />
 
-            {/* Employee Routes */}
-            <Route path="/my-documents" element={<ProtectedRoute requiredRoles={['employee']}><PlaceholderPage title="My Documents" /></ProtectedRoute>} />
-            <Route path="/change-password" element={<ProtectedRoute><PlaceholderPage title="Change Password" /></ProtectedRoute>} />
+            {/* Employee Routes (Legacy/Duplicate clean up if needed) */}
+            {/* Note: /my-documents is already defined above */}
 
             {/* New User Routes */}
             <Route path="/welcome" element={<ProtectedRoute requiredRoles={['newuser']}><NewUserDashboard /></ProtectedRoute>} />
