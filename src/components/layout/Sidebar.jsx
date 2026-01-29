@@ -59,7 +59,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
 
         switch (role) {
             case 'admin':
-            case 'superadmin': // Treating superadmin as admin for this list unless specified
                 links = [
                     { name: 'Dashboard', icon: <MdDashboard size={20} />, path: '/dashboard' },
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
@@ -72,7 +71,24 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Leaves', icon: <MdEventBusy size={20} />, path: '/leaves' },
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
                     { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/assets' },
-                    { name: 'Superadmin', icon: <MdAdminPanelSettings size={20} />, path: '/dashboard/super-admin' },
+                ];
+                break;
+
+            case 'superadmin':
+                links = [
+                    { name: 'Dashboard', icon: <MdDashboard size={20} />, path: '/dashboard' },
+                    { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
+                    { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
+                    { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
+                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
+                    { name: 'Assets', icon: <MdLaptopMac size={20} />, path: '/assets' },
+                    { name: 'Asset Categories', icon: <MdLaptopMac size={20} />, path: '/asset-categories' },
+                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+                    { name: 'Pay Grade', icon: <MdAttachMoney size={20} />, path: '/pay-grade' },
+                    { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
+                    { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
+                    { name: 'User Mgmt', icon: <MdPerson size={20} />, path: '/users' },
                 ];
                 break;
 

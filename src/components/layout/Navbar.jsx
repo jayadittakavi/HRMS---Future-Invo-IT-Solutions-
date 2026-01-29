@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import logo from "../../assets/images/fislogo1.png";
-import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
+import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
 
 const Navbar = ({ toggleSidebar, hideLogo }) => {
     const { user, logout } = useAuth();
-    const { toggleSettingsDrawer } = useTheme();
+    const { toggleSettingsDrawer, theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     const handleProfileClick = () => {
@@ -103,6 +103,10 @@ const Navbar = ({ toggleSidebar, hideLogo }) => {
                                     <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                                         <span className="visually-hidden">New alerts</span>
                                     </span>
+                                </button>
+
+                                <button className="btn btn-link text-secondary p-0" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} onClick={toggleTheme}>
+                                    {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
                                 </button>
 
                                 <button className="btn btn-link text-secondary p-0" title="Settings" onClick={toggleSettingsDrawer}>

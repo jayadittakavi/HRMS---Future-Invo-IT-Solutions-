@@ -19,6 +19,7 @@ import { UserManagementContent } from '../../pages/modules/core/user_management/
 import { PayGradeContent } from '../../pages/modules/finance/pay_grade/PayGrade';
 import { useAuth } from '../../context/AuthContext';
 import { FaUsers, FaMoneyBillWave, FaUserClock, FaTasks } from 'react-icons/fa';
+import { ProfileContent } from '../../pages/modules/hr/profile/Profile';
 
 const AdminDashboard = () => {
     const { user } = useAuth();
@@ -200,6 +201,7 @@ const AdminDashboard = () => {
                 {activeView === 'leave-management' && <LeaveManagementContent />}
                 {activeView === 'users' && <UserManagementContent />}
                 {activeView === 'pay-grade' && <PayGradeContent />}
+                {activeView === 'profile' && <ProfileContent />}
             </div>
         </DashboardLayout>
     );

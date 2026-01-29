@@ -2,11 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
+import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
 
-const DashboardHeader = ({ toggleSidebar }) => {
+const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
     const { user } = useAuth();
-    const { toggleSettingsDrawer, skin } = useTheme();
+    const { toggleSettingsDrawer, skin, theme, toggleTheme } = useTheme();
 
     // Map skin to light background tints
     const skinColors = {
@@ -73,17 +73,24 @@ const DashboardHeader = ({ toggleSidebar }) => {
 
 
 
-                    <Link to="/profile" className="btn btn-link text-dark p-0" title="Profile">
-                        <FaUserCircle size={28} />
-                    </Link>
                     <button className="btn btn-link text-secondary p-0 position-relative" title="Notifications">
                         <FaBell size={20} />
                         <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
                             <span className="visually-hidden">New alerts</span>
                         </span>
                     </button>
+                    <button className="btn btn-link text-secondary p-0" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} onClick={toggleTheme}>
+                        {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
+                    </button>
                     <button className="btn btn-link text-secondary p-0" title="Settings" onClick={toggleSettingsDrawer}>
                         <FaCog size={20} />
+                    </button>
+                    <button
+                        className="btn btn-link text-dark p-0 border-0 bg-transparent"
+                        title="Profile"
+                        onClick={() => onNavigate && onNavigate('/profile')}
+                    >
+                        <FaUserCircle size={28} />
                     </button>
                 </div>
             </div>

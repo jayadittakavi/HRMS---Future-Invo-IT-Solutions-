@@ -237,7 +237,7 @@ const EmployeeDashboard = () => {
                     </>
                 )}
 
-                {activeView === 'attendance' && <AttendanceContent personal={true} />}
+                {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
 
                 {activeView === 'profile' && (
                     <div className="p-5 text-center">
@@ -246,7 +246,7 @@ const EmployeeDashboard = () => {
                     </div>
                 )}
                 {activeView === 'my-leaves' && <LeaveManagementContent personal={true} />}
-                {activeView === 'payslips' && <PayrollContent personal={true} />}
+                {activeView === 'my-payslips' && <PayrollContent personal={true} />}
             </div>
         </DashboardLayout>
     );

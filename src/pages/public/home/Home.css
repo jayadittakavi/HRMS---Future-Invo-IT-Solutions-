@@ -1,16 +1,16 @@
 /* GLOBAL */
-body {
-    background: #0f0c29;
+/* GLOBAL */
+.home-container {
+    background: url('../../../assets/images/welcom bg1.jpg') no-repeat center center fixed;
+    background-size: cover;
 }
 
 /* HERO */
-.hero-section {
+.home-container .hero-section {
     min-height: 100vh;
-    background: url('../../assets/images/welcom bg1.jpg');
-    /* background: url('../../assets/images/welcome_page_background.png'); */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    /* background: url('../../../assets/images/welcom bg1.jpg'); */
+    background: transparent;
+    /* Use container background */
     display: flex;
     align-items: center;
     color: white;
@@ -47,11 +47,11 @@ body {
 }
 
 /* SECTIONS */
-section {
+.home-container section {
     padding: 80px 0;
 }
 
-h2 {
+.home-container h2 {
     text-align: center;
     margin-bottom: 40px;
     color: white;

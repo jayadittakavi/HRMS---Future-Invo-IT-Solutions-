@@ -198,6 +198,7 @@ export default function App() {
             <Route path="/my-payslips" element={<ProtectedRoute><Payroll personal={true} /></ProtectedRoute>} />
             <Route path="/my-documents" element={<ProtectedRoute><MyDocuments /></ProtectedRoute>} />
             <Route path="/my-performance" element={<ProtectedRoute><MyPerformance /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
             {/* Fallback */}

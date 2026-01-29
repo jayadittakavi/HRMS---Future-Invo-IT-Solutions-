@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useAuth } from '../../../../context/AuthContext';
 import './Attendance.css';
 import {
     FaCheckCircle,
@@ -11,6 +12,7 @@ import {
 } from 'react-icons/fa';
 
 export const AttendanceContent = ({ personal = false }) => {
+    const { user } = useAuth();
     // Filter States
     const [filterDateFrom, setFilterDateFrom] = useState('2025-10-02');
     const [filterDateTo, setFilterDateTo] = useState('2025-10-02');
@@ -19,7 +21,7 @@ export const AttendanceContent = ({ personal = false }) => {
     // const [searchTerm, setSearchTerm] = useState('');
 
     /* Mock Data - Admin View (Matching image columns: Name, Attendance, Logged Time, Login At, Logout At, Date, Device, Action) */
-    const attendanceData = [
+    const [attendanceData, setAttendanceData] = useState([
         { id: 1, name: 'Meera Joshi', attendance: 'Present', loggedTime: '8 hrs 49 mins', loginAt: '09:45', logoutAt: '19:34', date: '02/10/2025', device: 'Laptop' },
         { id: 2, name: 'Sanjay Gupta', attendance: 'Present', loggedTime: '7 hrs 40 mins', loginAt: '10:29', logoutAt: '19:09', date: '02/10/2025', device: 'Laptop' },
         { id: 3, name: 'Mohan Prasad', attendance: 'Absent', loggedTime: '', loginAt: '', logoutAt: '', date: '02/10/2025', device: 'Android Mobile' },
@@ -30,7 +32,17 @@ export const AttendanceContent = ({ personal = false }) => {
         { id: 8, name: 'Arjun Singh', attendance: 'Present', loggedTime: '9 hrs 29 mins', loginAt: '09:56', logoutAt: '20:25', date: '02/10/2025', device: 'iPhone' },
         { id: 9, name: 'Deepika Sharma', attendance: 'Half Day', loggedTime: '4 hrs 16 mins', loginAt: '11:44', logoutAt: '16:00', date: '02/10/2025', device: 'Tablet' },
         { id: 10, name: 'Manoj Tiwari', attendance: 'Present', loggedTime: '8 hrs 6 mins', loginAt: '09:12', logoutAt: '18:18', date: '02/10/2025', device: 'iPhone' },
-    ];
+    ]);
+
+    const handleDelete = (id) => {
+        if (window.confirm('Are you sure you want to delete this attendance record?')) {
+            setAttendanceData(attendanceData.filter(item => item.id !== id));
+        }
+    };
+
+    const handleEdit = (id) => {
+        alert(`Edit functionality for ID ${id} will be implemented here.`);
+    };
 
     /* Mock Data - Personal View */
     const personalAttendanceData = [
@@ -75,9 +87,12 @@ export const AttendanceContent = ({ personal = false }) => {
                         <div className="row g-3 mb-3 align-items-center">
                             <div className="col-md-3">
                                 <select className="form-select text-secondary">
-                                    <option>Select Department</option>
+                                    <option>Select Role/Department</option>
+                                    {(!user?.role || user?.role === 'superadmin' || user?.role === 'admin') && <option>Admin</option>}
                                     <option>HR</option>
-                                    <option>Engineering</option>
+                                    <option>Manager</option>
+                                    <option>Employee</option>
+                                    {(!user?.role || user?.role === 'superadmin' || user?.role === 'admin') && <option>Accountant</option>}
                                 </select>
                             </div>
                             <div className="col-md-3">
@@ -194,8 +209,8 @@ export const AttendanceContent = ({ personal = false }) => {
                                         <td className="small text-secondary">{row.device}</td>
                                         <td>
                                             <div className="d-flex gap-2">
-                                                <button className="btn btn-sm btn-outline-primary border-0 p-1"><FaEdit size={16} /></button>
-                                                <button className="btn btn-sm btn-outline-danger border-0 p-1"><FaTrash size={16} /></button>
+                                                <button className="btn btn-sm btn-outline-primary border-0 p-1" onClick={() => handleEdit(row.id)}><FaEdit size={16} /></button>
+                                                <button className="btn btn-sm btn-outline-danger border-0 p-1" onClick={() => handleDelete(row.id)}><FaTrash size={16} /></button>
                                             </div>
                                         </td>
                                     </tr>

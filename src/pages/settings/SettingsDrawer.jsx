@@ -91,25 +91,7 @@ const SettingsDrawer = () => {
                                 </div>
                             </div>
 
-                            {/* THEME COLORS */}
-                            <div className="mb-4">
-                                <h6 className="fw-bold small text-uppercase mb-3" style={{ fontSize: '0.7rem' }}>THEME COLORS</h6>
-                                <div className="btn-group btn-group-sm w-100">
-                                    <button
-                                        className={`btn ${theme === 'light' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                        onClick={() => theme !== 'light' && toggleTheme()}
-                                    >
-                                        Light
-                                    </button>
-                                    <button
-                                        className={`btn ${theme === 'dark' ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                        style={theme === 'dark' ? { background: '#333', borderColor: '#333' } : {}}
-                                        onClick={() => theme !== 'dark' && toggleTheme()}
-                                    >
-                                        Dark
-                                    </button>
-                                </div>
-                            </div>
+
 
                             {/* SKINS */}
                             <div className="mb-4">

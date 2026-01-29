@@ -1,15 +1,16 @@
 import DashboardLayout from '../../components/DashboardLayout';
-import { CompaniesContent } from '../pages/companies/Companies';
-import { BranchesContent } from '../pages/branches/Branches';
-import { DepartmentsContent } from '../pages/departments/Departments';
-import { AssetsContent } from '../pages/assets/Assets';
-import { AssetCategoriesContent } from '../pages/assets/AssetCategories';
-import { EmployeesContent } from '../pages/employees/Employees';
-import { PayrollContent } from '../pages/payroll/Payroll';
-import { FinancialYearContent } from '../pages/financial_year/FinancialYear';
-import { LeaveManagementContent } from '../pages/leave_management/LeaveManagement';
-import { UserManagementContent } from '../pages/user_management/UserManagement';
-import { PayGradeContent } from '../pages/pay_grade/PayGrade';
+import { CompaniesContent } from '../../modules/core/companies/Companies';
+import { BranchesContent } from '../../modules/core/branches/Branches';
+import { DepartmentsContent } from '../../modules/core/departments/Departments';
+import { AssetsContent } from '../../modules/operations/assets/Assets';
+import { AssetCategoriesContent } from '../../modules/operations/assets/AssetCategories';
+import { EmployeesContent } from '../../modules/hr/employees/Employees';
+import { PayrollContent } from '../../modules/finance/payroll/Payroll';
+import { FinancialYearContent } from '../../modules/finance/financial_year/FinancialYear';
+import { LeaveManagementContent } from '../../modules/hr/leave_management/LeaveManagement';
+import { AttendanceContent } from '../../modules/hr/attendance/Attendance';
+import { UserManagementContent } from '../../modules/core/user_management/UserManagement';
+import { PayGradeContent } from '../../modules/finance/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, SimpleAreaChart } from '../components/charts/CustomCharts';
 import { useAuth } from '../context/AuthContext';
 import React, { useState } from 'react';
@@ -312,6 +313,7 @@ const SuperAdminDashboard = () => {
                 {activeView === 'employees' && <EmployeesContent />}
                 {activeView === 'payroll' && <PayrollContent />}
                 {activeView === 'financial-year' && <FinancialYearContent />}
+                {activeView === 'attendance' && <AttendanceContent />}
                 {activeView === 'leave-management' && <LeaveManagementContent />}
                 {activeView === 'users' && <UserManagementContent />}
                 {activeView === 'pay-grade' && <PayGradeContent />}

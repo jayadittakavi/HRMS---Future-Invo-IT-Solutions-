@@ -9,11 +9,13 @@ import { EmployeesContent } from '../modules/hr/employees/Employees';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
 import { FinancialYearContent } from '../modules/finance/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
+import { AttendanceContent } from '../modules/hr/attendance/Attendance';
 import { UserManagementContent } from '../modules/core/user_management/UserManagement';
 import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../components/charts/CustomCharts';
 import { useAuth } from '../../context/AuthContext';
 import { FaWallet, FaUsers, FaClipboardList } from 'react-icons/fa';
+import { ProfileContent } from '../modules/hr/profile/Profile';
 
 
 const SuperAdminDashboard = () => {
@@ -315,7 +317,9 @@ const SuperAdminDashboard = () => {
                 {activeView === 'financial-year' && <FinancialYearContent />}
                 {activeView === 'leave-management' && <LeaveManagementContent />}
                 {activeView === 'users' && <UserManagementContent />}
+                {activeView === 'attendance' && <AttendanceContent />}
                 {activeView === 'pay-grade' && <PayGradeContent />}
+                {activeView === 'profile' && <ProfileContent />}
             </div>
         </DashboardLayout>
     );
