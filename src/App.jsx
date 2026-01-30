@@ -55,7 +55,7 @@ import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
 import Assets from "./pages/modules/operations/assets/Assets";
-import AssetCategories from "./pages/modules/operations/assets/AssetCategories";
+
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
 import ChangePassword from "./pages/settings/ChangePassword";
@@ -175,7 +175,7 @@ export default function App() {
             <Route path="/leaves" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Leaves" /></ProtectedRoute>} />
             <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
-            <Route path="/asset-categories" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><AssetCategories /></ProtectedRoute>} />
+            <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
 
             {/* Additional Dashboard Routes */}

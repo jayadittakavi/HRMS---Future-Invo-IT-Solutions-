@@ -17,6 +17,8 @@ export const EmployeesContent = () => {
     const [showDelete, setShowDelete] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [showRoleModal, setShowRoleModal] = useState(false);
+    const [creationRole, setCreationRole] = useState('Employee');
 
     // Handlers
     const handleEdit = (emp) => {
@@ -27,6 +29,12 @@ export const EmployeesContent = () => {
     const handleDelete = (emp) => {
         setSelectedEmployee(emp);
         setShowDelete(true);
+    };
+
+    const handleRoleSelect = (role) => {
+        setCreationRole(role);
+        setShowRoleModal(false);
+        setShowAdd(true);
     };
 
     return (
@@ -58,8 +66,8 @@ export const EmployeesContent = () => {
                         <button className="btn btn-primary btn-sm d-flex align-items-center gap-2">
                             <FaEdit /> CREATE USERNAME
                         </button>
-                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={() => setShowAdd(true)}>
-                            ADD EMPLOYEE
+                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={() => setShowRoleModal(true)}>
+                            ADD
                         </button>
                     </div>
                 </div>
@@ -106,11 +114,12 @@ export const EmployeesContent = () => {
             {/* Add Employee Multi-Step Modal */}
             {showAdd && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-xl">
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
                         <div className="modal-content">
                             <div className="modal-header border-0 pb-0">
                                 {/* Stepper Header */}
                                 <div className="w-100">
+                                    <h4 className="fw-bold text-center mb-4">Add {creationRole}</h4>
                                     <div className="d-flex justify-content-between align-items-center mb-4 px-4 position-relative">
                                         {/* Progress Line */}
                                         <div className="position-absolute top-50 start-0 w-100 translate-middle-y" style={{ height: '2px', backgroundColor: '#e9ecef', zIndex: 0 }}></div>
@@ -142,7 +151,7 @@ export const EmployeesContent = () => {
                                 <button className="btn-close position-absolute top-0 end-0 m-3" onClick={() => setShowAdd(false)}></button>
                             </div>
 
-                            <div className="modal-body px-5 py-4">
+                            <div className="modal-body px-4 py-3">
                                 {currentStep === 1 && (
                                     <form>
                                         <div className="row g-4">
@@ -522,6 +531,28 @@ export const EmployeesContent = () => {
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
                                 <button className="btn btn-danger btn-sm">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Role Selection Modal */}
+            {showRoleModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title fw-bold">Select Role to Create</h5>
+                                <button className="btn-close" onClick={() => setShowRoleModal(false)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <div className="d-grid gap-3">
+                                    <button className="btn btn-outline-primary py-3 fw-bold" onClick={() => handleRoleSelect('Employee')}>Create Employee</button>
+                                    <button className="btn btn-outline-info py-3 fw-bold" onClick={() => handleRoleSelect('HR')}>Create HR</button>
+                                    <button className="btn btn-outline-success py-3 fw-bold" onClick={() => handleRoleSelect('Manager')}>Create Manager</button>
+                                    <button className="btn btn-outline-dark py-3 fw-bold" onClick={() => handleRoleSelect('Admin')}>Create Admin</button>
+                                </div>
                             </div>
                         </div>
                     </div>

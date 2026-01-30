@@ -82,7 +82,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Assets', icon: <MdLaptopMac size={20} />, path: '/assets' },
-                    { name: 'Asset Categories', icon: <MdLaptopMac size={20} />, path: '/asset-categories' },
+
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
                     { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'Pay Grade', icon: <MdAttachMoney size={20} />, path: '/pay-grade' },

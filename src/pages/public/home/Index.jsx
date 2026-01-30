@@ -3,8 +3,7 @@ import "./Home.css";
 import Navbar from "../../../components/layout/Navbar";
 import { Link } from "react-router-dom";
 import Footer from "../../../components/layout/Footer";
-import sideImage1 from "../../../assets/images/hrm image.jpg";
-import sideImage2 from "../../../assets/images/hrms_what.png";
+
 
 const Home = () => {
   return (
@@ -57,18 +56,17 @@ const Home = () => {
         {/* WHAT IS HRMS */}
         <section className="what-is-hrms">
           <div className="container">
-            <div className="row align-items-center">
-              <div className="col-lg-6">
-                <img src={sideImage1} alt="What is HRMS" className="img-fluid rounded-4 shadow-lg" style={{ width: '50%', display: 'block', margin: '0 auto' }} />
-              </div>
-              <div className="col-lg-6">
-                <h2>What is HRMS?</h2>
-                <p className="lead text-dark">
-                  Human Resource Management System (HRMS) is a suite of software applications used to manage human resources and related processes throughout the employee lifecycle.
-                </p>
-                <p className="text-dark opacity-75">
-                  An HRMS enables companies to focus on their people, not just paperwork. It bridges the gap between human resource management and information technology, automating manual tasks and organizing employee information in central repository.
-                </p>
+            <div className="row justify-content-center">
+              <div className="col-lg-10">
+                <div className="glass-section-card text-center">
+                  <h2>What is HRMS?</h2>
+                  <p className="lead text-dark">
+                    Human Resource Management System (HRMS) is a suite of software applications used to manage human resources and related processes throughout the employee lifecycle.
+                  </p>
+                  <p className="text-dark opacity-75">
+                    An HRMS enables companies to focus on their people, not just paperwork. It bridges the gap between human resource management and information technology, automating manual tasks and organizing employee information in central repository.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -77,29 +75,28 @@ const Home = () => {
         {/* WHY FUTURE INVO HRMS */}
         <section className="future-invo-value">
           <div className="container">
-            <div className="row align-items-center flex-row-reverse">
-              <div className="col-lg-6">
-                <img src={sideImage2} alt="Future Invo Value" className="img-fluid rounded-4 shadow-lg" style={{ width: '50%', display: 'block', margin: '0 auto' }} />
-              </div>
-              <div className="col-lg-6">
-                <h2>Why Future Invo HRMS?</h2>
-                <p className="lead text-dark">
-                  We deliver more than just software. We provide a complete ecosystem for organizational growth.
-                </p>
-                <ul className="value-list">
-                  <li>
-                    <strong>🚀 Scalability:</strong> Grows with your business, from 10 to 10,000 employees.
-                  </li>
-                  <li>
-                    <strong>🔒 Enterprise-Grade Security:</strong> Your data is protected with state-of-the-art encryption.
-                  </li>
-                  <li>
-                    <strong>🎨 User-Centric Design:</strong> An intuitive interface that requires zero training.
-                  </li>
-                  <li>
-                    <strong>📊 Actionable Insights:</strong> Real-time analytics to make data-driven decisions.
-                  </li>
-                </ul>
+            <div className="row justify-content-center">
+              <div className="col-lg-10">
+                <div className="glass-section-card">
+                  <h2 className="text-center">Why Future Invo HRMS?</h2>
+                  <p className="lead text-dark text-center">
+                    We deliver more than just software. We provide a complete ecosystem for organizational growth.
+                  </p>
+                  <ul className="value-list">
+                    <li>
+                      <strong>🚀 Scalability:</strong> Grows with your business, from 10 to 10,000 employees.
+                    </li>
+                    <li>
+                      <strong>🔒 Enterprise-Grade Security:</strong> Your data is protected with state-of-the-art encryption.
+                    </li>
+                    <li>
+                      <strong>🎨 User-Centric Design:</strong> An intuitive interface that requires zero training.
+                    </li>
+                    <li>
+                      <strong>📊 Actionable Insights:</strong> Real-time analytics to make data-driven decisions.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
