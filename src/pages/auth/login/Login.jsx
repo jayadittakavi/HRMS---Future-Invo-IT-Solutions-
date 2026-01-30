@@ -1,10 +1,10 @@
+// src/pages/auth/Login.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import Navbar from '../../../components/layout/Navbar';
 import sideImage from '../../../assets/images/loginimage.png';
-import { loginService } from './service/service';
 import './login.css';
 
 const Login = () => {
@@ -12,54 +12,70 @@ const Login = () => {
   const [password, setPassword] = useState('password');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const { loginUser } = useAuth();
   const navigate = useNavigate();
+  const { login } = useAuth(); // Using context login
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setError('');
 
-      const response = await loginService.login(email, password);
+      const response = await fetch('http://192.168.1.66:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
       const data = await response.json();
+      console.log('LOGIN RESPONSE 👉', data);
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+      if (!response.ok) throw new Error(data.message || 'Login failed');
+
+      if (!data.token) throw new Error('Token missing in response');
+
+      // Safe user extraction
+      const safeUser = data.user || {
+        email,
+        role: data.role || 'employee',
+        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1) // Fallback name: Title Case
+      };
+
+      // Normalize role: "SUPER_ADMIN" -> "superadmin"
+      let role = safeUser.role.toLowerCase().replace('_', '');
+
+      // Update safeUser with normalized role for consistency in Context
+      safeUser.role = role;
+
+      // Save in context + localStorage
+      login(safeUser, data.token);
+
+      switch (role) {
+        case 'superadmin':
+          navigate('/dashboard/super-admin'); // Redirect to dashboard to show all components
+          break;
+        case 'admin':
+          navigate('/dashboard/admin');
+
+          break;
+        case 'manager':
+          navigate('/dashboard/manager');
+          break;
+        case 'hr':
+          navigate('/dashboard/hr');
+          break;
+        case 'accountant':
+          navigate('/dashboard/accountant');
+          break;
+        case 'newuser':
+          navigate('/dashboard/new-user');
+          break;
+        case 'employee':
+        default:
+          navigate('/dashboard/employee');
       }
 
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Redirect based on role
-        const role = data.user.role;
-        switch (role) {
-          case 'superadmin':
-            navigate('/dashboard/super-admin');
-            break;
-          case 'admin':
-            navigate('/dashboard/admin');
-            break;
-          case 'manager':
-            navigate('/dashboard/manager');
-            break;
-          case 'hr':
-            navigate('/dashboard/hr');
-            break;
-          case 'accountant':
-            navigate('/dashboard/accountant');
-            break;
-          case 'newuser':
-            navigate('/dashboard/new-user');
-            break;
-          case 'employee':
-          default:
-            navigate('/dashboard/employee');
-        }
-        // Force reload to update context if necessary
-        window.location.reload();
-      }
     } catch (err) {
+      console.error('Login Error:', err);
       setError('Failed to log in: ' + err.message);
     }
   };
@@ -73,14 +89,22 @@ const Login = () => {
             {/* Form Side */}
             <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
               <div className="mb-4">
-                <h3 className="login-title">Login to HRMS your work starts here!</h3>
+                <h3 className="login-title">
+                  Login to HRMS your work starts here!
+                </h3>
               </div>
 
-              {error && <div className="alert alert-danger" role="alert">{error}</div>}
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label small text-muted">Email Address</label>
+                  <label className="form-label small text-muted">
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     className="form-control"
@@ -95,7 +119,7 @@ const Login = () => {
                   <label className="form-label small text-muted">Password</label>
                   <div className="input-group">
                     <input
-                      type={showPassword ? "text" : "password"}
+                      type={showPassword ? 'text' : 'password'}
                       className="form-control"
                       placeholder="Enter your password"
                       required
@@ -117,7 +141,12 @@ const Login = () => {
                 </button>
 
                 <div className="d-flex justify-content-between align-items-center mt-3">
-                  <Link to="/forgot-password" className="forgot-password-link">Forgot password?</Link>
+                  <Link
+                    to="/forgot-password"
+                    className="forgot-password-link"
+                  >
+                    Forgot password?
+                  </Link>
                 </div>
               </form>
             </div>

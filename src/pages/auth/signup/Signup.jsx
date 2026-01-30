@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../../../components/layout/Navbar';
@@ -41,16 +42,26 @@ const Signup = () => {
         name: `${formData.firstName} ${formData.lastName} `
       };
 
-      // Simulate API call
-      // const response = await signupService.signupSuperAdmin(userData);
-      // const data = await response.json();
+      const response = await fetch("http://192.168.1.66:5000/api/auth/super-admin/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
 
       // For this demo environment, save to localStorage so Login service can find it
       localStorage.setItem('mock_registered_user', JSON.stringify(userData));
 
       // Success
-      alert('Account created successfully! Please login with your credentials.');
-      navigate('/login');
+      // Success
+      alert('Account created successfully! Please verify your email.');
+      navigate('/signup-otp', { state: { email: formData.email } });
 
     } catch (err) {
       console.error('Signup Error:', err);

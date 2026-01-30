@@ -68,7 +68,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
                     { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
-                    { name: 'Leaves', icon: <MdEventBusy size={20} />, path: '/leaves' },
+
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
                     { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/assets' },
                 ];

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
+import { useAuth } from '../../../../context/AuthContext';
 
 export const LeaveManagementContent = ({ personal = false }) => {
     // Mock Data - Admin
+    const { user } = useAuth();
     const [adminLeaveRequests] = useState([
         { id: 1, employee: 'John Doe', type: 'Sick Leave', from: '2024-05-20', to: '2024-05-21', days: 2, status: 'Pending' },
         { id: 2, employee: 'Sarah Smith', type: 'Annual Leave', from: '2024-06-10', to: '2024-06-15', days: 5, status: 'Approved' },
@@ -49,9 +51,11 @@ export const LeaveManagementContent = ({ personal = false }) => {
                             Leave Policies
                         </button>
                     )}
-                    <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => setShowApply(true)}>
-                        + Apply Leave
-                    </button>
+                    {(!personal && user?.role !== 'superadmin') && (
+                        <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => setShowApply(true)}>
+                            + Apply Leave
+                        </button>
+                    )}
                 </div>
             </div>
 

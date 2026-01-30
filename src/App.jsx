@@ -172,7 +172,7 @@ export default function App() {
             <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Loans /></ProtectedRoute>} />
             <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><TravelExpenses /></ProtectedRoute>} />
             <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
-            <Route path="/leaves" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Leaves" /></ProtectedRoute>} />
+
             <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
             <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />

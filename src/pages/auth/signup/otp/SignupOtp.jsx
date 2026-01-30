@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { signupService } from '../signupService';
 
 import sideImage from '../../../../assets/images/loginimage.png';
 import './SignupOtp.css';
@@ -72,7 +71,13 @@ const SignupOtp = () => {
         try {
             setError('');
 
-            const response = await signupService.verifySignupOtp({ email, otp: otpValue });
+            const response = await fetch("http://192.168.1.66:5000/api/auth/verify-signup-otp", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, otp: otpValue }),
+            });
             const data = await response.json();
 
             if (!response.ok) {

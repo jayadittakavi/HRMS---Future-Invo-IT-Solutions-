@@ -1,53 +1,38 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// src/context/AuthContext.jsx
+import React, { createContext, useContext, useState } from 'react';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
-
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        // Check local storage on initial load
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
+    // Safe user state initialization
+    const [user, setUser] = useState(() => {
+        try {
+            const storedUser = localStorage.getItem('user');
+            return storedUser ? JSON.parse(storedUser) : null;
+        } catch (err) {
+            console.error('Invalid user data in localStorage:', err);
+            localStorage.removeItem('user');
+            return null;
         }
-        setLoading(false);
-    }, []);
+    });
 
-    const login = (email, password) => {
-        // Determine role based on email pattern
-        let role = 'employee'; // Default
-        let status = 'active';
+    const [token, setToken] = useState(() => localStorage.getItem('authToken') || null);
+    const [loading, setLoading] = useState(false); // Add loading state if needed by ProtectedRoute
 
-        const normalizedEmail = email.toLowerCase();
-
-        if (normalizedEmail.includes('superadmin')) {
-            role = 'superadmin';
-        } else if (normalizedEmail.includes('admin')) {
-            role = 'admin';
-        } else if (normalizedEmail.includes('manager')) {
-            role = 'manager';
-        } else if (normalizedEmail.includes('hr')) {
-            role = 'hr';
-        } else if (normalizedEmail.includes('accountant')) {
-            role = 'accountant';
-        } else if (normalizedEmail.includes('newuser')) {
-            role = 'newuser';
-            status = 'pending';
-        }
-
-        const userData = { email, role, status };
+    // Login function to update context + localStorage
+    const login = (userData, authToken) => {
         setUser(userData);
+        setToken(authToken);
         localStorage.setItem('user', JSON.stringify(userData));
-        return userData;
+        localStorage.setItem('authToken', authToken);
     };
 
+    // Logout function
     const logout = () => {
         setUser(null);
+        setToken(null);
         localStorage.removeItem('user');
+        localStorage.removeItem('authToken');
     };
 
     // Check if user has permission to view a specific dashboard
@@ -57,42 +42,11 @@ export const AuthProvider = ({ children }) => {
         return requiredRoles.includes(user.role);
     };
 
-    const changeRole = (newRole) => {
-        if (!user) return;
-        const updatedUser = { ...user, role: newRole };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-    };
-
-    const updateProfile = (updates) => {
-        if (!user) return;
-        const updatedUser = { ...user, ...updates };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-
-        // Also update the registered user reference if it exists, for consistency
-        const storedRegUser = localStorage.getItem('mock_registered_user');
-        if (storedRegUser) {
-            const regUser = JSON.parse(storedRegUser);
-            if (regUser.email === user.email) {
-                localStorage.setItem('mock_registered_user', JSON.stringify({ ...regUser, ...updates }));
-            }
-        }
-    };
-
-    const value = {
-        user,
-        login,
-        logout,
-        changeRole,
-        updateProfile,
-        canAccess,
-        loading
-    };
-
     return (
-        <AuthContext.Provider value={value}>
-            {!loading && children}
+        <AuthContext.Provider value={{ user, token, login, logout, canAccess, loading }}>
+            {children}
         </AuthContext.Provider>
     );
 };
+
+export const useAuth = () => useContext(AuthContext);
