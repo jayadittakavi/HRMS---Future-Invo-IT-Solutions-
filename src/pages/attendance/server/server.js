@@ -8,7 +8,7 @@ const authHeader = () => {
     return {
         headers: {
             "Content-Type": "application/json",
-            Authorization: token ? `Bearer ${token}` : "",
+            Authorization: token ? `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJlbWFpbCI6ImRpdHRha2F2aWpheWFAZ21haWwuY29tIiwicm9sZSI6IlNVUEVSX0FETUlOIiwiZXhwIjoxNzY5OTk4NjcxfQ.vbrS7a5AkPsMOZu_g4eF-ToRjuur9LH1ft7J-Rok_FM` : "",
         },
     };
 };

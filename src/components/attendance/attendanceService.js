@@ -7,7 +7,7 @@ const API_BASE = "http://192.168.1.66:5000/api";
 const authHeader = () => ({
     headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${localStorage.getItem("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozLCJlbWFpbCI6ImRpdHRha2F2aWpheWFAZ21haWwuY29tIiwicm9sZSI6IlNVUEVSX0FETUlOIiwiZXhwIjoxNzY5OTk4NjcxfQ.vbrS7a5AkPsMOZu_g4eF-ToRjuur9LH1ft7J-Rok_FM")}`,
     },
 });
 
