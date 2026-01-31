@@ -81,13 +81,13 @@ const Login = () => {
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column min-vh-100 overflow-hidden">
       <Navbar />
       <div className="container-fluid login-container flex-grow-1">
         <div className="card login-card">
           <div className="row g-0 h-100">
             {/* Form Side */}
-            <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+            <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-card">
               <div className="mb-4">
                 <h3 className="login-title">
                   Login to HRMS your work starts here!
@@ -102,7 +102,7 @@ const Login = () => {
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label className="form-label small text-muted">
+                  <label className="form-label small text-secondary">
                     Email Address
                   </label>
                   <input
@@ -116,7 +116,7 @@ const Login = () => {
                 </div>
 
                 <div className="mb-4">
-                  <label className="form-label small text-muted">Password</label>
+                  <label className="form-label small text-secondary">Password</label>
                   <div className="input-group">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -152,7 +152,7 @@ const Login = () => {
             </div>
 
             {/* Image Side */}
-            <div className="col-lg-6 d-none d-lg-block p-0 position-relative bg-light">
+            <div className="col-lg-6 d-none d-lg-block p-0 position-relative">
               <img
                 src={sideImage}
                 alt="HRMS Dashboard"

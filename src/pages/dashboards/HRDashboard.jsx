@@ -3,7 +3,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from "../../context/AuthContext";
 import "../../components/layout/DashboardLayout.css";
 import { EmployeesContent } from "../modules/hr/employees/Employees";
-import { AttendanceContent } from '../modules/hr/attendance/Attendance';
+import { AttendanceContent } from '../attendance/Attendance';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../components/charts/CustomCharts';
 import { FaUsers, FaUserPlus, FaChalkboardTeacher } from 'react-icons/fa';
 

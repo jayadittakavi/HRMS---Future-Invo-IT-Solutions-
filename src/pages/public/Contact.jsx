@@ -5,15 +5,15 @@ import Footer from "../../components/layout/Footer";
 
 const Contact = () => {
     return (
-        <div className="bg-white min-vh-100 d-flex flex-column">
+        <div className="min-vh-100 d-flex flex-column">
             <Navbar />
 
             <main className="flex-grow-1">
                 <div className="container py-5 my-5">
                     <div className="row justify-content-center">
                         <div className="col-lg-8 text-center mb-5">
-                            <h1 className="display-4 fw-bold text-dark mb-3">Get in Touch</h1>
-                            <p className="lead text-muted">Have questions about our HRMS? We'd love to hear from you.</p>
+                            <h1 className="display-4 fw-bold text-main mb-3">Get in Touch</h1>
+                            <p className="lead text-secondary">Have questions about our HRMS? We'd love to hear from you.</p>
                         </div>
                     </div>
 
@@ -25,19 +25,19 @@ const Contact = () => {
                                         <div className="row g-3">
                                             <div className="col-md-6">
                                                 <label className="form-label fw-semibold">First Name</label>
-                                                <input type="text" className="form-control bg-light" placeholder="John" />
+                                                <input type="text" className="form-control bg-card" placeholder="John" />
                                             </div>
                                             <div className="col-md-6">
                                                 <label className="form-label fw-semibold">Last Name</label>
-                                                <input type="text" className="form-control bg-light" placeholder="Doe" />
+                                                <input type="text" className="form-control bg-card" placeholder="Doe" />
                                             </div>
                                             <div className="col-12">
                                                 <label className="form-label fw-semibold">Email Address</label>
-                                                <input type="email" className="form-control bg-light" placeholder="john@example.com" />
+                                                <input type="email" className="form-control bg-card" placeholder="john@example.com" />
                                             </div>
                                             <div className="col-12">
                                                 <label className="form-label fw-semibold">Message</label>
-                                                <textarea className="form-control bg-light" rows="5" placeholder="How can we help you?"></textarea>
+                                                <textarea className="form-control bg-card" rows="5" placeholder="How can we help you?"></textarea>
                                             </div>
                                             <div className="col-12 mt-4">
                                                 <button type="button" className="btn btn-primary btn-lg w-100 fw-bold rounded-pill">Send Message</button>
@@ -51,20 +51,20 @@ const Contact = () => {
                         <div className="col-lg-4 mt-5 mt-lg-0 ps-lg-5">
                             <div className="mb-4">
                                 <h4 className="fw-bold mb-3">Contact Information</h4>
-                                <p className="text-muted mb-1">📍 123 Innovation Drive, Tech City, TC 90210</p>
-                                <p className="text-muted mb-1">📧 support@futureinvo.com</p>
-                                <p className="text-muted">📞 +1 (555) 123-4567</p>
+                                <p className="text-secondary mb-1">📍 123 Innovation Drive, Tech City, TC 90210</p>
+                                <p className="text-secondary mb-1">📧 support@futureinvo.com</p>
+                                <p className="text-secondary">📞 +1 (555) 123-4567</p>
                             </div>
 
                             <hr className="my-4" />
 
                             <div>
                                 <h4 className="fw-bold mb-3">Office Hours</h4>
-                                <p className="d-flex justify-content-between text-muted mb-1">
+                                <p className="d-flex justify-content-between text-secondary mb-1">
                                     <span>Monday - Friday:</span>
                                     <span>9:00 AM - 6:00 PM</span>
                                 </p>
-                                <p className="d-flex justify-content-between text-muted">
+                                <p className="d-flex justify-content-between text-secondary">
                                     <span>Saturday - Sunday:</span>
                                     <span>Closed</span>
                                 </p>

@@ -3,7 +3,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import '../../components/layout/DashboardLayout.css';
 import { SimpleDonutChart, SimpleBarChart } from '../../components/charts/CustomCharts';
-import { AttendanceContent } from '../modules/hr/attendance/Attendance';
+import { AttendanceContent } from '../attendance/Attendance';
 import { FaUsersCog, FaClipboardList, FaStar } from 'react-icons/fa';
 
 const ManagerDashboard = () => {

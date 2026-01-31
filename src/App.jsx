@@ -24,6 +24,10 @@ import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
 /* Dashboard Layout & Manager */
 import DashboardManager from "./pages/dashboards/DashboardManager";
 
+/* Audit Logs */
+import SuperAdminAuditLogs from "./pages/superadmin/AuditLogs";
+import AdminAuditLogs from "./pages/admin/AuditLogs";
+
 /* Individual Dashboards */
 import SuperAdminDashboard from './pages/dashboards/SuperAdminDashboard';
 import AdminDashboard from './pages/dashboards/AdminDashboard';
@@ -43,7 +47,7 @@ import UserManagement from "./pages/modules/core/user_management/UserManagement"
 
 /* HR */
 import Employees from "./pages/modules/hr/employees/Employees";
-import Attendance from "./pages/modules/hr/attendance/Attendance";
+import Attendance from "./pages/attendance/Attendance";
 import LeaveManagement from "./pages/modules/hr/leave_management/LeaveManagement";
 import Profile from "./pages/modules/hr/profile/Profile";
 import MyDocuments from "./pages/modules/hr/documents/MyDocuments";
@@ -54,7 +58,6 @@ import Payroll from "./pages/modules/finance/payroll/Payroll";
 import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
-import Assets from "./pages/modules/operations/assets/Assets";
 
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
@@ -155,17 +158,11 @@ export default function App() {
             <Route
               path="/attendance"
               element={
-                <ProtectedRoute requiredRoles={['hr']}>
+                <ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}>
                   <Attendance />
                 </ProtectedRoute>
               }
             />
-            <Route path="/attendance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'accountant']}><Attendance /></ProtectedRoute>} />
-            import DailyTask from "./pages/daily_task/DailyTask";
-            import Loans from "./pages/loans/Loans";
-            import TravelExpenses from "./pages/travel_expenses/TravelExpenses";
-
-            // ... (in the routes section)
 
             <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><DailyTask /></ProtectedRoute>} />
             <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
@@ -174,9 +171,11 @@ export default function App() {
             <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
 
             <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
-            <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
-            <Route path="/assets" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Assets /></ProtectedRoute>} />
             <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
+
+            {/* Audit Logs */}
+            <Route path="/super-admin/audit-logs" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminAuditLogs /></ProtectedRoute>} />
+            <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['admin', 'superadmin']}><AdminAuditLogs /></ProtectedRoute>} />
 
             {/* Additional Dashboard Routes */}
 

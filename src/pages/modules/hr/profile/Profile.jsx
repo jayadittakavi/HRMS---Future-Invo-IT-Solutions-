@@ -49,14 +49,14 @@ const ProfileContent = () => {
                                 }}
                             />
                         </div>
-                        <h4 className="fw-bold text-dark mb-1">{user?.name || 'User Name'}</h4>
-                        <p className="text-muted mb-3">{user?.role || 'Role'}</p>
+                        <h4 className="fw-bold text-main mb-1">{user?.name || 'User Name'}</h4>
+                        <p className="text-secondary mb-3">{user?.role || 'Role'}</p>
                         <div className="d-flex justify-content-center gap-2 mb-4">
                             <button className="btn btn-primary rounded-pill px-3 btn-sm">Edit Profile</button>
                             <button className="btn btn-outline-danger rounded-pill px-3 btn-sm" onClick={handleLogout}>Logout</button>
                         </div>
 
-                        <hr className="text-muted opacity-25" />
+                        <hr className="text-secondary opacity-25" />
 
                         <div className="text-start mt-4">
                             <div className="d-flex align-items-center mb-3 text-secondary">
@@ -85,37 +85,37 @@ const ProfileContent = () => {
                             <form>
                                 <div className="row g-3">
                                     <div className="col-md-6">
-                                        <label className="form-label small text-muted">Full Name</label>
+                                        <label className="form-label small text-secondary">Full Name</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-light border-0"><FaUser className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-light border-0" value={user?.name || ''} readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaUser className="text-secondary" /></span>
+                                            <input type="text" className="form-control bg-card border-0" value={user?.name || ''} readOnly />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-muted">Department</label>
+                                        <label className="form-label small text-secondary">Department</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-light border-0"><FaBuilding className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-light border-0" value="Engineering" readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaBuilding className="text-secondary" /></span>
+                                            <input type="text" className="form-control bg-card border-0" value="Engineering" readOnly />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-muted">Job Title</label>
+                                        <label className="form-label small text-secondary">Job Title</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-light border-0"><FaBriefcase className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-light border-0" value="Senior Developer" readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaBriefcase className="text-secondary" /></span>
+                                            <input type="text" className="form-control bg-card border-0" value="Senior Developer" readOnly />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-muted">Joining Date</label>
+                                        <label className="form-label small text-secondary">Joining Date</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-light border-0"><FaCalendarAlt className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-light border-0" value="Jan 15, 2023" readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaCalendarAlt className="text-secondary" /></span>
+                                            <input type="text" className="form-control bg-card border-0" value="Jan 15, 2023" readOnly />
                                         </div>
                                     </div>
                                 </div>
 
                                 <h6 className="fw-bold mt-5 mb-3">Bio</h6>
-                                <textarea className="form-control bg-light border-0 rounded-3 p-3" rows="4" readOnly defaultValue="Experienced software engineer with a focus on frontend technologies. Passionate about building clean, efficient, and user-friendly applications."></textarea>
+                                <textarea className="form-control bg-card border-0 rounded-3 p-3" rows="4" readOnly defaultValue="Experienced software engineer with a focus on frontend technologies. Passionate about building clean, efficient, and user-friendly applications."></textarea>
                             </form>
                         </div>
                     </div>

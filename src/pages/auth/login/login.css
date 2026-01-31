@@ -1,8 +1,10 @@
 /* Login Page CSS */
 
 .login-container {
-  background-color: #eef2ff;
-  min-height: 100vh;
+  background-color: var(--bg-body);
+  /* Use theme var */
+  /* min-height: 100vh; REMOVED to prevent overflow with Navbar */
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

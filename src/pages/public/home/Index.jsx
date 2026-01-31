@@ -60,10 +60,10 @@ const Home = () => {
               <div className="col-lg-10">
                 <div className="glass-section-card text-center">
                   <h2>What is HRMS?</h2>
-                  <p className="lead text-dark">
+                  <p className="lead text-main">
                     Human Resource Management System (HRMS) is a suite of software applications used to manage human resources and related processes throughout the employee lifecycle.
                   </p>
-                  <p className="text-dark opacity-75">
+                  <p className="text-secondary opacity-75">
                     An HRMS enables companies to focus on their people, not just paperwork. It bridges the gap between human resource management and information technology, automating manual tasks and organizing employee information in central repository.
                   </p>
                 </div>
@@ -79,7 +79,7 @@ const Home = () => {
               <div className="col-lg-10">
                 <div className="glass-section-card">
                   <h2 className="text-center">Why Future Invo HRMS?</h2>
-                  <p className="lead text-dark text-center">
+                  <p className="lead text-main text-center">
                     We deliver more than just software. We provide a complete ecosystem for organizational growth.
                   </p>
                   <ul className="value-list">

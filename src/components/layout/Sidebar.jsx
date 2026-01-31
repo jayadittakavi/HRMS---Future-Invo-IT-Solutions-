@@ -36,7 +36,8 @@ import {
     MdEventNote, // Manage Leave
     MdLaptopMac, // Asset
     MdAdminPanelSettings, // Superadmin
-    MdChecklist as MdTasks // Task
+    MdChecklist as MdTasks, // Task
+    MdSecurity, // Audit Logs
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
@@ -70,7 +71,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
 
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
-                    { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/assets' },
+                    { name: 'Audit Logs', icon: <MdBarChart size={20} />, path: '/admin/audit-logs' },
                 ];
                 break;
 
@@ -81,14 +82,13 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Assets', icon: <MdLaptopMac size={20} />, path: '/assets' },
-
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
                     { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'Pay Grade', icon: <MdAttachMoney size={20} />, path: '/pay-grade' },
                     { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
                     { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                     { name: 'User Mgmt', icon: <MdPerson size={20} />, path: '/users' },
+                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/super-admin/audit-logs' },
                 ];
                 break;
 
@@ -190,13 +190,13 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     <img src={logo} alt="HRMS Logo" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '50%' }} />
                 </div>
                 <div>
-                    <h5 className="mb-0 fw-bold text-white lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
+                    <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
                 </div>
             </div>
 
             {/* Role Info */}
-            <div className="sidebar-role-label text-white">
-                Role : <span className="text-white fw-bold">{displayRole}</span>
+            <div className="sidebar-role-label">
+                Role : <span className="fw-bold text-main">{displayRole}</span>
             </div>
 
             {/* Links */}

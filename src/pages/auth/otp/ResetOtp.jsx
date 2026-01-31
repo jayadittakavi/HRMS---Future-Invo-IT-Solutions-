@@ -105,13 +105,13 @@ const ResetOtp = () => {
     };
 
     return (
-        <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-4" style={{ backgroundColor: '#eef2ff' }}>
+        <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center p-4 bg-body">
             <div className="card border-0 shadow-lg overflow-hidden" style={{ maxWidth: '900px', width: '100%' }}>
                 <div className="row g-0 h-100">
                     {/* Form Side */}
-                    <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+                    <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-card">
                         <div className="mb-4 text-center">
-                            <h3 className="fw-bold mb-2" style={{ color: '#1e40af' }}>Verify Reset OTP</h3>
+                            <h3 className="fw-bold mb-2 text-primary">Verify Reset OTP</h3>
                             <p className="text-secondary small">Enter the 6-digit code sent to <strong>{email}</strong></p>
                         </div>
 
@@ -135,13 +135,13 @@ const ResetOtp = () => {
                                             height: '55px',
                                             border: '1px solid #cbd5e1',
                                             borderRadius: '0.5rem',
-                                            color: '#1e40af'
+                                            color: 'var(--primary-color)'
                                         }}
                                     />
                                 ))}
                             </div>
 
-                            <button type="submit" className="btn btn-primary w-100 fw-bold mb-3" style={{ backgroundColor: '#1e40af', borderColor: '#1e40af', padding: '10px' }}>
+                            <button type="submit" className="btn btn-primary w-100 fw-bold mb-3" style={{ padding: '10px' }}>
                                 Verify & Proceed
                             </button>
 
@@ -162,7 +162,7 @@ const ResetOtp = () => {
                     </div>
 
                     {/* Image Side */}
-                    <div className="col-lg-6 d-none d-lg-block p-0 position-relative bg-light">
+                    <div className="col-lg-6 d-none d-lg-block p-0 position-relative">
                         <img
                             src={sideImage}
                             alt="Verification"

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
-import { AttendanceContent } from '../modules/hr/attendance/Attendance';
+import { AttendanceContent } from '../../pages/attendance/Attendance';
 import '../../components/layout/DashboardLayout.css';
 import { SimpleBarChart, SimpleDonutChart } from '../../components/charts/CustomCharts';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';

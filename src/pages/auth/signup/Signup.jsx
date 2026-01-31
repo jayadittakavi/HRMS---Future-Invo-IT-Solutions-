@@ -70,13 +70,13 @@ const Signup = () => {
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column min-vh-100 overflow-hidden">
       <Navbar />
       <div className="container-fluid signup-container flex-grow-1">
         <div className="card signup-card">
           <div className="row g-0 h-100">
             {/* Form Side */}
-            <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+            <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-card">
               <div className="mb-4 text-center text-lg-start">
                 <h3 className="signup-title">Create an account</h3>
               </div>
@@ -168,7 +168,7 @@ const Signup = () => {
                 </button>
 
                 <div className="text-center">
-                  <span className="text-muted small">
+                  <span className="text-secondary small">
                     Already have an account? <Link to="/login" className="login-link">Login here</Link>
                   </span>
                 </div>
@@ -176,7 +176,7 @@ const Signup = () => {
             </div>
 
             {/* Image Side */}
-            <div className="col-lg-6 d-none d-lg-block p-0 position-relative bg-light">
+            <div className="col-lg-6 d-none d-lg-block p-0 position-relative">
               <img
                 src={sideImage}
                 alt="HRMS Dashboard"

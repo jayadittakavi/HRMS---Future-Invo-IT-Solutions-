@@ -29,7 +29,7 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
                         }}
                         title={`${item.label}: ${item.value}`}
                     ></div>
-                    <span style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                 </div>
             ))}
         </div>
@@ -74,7 +74,7 @@ export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '
             <div style={{
                 width: '75%', // Thinner ring
                 height: '75%',
-                backgroundColor: '#fff',
+                backgroundColor: 'var(--bg-card)',
                 borderRadius: '50%',
                 position: 'absolute',
                 top: '50%',
@@ -86,8 +86,8 @@ export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '
                 flexDirection: 'column',
                 boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.05)'
             }}>
-                {centerText && <span style={{ fontWeight: '700', fontSize: '0.9rem', color: '#334155' }}>{centerText}</span>}
-                <span style={{ fontSize: '0.65rem', color: '#94a3b8', marginTop: '2px' }}>TOTAL</span>
+                {centerText && <span style={{ fontWeight: '700', fontSize: '0.9rem', color: 'var(--text-main)' }}>{centerText}</span>}
+                <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '2px' }}>TOTAL</span>
             </div>
         </div>
     );
@@ -114,7 +114,7 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
         <div style={{ width: '100%', height, overflow: 'hidden', position: 'relative' }}>
             {/* Background Grid Lines */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: '20px', zIndex: 0 }}>
-                {[1, 2, 3, 4].map(i => <div key={i} style={{ borderBottom: '1px dashed #e2e8f0', width: '100%', height: '1px' }}></div>)}
+                {[1, 2, 3, 4].map(i => <div key={i} style={{ borderBottom: '1px dashed var(--border-color)', width: '100%', height: '1px' }}></div>)}
             </div>
 
             <svg viewBox={`0 0 ${width} 220`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', position: 'relative', zIndex: 1 }}>
@@ -151,7 +151,7 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
                     const x = (i / (data.length - 1)) * width;
                     const y = 200 - ((val / max) * 180);
                     return (
-                        <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke={color} strokeWidth="2" />
+                        <circle key={i} cx={x} cy={y} r="4" fill="var(--bg-card)" stroke={color} strokeWidth="2" />
                     );
                 })}
             </svg>

@@ -1,55 +1,87 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* --- THEME CONFIGURATION --- */
+    /* --- 1. THEME CONFIGURATION (Light Mode) --- */
+    --primary-color: #6d28d9;
+    /* Deep Purple */
+    --primary-dark: #5b21b6;
+    --primary-light: #ede9fe;
+    --accent-color: #8b5cf6;
 
-    /* 1. Base Colors (Skins) - Default: Corporate Blue */
-    --primary-color: #2563eb;
-    /* Royal Blue */
-    --primary-dark: #1d4ed8;
-    /* Darker shade */
-    --primary-light: #eff6ff;
-    /* Very lightest shade */
-    --accent-color: #60a5fa;
-    /* Accent Blue */
-
-    --font-sans: 'Inter', sans-serif;
-
-    /* 2. Theme Colors (Light Mode Default) */
-    --bg-body: #f8fafc;
-    /* Slate 50 - Cleaner than gradients */
+    --bg-body: #f3f4f6;
+    /* Light Gray Background */
     --bg-card: #ffffff;
     --bg-sidebar: #ffffff;
-    --text-main: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
 
-    /* 3. Glassmorphism - Removed/Reduced for Cleaner Look */
-    --glass-border: 1px solid #e2e8f0;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    --glass-blur: none;
+    --text-main: #000000;
+    /* Pitch Black for User Request */
+    --text-secondary: #4b5563;
+    /* Gray 600 */
+    --text-muted: #9ca3af;
+    /* Gray 400 */
+    --text-on-primary: #ffffff;
 
-    --bs-body-font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    /* ALIASES FOR USER REQUEST COMPLIANCE */
+    --bg-color: var(--bg-body);
+    --card-bg: var(--bg-card);
+    --text-primary: var(--text-main);
+    /* --text-secondary is already defined matches user request */
 
-    /* Bootstrap Overrides mapped to variables */
-    --bs-primary: var(--primary-color);
-    --bs-link-color: var(--primary-color);
-    --bs-link-hover-color: var(--primary-dark);
+    --border-color: #e5e7eb;
+    --sidebar-width: 260px;
 
-    --glass-bg: var(--bg-card);
+    /* Elements */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --radius-card: 16px;
+
+    /* Bootstrap Overrides */
+    --bs-body-bg: var(--bg-body);
+    --bs-body-color: var(--text-main);
+
+    /* Glass Effect Vars (Light) */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.3);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    --glass-blur: blur(10px);
 }
 
 /* --- DARK MODE OVERRIDES --- */
+/* --- DARK MODE OVERRIDES --- */
 [data-theme="dark"] {
-    --bg-body: #0f172a;
-    --bg-card: #1e293b;
-    --bg-sidebar: #1e293b;
-    --text-main: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    --primary-color: #8b5cf6;
+    /* Lighter Purple for dark mode */
+    --primary-dark: #7c3aed;
+    --primary-light: #2e1065;
+    /* Dark Purple bg */
 
-    --glass-border: 1px solid #334155;
-    --glass-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --bg-body: #0f172a;
+    /* Slate 900 */
+    --bg-card: #1e293b;
+    /* Slate 800 */
+    --bg-sidebar: #0f172a;
+    /* Darker Sidebar */
+
+    --text-main: #f3f4f6;
+    /* Gray 100 */
+    --text-secondary: #9ca3af;
+    /* Gray 400 */
+    --text-muted: #6b7280;
+    /* Gray 500 */
+
+    /* ALIASES UPDATE FOR DARK MODE */
+    --bg-color: var(--bg-body);
+    --card-bg: var(--bg-card);
+    --text-primary: var(--text-main);
+    /* --text-secondary updates automatically via its definition above */
+
+    --border-color: #334155;
+    /* Slate 700 */
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+    /* Glass Effect Vars (Dark) */
+    --glass-bg: rgba(15, 23, 42, 0.65);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.05);
+    --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 /* --- SKIN PRESETS (Applied via data-skin attribute on body) --- */
@@ -101,15 +133,30 @@ body {
     padding: 0;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     /* Modern Font */
-    background: var(--bg-body);
+    background: var(--bg-color);
+    /* Updated to use user variable */
     background-attachment: fixed;
     background-size: cover;
-    color: var(--text-main);
+    color: var(--text-primary);
+    /* Updated to use user variable */
     min-height: 100vh;
     width: 100%;
     overflow-x: hidden;
     /* Prevent horizontal scroll */
     transition: background 0.5s ease;
+}
+
+/* Force inheritance for common text elements */
+a,
+p,
+span,
+li,
+label,
+input,
+select,
+textarea,
+div {
+    color: inherit;
 }
 
 html {
@@ -152,6 +199,122 @@ textarea {
     background-color: var(--primary-color) !important;
     color: #fff !important;
 }
+
+/* Navbar Theme Style */
+/* Navbar Theme Style - Glassy */
+.navbar-theme {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-bottom: var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    transition: all 0.3s ease;
+}
+
+.text-main {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .text-main {
+    color: var(--text-main) !important;
+}
+
+.bg-card {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main);
+}
+
+/* --- Global Text Adaptability Overrides --- */
+.text-dark,
+.text-black,
+.text-body {
+    color: var(--text-main) !important;
+}
+
+.text-muted,
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Global Table & Form Overrides */
+.table {
+    color: var(--text-main) !important;
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-main);
+    --bs-table-striped-color: var(--text-main);
+}
+
+.form-control {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.form-control:focus {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--primary-color);
+}
+
+/* Button Refinements for Theme */
+.btn-light,
+.btn-white {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.btn-light:hover,
+.btn-white:hover {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.btn-outline-dark,
+.btn-outline-secondary {
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.btn-outline-dark:hover,
+.btn-outline-secondary:hover {
+    background-color: var(--text-main);
+    color: var(--bg-card);
+}
+
+/* Dropdowns & Lists */
+.dropdown-menu {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-main);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+}
+
+.list-group-item {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--text-main);
+}
+
 
 /* Card Updates for Theme */
 .dashboard-card {

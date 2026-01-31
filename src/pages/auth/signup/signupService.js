@@ -1,7 +1,7 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "http://192.168.1.4:5000/api";
+const BASE_URL = import.meta.env.VITE_API_BASE || "http://192.168.1.66:5000/api";
 
-export const SIGNUP_URL = "http://127.0.0.1:5000/api/auth/super-admin/signup";
-export const VERIFY_OTP_URL = "http://127.0.0.1:5000/api/auth/verify-signup-otp";
+export const SIGNUP_URL = "http://192.168.1.66:5000/api/auth/super-admin/signup";
+export const VERIFY_OTP_URL = "http://192.168.1.66:5000/api/auth/verify-signup-otp";
 
 export const signupService = {
     signupSuperAdmin: async (userData) => {

@@ -241,21 +241,42 @@
 }
 
 /* Gradient Cards - More Vibrant Glass */
+.bg-gradient-purple,
+.bg-gradient-blue,
+.bg-gradient-green,
+.bg-gradient-orange {
+    color: #ffffff !important;
+}
+
+.bg-gradient-purple .dashboard-value,
+.bg-gradient-blue .dashboard-value,
+.bg-gradient-green .dashboard-value,
+.bg-gradient-orange .dashboard-value {
+    color: #ffffff !important;
+}
+
+.bg-gradient-purple .dashboard-card-title,
+.bg-gradient-blue .dashboard-card-title,
+.bg-gradient-green .dashboard-card-title,
+.bg-gradient-orange .dashboard-card-title {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .bg-gradient-purple {
-    background: linear-gradient(135deg, rgba(121, 40, 202, 0.8) 0%, rgba(255, 0, 128, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(121, 40, 202, 0.8) 0%, rgba(255, 0, 128, 0.8) 100%) !important;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .bg-gradient-blue {
-    background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%) !important;
 }
 
 .bg-gradient-green {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.8) 0%, rgba(5, 150, 105, 0.8) 100%) !important;
 }
 
 .bg-gradient-orange {
-    background: linear-gradient(135deg, rgba(245, 57, 57, 0.8) 0%, rgba(251, 207, 51, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(245, 57, 57, 0.8) 0%, rgba(251, 207, 51, 0.8) 100%) !important;
 }
 
 /* Chart Tooltip Overrides */

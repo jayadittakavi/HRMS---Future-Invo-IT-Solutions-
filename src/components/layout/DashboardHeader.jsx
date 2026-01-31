@@ -8,24 +8,11 @@ const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
     const { user } = useAuth();
     const { toggleSettingsDrawer, skin, theme, toggleTheme } = useTheme();
 
-    // Map skin to light background tints
-    const skinColors = {
-        blue: 'rgba(235, 248, 255, 0.95)',    // Light Blue
-        purple: 'rgba(243, 232, 255, 0.95)',  // Light Purple
-        green: 'rgba(220, 252, 231, 0.95)',   // Light Green
-        orange: 'rgba(255, 237, 213, 0.95)', // Light Orange
-        teal: 'rgba(204, 251, 241, 0.95)',    // Light Teal
-        red: 'rgba(254, 226, 226, 0.95)',     // Light Red
-    };
-
-    const headerBg = skinColors[skin] || 'rgba(255, 255, 255, 0.65)'; // Fallback
-
     return (
-        <header className="border-bottom py-3 px-3 d-flex align-items-center justify-content-between sticky-top glass-header"
+        <header className="border-bottom py-3 px-3 d-flex align-items-center justify-content-between sticky-top navbar-theme glass-header"
             style={{
                 minHeight: '70px',
-                background: headerBg,
-                transition: 'background 0.3s ease'
+                zIndex: 1020
             }}>
             {/* Left Side: Toggle & User Name */}
             <div className="d-flex align-items-center gap-3">
@@ -37,7 +24,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
                     <span className="fs-4">☰</span>
                 </button>
 
-                <span className="fw-bold text-dark fs-5">
+                <span className="fw-bold text-main fs-5">
                     {user?.name || 'Dashboard'}
                 </span>
             </div>
@@ -52,17 +39,17 @@ const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
                         <input
                             type="text"
                             placeholder="Search..."
-                            className="form-control border-0 rounded-pill ps-5 text-dark"
+                            className="form-control border-0 rounded-pill ps-5 text-main"
                             style={{
                                 width: '250px',
-                                background: 'rgba(255, 255, 255, 0.9)',
-                                backdropFilter: 'blur(20px)',
-                                WebkitBackdropFilter: 'blur(20px)',
-                                border: '1px solid rgba(255, 255, 255, 0.8)',
-                                boxShadow: '0 2px 15px rgba(236, 72, 153, 0.1), 0 2px 15px rgba(59, 130, 246, 0.1)', // Subtle pink & blue glow
+                                background: 'var(--bg-card)',
+                                backdropFilter: 'var(--glass-blur)',
+                                WebkitBackdropFilter: 'var(--glass-blur)',
+                                border: 'var(--glass-border)',
+                                boxShadow: 'var(--shadow-sm)', // Subtle pink & blue glow
                                 fontSize: '0.9rem',
                                 paddingRight: '1rem',
-                                color: '#1e293b'
+                                color: 'var(--text-main)'
                             }}
                         />
                         <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary opacity-75">

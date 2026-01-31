@@ -11,7 +11,7 @@ import { EmployeesContent } from '../../pages/modules/hr/employees/Employees';
 import { PayrollContent } from '../../pages/modules/finance/payroll/Payroll';
 import { FinancialYearContent } from '../../pages/modules/finance/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../../pages/modules/hr/leave_management/LeaveManagement';
-import { AttendanceContent } from '../../pages/modules/hr/attendance/Attendance';
+import { AttendanceContent } from '../attendance/Attendance';
 import { DailyTaskContent } from '../../pages/modules/operations/daily_task/DailyTask';
 import { LoansContent } from '../../pages/modules/finance/loans/Loans';
 import { TravelExpensesContent } from '../../pages/modules/finance/travel_expenses/TravelExpenses';
@@ -55,7 +55,7 @@ const AdminDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Admin'}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">System status:</span>
                                 <span className="badge bg-success text-white fw-bold">OPERATIONAL</span>

@@ -110,7 +110,7 @@ const SignupOtp = () => {
             <div className="card otp-card">
                 <div className="row g-0 h-100">
                     {/* Form Side */}
-                    <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-white">
+                    <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-card">
                         <div className="mb-4 text-center">
                             <h3 className="otp-title">Verify Signup OTP</h3>
                             <p className="otp-description">Enter the 6-digit code sent to <strong>{email}</strong></p>
@@ -140,7 +140,7 @@ const SignupOtp = () => {
                             </button>
 
                             <div className="text-center mt-3">
-                                <span className="small text-muted">
+                                <span className="small text-secondary">
                                     Didn't receive the code? {' '}
                                     <button
                                         type="button"
@@ -156,7 +156,7 @@ const SignupOtp = () => {
                     </div>
 
                     {/* Image Side */}
-                    <div className="col-lg-6 d-none d-lg-block p-0 position-relative bg-light">
+                    <div className="col-lg-6 d-none d-lg-block p-0 position-relative">
                         <img
                             src={sideImage}
                             alt="Verification"

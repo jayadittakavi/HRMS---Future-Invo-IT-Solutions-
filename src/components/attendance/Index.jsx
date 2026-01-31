@@ -10,6 +10,8 @@ import {
     FaCalendarAlt,
     FaExclamationCircle
 } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
+import { attendanceService } from './attendanceService';
 
 export const AttendanceContent = () => {
     // Filter States
@@ -17,14 +19,44 @@ export const AttendanceContent = () => {
     const [filterDept, setFilterDept] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
 
-    /* Mock Data */
-    const attendanceData = [
+    const { user, token } = useAuth(); // Assuming token is available in context
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({ present: 0, absent: 0, leave: 0, late: 0 });
+
+    React.useEffect(() => {
+        const fetchAttendance = async () => {
+            try {
+                // If we have a token, fetch from API
+                const authToken = token || localStorage.getItem('token'); // Fallback if context doesn't have it yet
+                if (authToken) {
+                    const response = await attendanceService.getEmployeeAttendance(authToken);
+                    if (response && response.data) {
+                        setAttendanceData(response.data);
+                        // Calculate stats or use response stats
+                        // setStats(...) 
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to load attendance", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAttendance();
+    }, [token]);
+
+    /* Mock Data Fallback if API fails or empty */
+    const mockData = [
         { id: 'EMP001', name: 'Meera Krishnan', dept: 'HR', in: '09:00 AM', out: '06:00 PM', status: 'Present' },
         { id: 'EMP002', name: 'John Doe', dept: 'Engineering', in: '09:15 AM', out: '06:15 PM', status: 'Late' },
         { id: 'EMP003', name: 'Sarah Smith', dept: 'Sales', in: '-', out: '-', status: 'Absent' },
         { id: 'EMP004', name: 'Mike Ross', dept: 'Legal', in: '-', out: '-', status: 'On Leave' },
         { id: 'EMP005', name: 'Rachel Zane', dept: 'Legal', in: '08:55 AM', out: '05:55 PM', status: 'Present' },
     ];
+
+    const displayData = attendanceData.length > 0 ? attendanceData : mockData;
 
     return (
         <div className="attendance-content">
@@ -106,7 +138,7 @@ export const AttendanceContent = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {attendanceData.map((row) => (
+                        {displayData.map((row) => (
                             <tr key={row.id}>
                                 <td>
                                     <div className="user-cell">

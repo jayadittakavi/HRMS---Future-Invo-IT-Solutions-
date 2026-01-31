@@ -9,7 +9,7 @@ import { EmployeesContent } from '../modules/hr/employees/Employees';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
 import { FinancialYearContent } from '../modules/finance/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
-import { AttendanceContent } from '../modules/hr/attendance/Attendance';
+import { AttendanceContent } from '../attendance/Attendance';
 import { UserManagementContent } from '../modules/core/user_management/UserManagement';
 import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../components/charts/CustomCharts';
@@ -76,10 +76,10 @@ const SuperAdminDashboard = () => {
                     <>
                         {/* Welcome & Status Section */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
-                                <span className="badge bg-warning text-dark fw-bold px-3">APPROVED</span>
+                                <span className="badge bg-warning text-main fw-bold px-3">APPROVED</span>
                             </div>
                         </div>
 
@@ -134,7 +134,7 @@ const SuperAdminDashboard = () => {
                                     </div>
                                     <ul className="list-unstyled small mb-0">
                                         <li className="mb-1 d-flex align-items-center"><span className="badge bg-white text-success me-2 rounded-pill" style={{ width: '8px', height: '8px', padding: 0 }}> </span>136 Reimbursements</li>
-                                        <li className="mb-0 d-flex align-items-center"><span className="badge bg-warning text-dark me-2 rounded-pill" style={{ width: '8px', height: '8px', padding: 0 }}> </span>55 Salary Revisions</li>
+                                        <li className="mb-0 d-flex align-items-center"><span className="badge bg-warning text-main me-2 rounded-pill" style={{ width: '8px', height: '8px', padding: 0 }}> </span>55 Salary Revisions</li>
                                     </ul>
                                 </div>
                             </div>

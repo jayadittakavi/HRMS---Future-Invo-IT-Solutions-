@@ -1,229 +1,409 @@
-import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-import DashboardLayout from '../../components/DashboardLayout';
-import './Attendance.css';
-import {
-    FaSearch,
-    FaFileExport,
-    FaCheckCircle,
-    FaTimesCircle,
-    FaCalendarAlt,
-    FaExclamationCircle,
-    FaEdit,
-    FaTrash
-} from 'react-icons/fa';
+import React, { useEffect, useState } from "react";
+import { attendanceService } from "./server/server";
+import { useAuth } from "../../context/AuthContext";
+import DashboardLayout from "../../components/layout/DashboardLayout";
 
+// Exporting the content component separately for use in dashboards
 export const AttendanceContent = ({ personal = false }) => {
-    // Filter States
-    const [filterDateFrom, setFilterDateFrom] = useState('2025-10-02');
-    const [filterDateTo, setFilterDateTo] = useState('2025-10-02');
-    const [filterDay, setFilterDay] = useState('All');
-    const [filterMonth, setFilterMonth] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
+    const { user } = useAuth();
+    const [attendance, setAttendance] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    /* Mock Data - Admin View (Matching image columns: Name, Attendance, Logged Time, Login At, Logout At, Date, Device, Action) */
-    const attendanceData = [
-        { id: 1, name: 'Meera Joshi', attendance: 'Present', loggedTime: '8 hrs 49 mins', loginAt: '09:45', logoutAt: '19:34', date: '02/10/2025', device: 'Laptop' },
-        { id: 2, name: 'Sanjay Gupta', attendance: 'Present', loggedTime: '7 hrs 40 mins', loginAt: '10:29', logoutAt: '19:09', date: '02/10/2025', device: 'Laptop' },
-        { id: 3, name: 'Mohan Prasad', attendance: 'Absent', loggedTime: '', loginAt: '', logoutAt: '', date: '02/10/2025', device: 'Android Mobile' },
-        { id: 4, name: 'Kiran Desai', attendance: 'Present', loggedTime: '9 hrs 24 mins', loginAt: '09:27', logoutAt: '19:51', date: '02/10/2025', device: 'Android Mobile' },
-        { id: 5, name: 'Priya Nair', attendance: 'Present', loggedTime: '8 hrs 28 mins', loginAt: '09:18', logoutAt: '18:46', date: '02/10/2025', device: 'Desktop' },
-        { id: 6, name: 'Rohit Mehta', attendance: 'Present', loggedTime: '8 hrs 48 mins', loginAt: '09:56', logoutAt: '19:44', date: '02/10/2025', device: 'Laptop' },
-        { id: 7, name: 'Shreya Iyer', attendance: 'Present', loggedTime: '8 hrs 59 mins', loginAt: '09:08', logoutAt: '19:07', date: '02/10/2025', device: 'iPhone' },
-        { id: 8, name: 'Arjun Singh', attendance: 'Present', loggedTime: '9 hrs 29 mins', loginAt: '09:56', logoutAt: '20:25', date: '02/10/2025', device: 'iPhone' },
-        { id: 9, name: 'Deepika Sharma', attendance: 'Half Day', loggedTime: '4 hrs 16 mins', loginAt: '11:44', logoutAt: '16:00', date: '02/10/2025', device: 'Tablet' },
-        { id: 10, name: 'Manoj Tiwari', attendance: 'Present', loggedTime: '8 hrs 6 mins', loginAt: '09:12', logoutAt: '18:18', date: '02/10/2025', device: 'iPhone' },
-    ];
+    // Filter/Form states for manual entry could go here
+    const [showManualModal, setShowManualModal] = useState(false);
+    const [editingRecord, setEditingRecord] = useState(null); // State to hold record being edited
 
-    /* Mock Data - Personal View */
-    const personalAttendanceData = [
-        { date: 'Jan 28, 2026', day: 'Wednesday', in: '10:05 AM', out: '-', hours: '4h 12m', status: 'Present' },
-        { date: 'Jan 27, 2026', day: 'Tuesday', in: '10:00 AM', out: '07:00 PM', hours: '9h 00m', status: 'Present' },
-        { date: 'Jan 26, 2026', day: 'Monday', in: '10:15 AM', out: '07:15 PM', hours: '9h 00m', status: 'Late' },
-        { date: 'Jan 23, 2026', day: 'Friday', in: '10:00 AM', out: '07:00 PM', hours: '9h 00m', status: 'Present' },
-        { date: 'Jan 22, 2026', day: 'Thursday', in: '-', out: '-', hours: '-', status: 'Absent' },
-    ];
+    // Import state
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importFile, setImportFile] = useState(null);
+    const [isImporting, setIsImporting] = useState(false);
+
+    useEffect(() => {
+        fetchAttendance();
+    }, [user, personal]);
+
+    const fetchAttendance = async () => {
+        setLoading(true);
+        try {
+            let res;
+            // Normalize role checking
+            const role = user?.role?.toLowerCase();
+
+            // If personal prop is true, force fetching my attendance
+            if (personal || role === "employee") {
+                res = await attendanceService.getMyAttendance();
+            } else if (["admin", "superadmin", "hr", "manager"].includes(role)) {
+                res = await attendanceService.getAllAttendance();
+            } else {
+                // Fallback for unexpected roles
+                res = await attendanceService.getMyAttendance();
+            }
+
+            // Unpack data - fetch returns analyzed json directly
+            // Adjust based on actual API response structure. Assuming direct array or { data: [] }
+            setAttendance(res.data || res || []);
+            setError(null);
+        } catch (err) {
+            console.error("Attendance fetch error", err);
+            setError("Failed to fetch attendance records.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleManualAttendance = async (formData) => {
+        try {
+            if (editingRecord) {
+                await attendanceService.updateAttendance(editingRecord.id || editingRecord._id, formData);
+                alert("Attendance updated successfully!");
+            } else {
+                await attendanceService.addManualAttendance(formData);
+                alert("Attendance added successfully!");
+            }
+            setShowManualModal(false);
+            setEditingRecord(null); // Reset edit state
+            fetchAttendance(); // 🔥 refresh list after add
+        } catch (err) {
+            console.error("Manual attendance error", err);
+            alert("Failed to save attendance.");
+        }
+    };
+
+    const handleEdit = (record) => {
+        setEditingRecord(record);
+        setShowManualModal(true);
+    }
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this record?")) return;
+        try {
+            await attendanceService.deleteAttendance(id);
+            fetchAttendance();
+        } catch (err) {
+            console.error("Delete error", err);
+            alert("Failed to delete record.");
+        }
+    };
+
+    // CSV Import Logic
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setImportFile(e.target.files[0]);
+        }
+    };
+
+    const handleImportSubmit = async () => {
+        if (!importFile) return;
+        setIsImporting(true);
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const text = e.target.result;
+            // Simple CSV Parser (Assumes header: Employee ID, Date, Status, Check In, Check Out)
+            const rows = text.split('\n').slice(1); // Skip header
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (let row of rows) {
+                if (!row.trim()) continue;
+                const cols = row.split(',');
+                if (cols.length < 3) continue;
+
+                const record = {
+                    employeeId: cols[0]?.trim(),
+                    date: cols[1]?.trim() || new Date().toISOString().split('T')[0],
+                    status: cols[2]?.trim() || 'Present',
+                    checkIn: cols[3]?.trim() || '',
+                    checkOut: cols[4]?.trim() || ''
+                };
+
+                try {
+                    // Sequentially save to backend using the manual add API
+                    // In a real app, use a bulk API
+                    await attendanceService.addManualAttendance(record);
+                    successCount++;
+                } catch (err) {
+                    console.error("Import error for row", row, err);
+                    errorCount++;
+                }
+            }
+
+            alert(`Import complete. Success: ${successCount}, Failed: ${errorCount}`);
+            setIsImporting(false);
+            setShowImportModal(false);
+            setImportFile(null);
+            fetchAttendance();
+        };
+        reader.readAsText(importFile);
+    };
+
+    // Helper to check permissions - IF personal mode is on, manage actions are disabled
+    const canManage = !personal && ["superadmin", "admin", "hr", "manager"].includes(user?.role?.toLowerCase());
 
     return (
-        <div className="attendance-content bg-light p-4" style={{ minHeight: '80vh' }}>
-            {/* Header */}
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div style={{ width: '150px' }}></div> {/* Spacer for centering */}
-                <h4 className="fw-bold text-dark m-0">{personal ? 'My Attendance' : 'Attendance Details'}</h4>
-                <div style={{ width: '150px', display: 'flex', justifyContent: 'flex-end' }}>
-                    {!personal && <button className="btn btn-primary fw-bold border-0" style={{ backgroundColor: '#0d6efd' }}>ADD</button>}
+        <>
+            <div className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h2 style={{ color: 'var(--text-main)' }}>Attendance Records</h2>
+                    {canManage && (
+                        <div className="d-flex gap-2">
+                            <button
+                                className="btn btn-outline-success"
+                                onClick={() => setShowImportModal(true)}
+                            >
+                                Import CSV
+                            </button>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowManualModal(true)}
+                            >
+                                Add Manual Attendance
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </div>
 
-            {/* Filters Section */}
-            <div className="bg-white p-3 rounded shadow-sm mb-4">
-                {personal ? (
-                    /* Simplified Filters for Personal View */
-                    <div className="row g-3 align-items-end">
-                        <div className="col-md-3">
-                            <label className="small text-muted fw-bold mb-1">Select Month</label>
-                            <select className="form-select text-secondary">
-                                <option>January 2026</option>
-                                <option>December 2025</option>
-                            </select>
-                        </div>
-                        <div className="col-md-2">
-                            <button className="btn btn-primary w-100 fw-bold border-0" style={{ backgroundColor: '#0d6efd' }}>SEARCH</button>
-                        </div>
-                    </div>
+                {error && <div className="alert alert-danger">{error}</div>}
+
+                {loading ? (
+                    <div className="text-center" style={{ color: 'var(--text-main)' }}>Loading...</div>
                 ) : (
-                    /* Admin Filters */
-                    <>
-                        <div className="row g-3 mb-3 align-items-center">
-                            <div className="col-md-3">
-                                <select className="form-select text-secondary">
-                                    <option>Select Department</option>
-                                    <option>HR</option>
-                                    <option>Engineering</option>
-                                </select>
-                            </div>
-                            <div className="col-md-3">
-                                <div className="input-group">
-                                    <span className="input-group-text bg-white border-end-0 text-muted" style={{ fontSize: '0.8rem' }}>Select Day</span>
-                                    <select className="form-select border-start-0 ps-0 text-secondary" value={filterDay} onChange={(e) => setFilterDay(e.target.value)}>
-                                        <option>All</option>
-                                        <option>Today</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-md-3">
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className="small text-muted text-nowrap">From</span>
-                                    <input type="date" className="form-control text-secondary" value={filterDateFrom} onChange={(e) => setFilterDateFrom(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="col-md-3">
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className="small text-muted text-nowrap">To</span>
-                                    <input type="date" className="form-control text-secondary" value={filterDateTo} onChange={(e) => setFilterDateTo(e.target.value)} />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="row g-3 align-items-center">
-                            <div className="col-md-3">
-                                <select className="form-select text-secondary">
-                                    <option>By Username</option>
-                                </select>
-                            </div>
-                            <div className="col-md-3">
-                                <div className="input-group">
-                                    <span className="input-group-text bg-white border-end-0 text-muted" style={{ fontSize: '0.8rem' }}>Select Month</span>
-                                    <select className="form-select border-start-0 ps-0 text-secondary" value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)}>
-                                        <option>October 2025</option>
-                                        <option>September 2025</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div className="col-md-2">
-                                <button className="btn btn-primary w-100 fw-bold border-0" style={{ backgroundColor: '#0d6efd' }}>SEARCH</button>
-                            </div>
-                            <div className="col-md-2">
-                                <button className="btn btn-primary w-100 fw-bold border-0" style={{ backgroundColor: '#0d6efd' }}>EXPORT</button>
-                            </div>
-                        </div>
-                    </>
+                    <div className="table-responsive rounded shadow-sm" style={{ backgroundColor: 'var(--card-bg)' }}>
+                        <table className="table table-hover mb-0" style={{ color: 'var(--text-main)' }}>
+                            <thead style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-secondary)' }}>
+                                <tr>
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Date</th>
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Employee</th> {/* Show Name/ID if admin */}
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Status</th>
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Check In</th>
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Check Out</th>
+                                    {/* Added Role and Department for visibility */}
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Role</th>
+                                    <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Department</th>
+                                    {canManage && <th style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)' }}>Actions</th>}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {attendance.length > 0 ? (
+                                    attendance.map((row) => (
+                                        <tr key={row.id || row._id}>
+                                            <td style={{ color: 'var(--text-main)' }}>{new Date(row.date).toLocaleDateString()}</td>
+                                            <td style={{ color: 'var(--text-main)' }}>
+                                                {/* Display name if available, else generic */}
+                                                {row.employeeId?.name || row.employeeName || row.employeeId || "Self"}
+                                            </td>
+                                            <td>
+                                                <span className={`badge ${row.status === 'Present' ? 'bg-success' :
+                                                    row.status === 'Absent' ? 'bg-danger' : 'bg-warning'
+                                                    }`}>
+                                                    {row.status}
+                                                </span>
+                                            </td>
+                                            <td style={{ color: 'var(--text-main)' }}>{row.checkIn || '-'}</td>
+                                            <td style={{ color: 'var(--text-main)' }}>{row.checkOut || '-'}</td>
+                                            {/* Role and Department Columns */}
+                                            <td style={{ color: 'var(--text-main)', textTransform: 'capitalize' }}>{row.employeeId?.role || '-'}</td>
+                                            <td style={{ color: 'var(--text-main)', textTransform: 'capitalize' }}>{row.employeeId?.department?.name || row.employeeId?.department || '-'}</td>
+                                            {canManage && (
+                                                <td>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger"
+                                                        onClick={() => handleDelete(row.id || row._id)}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-sm btn-outline-primary ms-2"
+                                                        onClick={() => handleEdit(row)}
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={canManage ? 8 : 7} className="text-center py-4">
+                                            No attendance records found.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
-            {/* Table Section */}
-            <div className="bg-white rounded shadow-sm">
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="bg-light">
-                            <tr>
-                                {personal ? (
-                                    <>
-                                        <th className="border-bottom-0 text-dark fw-bold small ps-4">Date</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Day</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Check-In</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Check-Out</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Working Hours</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Status</th>
-                                    </>
-                                ) : (
-                                    <>
-                                        <th className="border-bottom-0 text-dark fw-bold small ps-4">Name</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Attendance</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Logged Time</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Login At</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Logout At</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Date</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Device</th>
-                                        <th className="border-bottom-0 text-dark fw-bold small">Action</th>
-                                    </>
+            {/* Import CSV Modal */}
+            {showImportModal && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-main)' }}>
+                            <div className="modal-header" style={{ borderBottomColor: 'var(--border-color)' }}>
+                                <h5 className="modal-title">Import Attendance CSV</h5>
+                                <button className="btn-close" onClick={() => setShowImportModal(false)} style={{ filter: 'var(--filter-invert)' }}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label className="form-label">Select CSV File</label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        accept=".csv"
+                                        onChange={handleFileChange}
+                                        style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                                    />
+                                    <div className="form-text" style={{ color: 'var(--text-muted)' }}>
+                                        Format: Employee ID, Date (YYYY-MM-DD), Status, Check In (HH:mm), Check Out (HH:mm)
+                                    </div>
+                                </div>
+                                {importFile && (
+                                    <div className="alert alert-info py-2">
+                                        Selected: {importFile.name}
+                                    </div>
                                 )}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {personal ? (
-                                personalAttendanceData.map((row, idx) => (
-                                    <tr key={idx}>
-                                        <td className="ps-4 fw-bold text-secondary">{row.date}</td>
-                                        <td className="small text-muted">{row.day}</td>
-                                        <td className="small text-primary fw-bold">{row.in}</td>
-                                        <td className="small text-primary fw-bold">{row.out}</td>
-                                        <td className="small fw-bold">{row.hours}</td>
-                                        <td>
-                                            <span className={`badge ${row.status === 'Present' ? 'bg-success' : row.status === 'Absent' ? 'bg-danger' : 'bg-warning'}`}>
-                                                {row.status}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                attendanceData.map((row) => (
-                                    <tr key={row.id}>
-                                        <td className="ps-4">
-                                            <span className="text-secondary">{row.name}</span>
-                                        </td>
-                                        <td>
-                                            <span className={`small fw-bold ${row.attendance === 'Present' ? 'text-success' :
-                                                row.attendance === 'Absent' ? 'text-danger' :
-                                                    'text-warning'
-                                                }`}>
-                                                {row.attendance}
-                                            </span>
-                                        </td>
-                                        <td className="small text-secondary">{row.loggedTime}</td>
-                                        <td className="small text-secondary">{row.loginAt}</td>
-                                        <td className="small text-secondary">{row.logoutAt}</td>
-                                        <td className="small text-secondary">{row.date}</td>
-                                        <td className="small text-secondary">{row.device}</td>
-                                        <td>
-                                            <div className="d-flex gap-2">
-                                                <button className="btn btn-sm btn-outline-primary border-0 p-1"><FaEdit size={16} /></button>
-                                                <button className="btn btn-sm btn-outline-danger border-0 p-1"><FaTrash size={16} /></button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-                <div className="d-flex justify-content-end align-items-center p-3 border-top">
-                    <span className="small text-muted me-3">Rows per page: 10</span>
-                    <span className="small text-muted me-3">1-10 of {personal ? personalAttendanceData.length : attendanceData.length}</span>
-                    <div className="btn-group">
-                        <button className="btn btn-sm btn-link text-muted border-0">&lt;</button>
-                        <button className="btn btn-sm btn-link text-muted border-0">&gt;</button>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setShowImportModal(false)}>Cancel</button>
+                                <button
+                                    className="btn btn-success"
+                                    onClick={handleImportSubmit}
+                                    disabled={!importFile || isImporting}
+                                >
+                                    {isImporting ? 'Importing...' : 'Upload & Process'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            )}
+
+            {/* Simple Manual Entry Modal */}
+            {showManualModal && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content" style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-main)' }}>
+                            <div className="modal-header" style={{ borderBottomColor: 'var(--border-color)' }}>
+                                <h5 className="modal-title">{editingRecord ? 'Edit Attendance' : 'Add Manual Attendance'}</h5>
+                                <button className="btn-close" onClick={() => { setShowManualModal(false); setEditingRecord(null); }} style={{ filter: 'var(--filter-invert)' }}></button>
+                            </div>
+                            <div className="modal-body">
+                                <ManualAttendanceForm
+                                    onSubmit={handleManualAttendance}
+                                    onCancel={() => { setShowManualModal(false); setEditingRecord(null); }}
+                                    initialData={editingRecord}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
-const Attendance = ({ personal = false }) => {
+// Simple internal component for the form
+const ManualAttendanceForm = ({ onSubmit, onCancel, initialData }) => {
+    const [formData, setFormData] = useState({
+        employeeId: '',
+        date: new Date().toISOString().split('T')[0],
+        status: 'Present',
+        checkIn: '',
+        checkOut: ''
+    });
+
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                employeeId: initialData.employeeId?.employeeId || initialData.employeeId || '', // Handle populated vs raw ID
+                date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : '',
+                status: initialData.status || 'Present',
+                checkIn: initialData.checkIn || '',
+                checkOut: initialData.checkOut || ''
+            });
+        }
+    }, [initialData]);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
     return (
-        <DashboardLayout title={personal ? "My Attendance" : "Attendance Management"}>
-            <AttendanceContent personal={personal} />
+        <form onSubmit={handleSubmit}>
+            <div className="mb-3">
+                <label className="form-label">Employee ID</label>
+                <input
+                    type="text"
+                    name="employeeId"
+                    className="form-control"
+                    onChange={handleChange}
+                    required
+                    style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Date</label>
+                <input
+                    type="date"
+                    name="date"
+                    className="form-control"
+                    value={formData.date}
+                    onChange={handleChange}
+                    required
+                    style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Status</label>
+                <select
+                    name="status"
+                    className="form-select"
+                    onChange={handleChange}
+                    style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                >
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Half Day">Half Day</option>
+                </select>
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Check In Time</label>
+                <input
+                    type="time"
+                    name="checkIn"
+                    className="form-control"
+                    onChange={handleChange}
+                    style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                />
+            </div>
+            <div className="mb-3">
+                <label className="form-label">Check Out Time</label>
+                <input
+                    type="time"
+                    name="checkOut"
+                    className="form-control"
+                    onChange={handleChange}
+                    style={{ backgroundColor: 'var(--bg-body)', color: 'var(--text-main)', borderColor: 'var(--border-color)' }}
+                />
+            </div>
+            <div className="d-flex justify-content-end gap-2">
+                <button type="button" className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+                <button type="submit" className="btn btn-primary">Save</button>
+            </div>
+        </form>
+    );
+};
+
+const Attendance = () => {
+    return (
+        <DashboardLayout title="Attendance Management">
+            <AttendanceContent />
         </DashboardLayout>
     );
 };

@@ -7,7 +7,7 @@ import featuresBg from "../../assets/images/features-bg.png";
 
 const Features = () => {
     return (
-        <div className="bg-white min-vh-100 d-flex flex-column">
+        <div className="min-vh-100 d-flex flex-column">
             <Navbar />
 
             <main className="flex-grow-1">
@@ -42,8 +42,8 @@ const Features = () => {
                                 <div className="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
                                     <div className="card-body p-4">
                                         <div className="display-6 mb-3 text-primary">{feature.icon}</div>
-                                        <h3 className="h5 fw-bold text-dark mb-2">{feature.title}</h3>
-                                        <p className="text-muted mb-0">{feature.desc}</p>
+                                        <h3 className="h5 fw-bold text-main mb-2">{feature.title}</h3>
+                                        <p className="text-secondary mb-0">{feature.desc}</p>
                                     </div>
                                 </div>
                             </div>

@@ -32,7 +32,7 @@ const ResetPassword = () => {
 
     if (isSuccess) {
         return (
-            <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+            <div className="d-flex align-items-center justify-content-center min-vh-100 bg-body">
                 <div className="container">
                     <div className="row justify-content-center">
                         <div className="col-lg-10">
@@ -41,11 +41,11 @@ const ResetPassword = () => {
                                     <div className="col-md-6 p-5 d-flex flex-column justify-content-center">
                                         <div className="mb-4 text-center">
                                             <h2 className="fw-bold text-success mb-3">Password Reset!</h2>
-                                            <p className="text-muted">Your password has been updated successfully.</p>
+                                            <p className="text-secondary">Your password has been updated successfully.</p>
                                             <div className="spinner-border text-primary mt-3" role="status">
                                                 <span className="visually-hidden">Loading...</span>
                                             </div>
-                                            <p className="small text-muted mt-2">Redirecting to login...</p>
+                                            <p className="small text-secondary mt-2">Redirecting to login...</p>
                                         </div>
                                     </div>
                                     <div className="col-md-6 d-none d-md-block position-relative">
@@ -65,7 +65,7 @@ const ResetPassword = () => {
     }
 
     return (
-        <div className="d-flex align-items-center justify-content-center min-vh-100 bg-light">
+        <div className="d-flex align-items-center justify-content-center min-vh-100 bg-body">
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-lg-10">
@@ -75,7 +75,7 @@ const ResetPassword = () => {
                                 <div className="col-md-6 p-5">
                                     <div className="mb-4">
                                         <h2 className="fw-bold text-primary">Reset Password</h2>
-                                        <p className="text-muted">Create a strong new password</p>
+                                        <p className="text-secondary">Create a strong new password</p>
                                     </div>
 
                                     {error && <div className="alert alert-danger" role="alert">{error}</div>}
@@ -85,7 +85,7 @@ const ResetPassword = () => {
                                             <label className="form-label fw-semibold">New Password</label>
                                             <input
                                                 type="password"
-                                                className="form-control form-control-lg bg-light"
+                                                className="form-control form-control-lg bg-card"
                                                 placeholder="••••••••"
                                                 name="password"
                                                 value={formData.password}
@@ -98,7 +98,7 @@ const ResetPassword = () => {
                                             <label className="form-label fw-semibold">Confirm Password</label>
                                             <input
                                                 type="password"
-                                                className="form-control form-control-lg bg-light"
+                                                className="form-control form-control-lg bg-card"
                                                 placeholder="••••••••"
                                                 name="confirmPassword"
                                                 value={formData.confirmPassword}
