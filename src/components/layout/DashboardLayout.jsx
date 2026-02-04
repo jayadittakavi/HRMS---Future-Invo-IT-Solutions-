@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
 import './DashboardLayout.css'; // Keeping for specific layout tweaks not covered by Bootstrap utils if needed, or remove if fully bootstrap
 
 const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const navigate = useNavigate();
+
+    // Use passed onNavigate or default to router navigation
+    const handleNavigate = (path) => {
+        if (onNavigate) {
+            onNavigate(path);
+        } else {
+            navigate(path);
+        }
+    };
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -27,13 +38,13 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
                     if (window.innerWidth < 768) {
                         setIsSidebarOpen(false);
                     }
-                    if (onNavigate) onNavigate(path);
+                    handleNavigate(path);
                 }} />
             </div>
 
             {/* Main Content Wrapper */}
             <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden">
-                <DashboardHeader toggleSidebar={toggleSidebar} onNavigate={onNavigate} />
+                <DashboardHeader toggleSidebar={toggleSidebar} onNavigate={handleNavigate} />
 
                 {/* Scrollable Content Area */}
                 <div className="flex-grow-1 overflow-auto p-4">

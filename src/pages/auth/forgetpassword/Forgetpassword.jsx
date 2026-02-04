@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import sideImage from '../../../assets/images/loginimage.png';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (email) {
-      console.log('Sending reset link to:', email);
-      setIsSubmitted(true);
+      setIsLoading(true);
+      try {
+        const response = await fetch("http://192.168.1.13:5000/api/auth/forgot-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Something went wrong");
+        }
+
+        // Redirect to OTP verification page instead of showing success message
+        navigate('/reset-otp', { state: { email } });
+      } catch (err) {
+        setError(err.message || 'Failed to send reset link');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -64,6 +91,7 @@ const ForgotPassword = () => {
                   <div className="mb-4">
                     <h2 className="fw-bold text-primary">Forgot Password?</h2>
                     <p className="text-secondary">Enter your email to reset your password.</p>
+                    {error && <div className="alert alert-danger p-2 small">{error}</div>}
                   </div>
 
                   <form onSubmit={handleSubmit}>
@@ -79,8 +107,12 @@ const ForgotPassword = () => {
                       />
                     </div>
 
-                    <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold shadow-sm mb-4">
-                      Send Reset Link
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-lg w-100 fw-bold shadow-sm mb-4"
+                      disabled={isLoading}
+                    >
+                      {isLoading ? 'Sending...' : 'Send Reset Link'}
                     </button>
 
                     <div className="text-center">

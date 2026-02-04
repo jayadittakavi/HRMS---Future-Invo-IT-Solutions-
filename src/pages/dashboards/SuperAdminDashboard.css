@@ -1,0 +1,107 @@
+/* SuperAdminDashboard.css */
+
+/* Gradient Backgrounds for Cards */
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-orange {
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-rose {
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-cyan {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-emerald {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Helper for text color inside these cards */
+.bg-gradient-blue .text-secondary,
+.bg-gradient-purple .text-secondary,
+.bg-gradient-orange .text-secondary,
+.bg-gradient-rose .text-secondary,
+.bg-gradient-cyan .text-secondary,
+.bg-gradient-emerald .text-secondary,
+.bg-gradient-dark .text-secondary,
+.bg-gradient-blue .dashboard-card-title,
+.bg-gradient-purple .dashboard-card-title,
+.bg-gradient-orange .dashboard-card-title,
+.bg-gradient-rose .dashboard-card-title,
+.bg-gradient-cyan .dashboard-card-title,
+.bg-gradient-emerald .dashboard-card-title,
+.bg-gradient-dark .dashboard-card-title,
+.bg-gradient-blue h6,
+.bg-gradient-blue h3,
+.bg-gradient-purple h6,
+.bg-gradient-purple h3,
+.bg-gradient-orange h6,
+.bg-gradient-orange h3,
+.bg-gradient-rose h6,
+.bg-gradient-rose h3,
+.bg-gradient-cyan h6,
+.bg-gradient-cyan h3,
+.bg-gradient-emerald h6,
+.bg-gradient-emerald h3,
+.bg-gradient-dark h6,
+.bg-gradient-dark h3 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.bg-gradient-blue .dashboard-value,
+.bg-gradient-purple .dashboard-value,
+.bg-gradient-orange .dashboard-value,
+.bg-gradient-rose .dashboard-value,
+.bg-gradient-cyan .dashboard-value,
+.bg-gradient-emerald .dashboard-value,
+.bg-gradient-dark .dashboard-value {
+    color: #ffffff !important;
+}
+
+/* Icon adjustments */
+.bg-gradient-blue .rounded-3,
+.bg-gradient-purple .rounded-3,
+.bg-gradient-orange .rounded-3,
+.bg-gradient-rose .rounded-3,
+.bg-gradient-cyan .rounded-3,
+.bg-gradient-emerald .rounded-3 {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+/* Hover Effect */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2) !important;
+}

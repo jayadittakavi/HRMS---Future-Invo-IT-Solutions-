@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import sideImage from '../../../assets/images/loginimage.png';
+
 
 const ResetPassword = () => {
     const [formData, setFormData] = useState({
@@ -9,25 +10,59 @@ const ResetPassword = () => {
     });
     const [error, setError] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+    const email = location.state?.email;
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
+
+        if (!email) {
+            setError('Email not found. Please restart the reset process.');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
-        // Simulate API call
-        console.log('Resetting password');
-        setIsSuccess(true);
-        setTimeout(() => {
-            navigate('/login');
-        }, 2000);
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('http://192.168.1.13:5000/api/auth/reset-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    newPassword: formData.password
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to reset password');
+            }
+
+            setIsSuccess(true);
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+        } catch (err) {
+            console.error(err);
+            setError(err.message || 'Failed to reset password. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     if (isSuccess) {
@@ -107,8 +142,8 @@ const ResetPassword = () => {
                                             />
                                         </div>
 
-                                        <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold shadow-sm">
-                                            Save Password
+                                        <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold shadow-sm" disabled={isLoading}>
+                                            {isLoading ? 'Saving...' : 'Save Password'}
                                         </button>
                                     </form>
                                 </div>

@@ -16,6 +16,7 @@ import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../compone
 import { useAuth } from '../../context/AuthContext';
 import { FaWallet, FaUsers, FaClipboardList } from 'react-icons/fa';
 import { ProfileContent } from '../modules/hr/profile/Profile';
+import './SuperAdminDashboard.css';
 
 
 const SuperAdminDashboard = () => {
@@ -76,7 +77,7 @@ const SuperAdminDashboard = () => {
                     <>
                         {/* Welcome & Status Section */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || user?.email?.split('@')[0] || 'Super Admin'}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
                                 <span className="badge bg-warning text-main fw-bold px-3">APPROVED</span>
@@ -87,7 +88,7 @@ const SuperAdminDashboard = () => {
                         <div className="row g-4 mb-4">
                             {/* Employees Net Pay */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-blue hover-lift">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaWallet size={24} />
@@ -97,13 +98,13 @@ const SuperAdminDashboard = () => {
                                             <h3 className="dashboard-value mb-0">₹17.25 Cr</h3>
                                         </div>
                                     </div>
-                                    <p className="small mt-1 mb-0">Pay Date: <span className="fw-bold">31 May 2024</span></p>
+                                    <p className="small mt-1 mb-0 opacity-75">Pay Date: <span className="fw-bold">31 May 2024</span></p>
                                 </div>
                             </div>
 
                             {/* No. of Employees */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-purple hover-lift">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaUsers size={24} />
@@ -122,7 +123,7 @@ const SuperAdminDashboard = () => {
 
                             {/* To Do Tasks */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-orange hover-lift">
                                     <div className="d-flex align-items-center mb-3">
                                         <div className="rounded-3 p-3 me-3">
                                             <FaClipboardList size={24} />
@@ -144,9 +145,9 @@ const SuperAdminDashboard = () => {
                         <div className="row g-4 mb-4">
                             {/* Deduction Summary */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-rose hover-lift">
                                     <h6 className="dashboard-card-title">Deduction Summary</h6>
-                                    <div className="text-secondary small">
+                                    <div className="text-secondary small opacity-90">
                                         <div className="mb-1">EPF: ₹39,73,913</div>
                                         <div className="mb-1">ESI: ₹891,010</div>
                                         <div className="mb-0">TDS: ₹1,15,89,089</div>
@@ -156,18 +157,18 @@ const SuperAdminDashboard = () => {
 
                             {/* Employee Summary */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-cyan hover-lift">
                                     <h6 className="dashboard-card-title">Employee Summary</h6>
                                     <h3 className="dashboard-value">1308</h3>
-                                    <p className="text-secondary small mb-0">Active Employees</p>
+                                    <p className="text-secondary small mb-0 opacity-75">Active Employees</p>
                                 </div>
                             </div>
 
                             {/* Payment Updates */}
                             <div className="col-md-4">
-                                <div className="dashboard-card">
+                                <div className="dashboard-card bg-gradient-emerald hover-lift">
                                     <h6 className="dashboard-card-title">Payment Updates</h6>
-                                    <ul className="list-unstyled text-secondary small mb-0">
+                                    <ul className="list-unstyled text-secondary small mb-0 opacity-90">
                                         <li className="mb-1">✓ Salary Processed</li>
                                         <li className="mb-1">✓ Tax Calculated</li>
                                         <li>✓ Payslips Generated</li>

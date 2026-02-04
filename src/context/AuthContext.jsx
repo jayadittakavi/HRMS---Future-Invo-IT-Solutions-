@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
         setToken(authToken);
         localStorage.setItem('user', JSON.stringify(userData));
         localStorage.setItem('authToken', authToken);
+        localStorage.setItem('token', authToken); // Also save as 'token' for compatibility
     };
 
     // Logout function
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         localStorage.removeItem('user');
         localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
     };
 
     // Check if user has permission to view a specific dashboard
@@ -42,8 +44,17 @@ export const AuthProvider = ({ children }) => {
         return requiredRoles.includes(user.role);
     };
 
+    // Update profile function
+    const updateProfile = (updates) => {
+        setUser((prevUser) => {
+            const newUser = { ...prevUser, ...updates };
+            localStorage.setItem('user', JSON.stringify(newUser));
+            return newUser;
+        });
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, canAccess, loading }}>
+        <AuthContext.Provider value={{ user, token, login, logout, canAccess, loading, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

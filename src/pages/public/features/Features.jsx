@@ -58,7 +58,7 @@ const Features = () => {
                 {/* Header Section */}
                 <div className="features-header text-center pt-5 pb-4">
                     <div className="container">
-                        <h1 className="features-title text-white fw-bold display-4">Powerful HR Features</h1>
+                        <h1 className="features-title fw-bold display-4">Powerful HR Features</h1>
                         <p className="features-subtitle text-white opacity-75 lead">
                             Configure and customize the perfect HR stack for your organization.
                         </p>

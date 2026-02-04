@@ -20,7 +20,7 @@ const Login = () => {
     try {
       setError('');
 
-      const response = await fetch('http://192.168.1.66:5000/api/auth/login', {
+      const response = await fetch('http://192.168.1.13:5000/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -37,7 +37,7 @@ const Login = () => {
       const safeUser = data.user || {
         email,
         role: data.role || 'employee',
-        name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1) // Fallback name: Title Case
+        name: data.user?.name || email.split('@')[0].split('.').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ') // Fallback: Proper Case from Email
       };
 
       // Normalize role: "SUPER_ADMIN" -> "superadmin"

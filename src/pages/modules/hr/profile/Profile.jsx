@@ -1,16 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useAuth } from "../../../../context/AuthContext";
-import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaBriefcase, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaMapMarkerAlt, FaBriefcase, FaCalendarAlt, FaCheckCircle } from 'react-icons/fa';
 
 const ProfileContent = () => {
     const { user, updateProfile, logout } = useAuth();
     const navigate = useNavigate();
+    const [isEditing, setIsEditing] = useState(false);
+    const [name, setName] = useState(user?.name || '');
+    // Update local state when user context changes (e.g. after save)
+    useEffect(() => {
+        setName(user?.name || '');
+    }, [user]);
 
     const handleLogout = () => {
         logout();
         navigate('/login');
+    };
+
+    const handleSave = () => {
+        updateProfile({ name: name });
+        setIsEditing(false);
+        alert('Profile updated successfully!');
+    };
+
+    const handleCancel = () => {
+        setName(user?.name || '');
+        setIsEditing(false);
     };
 
     return (
@@ -21,17 +38,21 @@ const ProfileContent = () => {
                     <div className="card border-0 shadow-sm rounded-4 text-center p-4 h-100">
                         <div className="position-relative d-inline-block mx-auto mb-3">
                             <div
-                                className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center shadow-lg overflow-hidden cursor-pointer"
+                                className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center shadow-lg overflow-hidden cursor-pointer position-relative"
                                 style={{ width: '120px', height: '120px', fontSize: '3rem', cursor: 'pointer' }}
-                                onClick={() => document.getElementById('profile-upload').click()}
+                                onClick={() => isEditing && document.getElementById('profile-upload').click()}
                             >
                                 {user?.profilePic ? (
                                     <img src={user.profilePic} alt="Profile" className="w-100 h-100 object-fit-cover" />
                                 ) : (
                                     user?.name?.charAt(0) || 'U'
                                 )}
+                                {isEditing && (
+                                    <div className="position-absolute w-100 h-100 bg-black bg-opacity-50 d-flex align-items-center justify-content-center">
+                                        <span className="fs-6 text-white fw-bold">Change</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-2"></div>
                             <input
                                 type="file"
                                 id="profile-upload"
@@ -47,12 +68,30 @@ const ProfileContent = () => {
                                         reader.readAsDataURL(file);
                                     }
                                 }}
+                                disabled={!isEditing}
                             />
                         </div>
-                        <h4 className="fw-bold text-main mb-1">{user?.name || 'User Name'}</h4>
+                        {isEditing ? (
+                            <input
+                                type="text"
+                                className="form-control text-center mb-1 fw-bold"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        ) : (
+                            <h4 className="fw-bold text-main mb-1">{user?.name || 'User Name'}</h4>
+                        )}
                         <p className="text-secondary mb-3">{user?.role || 'Role'}</p>
+
                         <div className="d-flex justify-content-center gap-2 mb-4">
-                            <button className="btn btn-primary rounded-pill px-3 btn-sm">Edit Profile</button>
+                            {isEditing ? (
+                                <>
+                                    <button className="btn btn-success rounded-pill px-3 btn-sm" onClick={handleSave}>Save</button>
+                                    <button className="btn btn-secondary rounded-pill px-3 btn-sm" onClick={handleCancel}>Cancel</button>
+                                </>
+                            ) : (
+                                <button className="btn btn-primary rounded-pill px-3 btn-sm" onClick={() => setIsEditing(true)}>Edit Profile</button>
+                            )}
                             <button className="btn btn-outline-danger rounded-pill px-3 btn-sm" onClick={handleLogout}>Logout</button>
                         </div>
 
@@ -62,10 +101,6 @@ const ProfileContent = () => {
                             <div className="d-flex align-items-center mb-3 text-secondary">
                                 <FaEnvelope className="me-3 opacity-50" />
                                 <span>{user?.email || 'user@example.com'}</span>
-                            </div>
-                            <div className="d-flex align-items-center mb-3 text-secondary">
-                                <FaPhone className="me-3 opacity-50" />
-                                <span>+1 (555) 123-4567</span>
                             </div>
                             <div className="d-flex align-items-center mb-3 text-secondary">
                                 <FaMapMarkerAlt className="me-3 opacity-50" />
@@ -88,34 +123,37 @@ const ProfileContent = () => {
                                         <label className="form-label small text-secondary">Full Name</label>
                                         <div className="input-group">
                                             <span className="input-group-text bg-card border-0"><FaUser className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-card border-0" value={user?.name || ''} readOnly />
+                                            <input
+                                                type="text"
+                                                className={`form-control bg-card border-0 ${isEditing ? 'bg-white border rounded' : ''}`}
+                                                value={name}
+                                                readOnly={!isEditing}
+                                                onChange={(e) => setName(e.target.value)}
+                                            />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-secondary">Department</label>
+                                        <label className="form-label small text-secondary">Email</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-card border-0"><FaBuilding className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-card border-0" value="Engineering" readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaEnvelope className="text-secondary" /></span>
+                                            <input type="text" className="form-control bg-card border-0" value={user?.email || ''} readOnly />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-secondary">Job Title</label>
+                                        <label className="form-label small text-secondary">Role</label>
                                         <div className="input-group">
                                             <span className="input-group-text bg-card border-0"><FaBriefcase className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-card border-0" value="Senior Developer" readOnly />
+                                            <input type="text" className="form-control bg-card border-0" value={user?.role || ''} readOnly />
                                         </div>
                                     </div>
                                     <div className="col-md-6">
-                                        <label className="form-label small text-secondary">Joining Date</label>
+                                        <label className="form-label small text-secondary">Status</label>
                                         <div className="input-group">
-                                            <span className="input-group-text bg-card border-0"><FaCalendarAlt className="text-secondary" /></span>
-                                            <input type="text" className="form-control bg-card border-0" value="Jan 15, 2023" readOnly />
+                                            <span className="input-group-text bg-card border-0"><FaCheckCircle className="text-success" /></span>
+                                            <input type="text" className="form-control bg-card border-0 text-success fw-bold" value="Active" readOnly />
                                         </div>
                                     </div>
                                 </div>
-
-                                <h6 className="fw-bold mt-5 mb-3">Bio</h6>
-                                <textarea className="form-control bg-card border-0 rounded-3 p-3" rows="4" readOnly defaultValue="Experienced software engineer with a focus on frontend technologies. Passionate about building clean, efficient, and user-friendly applications."></textarea>
                             </form>
                         </div>
                     </div>
