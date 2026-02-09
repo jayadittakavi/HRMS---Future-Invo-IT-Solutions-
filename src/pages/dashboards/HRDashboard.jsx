@@ -6,6 +6,8 @@ import { EmployeesContent } from "../modules/hr/employees/Employees";
 import { AttendanceContent } from '../attendance/Attendance';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../components/charts/CustomCharts';
 import { FaUsers, FaUserPlus, FaChalkboardTeacher } from 'react-icons/fa';
+import { ProfileContent } from '../modules/hr/profile/Profile';
+import { OnboardingContent } from '../modules/hr/onboarding/Onboarding';
 
 const HRDashboard = () => {
     const { user } = useAuth();
@@ -188,12 +190,10 @@ const HRDashboard = () => {
                     </div>
                 )}
 
-                {activeView === 'onboarding' && (
-                    <div className="p-5 text-center">
-                        <h3 className="text-muted">Onboarding Module Coming Soon</h3>
-                        <p>Manage new hire onboarding checklists here.</p>
-                    </div>
-                )}
+
+
+                {activeView === 'onboarding' && <OnboardingContent />}
+                {activeView === 'profile' && <ProfileContent />}
             </div>
         </DashboardLayout>
     );

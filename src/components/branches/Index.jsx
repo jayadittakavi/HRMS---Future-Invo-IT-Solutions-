@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
-import BranchMap from '../../components/BranchMap';
+import BranchMap from './BranchMap';
 import '../../components/DashboardLayout.css';
 
 export const BranchesContent = () => {

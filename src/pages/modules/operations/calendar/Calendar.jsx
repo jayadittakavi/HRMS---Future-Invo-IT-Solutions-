@@ -1,24 +1,91 @@
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, subMonths, isSameMonth, isSameDay, addDays, isToday } from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import Footer from '../../../../components/layout/Footer';
+import Navbar from '../../../../components/layout/Navbar';
 import '../../../../components/layout/DashboardLayout.css'; // Keep for dashboard-card styles
 
 const Calendar = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
 
-    // Mock Events
-    const events = [
-        { id: 1, title: 'Dentist Appointment', time: '9:30 AM - 10:30 AM', date: new Date(), type: 'personal' },
-        { id: 2, title: 'Team Meeting', time: '11:00 AM - 12:00 PM', date: new Date(), type: 'work' },
-        { id: 3, title: 'Project Review', time: '2:00 PM - 3:00 PM', date: addDays(new Date(), 2), type: 'urgent' },
-    ];
+    // Event State
+    const [events, setEvents] = useState([
+        { id: 1, title: 'Dentist Appointment', time: '09:30 - 10:30', date: new Date(), type: 'personal', description: 'Regular checkup' },
+        { id: 2, title: 'Team Meeting', time: '11:00 - 12:00', date: new Date(), type: 'work', description: 'Weekly sync' },
+        { id: 3, title: 'Project Review', time: '14:00 - 15:00', date: addDays(new Date(), 2), type: 'important', description: 'Critical milestone review' },
+    ]);
+
+    // Modal State
+    const [showModal, setShowModal] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [currentEvent, setCurrentEvent] = useState({
+        id: null,
+        title: '',
+        date: '',
+        startTime: '',
+        endTime: '',
+        type: 'work',
+        description: ''
+    });
 
     const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
     const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-    const onDateClick = (day) => setSelectedDate(day);
+
+    const onDateClick = (day) => {
+        setSelectedDate(day);
+        // Optional: Open modal immediately on date click? 
+        // For now, just select the date. We can add a "Add Event" button or double click.
+        // Let's stick to selecting the date, and the user can click "+" to add event for selected date.
+    };
+
+    const handleAddEventClick = () => {
+        setIsEditing(false);
+        setCurrentEvent({
+            id: null,
+            title: '',
+            date: format(selectedDate, 'yyyy-MM-dd'),
+            startTime: '09:00',
+            endTime: '10:00',
+            type: 'work',
+            description: ''
+        });
+        setShowModal(true);
+    };
+
+    const handleEditEventClick = (e, event) => {
+        e.stopPropagation(); // Prevent triggering date click
+        setIsEditing(true);
+        setCurrentEvent({
+            ...event,
+            date: format(event.date, 'yyyy-MM-dd'),
+            startTime: event.time.split(' - ')[0] || '',
+            endTime: event.time.split(' - ')[1] || ''
+        });
+        setShowModal(true);
+    };
+
+    const handleSaveEvent = () => {
+        if (isEditing) {
+            setEvents(events.map(ev => ev.id === currentEvent.id ? {
+                ...currentEvent,
+                date: new Date(currentEvent.date),
+                time: `${currentEvent.startTime} - ${currentEvent.endTime}`
+            } : ev));
+        } else {
+            setEvents([...events, {
+                ...currentEvent,
+                id: Date.now(),
+                date: new Date(currentEvent.date),
+                time: `${currentEvent.startTime} - ${currentEvent.endTime}`
+            }]);
+        }
+        setShowModal(false);
+    };
+
+    const handleDeleteEvent = () => {
+        setEvents(events.filter(ev => ev.id !== currentEvent.id));
+        setShowModal(false);
+    };
 
     const renderHeader = () => {
         return (
@@ -73,7 +140,7 @@ const Calendar = () => {
                         key={day}
                         className={`flex-grow-1 border-end border-bottom p-2 position-relative ${!isSameMonth(day, monthStart)
                             ? 'text-muted bg-light opacity-50'
-                            : isSameDay(day, selectedDate) ? 'bg-white' : 'bg-white'
+                            : isSameDay(day, selectedDate) ? 'bg-white border-primary border-2' : 'bg-white'
                             }`}
                         style={{ height: '120px', cursor: 'pointer', minWidth: '0' }}
                         onClick={() => onDateClick(cloneDay)}
@@ -82,12 +149,18 @@ const Calendar = () => {
                             {formattedDate}
                         </span>
 
-                        <div className="mt-2 d-flex flex-column gap-1">
+                        <div className="mt-2 d-flex flex-column gap-1 overflow-auto" style={{ maxHeight: '80px' }}>
                             {dayEvents.map(ev => (
-                                <div key={ev.id} className={`badge text-start text-truncate fw-normal px-2 ${ev.type === 'work' ? 'bg-purple-subtle text-purple' :
-                                    ev.type === 'urgent' ? 'bg-danger-subtle text-danger' :
-                                        'bg-success-subtle text-success'
-                                    }`} style={{ fontSize: '0.7rem' }}>
+                                <div
+                                    key={ev.id}
+                                    className={`badge text-start text-truncate fw-normal px-2 ${ev.type === 'work' ? 'bg-purple-subtle text-purple' :
+                                            ev.type === 'important' ? 'bg-danger-subtle text-danger' :
+                                                'bg-success-subtle text-success'
+                                        }`}
+                                    style={{ fontSize: '0.7rem', cursor: 'pointer' }}
+                                    onClick={(e) => handleEditEventClick(e, ev)}
+                                    title={ev.title}
+                                >
                                     • {ev.title}
                                 </div>
                             ))}
@@ -107,7 +180,6 @@ const Calendar = () => {
     };
 
     const renderMiniCalendar = () => {
-        // Simplified mini calendar logic (reuse similar logic but smaller)
         const monthStart = startOfMonth(selectedDate);
         const monthEnd = endOfMonth(monthStart);
         const startDate = startOfWeek(monthStart);
@@ -127,7 +199,10 @@ const Calendar = () => {
                             !isSameMonth(day, monthStart) ? 'text-muted' : 'text-dark'
                             }`}
                         style={{ width: '30px', height: '30px', lineHeight: '15px' }}
-                        onClick={() => setSelectedDate(cloneDay)}
+                        onClick={() => {
+                            setSelectedDate(cloneDay);
+                            setCurrentDate(cloneDay); // Sync main calendar too
+                        }}
                     >
                         {format(day, 'd')}
                     </div>
@@ -143,8 +218,8 @@ const Calendar = () => {
                 <div className="d-flex justify-content-between align-items-center mb-3">
                     <h6 className="fw-bold mb-0">{format(selectedDate, 'MMMM yyyy')}</h6>
                     <div className="d-flex gap-1">
-                        <button className="btn btn-sm btn-light p-1"><FaChevronLeft size={10} /></button>
-                        <button className="btn btn-sm btn-light p-1"><FaChevronRight size={10} /></button>
+                        <button className="btn btn-sm btn-light p-1" onClick={() => setSelectedDate(subMonths(selectedDate, 1))}><FaChevronLeft size={10} /></button>
+                        <button className="btn btn-sm btn-light p-1" onClick={() => setSelectedDate(addMonths(selectedDate, 1))}><FaChevronRight size={10} /></button>
                     </div>
                 </div>
                 <div className="d-flex justify-content-between mb-2">
@@ -153,72 +228,159 @@ const Calendar = () => {
                 {rows}
 
                 <div className="mt-4 pt-3 border-top">
-                    <div className="d-flex gap-2 mb-2">
-                        <span className="badge rounded-pill bg-purple-subtle text-purple px-3">Work</span>
-                        <span className="badge rounded-pill bg-success-subtle text-success px-3">Personal</span>
-                        <span className="badge rounded-pill bg-danger-subtle text-danger px-3">Urgent</span>
-                        <button className="btn btn-sm btn-light rounded-circle"><FaPlus /></button>
+                    <div className="d-flex flex-wrap gap-2 mb-2">
+                        <span className="badge rounded-pill bg-purple-subtle text-purple px-2">Work</span>
+                        <span className="badge rounded-pill bg-success-subtle text-success px-2">Personal</span>
+                        <span className="badge rounded-pill bg-danger-subtle text-danger px-2">Important</span>
+                        <button className="btn btn-sm btn-primary rounded-circle ms-auto" onClick={handleAddEventClick}><FaPlus /></button>
                     </div>
+                    <small className="text-muted d-block mt-2">Click + to add important dates</small>
                 </div>
             </div>
         );
     };
 
     const renderEventList = () => {
+        // Filter events for the selected date
+        const selectedDateEvents = events.filter(e => isSameDay(e.date, selectedDate));
+
         return (
             <div className="dashboard-card p-4" style={{ height: 'auto' }}>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h6 className="fw-bold mb-0">Today's Events</h6>
-                    <FaPlus className="text-secondary cursor-pointer" />
+                    <h6 className="fw-bold mb-0">Events for {format(selectedDate, 'MMM d')}</h6>
+                    <FaPlus className="text-primary cursor-pointer" onClick={handleAddEventClick} title="Add Event" />
                 </div>
 
                 <div className="d-flex flex-column gap-3">
-                    {events.map((ev, idx) => (
-                        <div key={idx} className="d-flex gap-3 position-relative">
-                            <div className="d-flex flex-column align-items-center" style={{ width: '40px' }}>
-                                <small className="text-muted" style={{ fontSize: '0.7rem' }}>{ev.time.split('-')[0]}</small>
-                                <div className="h-100 border-start my-1" style={{ borderStyle: 'dashed' }}></div>
+                    {selectedDateEvents.length > 0 ? (
+                        selectedDateEvents.map((ev, idx) => (
+                            <div key={idx} className="d-flex gap-3 position-relative cursor-pointer" onClick={(e) => handleEditEventClick(e, ev)}>
+                                <div className="d-flex flex-column align-items-center" style={{ width: '40px' }}>
+                                    <small className="text-muted" style={{ fontSize: '0.7rem' }}>{ev.time.split('-')[0]}</small>
+                                    <div className="h-100 border-start my-1" style={{ borderStyle: 'dashed' }}></div>
+                                </div>
+                                <div className="flex-grow-1">
+                                    <h6 className="mb-0 small fw-bold">{ev.title}</h6>
+                                    <small className="text-muted" style={{ fontSize: '0.7rem' }}>{ev.time} • {ev.type}</small>
+                                </div>
+                                <div className={`rounded-circle p-1 ${ev.type === 'important' ? 'bg-danger' : ev.type === 'work' ? 'bg-purple' : 'bg-success'}`} style={{ width: '8px', height: '8px', marginTop: '5px' }}></div>
                             </div>
-                            <div>
-                                <h6 className="mb-0 small fw-bold">{ev.title}</h6>
-                                <small className="text-muted" style={{ fontSize: '0.7rem' }}>{ev.time}</small>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="mt-3 pt-3 border-top text-center">
-                    <button className="btn btn-light btn-sm w-100 fw-bold">Yesterdays Events</button>
+                        ))
+                    ) : (
+                        <p className="text-muted small text-center my-3">No events scheduled.</p>
+                    )}
                 </div>
             </div>
         );
     };
 
     return (
-        <div className="bg-white min-vh-100 d-flex flex-column">
+        <div className="d-flex flex-column min-vh-100 bg-light">
             <Navbar />
-            <main className="flex-grow-1 p-4 bg-light">
-                <div className="container">
-                    <div className="row g-4 d-flex align-items-start">
-                        {/* Added align-items-start to ensure columns don't stretch unnaturally if not needed, though stretching is fine if content is handled */}
-                        {/* Left Sidebar */}
-                        <div className="col-lg-3 col-md-4">
-                            {renderMiniCalendar()}
-                            {renderEventList()}
-                        </div>
+            <div className="container-fluid py-4" style={{ marginTop: '20px' }}>
+                <div className="row g-4 d-flex align-items-start">
+                    {/* Left Sidebar */}
+                    <div className="col-lg-3 col-md-4">
+                        {renderMiniCalendar()}
+                        {renderEventList()}
+                    </div>
 
-                        {/* Main Calendar */}
-                        <div className="col-lg-9 col-md-8">
-                            <div className="dashboard-card p-4" style={{ height: 'auto', minHeight: '100%' }}>
-                                {renderHeader()}
-                                {renderDays()}
-                                {renderCells()}
+                    {/* Main Calendar */}
+                    <div className="col-lg-9 col-md-8">
+                        <div className="dashboard-card p-4 bg-white rounded shadow-sm" style={{ height: 'auto', minHeight: '100%' }}>
+                            {renderHeader()}
+                            {renderDays()}
+                            {renderCells()}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Event Modal */}
+            {showModal && (
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">{isEditing ? 'Edit Event' : 'Add New Event'}</h5>
+                                <button className="btn-close" onClick={() => setShowModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label className="form-label small fw-bold">Event Title</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={currentEvent.title}
+                                        onChange={(e) => setCurrentEvent({ ...currentEvent, title: e.target.value })}
+                                        placeholder="Meeting, Birthday, etc."
+                                    />
+                                </div>
+                                <div className="row g-2 mb-3">
+                                    <div className="col-6">
+                                        <label className="form-label small fw-bold">Date</label>
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            value={currentEvent.date}
+                                            onChange={(e) => setCurrentEvent({ ...currentEvent, date: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-6">
+                                        <label className="form-label small fw-bold">Type</label>
+                                        <select
+                                            className="form-select"
+                                            value={currentEvent.type}
+                                            onChange={(e) => setCurrentEvent({ ...currentEvent, type: e.target.value })}
+                                        >
+                                            <option value="work">Work</option>
+                                            <option value="personal">Personal</option>
+                                            <option value="important">Important</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="row g-2 mb-3">
+                                    <div className="col-6">
+                                        <label className="form-label small fw-bold">Start Time</label>
+                                        <input
+                                            type="time"
+                                            className="form-control"
+                                            value={currentEvent.startTime}
+                                            onChange={(e) => setCurrentEvent({ ...currentEvent, startTime: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="col-6">
+                                        <label className="form-label small fw-bold">End Time</label>
+                                        <input
+                                            type="time"
+                                            className="form-control"
+                                            value={currentEvent.endTime}
+                                            onChange={(e) => setCurrentEvent({ ...currentEvent, endTime: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label small fw-bold">Description</label>
+                                    <textarea
+                                        className="form-control"
+                                        rows="3"
+                                        value={currentEvent.description}
+                                        onChange={(e) => setCurrentEvent({ ...currentEvent, description: e.target.value })}
+                                        placeholder="Add details..."
+                                    ></textarea>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                {isEditing && (
+                                    <button className="btn btn-danger btn-sm me-auto" onClick={handleDeleteEvent}>Delete</button>
+                                )}
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowModal(false)}>Cancel</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleSaveEvent}>Save Event</button>
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
-            <Footer />
+            )}
         </div>
     );
 };

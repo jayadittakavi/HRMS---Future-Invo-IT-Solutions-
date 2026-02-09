@@ -37,8 +37,19 @@ const BranchMap = ({ branches }) => {
                 />
 
                 {branches.map((branch) => {
-                    const [lat, lng] = branch.location.split(',').map(coord => parseFloat(coord.trim()));
-                    if (isNaN(lat) || isNaN(lng)) return null;
+                    let lat, lng;
+
+                    if (typeof branch.location === 'string') {
+                        const parts = branch.location.split(',').map(coord => parseFloat(coord.trim()));
+                        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+                            [lat, lng] = parts;
+                        }
+                    } else if (branch.lat && branch.lng) {
+                        lat = parseFloat(branch.lat);
+                        lng = parseFloat(branch.lng);
+                    }
+
+                    if (!lat || !lng) return null;
 
                     return (
                         <Marker key={branch.id} position={[lat, lng]}>

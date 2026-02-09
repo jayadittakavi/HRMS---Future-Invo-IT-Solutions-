@@ -20,8 +20,8 @@ const Features = () => {
                     }}
                 >
                     <div className="container py-5 text-center">
-                        <h1 className="display-4 fw-bold mb-3">Powerful HR Features</h1>
-                        <p className="lead opacity-75 mb-0 max-w-2xl mx-auto">Discover the tools that will transform your workforce management.</p>
+                        <h1 className="display-4 fw-bold mb-3 text-white" style={{ color: 'white' }}>Powerful HR Features</h1>
+                        <p className="lead opacity-75 mb-0 max-w-2xl mx-auto text-white" style={{ color: 'white' }}>Discover the tools that will transform your workforce management.</p>
                     </div>
                 </div>
 

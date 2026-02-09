@@ -88,7 +88,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
                     { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                     { name: 'User Mgmt', icon: <MdPerson size={20} />, path: '/users' },
-                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/super-admin/audit-logs' },
+                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/audit-logs' },
                 ];
                 break;
 

@@ -6,7 +6,7 @@ import sideImage from '../../../assets/images/loginimage.png';
 const ResetOtp = () => {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
-    const [timeLeft, setTimeLeft] = useState(30);
+    const [timeLeft, setTimeLeft] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -21,12 +21,34 @@ const ResetOtp = () => {
         }
     }, [timeLeft]);
 
-    const handleResend = () => {
-        setTimeLeft(30);
+    const handleResend = async () => {
         setCanResend(false);
         setError('');
-        // Logic to resend OTP goes here
-        console.log('Resending Reset OTP to', email);
+
+        try {
+            const response = await fetch("http://192.168.1.13:5000/api/auth/forgot-password", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to resend OTP");
+            }
+
+            // Restart timer only on success
+            setTimeLeft(60);
+            alert(`OTP resent successfully to ${email}`);
+
+        } catch (err) {
+            console.error("Resend OTP Error:", err);
+            setError(err.message || 'Failed to resend OTP. Please try again.');
+            setCanResend(true); // Allow retry immediately on failure
+        }
     };
 
     const handleChange = (element, index) => {
@@ -71,7 +93,7 @@ const ResetOtp = () => {
             setError('');
 
             // Direct fetch call
-            const response = await fetch("http://192.168.1.4:5000/api/auth/verify-reset-otp", {
+            const response = await fetch("http://192.168.1.13:5000/api/auth/verify-reset-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, otp: otpValue })
@@ -85,18 +107,8 @@ const ResetOtp = () => {
             // Logic based on Role (assuming response contains role)
             const role = data.role; // Verify backend returns this!
 
-            if (role === 'superadmin') {
-                // 1. SUPER ADMIN: Direct reset
-                navigate('/reset-password', { state: { email } });
-            } else if (role === 'admin') {
-                // 2. ADMIN: Request sent to Super Admin
-                alert("Reset request sent to Super Admin for approval");
-                navigate('/login');
-            } else {
-                // 3. EMPLOYEE / MANAGER / HR / ACCOUNTANT: Request sent to Admin
-                alert("Reset request sent to Admin for approval");
-                navigate('/login');
-            }
+            // Direct reset for ALL users (as requested)
+            navigate('/reset-password', { state: { email, otp: otpValue } });
 
         } catch (err) {
             console.error(err);

@@ -8,7 +8,7 @@ export const UserManagementContent = () => {
     const [activeTab, setActiveTab] = useState('users');
 
     // --- USER MANAGEMENT STATE ---
-    const [users] = useState([
+    const [users, setUsers] = useState([
         { id: 1, name: 'Meera Krishnan', email: 'meera@example.com', role: 'Super Admin', status: 'Active', lastLogin: 'Today, 10:00 AM' },
         { id: 2, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active', lastLogin: 'Yesterday, 05:30 PM' },
         { id: 3, name: 'Jane Smith', email: 'jane@example.com', role: 'Employee', status: 'Inactive', lastLogin: '2 weeks ago' },
@@ -16,12 +16,13 @@ export const UserManagementContent = () => {
         { id: 5, name: 'Bob Williams', email: 'bob@example.com', role: 'Accountant', status: 'Active', lastLogin: '3 days ago' },
     ]);
     const [showUserAdd, setShowUserAdd] = useState(false);
-    // const [showUserEdit, setShowUserEdit] = useState(false);
-    // const [selectedUser, setSelectedUser] = useState(null);
+    const [showUserEdit, setShowUserEdit] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [userForm, setUserForm] = useState({ name: '', email: '', role: 'Employee', status: 'Active' });
 
     // --- ROLES & PERMISSIONS STATE ---
     const modules = ['Employees', 'Attendance', 'Leave', 'Payroll', 'Assets', 'Performance'];
-    const actions = ['View', 'Add', 'Edit', 'Approve'];
+    const actions = ['View', 'Add', 'Edit', 'Delete', 'Status', 'Approve'];
 
     const [roles, setRoles] = useState([
         {
@@ -35,7 +36,7 @@ export const UserManagementContent = () => {
             name: 'HR',
             description: 'Manage employees, attendance, and payroll',
             permissions: {
-                Employees: ['View', 'Add', 'Edit'],
+                Employees: ['View', 'Add', 'Edit', 'Status'],
                 Attendance: ['View', 'Edit', 'Approve'],
                 Payroll: ['View', 'Add', 'Edit', 'Approve'],
                 Leave: ['View', 'Approve']
@@ -79,9 +80,41 @@ export const UserManagementContent = () => {
     // --- HANDLERS ---
 
     // User Handlers
+    const handleUserInputChange = (e) => {
+        const { name, value } = e.target;
+        setUserForm({ ...userForm, [name]: value });
+    };
+
+    const handleAddUserClick = () => {
+        setUserForm({ name: '', email: '', role: 'Employee', status: 'Active' });
+        setShowUserAdd(true);
+    };
+
     const handleEditUser = (user) => {
         setSelectedUser(user);
+        setUserForm(user);
         setShowUserEdit(true);
+    };
+
+    const handleSaveUser = () => {
+        if (!userForm.name) return;
+        const newUser = {
+            id: users.length + 1,
+            ...userForm,
+            lastLogin: 'Never'
+        };
+        setUsers([...users, newUser]);
+        setShowUserAdd(false);
+    };
+
+    const handleUpdateUser = () => {
+        if (!selectedUser) return;
+        setUsers(users.map(u => u.id === selectedUser.id ? { ...userForm, id: selectedUser.id, lastLogin: u.lastLogin } : u));
+        setShowUserEdit(false);
+    };
+
+    const toggleUserStatus = (id) => {
+        setUsers(users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
     };
 
     // Role Handlers
@@ -167,7 +200,7 @@ export const UserManagementContent = () => {
 
                 <button
                     className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2 shadow-sm"
-                    onClick={() => activeTab === 'users' ? setShowUserAdd(true) : handleAddRoleClick()}
+                    onClick={() => activeTab === 'users' ? handleAddUserClick() : handleAddRoleClick()}
                 >
                     <FaPlus size={12} /> {activeTab === 'users' ? 'Add User' : 'Create Role'}
                 </button>
@@ -189,7 +222,7 @@ export const UserManagementContent = () => {
                             </thead>
                             <tbody>
                                 {users.map((user) => (
-                                    <tr key={user.id}>
+                                    <tr key={user.id} className={user.status === 'Inactive' ? 'opacity-50' : ''}>
                                         <td>
                                             <div className="d-flex flex-column">
                                                 <span className="fw-bold text-dark">{user.name}</span>
@@ -210,6 +243,13 @@ export const UserManagementContent = () => {
                                         <td>
                                             <div className="d-flex gap-2">
                                                 <button className="action-btn edit" onClick={() => handleEditUser(user)}><FaEdit /></button>
+                                                <button
+                                                    className={`action-btn ${user.status === 'Active' ? 'text-danger' : 'text-success'}`}
+                                                    onClick={() => toggleUserStatus(user.id)}
+                                                    title={user.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                                >
+                                                    {user.status === 'Active' ? <FaTimes /> : <FaCheck />}
+                                                </button>
                                                 <button className="action-btn delete"><FaTrash /></button>
                                             </div>
                                         </td>
@@ -221,7 +261,7 @@ export const UserManagementContent = () => {
                 </div>
             )}
 
-            {/* TAB CONTENT: ROLES */}
+            {/* TAB CONTENT: ROLES (Already in place) */}
             {activeTab === 'roles' && (
                 <div className="flex-grow-1 fade-in">
                     <div className="row g-4">
@@ -273,7 +313,6 @@ export const UserManagementContent = () => {
                 </div>
             )}
 
-            {/* USER MODALS REMAIN THE SAME (SIMPLIFIED FOR BREVITY IN EDIT) */}
             {/* Add User Modal */}
             {showUserAdd && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -287,23 +326,105 @@ export const UserManagementContent = () => {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Full Name</label>
-                                        <input type="text" className="form-control" />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={userForm.name}
+                                            onChange={handleUserInputChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Email Address</label>
-                                        <input type="email" className="form-control" />
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={userForm.email}
+                                            onChange={handleUserInputChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Assign Role</label>
-                                        <select className="form-select">
-                                            {roles.map((r) => (<option key={r.id}>{r.name}</option>))}
+                                        <select
+                                            className="form-select"
+                                            name="role"
+                                            value={userForm.role}
+                                            onChange={handleUserInputChange}
+                                        >
+                                            {roles.map((r) => (<option key={r.id} value={r.name}>{r.name}</option>))}
                                         </select>
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowUserAdd(false)}>Cancel</button>
-                                <button className="btn btn-primary btn-sm">Create User</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleSaveUser}>Create User</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit User Modal */}
+            {showUserEdit && selectedUser && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Edit User</h5>
+                                <button className="btn-close" onClick={() => setShowUserEdit(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <form>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Full Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={userForm.name}
+                                            onChange={handleUserInputChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Email Address</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            name="email"
+                                            value={userForm.email}
+                                            onChange={handleUserInputChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Assign Role</label>
+                                        <select
+                                            className="form-select"
+                                            name="role"
+                                            value={userForm.role}
+                                            onChange={handleUserInputChange}
+                                        >
+                                            {roles.map((r) => (<option key={r.id} value={r.name}>{r.name}</option>))}
+                                        </select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Status</label>
+                                        <select
+                                            className="form-select"
+                                            name="status"
+                                            value={userForm.status}
+                                            onChange={handleUserInputChange}
+                                        >
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowUserEdit(false)}>Cancel</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleUpdateUser}>Update User</button>
                             </div>
                         </div>
                     </div>

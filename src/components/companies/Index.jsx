@@ -1,103 +1,239 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import React, { useEffect, useState } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import DashboardLayout from "../layout/DashboardLayout";
+import { companyService } from "./service/service";
 
-export const CompaniesContent = () => {
-    // Mock Data
-    const [companies] = useState([
-        { id: 1, name: 'TrickuWeb Technologies', email: 'support@trickuweb.com', address: 'Tech Park, Bangalore', status: 'Active' },
-        { id: 2, name: 'InnovateSoft Solutions', email: 'support@innovatesoft.com', address: 'IT Hub, Hyderabad', status: 'Active' },
-        { id: 3, name: 'NextGen Systems', email: 'info@nextgensys.com', address: 'Tech Valley, Noida', status: 'Active' },
-    ]);
+const CompaniesContent = () => {
+    const [companies, setCompanies] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
-    const [selectedCompany, setSelectedCompany] = useState(null);
 
-    // Handlers
-    const handleEdit = (company) => {
-        setSelectedCompany(company);
-        setShowEdit(true);
+    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [formData, setFormData] = useState({
+        name: "",
+        company_Id: "",
+        industry: "",
+        company_size: "",
+        country: "",
+        state: "",
+        city_branch: "",
+        timezone: "",
+    });
+
+    // 🔹 Fetch companies
+    const fetchCompanies = async () => {
+        setLoading(true);
+        try {
+            const data = await companyService.getAllCompanies();
+            setCompanies(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleDelete = (company) => {
-        setSelectedCompany(company);
-        setShowDelete(true);
+    useEffect(() => {
+        fetchCompanies();
+    }, []);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    // 🔹 Create
+    const handleCreate = async () => {
+        try {
+            await companyService.createCompany(formData);
+
+            alert("Company created successfully");
+            setShowAdd(false);
+            setFormData({
+                name: "",
+                company_Id: "",
+                industry: "",
+                company_size: "",
+                country: "",
+                state: "",
+                city_branch: "",
+                timezone: "",
+            });
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to create company: " + (err.message || "Unknown error"));
+        }
+    }
+
+
+    // 🔹 Update
+    const handleUpdate = async () => {
+        try {
+            await companyService.updateCompany(selectedCompany.id, formData);
+            alert("Company updated successfully");
+            setShowEdit(false);
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update company: " + (err.message || "Unknown error"));
+        }
+    };
+
+    // 🔹 Delete
+    const handleDelete = async () => {
+        try {
+            await companyService.deleteCompany(selectedCompany.id);
+            alert("Company deleted successfully");
+            setShowDelete(false);
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete company: " + (err.message || "Unknown error"));
+        }
     };
 
     return (
         <>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 className="fw-bold text-dark mb-1">Company Management</h5>
-                    <p className="text-secondary small mb-0">Manage companies in your system</p>
-                </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => setShowAdd(true)}>
+            <div className="d-flex justify-content-between mb-3">
+                <h5>Company Management</h5>
+                <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                        setFormData({
+                            name: "",
+                            company_Id: "",
+                            industry: "",
+                            company_size: "",
+                            country: "",
+                            state: "",
+                            city_branch: "",
+                            timezone: "",
+                        });
+                        setShowAdd(true);
+                    }}
+                >
                     + Add Company
                 </button>
             </div>
 
-            <div className="table-card">
-                <div className="table-responsive">
-                    <table className="table custom-table">
-                        <thead>
-                            <tr>
-                                <th>Company Name</th>
-                                <th>Support Email</th>
-                                <th>Address</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Company ID</th>
+                        <th>Industry</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loading ? (
+                        <tr>
+                            <td colSpan="4">Loading...</td>
+                        </tr>
+                    ) : companies.length === 0 ? (
+                        <tr>
+                            <td colSpan="4">No companies found</td>
+                        </tr>
+                    ) : (
+                        companies.map((c) => (
+                            <tr key={c.id}>
+                                <td>{c.name}</td>
+                                <td>{c.company_Id}</td>
+                                <td>{c.industry}</td>
+                                <td>{`${c.city_branch || ''}, ${c.country || ''}`}</td>
+                                <td>
+                                    <FaEdit
+                                        className="me-3 text-primary"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            setSelectedCompany(c);
+                                            setFormData({
+                                                name: c.name || "",
+                                                company_Id: c.company_Id || "",
+                                                industry: c.industry || "",
+                                                company_size: c.company_size || "",
+                                                country: c.country || "",
+                                                state: c.state || "",
+                                                city_branch: c.city_branch || "",
+                                                timezone: c.timezone || "",
+                                            });
+                                            setShowEdit(true);
+                                        }}
+                                    />
+                                    <FaTrash
+                                        className="text-danger"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            setSelectedCompany(c);
+                                            setShowDelete(true);
+                                        }}
+                                    />
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {companies.map((company) => (
-                                <tr key={company.id}>
-                                    <td><span className="fw-bold text-dark">{company.name}</span></td>
-                                    <td>{company.email}</td>
-                                    <td>{company.address}</td>
-                                    <td><span className="status-badge">Active</span></td>
-                                    <td>
-                                        <button className="action-btn edit" onClick={() => handleEdit(company)} title="Edit"><FaEdit /></button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(company)} title="Delete"><FaTrash /></button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        ))
+                    )}
+                </tbody>
+            </table>
 
             {/* Add Modal */}
             {showAdd && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content p-3">
+                            <div className="modal-header border-0">
                                 <h5 className="modal-title">Add Company</h5>
                                 <button className="btn-close" onClick={() => setShowAdd(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
+                                <div className="row g-3">
+                                    <div className="col-md-6">
                                         <label className="form-label small fw-bold">Company Name</label>
-                                        <input type="text" className="form-control" placeholder="Enter name" />
+                                        <input name="name" className="form-control" onChange={handleChange} value={formData.name} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Support Email</label>
-                                        <input type="email" className="form-control" placeholder="Enter email" />
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company ID</label>
+                                        <input name="company_Id" className="form-control" onChange={handleChange} value={formData.company_Id} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea className="form-control" rows="2" placeholder="Enter address"></textarea>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Industry</label>
+                                        <input name="industry" className="form-control" onChange={handleChange} value={formData.industry} />
                                     </div>
-                                </form>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company Size</label>
+                                        <select name="company_size" className="form-select" onChange={handleChange} value={formData.company_size}>
+                                            <option value="">Select Size</option>
+                                            <option>1-10</option>
+                                            <option>11-50</option>
+                                            <option>51-200</option>
+                                            <option>201-500</option>
+                                            <option>500+</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">Country</label>
+                                        <input name="country" className="form-control" onChange={handleChange} value={formData.country} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">State</label>
+                                        <input name="state" className="form-control" onChange={handleChange} value={formData.state} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">City/Branch</label>
+                                        <input name="city_branch" className="form-control" onChange={handleChange} value={formData.city_branch} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Timezone</label>
+                                        <input name="timezone" className="form-control" onChange={handleChange} value={formData.timezone} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Save Company</button>
+                            <div className="modal-footer border-0">
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Cancel</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleCreate}>Save</button>
                             </div>
                         </div>
                     </div>
@@ -105,33 +241,60 @@ export const CompaniesContent = () => {
             )}
 
             {/* Edit Modal */}
-            {showEdit && selectedCompany && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
+            {showEdit && (
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content p-3">
+                            <div className="modal-header border-0">
                                 <h5 className="modal-title">Edit Company</h5>
                                 <button className="btn-close" onClick={() => setShowEdit(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
+                                <div className="row g-3">
+                                    <div className="col-md-6">
                                         <label className="form-label small fw-bold">Company Name</label>
-                                        <input type="text" className="form-control" defaultValue={selectedCompany.name} />
+                                        <input name="name" className="form-control" onChange={handleChange} value={formData.name} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Support Email</label>
-                                        <input type="email" className="form-control" defaultValue={selectedCompany.email} />
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company ID</label>
+                                        <input name="company_Id" className="form-control" onChange={handleChange} value={formData.company_Id} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea className="form-control" rows="2" defaultValue={selectedCompany.address}></textarea>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Industry</label>
+                                        <input name="industry" className="form-control" onChange={handleChange} value={formData.industry} />
                                     </div>
-                                </form>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company Size</label>
+                                        <select name="company_size" className="form-select" onChange={handleChange} value={formData.company_size}>
+                                            <option value="">Select Size</option>
+                                            <option>1-10</option>
+                                            <option>11-50</option>
+                                            <option>51-200</option>
+                                            <option>201-500</option>
+                                            <option>500+</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">Country</label>
+                                        <input name="country" className="form-control" onChange={handleChange} value={formData.country} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">State</label>
+                                        <input name="state" className="form-control" onChange={handleChange} value={formData.state} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">City/Branch</label>
+                                        <input name="city_branch" className="form-control" onChange={handleChange} value={formData.city_branch} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Timezone</label>
+                                        <input name="timezone" className="form-control" onChange={handleChange} value={formData.timezone} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Update Company</button>
+                            <div className="modal-footer border-0">
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Cancel</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleUpdate}>Update</button>
                             </div>
                         </div>
                     </div>
@@ -139,21 +302,12 @@ export const CompaniesContent = () => {
             )}
 
             {/* Delete Modal */}
-            {showDelete && selectedCompany && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title text-danger">Delete Company</h5>
-                                <button className="btn-close" onClick={() => setShowDelete(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to delete <strong>{selectedCompany.name}</strong>? This action cannot be undone.</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
-                            </div>
+            {showDelete && (
+                <div className="modal show d-block">
+                    <div className="modal-dialog">
+                        <div className="modal-content p-3">
+                            <p>Are you sure?</p>
+                            <button className="btn btn-danger btn-sm" onClick={handleDelete}>Delete</button>
                         </div>
                     </div>
                 </div>
@@ -162,12 +316,10 @@ export const CompaniesContent = () => {
     );
 };
 
-const Companies = () => {
-    return (
-        <DashboardLayout title="">
-            <CompaniesContent />
-        </DashboardLayout>
-    );
-};
+const Companies = () => (
+    <DashboardLayout>
+        <CompaniesContent />
+    </DashboardLayout>
+);
 
 export default Companies;

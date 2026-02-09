@@ -21,10 +21,50 @@ export const BranchesContent = () => {
     const [showEdit, setShowEdit] = useState(false);
     const [selectedBranch, setSelectedBranch] = useState(null);
 
+    const [formData, setFormData] = useState({
+        name: '',
+        company: '',
+        address: '',
+        location: '',
+        status: 'Active'
+    });
+
     // Handlers
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleAddClick = () => {
+        setFormData({ name: '', company: '', address: '', location: '', status: 'Active' });
+        setShowAdd(true);
+    };
+
     const handleEdit = (branch) => {
         setSelectedBranch(branch);
+        setFormData(branch);
         setShowEdit(true);
+    };
+
+    const handleSaveBranch = () => {
+        if (!formData.name) return;
+        const newBranch = {
+            id: branches.length + 1,
+            ...formData,
+            // Mock location generation if empty
+            location: formData.location || '0.0, 0.0'
+        };
+        setBranches([...branches, newBranch]);
+        setShowAdd(false);
+    };
+
+    const handleUpdateBranch = () => {
+        if (!selectedBranch) return;
+        const updatedList = branches.map(b =>
+            b.id === selectedBranch.id ? { ...formData, id: selectedBranch.id } : b
+        );
+        setBranches(updatedList);
+        setShowEdit(false);
     };
 
     const toggleStatus = (id) => {
@@ -44,7 +84,7 @@ export const BranchesContent = () => {
                     <h5 className="fw-bold text-dark mb-1">Branch Management</h5>
                     <p className="text-secondary small mb-0">Manage company branches</p>
                 </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => setShowAdd(true)}>
+                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
                     + Add Branch
                 </button>
             </div>
@@ -109,25 +149,55 @@ export const BranchesContent = () => {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Branch Name</label>
-                                        <input type="text" className="form-control" placeholder="Enter branch name" />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter branch name"
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Company</label>
-                                        <select className="form-select">
-                                            <option>Select Company</option>
-                                            <option>TrickuWeb Technologies</option>
-                                            <option>InnovateSoft Solutions</option>
+                                        <select
+                                            className="form-select"
+                                            name="company"
+                                            value={formData.company}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="">Select Company</option>
+                                            <option value="TrickuWeb Technologies">TrickuWeb Technologies</option>
+                                            <option value="InnovateSoft Solutions">InnovateSoft Solutions</option>
                                         </select>
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Address</label>
-                                        <textarea className="form-control" rows="2" placeholder="Enter address"></textarea>
+                                        <textarea
+                                            className="form-control"
+                                            rows="2"
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleInputChange}
+                                            placeholder="Enter address"
+                                        ></textarea>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Location (Lat, Lng)</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="location"
+                                            value={formData.location}
+                                            onChange={handleInputChange}
+                                            placeholder="e.g. 12.9716, 77.5946"
+                                        />
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Save Branch</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleSaveBranch}>Save Branch</button>
                             </div>
                         </div>
                     </div>
@@ -147,24 +217,63 @@ export const BranchesContent = () => {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Branch Name</label>
-                                        <input type="text" className="form-control" defaultValue={selectedBranch.name} />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Company</label>
-                                        <select className="form-select" defaultValue={selectedBranch.company}>
-                                            <option>TrickuWeb Technologies</option>
-                                            <option>InnovateSoft Solutions</option>
+                                        <select
+                                            className="form-select"
+                                            name="company"
+                                            value={formData.company}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="TrickuWeb Technologies">TrickuWeb Technologies</option>
+                                            <option value="InnovateSoft Solutions">InnovateSoft Solutions</option>
                                         </select>
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Address</label>
-                                        <textarea className="form-control" rows="2" defaultValue={selectedBranch.address}></textarea>
+                                        <textarea
+                                            className="form-control"
+                                            rows="2"
+                                            name="address"
+                                            value={formData.address}
+                                            onChange={handleInputChange}
+                                        ></textarea>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Location</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="location"
+                                            value={formData.location}
+                                            onChange={handleInputChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Status</label>
+                                        <select
+                                            className="form-select"
+                                            name="status"
+                                            value={formData.status}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Update Branch</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleUpdateBranch}>Update Branch</button>
                             </div>
                         </div>
                     </div>

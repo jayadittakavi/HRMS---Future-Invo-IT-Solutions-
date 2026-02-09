@@ -1,237 +1,239 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaBan, FaCheckCircle, FaPlus } from 'react-icons/fa';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import "../../../../components/layout/DashboardLayout.css";
+import React, { useEffect, useState } from "react";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import DashboardLayout from "../../../../components/layout/DashboardLayout";
+import { companyService } from "./service.js";
 
 export const CompaniesContent = () => {
-    // Initial Mock Data
-    const initialCompanies = [
-        { id: 1, name: 'TrickuWeb Technologies', email: 'support@trickuweb.com', address: 'Tech Park, Bangalore', status: 'Active', startDate: '2025-01-01', endDate: '2026-01-01' },
-        { id: 2, name: 'InnovateSoft Solutions', email: 'support@innovatesoft.com', address: 'IT Hub, Hyderabad', status: 'Active', startDate: '2025-02-15', endDate: '2026-02-15' },
-        { id: 3, name: 'NextGen Systems', email: 'info@nextgensys.com', address: 'Tech Valley, Noida', status: 'Inactive', startDate: '2024-06-01', endDate: '2025-06-01' },
-        { id: 4, name: 'Alpha Corp', email: 'admin@alphacorp.com', address: 'Business Bay, Mumbai', status: 'Active', startDate: '2024-01-01', endDate: '2025-12-31' },
-        { id: 5, name: 'Beta Industries', email: 'hr@betaindustries.com', address: 'Industrial Area, Chennai', status: 'Active', startDate: '2023-05-20', endDate: '2026-05-20' },
-        { id: 6, name: 'Gamma Enterprises', email: 'contact@gammaent.com', address: 'Sector 62, Gurgaon', status: 'Inactive', startDate: '2024-03-10', endDate: '2025-03-10' },
-        { id: 7, name: 'Delta Solutions', email: 'support@deltasol.com', address: 'Hinjewadi, Pune', status: 'Active', startDate: '2025-07-01', endDate: '2027-07-01' },
-        { id: 8, name: 'Epsilon Tech', email: 'info@epsilon.com', address: 'Salt Lake, Kolkata', status: 'Active', startDate: '2025-04-15', endDate: '2026-04-15' },
-    ];
+    const [companies, setCompanies] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // State
-    const [companies, setCompanies] = useState(initialCompanies);
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    // const [showDelete, setShowDelete] = useState(false); // Can be used for "Delete" or "Block" confirmation if needed, but simple toggle is faster
-    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [showDelete, setShowDelete] = useState(false);
 
-    // Form States
+    const [selectedCompany, setSelectedCompany] = useState(null);
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        address: '',
-        status: 'Active',
-        startDate: '',
-        endDate: ''
+        name: "",
+        company_Id: "",
+        industry: "",
+        company_size: "",
+        country: "",
+        state: "",
+        city_branch: "",
+        timezone: "",
     });
 
-    // Handlers
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+    // 🔹 Fetch companies
+    const fetchCompanies = async () => {
+        setLoading(true);
+        try {
+            const data = await companyService.getAllCompanies();
+            setCompanies(Array.isArray(data) ? data : []);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAddClick = () => {
-        setFormData({ name: '', email: '', address: '', status: 'Active', startDate: '', endDate: '' });
-        setShowAdd(true);
+    useEffect(() => {
+        fetchCompanies();
+    }, []);
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleEditClick = (company) => {
-        setSelectedCompany(company);
-        setFormData(company);
-        setShowEdit(true);
+    // 🔹 Create
+    const handleCreate = async () => {
+        try {
+            await companyService.createCompany(formData);
+
+            alert("Company created successfully");
+            setShowAdd(false);
+            setFormData({
+                name: "",
+                company_Id: "",
+                industry: "",
+                company_size: "",
+                country: "",
+                state: "",
+                city_branch: "",
+                timezone: "",
+            });
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to create company: " + (err.message || "Unknown error"));
+        }
+    }
+
+
+    // 🔹 Update
+    const handleUpdate = async () => {
+        try {
+            await companyService.updateCompany(selectedCompany.id, formData);
+            alert("Company updated successfully");
+            setShowEdit(false);
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update company: " + (err.message || "Unknown error"));
+        }
     };
 
-    const handleSaveCompany = () => {
-        if (!formData.name || !formData.email) return; // Basic validation
-        const newCompany = {
-            ...formData,
-            id: companies.length + 1,
-            status: 'Active' // Default active on create
-        };
-        setCompanies([...companies, newCompany]);
-        setShowAdd(false);
-    };
-
-    const handleUpdateCompany = () => {
-        if (!selectedCompany) return;
-        const updatedList = companies.map(comp =>
-            comp.id === selectedCompany.id ? { ...formData, id: selectedCompany.id } : comp
-        );
-        setCompanies(updatedList);
-        setShowEdit(false);
-    };
-
-    const toggleStatus = (id) => {
-        const updatedList = companies.map(comp => {
-            if (comp.id === id) {
-                return { ...comp, status: comp.status === 'Active' ? 'Inactive' : 'Active' };
-            }
-            return comp;
-        });
-        setCompanies(updatedList);
-    };
-
-    // Calculate subscription status
-    const getSubscriptionStatus = (endDate) => {
-        if (!endDate) return 'Unknown';
-        const today = new Date();
-        const end = new Date(endDate);
-        return end < today ? 'Expired' : 'Valid';
+    // 🔹 Delete
+    const handleDelete = async () => {
+        try {
+            await companyService.deleteCompany(selectedCompany.id);
+            alert("Company deleted successfully");
+            setShowDelete(false);
+            fetchCompanies();
+        } catch (err) {
+            console.error(err);
+            alert("Failed to delete company: " + (err.message || "Unknown error"));
+        }
     };
 
     return (
         <>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 className="fw-bold text-dark mb-1">Company Management</h5>
-                    <p className="text-secondary small mb-0">Create, edit, and manage company subscriptions</p>
-                </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2" onClick={handleAddClick}>
-                    <FaPlus size={12} /> Add Company
+            <div className="d-flex justify-content-between mb-3">
+                <h5>Company Management</h5>
+                <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                        setFormData({
+                            name: "",
+                            company_Id: "",
+                            industry: "",
+                            company_size: "",
+                            country: "",
+                            state: "",
+                            city_branch: "",
+                            timezone: "",
+                        });
+                        setShowAdd(true);
+                    }}
+                >
+                    + Add Company
                 </button>
             </div>
 
-            <div className="table-card">
-                <div className="table-responsive">
-                    <table className="table custom-table align-middle">
-                        <thead>
-                            <tr>
-                                <th>Company Name</th>
-                                <th>Email</th>
-                                <th>Valid From</th>
-                                <th>Valid To</th>
-                                <th>Platform Access</th>
-                                <th>Actions</th>
+            <table className="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Company ID</th>
+                        <th>Industry</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {loading ? (
+                        <tr>
+                            <td colSpan="4">Loading...</td>
+                        </tr>
+                    ) : companies.length === 0 ? (
+                        <tr>
+                            <td colSpan="4">No companies found</td>
+                        </tr>
+                    ) : (
+                        companies.map((c) => (
+                            <tr key={c.id}>
+                                <td>{c.name}</td>
+                                <td>{c.company_Id}</td>
+                                <td>{c.industry}</td>
+                                <td>{`${c.city_branch || ''}, ${c.country || ''}`}</td>
+                                <td>
+                                    <FaEdit
+                                        className="me-3 text-primary"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            setSelectedCompany(c);
+                                            setFormData({
+                                                name: c.name || "",
+                                                company_Id: c.company_Id || "",
+                                                industry: c.industry || "",
+                                                company_size: c.company_size || "",
+                                                country: c.country || "",
+                                                state: c.state || "",
+                                                city_branch: c.city_branch || "",
+                                                timezone: c.timezone || "",
+                                            });
+                                            setShowEdit(true);
+                                        }}
+                                    />
+                                    <FaTrash
+                                        className="text-danger"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            setSelectedCompany(c);
+                                            setShowDelete(true);
+                                        }}
+                                    />
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {companies.map((company) => {
-                                const subStatus = getSubscriptionStatus(company.endDate);
-                                const isExpired = subStatus === 'Expired';
-
-                                return (
-                                    <tr key={company.id} className={company.status === 'Inactive' ? 'opacity-50' : ''}>
-                                        <td>
-                                            <div className="d-flex flex-column">
-                                                <span className="fw-bold text-dark">{company.name}</span>
-                                                <span className="small text-muted">{company.address}</span>
-                                            </div>
-                                        </td>
-                                        <td>{company.email}</td>
-                                        <td>{company.startDate || '-'}</td>
-                                        <td>
-                                            <span className={isExpired ? 'text-danger fw-bold' : ''}>
-                                                {company.endDate || '-'}
-                                            </span>
-                                            {isExpired && <span className="badge bg-danger ms-2" style={{ fontSize: '0.65rem' }}>Expired</span>}
-                                        </td>
-                                        <td>
-                                            <span className={`badge ${company.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                                                {company.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <div className="d-flex gap-2">
-                                                <button className="action-btn edit" title="Edit" onClick={() => handleEditClick(company)}>
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    className={`action-btn ${company.status === 'Active' ? 'delete' : 'edit'}`}
-                                                    title={company.status === 'Active' ? "Block Access" : "Activate Access"}
-                                                    onClick={() => toggleStatus(company.id)}
-                                                >
-                                                    {company.status === 'Active' ? <FaBan /> : <FaCheckCircle className="text-success" />}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        ))
+                    )}
+                </tbody>
+            </table>
 
             {/* Add Modal */}
             {showAdd && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Create New Company</h5>
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content p-3">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title">Add Company</h5>
                                 <button className="btn-close" onClick={() => setShowAdd(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Company Name <span className="text-danger">*</span></label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. Acme Corp"
-                                        />
+                                <div className="row g-3">
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company Name</label>
+                                        <input name="name" className="form-control" onChange={handleChange} value={formData.name} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Support Email <span className="text-danger">*</span></label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleInputChange}
-                                            placeholder="admin@acme.com"
-                                        />
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company ID</label>
+                                        <input name="company_Id" className="form-control" onChange={handleChange} value={formData.company_Id} />
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Subscription Start</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                name="startDate"
-                                                value={formData.startDate}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Subscription End</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                name="endDate"
-                                                value={formData.endDate}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Industry</label>
+                                        <input name="industry" className="form-control" onChange={handleChange} value={formData.industry} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea
-                                            className="form-control"
-                                            rows="2"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                            placeholder="Registered office address"
-                                        ></textarea>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company Size</label>
+                                        <select name="company_size" className="form-select" onChange={handleChange} value={formData.company_size}>
+                                            <option value="">Select Size</option>
+                                            <option>1-10</option>
+                                            <option>11-50</option>
+                                            <option>51-200</option>
+                                            <option>201-500</option>
+                                            <option>500+</option>
+                                        </select>
                                     </div>
-                                </form>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">Country</label>
+                                        <input name="country" className="form-control" onChange={handleChange} value={formData.country} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">State</label>
+                                        <input name="state" className="form-control" onChange={handleChange} value={formData.state} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">City/Branch</label>
+                                        <input name="city_branch" className="form-control" onChange={handleChange} value={formData.city_branch} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Timezone</label>
+                                        <input name="timezone" className="form-control" onChange={handleChange} value={formData.timezone} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer border-0">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Cancel</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleSaveCompany}>Create Company</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleCreate}>Save</button>
                             </div>
                         </div>
                     </div>
@@ -239,86 +241,73 @@ export const CompaniesContent = () => {
             )}
 
             {/* Edit Modal */}
-            {showEdit && selectedCompany && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Edit Company Details</h5>
+            {showEdit && (
+                <div className="modal show d-block" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content p-3">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title">Edit Company</h5>
                                 <button className="btn-close" onClick={() => setShowEdit(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
+                                <div className="row g-3">
+                                    <div className="col-md-6">
                                         <label className="form-label small fw-bold">Company Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                        />
+                                        <input name="name" className="form-control" onChange={handleChange} value={formData.name} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Support Email</label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={handleInputChange}
-                                        />
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company ID</label>
+                                        <input name="company_Id" className="form-control" onChange={handleChange} value={formData.company_Id} />
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Subscription Start</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                name="startDate"
-                                                value={formData.startDate}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Subscription End</label>
-                                            <input
-                                                type="date"
-                                                className="form-control"
-                                                name="endDate"
-                                                value={formData.endDate}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Industry</label>
+                                        <input name="industry" className="form-control" onChange={handleChange} value={formData.industry} />
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Status</label>
-                                        <select
-                                            className="form-select"
-                                            name="status"
-                                            value={formData.status}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive (Blocked)</option>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Company Size</label>
+                                        <select name="company_size" className="form-select" onChange={handleChange} value={formData.company_size}>
+                                            <option value="">Select Size</option>
+                                            <option>1-10</option>
+                                            <option>11-50</option>
+                                            <option>51-200</option>
+                                            <option>201-500</option>
+                                            <option>500+</option>
                                         </select>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea
-                                            className="form-control"
-                                            rows="2"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                        ></textarea>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">Country</label>
+                                        <input name="country" className="form-control" onChange={handleChange} value={formData.country} />
                                     </div>
-                                </form>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">State</label>
+                                        <input name="state" className="form-control" onChange={handleChange} value={formData.state} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-bold">City/Branch</label>
+                                        <input name="city_branch" className="form-control" onChange={handleChange} value={formData.city_branch} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Timezone</label>
+                                        <input name="timezone" className="form-control" onChange={handleChange} value={formData.timezone} />
+                                    </div>
+                                </div>
                             </div>
-                            <div className="modal-footer">
+                            <div className="modal-footer border-0">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Cancel</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleUpdateCompany}>Save Changes</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleUpdate}>Update</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Modal */}
+            {showDelete && (
+                <div className="modal show d-block">
+                    <div className="modal-dialog">
+                        <div className="modal-content p-3">
+                            <p>Are you sure?</p>
+                            <button className="btn btn-danger btn-sm" onClick={handleDelete}>Delete</button>
                         </div>
                     </div>
                 </div>
@@ -327,12 +316,10 @@ export const CompaniesContent = () => {
     );
 };
 
-const Companies = () => {
-    return (
-        <DashboardLayout title="">
-            <CompaniesContent />
-        </DashboardLayout>
-    );
-};
+const Companies = () => (
+    <DashboardLayout>
+        <CompaniesContent />
+    </DashboardLayout>
+);
 
 export default Companies;

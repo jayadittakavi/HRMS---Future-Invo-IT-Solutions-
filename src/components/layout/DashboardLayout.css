@@ -359,15 +359,18 @@
 }
 
 .btn-white {
-    background-color: #fff;
+    background-color: var(--bg-card);
     color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 
 .btn-white:hover {
-    background-color: #f8f9fa;
+    background-color: var(--bg-body);
+    color: var(--primary-color);
 }
 
 .btn-white.active {
-    background-color: #e2e8f0;
+    background-color: var(--bg-body);
     font-weight: 600;
+    border-color: var(--primary-color);
 }

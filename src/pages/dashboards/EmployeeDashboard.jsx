@@ -7,10 +7,93 @@ import { SimpleBarChart, SimpleDonutChart } from '../../components/charts/Custom
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
 import { FaCalendarCheck, FaUmbrellaBeach, FaTasks, FaFileInvoiceDollar, FaClock, FaBusinessTime, FaSignInAlt, FaSignOutAlt, FaMugHot } from 'react-icons/fa';
+import { ProfileContent } from '../modules/hr/profile/Profile';
+import { attendanceService } from '../attendance/service/service';
+import { useEffect } from 'react';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
-    const [activeView, setActiveView] = useState('dashboard');
+    const [todayStatus, setTodayStatus] = useState({
+        date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
+        status: 'Absent',
+        checkIn: '--:--',
+        checkOut: '--:--',
+        workingHours: '0h 0m',
+        shift: '10:00 AM - 07:00 PM', // Default
+        isLate: false,
+        lateBy: null
+    });
+
+    useEffect(() => {
+        const fetchTodayStatus = async () => {
+            try {
+                const data = await attendanceService.getMyAttendance();
+                // Find today's record (matching YYYY-MM-DD)
+                const todayStr = new Date().toISOString().split('T')[0];
+                const todayRecord = data.find(record => {
+                    // Handle different potential date formats from API
+                    if (!record.date) return false;
+                    return record.date.startsWith(todayStr) || record.date.split('T')[0] === todayStr;
+                });
+
+                if (todayRecord) {
+                    const formatTime = (timeStr) => {
+                        if (!timeStr) return '--:--';
+                        try {
+                            const dateObj = new Date(timeStr);
+                            if (isNaN(dateObj.getTime())) {
+                                // Fallback for simple time strings if API returns "HH:MM:SS"
+                                return timeStr.substring(0, 5);
+                            }
+                            return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        } catch (e) {
+                            return '--:--';
+                        }
+                    };
+
+                    const checkIn = formatTime(todayRecord.punch_in_time); // Using punch_in_time based on context
+                    const checkOut = formatTime(todayRecord.punch_out_time); // Using punch_out_time based on context
+
+                    // Calculate working hours
+                    let duration = '0h 0m';
+                    if (todayRecord.punch_in_time) {
+                        const start = new Date(todayRecord.punch_in_time);
+                        const end = todayRecord.punch_out_time ? new Date(todayRecord.punch_out_time) : new Date();
+                        const diffMs = end - start;
+                        if (diffMs > 0) {
+                            const diffHrs = Math.floor(diffMs / 3600000);
+                            const diffMins = Math.floor((diffMs % 3600000) / 60000);
+                            duration = `${diffHrs}h ${diffMins}m`;
+                        }
+                    }
+
+                    // Determine Status (Prioritize API status, else derive)
+                    let status = todayRecord.status || 'Present';
+                    // Example logic for "Late" if not explicitly "Late" status but checking logic
+                    const isLate = status.toLowerCase().includes('late');
+
+                    setTodayStatus(prev => ({
+                        ...prev,
+                        status: status,
+                        checkIn: checkIn,
+                        checkOut: checkOut,
+                        workingHours: duration,
+                        isLate: isLate,
+                        // lateBy: isLate ? '5 MINS' : null // Mocking calculation for now or need shift start time
+                    }));
+                }
+            } catch (error) {
+                console.error("Error fetching attendance status:", error);
+            }
+        };
+
+        fetchTodayStatus();
+
+        // Optional: Update timer every minute for live "working hours" if currently checked in
+        const interval = setInterval(fetchTodayStatus, 60000);
+        return () => clearInterval(interval);
+    }, []);
+
 
     const handleNavigate = (path) => {
         const view = path.replace('/', '');
@@ -38,7 +121,7 @@ const EmployeeDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Employee'}!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Employee')}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Next Pay Date:</span>
                                 <span className="badge bg-primary text-white fw-bold">JUN 30</span>
@@ -55,11 +138,13 @@ const EmployeeDashboard = () => {
                                             <FaBusinessTime className="text-primary" /> Today's Status
                                         </h6>
                                         <div className="d-flex gap-2">
-                                            <span className="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 rounded-pill fw-bold">
-                                                LATE BY 5 MINS
-                                            </span>
+                                            {todayStatus.isLate && (
+                                                <span className="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 rounded-pill fw-bold">
+                                                    LATE
+                                                </span>
+                                            )}
                                             <span className="badge bg-light text-secondary border px-3 rounded-pill">
-                                                28 Jan 2026
+                                                {todayStatus.date}
                                             </span>
                                         </div>
                                     </div>
@@ -68,14 +153,18 @@ const EmployeeDashboard = () => {
                                         {/* Attendance Status */}
                                         <div className="col-md-3 border-end">
                                             <div className="mb-2 text-secondary small text-uppercase fw-bold">Current Status</div>
-                                            <h4 className="fw-bold text-success mb-1">Present</h4>
-                                            <div className="small text-muted">Checked in at 10:05 AM</div>
+                                            <h4 className={`fw-bold mb-1 ${todayStatus.status === 'Absent' ? 'text-secondary' : todayStatus.isLate ? 'text-warning' : 'text-success'}`}>
+                                                {todayStatus.status}
+                                            </h4>
+                                            <div className="small text-muted">
+                                                {todayStatus.checkIn !== '--:--' ? `Checked in at ${todayStatus.checkIn}` : 'Not checked in yet'}
+                                            </div>
                                         </div>
 
                                         {/* Shift Timing */}
                                         <div className="col-md-3 border-end">
                                             <div className="mb-2 text-secondary small text-uppercase fw-bold">Shift Timing</div>
-                                            <h5 className="fw-bold text-dark mb-1">10:00 AM - 07:00 PM</h5>
+                                            <h5 className="fw-bold text-dark mb-1">{todayStatus.shift}</h5>
                                             <div className="small text-muted">General Shift (9h)</div>
                                         </div>
 
@@ -87,14 +176,14 @@ const EmployeeDashboard = () => {
                                                     <div className="d-flex align-items-center gap-1 small text-success fw-bold">
                                                         <FaSignInAlt /> In
                                                     </div>
-                                                    <span className="d-block fw-bold display-6" style={{ fontSize: '1.2rem' }}>10:05</span>
+                                                    <span className="d-block fw-bold display-6" style={{ fontSize: '1.2rem' }}>{todayStatus.checkIn}</span>
                                                 </div>
                                                 <div className="border-start mx-2"></div>
                                                 <div className="text-start">
                                                     <div className="d-flex align-items-center gap-1 small text-secondary fw-bold">
                                                         <FaSignOutAlt /> Out
                                                     </div>
-                                                    <span className="d-block text-muted fw-bold" style={{ fontSize: '1.2rem' }}>--:--</span>
+                                                    <span className="d-block text-muted fw-bold" style={{ fontSize: '1.2rem' }}>{todayStatus.checkOut}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -102,7 +191,7 @@ const EmployeeDashboard = () => {
                                         {/* Working Hours */}
                                         <div className="col-md-3">
                                             <div className="mb-2 text-secondary small text-uppercase fw-bold">Working Hours</div>
-                                            <h4 className="fw-bold text-primary mb-1">04h 12m</h4>
+                                            <h4 className="fw-bold text-primary mb-1">{todayStatus.workingHours}</h4>
                                             <div className="progress mt-2" style={{ height: '6px' }}>
                                                 <div className="progress-bar bg-primary" style={{ width: '45%' }}></div>
                                             </div>
@@ -239,12 +328,7 @@ const EmployeeDashboard = () => {
 
                 {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
 
-                {activeView === 'profile' && (
-                    <div className="p-5 text-center">
-                        <h3 className="text-muted">My Profile</h3>
-                        <p>View and edit your personal information.</p>
-                    </div>
-                )}
+                {activeView === 'profile' && <ProfileContent />}
                 {activeView === 'my-leaves' && <LeaveManagementContent personal={true} />}
                 {activeView === 'my-payslips' && <PayrollContent personal={true} />}
             </div>

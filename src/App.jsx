@@ -11,6 +11,14 @@ import Home from "./pages/public/home/Index";
 import Features from "./pages/public/Features";
 import About from "./pages/public/About";
 import Contact from "./pages/public/Contact";
+import Assets from "./pages/public/Assets";
+import AttendanceInfo from "./pages/public/AttendanceInfo";
+import EmployeesInfo from "./pages/public/EmployeesInfo";
+import LeavesInfo from "./pages/public/LeavesInfo";
+import OnboardingInfo from "./pages/public/OnboardingInfo";
+import PayrollInfo from "./pages/public/PayrollInfo";
+import Docs from "./pages/public/Docs";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 
 /* Auth Pages */
 import Login from "./pages/auth/login/Login";
@@ -57,6 +65,7 @@ import MyPerformance from "./pages/modules/hr/performance/MyPerformance";
 import Payroll from "./pages/modules/finance/payroll/Payroll";
 import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
+import PayGrade from "./pages/modules/finance/pay_grade/PayGrade";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
 
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
@@ -77,6 +86,14 @@ export default function App() {
             <Route path="/features" element={<Features />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/docs" element={<Docs />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/feature/attendance" element={<AttendanceInfo />} />
+            <Route path="/employees" element={<EmployeesInfo />} />
+            <Route path="/leaves" element={<LeavesInfo />} />
+            <Route path="/feature/onboarding" element={<OnboardingInfo />} />
+            <Route path="/payroll" element={<PayrollInfo />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signup-otp" element={<SignupOtp />} />
@@ -208,7 +225,7 @@ export default function App() {
             <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
 
             {/* HR Routes */}
-            <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['hr', 'admin']}><Employees /></ProtectedRoute>} />
+            <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><Employees /></ProtectedRoute>} />
             <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Training" /></ProtectedRoute>} />
             <Route path="/performance-reviews" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Performance Reviews" /></ProtectedRoute>} />
             <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr']}><PlaceholderPage title="Documents" /></ProtectedRoute>} />
@@ -225,7 +242,11 @@ export default function App() {
             {/* Accountant Routes */}
             <Route path="/payroll-processing" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Payroll Processing" /></ProtectedRoute>} />
             <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
-            <Route path="/payslips" element={<ProtectedRoute requiredRoles={['accountant', 'employee']}><PlaceholderPage title="Payslips" /></ProtectedRoute>} />
+            {/* Shared Payroll Route for Admin/Accountant */}
+            <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><Payroll /></ProtectedRoute>} />
+            {/* Pay Grades - SuperAdmin & Accountant */}
+            <Route path="/pay-grades" element={<ProtectedRoute requiredRoles={['superadmin', 'accountant']}><PayGrade /></ProtectedRoute>} />
+
             <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
             <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Financial Reports" /></ProtectedRoute>} />
 

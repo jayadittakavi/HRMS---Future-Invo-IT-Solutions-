@@ -16,6 +16,7 @@ import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../compone
 import { useAuth } from '../../context/AuthContext';
 import { FaWallet, FaUsers, FaClipboardList } from 'react-icons/fa';
 import { ProfileContent } from '../modules/hr/profile/Profile';
+import AuditLogs from '../../components/audit/AuditLogs';
 import './SuperAdminDashboard.css';
 
 
@@ -77,7 +78,7 @@ const SuperAdminDashboard = () => {
                     <>
                         {/* Welcome & Status Section */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || user?.email?.split('@')[0] || 'Super Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Super Admin')}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
                                 <span className="badge bg-warning text-main fw-bold px-3">APPROVED</span>
@@ -321,6 +322,7 @@ const SuperAdminDashboard = () => {
                 {activeView === 'attendance' && <AttendanceContent />}
                 {activeView === 'pay-grade' && <PayGradeContent />}
                 {activeView === 'profile' && <ProfileContent />}
+                {activeView === 'audit-logs' && <AuditLogs role="superadmin" />}
             </div>
         </DashboardLayout>
     );

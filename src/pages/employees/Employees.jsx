@@ -15,10 +15,18 @@ export const EmployeesContent = () => {
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
+    const [showRoleModal, setShowRoleModal] = useState(false);
+    const [creationRole, setCreationRole] = useState('Employee');
     const [currentStep, setCurrentStep] = useState(1);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     // Handlers
+    const handleRoleSelect = (role) => {
+        setCreationRole(role);
+        setShowRoleModal(false);
+        setShowAdd(true);
+    };
+
     const handleEdit = (emp) => {
         setSelectedEmployee(emp);
         setShowEdit(true);
@@ -58,7 +66,7 @@ export const EmployeesContent = () => {
                         <button className="btn btn-primary btn-sm d-flex align-items-center gap-2">
                             <FaEdit /> CREATE USERNAME
                         </button>
-                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={() => setShowAdd(true)}>
+                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={() => setShowRoleModal(true)}>
                             ADD EMPLOYEE
                         </button>
                     </div>
@@ -103,348 +111,124 @@ export const EmployeesContent = () => {
                 </div>
             </div>
 
-            {/* Add Employee Multi-Step Modal */}
+            {/* Add Employee Modal */}
             {showAdd && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-xl">
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
                         <div className="modal-content">
-                            <div className="modal-header border-0 pb-0">
-                                {/* Stepper Header */}
-                                <div className="w-100">
-                                    <div className="d-flex justify-content-between align-items-center mb-4 px-4 position-relative">
-                                        {/* Progress Line */}
-                                        <div className="position-absolute top-50 start-0 w-100 translate-middle-y" style={{ height: '2px', backgroundColor: '#e9ecef', zIndex: 0 }}></div>
-
-                                        {[
-                                            { id: 1, label: 'Personal Details' },
-                                            { id: 2, label: 'Official Details' },
-                                            { id: 3, label: 'Education Details' },
-                                            { id: 4, label: 'Last Work Details' },
-                                            { id: 5, label: 'Other Details' }
-                                        ].map((step) => (
-                                            <div key={step.id} className="d-flex flex-column align-items-center position-relative z-1 bg-white px-2">
-                                                <div
-                                                    className={`rounded-circle d-flex align-items-center justify-content-center mb-2 fw-bold text-white transition-all`}
-                                                    style={{
-                                                        width: '32px',
-                                                        height: '32px',
-                                                        backgroundColor: step.id <= currentStep ? '#0d6efd' : '#dee2e6',
-                                                        transition: 'background-color 0.3s'
-                                                    }}
-                                                >
-                                                    {step.id}
-                                                </div>
-                                                <span className={`small fw-bold ${step.id <= currentStep ? 'text-dark' : 'text-muted'}`}>{step.label}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                            <div className="modal-header">
+                                <div>
+                                    <h5 className="modal-title fw-bold">Add New {creationRole}</h5>
+                                    <p className="text-secondary small mb-0">Enter {creationRole.toLowerCase()} information to add to the system</p>
                                 </div>
-                                <button className="btn-close position-absolute top-0 end-0 m-3" onClick={() => setShowAdd(false)}></button>
+                                <button className="btn-close" onClick={() => setShowAdd(false)}></button>
                             </div>
-
-                            <div className="modal-body px-5 py-4">
-                                {currentStep === 1 && (
-                                    <form>
-                                        <div className="row g-4">
-                                            {/* Column 1 */}
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Username</label>
-                                                    <select className="form-select text-muted"><option>Select Username</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Company*</label>
-                                                    <select className="form-select"><option>Select Company</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Branch*</label>
-                                                    <select className="form-select"><option>Select Branch</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Work Mode*</label>
-                                                    <select className="form-select"><option>Select Work Mode</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Name*</label>
-                                                    <input type="text" className="form-control" placeholder="Enter Name" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Enter Email*</label>
-                                                    <input type="email" className="form-control" placeholder="Enter Email" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Phone No.*</label>
-                                                    <input type="tel" className="form-control" placeholder="Enter Phone No." />
-                                                </div>
-                                            </div>
-
-                                            {/* Column 2 */}
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Emergency Phone No.</label>
-                                                    <input type="tel" className="form-control" placeholder="Emergency Contact" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Gender*</label>
-                                                    <select className="form-select"><option>Select Gender</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Father / Husband Name</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Mother's Name</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Permanent Address</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Present Address</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                            </div>
-
-                                            {/* Column 3 */}
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">City</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">State</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Pincode</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Pan</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Aadhaar</label>
-                                                    <input type="text" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">DOB</label>
-                                                    <input type="date" className="form-control" />
-                                                </div>
-                                            </div>
+                            <div className="modal-body">
+                                <form>
+                                    <div className="row g-3">
+                                        {/* Row 1 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Select User Account</label>
+                                            <select className="form-select">
+                                                <option>Select a user account</option>
+                                                {/* Only unassigned user accounts are shown */}
+                                            </select>
+                                            <div className="form-text small">Only unassigned user accounts are shown</div>
                                         </div>
-                                    </form>
-                                )}
-
-                                {/* Step 2: Official Details */}
-                                {currentStep === 2 && (
-                                    <form>
-                                        <div className="row g-4">
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Employee ID*</label>
-                                                    <input type="text" className="form-control" placeholder="EMP-001" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Department*</label>
-                                                    <select className="form-select"><option>Select Dept</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Designation*</label>
-                                                    <select className="form-select"><option>Select Designation</option></select>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Date of Joining*</label>
-                                                    <input type="date" className="form-control" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Joining Salary (CTC)</label>
-                                                    <input type="number" className="form-control" placeholder="0.00" />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Reporting Manager</label>
-                                                    <select className="form-select"><option>Select Manager</option></select>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Shift</label>
-                                                    <select className="form-select"><option>General Shift</option></select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Employment Type</label>
-                                                    <select className="form-select">
-                                                        <option>Permanent</option>
-                                                        <option>Contract</option>
-                                                        <option>Intern</option>
-                                                    </select>
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label className="form-label small fw-bold text-secondary">Work Location</label>
-                                                    <input type="text" className="form-control" placeholder="Office Location" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </form>
-                                )}
-
-                                {/* Step 3: Education Details */}
-                                {currentStep === 3 && (
-                                    <form>
-                                        <h6 className="fw-bold text-primary mb-3">SSC (10th Standard)</h6>
-                                        <div className="row g-3 mb-4 border-bottom pb-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Institution Name</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Board / University</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">Year</label>
-                                                <input type="number" className="form-control" placeholder="YYYY" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">% / CGPA</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Full Name</label>
+                                            <input type="text" className="form-control" placeholder="John Doe" />
                                         </div>
 
-                                        <h6 className="fw-bold text-primary mb-3">HSC / Diploma (12th Standard)</h6>
-                                        <div className="row g-3 mb-4 border-bottom pb-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Institution Name</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Board / University</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">Year</label>
-                                                <input type="number" className="form-control" placeholder="YYYY" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">% / CGPA</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
+                                        {/* Row 2 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Email</label>
+                                            <input type="email" className="form-control" placeholder="john.doe@company.com" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Phone</label>
+                                            <input type="tel" className="form-control" placeholder="Phone number" />
                                         </div>
 
-                                        <h6 className="fw-bold text-primary mb-3">Graduation</h6>
-                                        <div className="row g-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Institution Name</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">University</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">Year</label>
-                                                <input type="number" className="form-control" placeholder="YYYY" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">% / CGPA</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
+                                        {/* Row 3 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Department</label>
+                                            <select className="form-select">
+                                                <option>Select Department</option>
+                                                <option>Administration</option>
+                                                <option>HR</option>
+                                                <option>Engineering</option>
+                                            </select>
                                         </div>
-                                    </form>
-                                )}
-
-                                {/* Step 4: Last Work Details */}
-                                {currentStep === 4 && (
-                                    <form>
-                                        <div className="row g-3 align-items-end mb-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Previous Company Name</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Job Title / Designation</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">From Date</label>
-                                                <input type="date" className="form-control" />
-                                            </div>
-                                            <div className="col-md-2">
-                                                <label className="form-label small fw-bold text-secondary">To Date</label>
-                                                <input type="date" className="form-control" />
-                                            </div>
-                                        </div>
-                                        <div className="row g-3">
-                                            <div className="col-md-8">
-                                                <label className="form-label small fw-bold text-secondary">Reason for Leaving</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Relevant Experience (Years)</label>
-                                                <input type="number" className="form-control" step="0.1" />
-                                            </div>
-                                        </div>
-                                    </form>
-                                )}
-
-                                {/* Step 5: Other Details */}
-                                {currentStep === 5 && (
-                                    <form>
-                                        <h6 className="fw-bold text-dark mb-3">Bank Details</h6>
-                                        <div className="row g-3 mb-4 border-bottom pb-4">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Bank Name</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">Account Number</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">IFSC Code</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Designation</label>
+                                            <input type="text" className="form-control" placeholder="Software Engineer" />
                                         </div>
 
-                                        <h6 className="fw-bold text-dark mb-3">Statutory Details</h6>
-                                        <div className="row g-3">
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">UAN Number</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">PF Account Number</label>
-                                                <input type="text" className="form-control" />
-                                            </div>
-                                            <div className="col-md-4">
-                                                <label className="form-label small fw-bold text-secondary">ESIC Number</label>
-                                                <input type="text" className="form-control" />
+                                        {/* Row 4 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Employee Type</label>
+                                            <select className="form-select" defaultValue={creationRole}>
+                                                <option>Employee</option>
+                                                <option>HR</option>
+                                                <option>Manager</option>
+                                                <option>Admin</option>
+                                            </select>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Joining Date</label>
+                                            <input type="date" className="form-control" />
+                                        </div>
+
+                                        {/* Row 5 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Company</label>
+                                            <select className="form-select">
+                                                <option>Select Company</option>
+                                            </select>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Branch</label>
+                                            <select className="form-select">
+                                                <option>Select Branch</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Row 6 */}
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">PayGrade *</label>
+                                            <select className="form-select">
+                                                <option>Select PayGrade</option>
+                                            </select>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">CTC (Annual)</label>
+                                            <input type="number" className="form-control" placeholder="600000" />
+                                        </div>
+
+                                        {/* Row 7 */}
+                                        <div className="col-12">
+                                            <label className="form-label small fw-bold">Manager (Optional)</label>
+                                            <select className="form-select">
+                                                <option>Select Manager</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Checkbox */}
+                                        <div className="col-12">
+                                            <div className="form-check">
+                                                <input className="form-check-input" type="checkbox" id="lockForm" />
+                                                <label className="form-check-label small" htmlFor="lockForm">
+                                                    Lock Form Editing
+                                                </label>
                                             </div>
                                         </div>
-                                    </form>
-                                )}
+                                    </div>
+                                </form>
                             </div>
-
-                            <div className="modal-footer border-0 px-5 pb-4">
-                                <button
-                                    className="btn btn-outline-secondary px-4 me-auto"
-                                    onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
-                                    disabled={currentStep === 1}
-                                >
-                                    BACK
-                                </button>
-                                <button
-                                    className="btn btn-primary px-5 rounded-pill"
-                                    onClick={() => {
-                                        if (currentStep < 5) setCurrentStep(prev => prev + 1);
-                                        else setShowAdd(false);
-                                    }}
-                                >
-                                    {currentStep === 5 ? 'SUBMIT' : 'NEXT'}
-                                </button>
+                            <div className="modal-footer">
+                                <button className="btn btn-primary w-100">Add Employee</button>
+                                <button className="btn btn-light w-100 mt-2 border" onClick={() => setShowAdd(false)}>Cancel</button>
                             </div>
                         </div>
                     </div>
@@ -522,6 +306,27 @@ export const EmployeesContent = () => {
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
                                 <button className="btn btn-danger btn-sm">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Role Selection Modal */}
+            {showRoleModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header border-0">
+                                <h5 className="modal-title fw-bold">Select Role to Create</h5>
+                                <button className="btn-close" onClick={() => setShowRoleModal(false)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <div className="d-grid gap-3">
+                                    <button className="btn btn-outline-primary py-3 fw-bold" onClick={() => handleRoleSelect('Employee')}>Create Employee</button>
+                                    <button className="btn btn-outline-info py-3 fw-bold" onClick={() => handleRoleSelect('HR')}>Create HR</button>
+                                    <button className="btn btn-outline-success py-3 fw-bold" onClick={() => handleRoleSelect('Manager')}>Create Manager</button>
+                                    <button className="btn btn-outline-dark py-3 fw-bold" onClick={() => handleRoleSelect('Admin')}>Create Admin</button>
+                                </div>
                             </div>
                         </div>
                     </div>

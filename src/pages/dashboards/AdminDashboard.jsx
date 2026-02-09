@@ -55,7 +55,7 @@ const AdminDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Admin')}!</h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">System status:</span>
                                 <span className="badge bg-success text-white fw-bold">OPERATIONAL</span>
@@ -189,7 +189,7 @@ const AdminDashboard = () => {
                 {activeView === 'daily-task' && <DailyTaskContent />}
                 {activeView === 'loans' && <LoansContent />}
                 {activeView === 'travel-expenses' && <TravelExpensesContent />}
-                {activeView === 'attendance-management' && <AttendanceContent />}
+                {activeView === 'attendance' && <AttendanceContent />}
                 {activeView === 'companies' && <CompaniesContent />}
                 {activeView === 'branches' && <BranchesContent />}
                 {activeView === 'departments' && <DepartmentsContent />}

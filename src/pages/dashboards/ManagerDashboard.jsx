@@ -5,6 +5,7 @@ import '../../components/layout/DashboardLayout.css';
 import { SimpleDonutChart, SimpleBarChart } from '../../components/charts/CustomCharts';
 import { AttendanceContent } from '../attendance/Attendance';
 import { FaUsersCog, FaClipboardList, FaStar } from 'react-icons/fa';
+import { ProfileContent } from '../modules/hr/profile/Profile';
 
 const ManagerDashboard = () => {
     const { user } = useAuth();
@@ -147,6 +148,7 @@ const ManagerDashboard = () => {
                         <p>Conduct performance reviews for your team.</p>
                     </div>
                 )}
+                {activeView === 'profile' && <ProfileContent />}
             </div>
         </DashboardLayout>
     );

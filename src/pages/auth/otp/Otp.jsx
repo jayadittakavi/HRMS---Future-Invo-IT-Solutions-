@@ -6,7 +6,7 @@ import sideImage from '../../../assets/images/loginimage.png';
 const ResetOtp = () => {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
-    const [timeLeft, setTimeLeft] = useState(30);
+    const [timeLeft, setTimeLeft] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -22,7 +22,7 @@ const ResetOtp = () => {
     }, [timeLeft]);
 
     const handleResend = () => {
-        setTimeLeft(30);
+        setTimeLeft(60);
         setCanResend(false);
         setError('');
         // Logic to resend OTP goes here
@@ -71,7 +71,7 @@ const ResetOtp = () => {
             setError('');
 
             // Direct fetch call
-            const response = await fetch("http://192.168.1.4:5000/api/auth/verify-reset-otp", {
+            const response = await fetch("http://192.168.1.13:5000/api/auth/verify-reset-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, otp: otpValue })

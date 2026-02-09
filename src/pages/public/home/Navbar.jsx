@@ -6,21 +6,18 @@ import logo from '../../assets/images/fislogo1.png';
 import { FaCog, FaUserCircle, FaSearch } from 'react-icons/fa';
 
 const Navbar = () => {
-    // const { user, logout, isSystemInitialized } = useAuth();
     const { toggleSettingsDrawer } = useTheme();
     const navigate = useNavigate();
 
-    // const handleLogout = () => {
-    //     logout();
-    //     navigate('/login');
-    // };
-
     return (
-        <nav className="navbar navbar-expand-lg navbar-light glass-navbar sticky-top shadow-sm py-2" style={{ minHeight: '70px' }}>
+        <nav className="navbar navbar-expand-lg glass-navbar sticky-top py-2" style={{ minHeight: '70px' }}>
             <div className="container">
                 <Link className="navbar-brand d-flex align-items-center" to="/">
                     <img src={logo} alt="HRMS Logo" height="40" className="me-3 rounded-4 shadow-sm" style={{ borderRadius: '12px' }} />
-                    <span className="fw-bold text-primary fs-4">Future Invo HRMS</span>
+                    <div className="d-flex flex-column ms-2">
+                        <span className="fw-bold fs-4 lh-1 text-white" style={{ color: 'white' }}>HRMS</span>
+                        <span className="text-white" style={{ fontSize: '0.7rem', fontWeight: '500', color: 'white' }}>Future Invo Solutions</span>
+                    </div>
                 </Link>
 
                 <button

@@ -200,15 +200,35 @@ textarea {
     color: #fff !important;
 }
 
-/* Navbar Theme Style */
 /* Navbar Theme Style - Glassy */
-.navbar-theme {
-    background: var(--glass-bg) !important;
-    backdrop-filter: var(--glass-blur) !important;
-    -webkit-backdrop-filter: var(--glass-blur) !important;
-    border-bottom: var(--glass-border) !important;
-    box-shadow: var(--glass-shadow) !important;
+.glass-navbar {
+    background: transparent !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
     transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .glass-navbar {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Navbar Theme Style - Standard (Non-Home Pages) */
+.navbar-theme {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .navbar-theme {
+    background: rgba(15, 23, 42, 0.95) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
 }
 
 .text-main {
@@ -231,9 +251,64 @@ textarea {
     color: var(--text-main) !important;
 }
 
+/* Re-apply secondary colors where specifically requested via class */
 .text-muted,
 .text-secondary {
     color: var(--text-secondary) !important;
+}
+
+/* Ensure links inherit unless specific */
+a:not(.btn) {
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+a:not(.btn):hover {
+    color: var(--primary-color);
+}
+
+.text-muted,
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* --- Bootstrap Background Overrides for Dark Mode --- */
+.bg-white {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+.bg-light {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+}
+
+/* Ensure cards respect theme */
+.card {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--glass-border);
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+.modal-header,
+.modal-footer {
+    border-color: var(--border-color);
+}
+
+.close,
+.btn-close {
+    filter: var(--theme-filter, none);
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 /* Global Table & Form Overrides */
@@ -244,15 +319,31 @@ textarea {
     --bs-table-striped-color: var(--text-main);
 }
 
-.form-control {
+
+
+.form-control,
+.form-select,
+.input-group-text {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.25rem rgba(139, 92, 246, 0.25);
+}
+
+.form-check-input {
     background-color: var(--bg-card);
-    color: var(--text-main);
     border-color: var(--border-color);
 }
 
-.form-control:focus {
-    background-color: var(--bg-card);
-    color: var(--text-main);
+.form-check-input:checked {
+    background-color: var(--primary-color);
     border-color: var(--primary-color);
 }
 

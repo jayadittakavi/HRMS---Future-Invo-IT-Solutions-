@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaFilePdf } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const PayGradeContent = () => {
     // Mock Data for Table
-    const [payGrades] = useState([
+    const [payGrades, setPayGrades] = useState([
         { id: 1, name: 'Grade A', min: '₹30,000', max: '₹50,000', currency: 'INR', employeeCount: 15 },
         { id: 2, name: 'Grade B', min: '₹50,001', max: '₹80,000', currency: 'INR', employeeCount: 25 },
         { id: 3, name: 'Grade C', min: '₹80,001', max: '₹1,20,000', currency: 'INR', employeeCount: 10 },
@@ -24,17 +24,70 @@ export const PayGradeContent = () => {
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
+    const [showPdf, setShowPdf] = useState(false);
     const [selectedGrade, setSelectedGrade] = useState(null);
+
+    // Form States
+    const [formData, setFormData] = useState({ name: '', currency: 'INR', min: '', max: '' });
 
     // Handlers
     const handleEdit = (grade) => {
         setSelectedGrade(grade);
+        setFormData({ name: grade.name, currency: grade.currency, min: grade.min.replace(/[^0-9]/g, ''), max: grade.max.replace(/[^0-9]/g, '') });
         setShowEdit(true);
     };
 
     const handleDelete = (grade) => {
         setSelectedGrade(grade);
         setShowDelete(true);
+    };
+
+    const handleDownloadPdf = (grade) => {
+        setSelectedGrade(grade);
+        setShowPdf(true);
+    };
+
+    const handleSave = () => {
+        const newId = payGrades.length + 1;
+        const newGrade = {
+            id: newId,
+            name: formData.name,
+            min: `₹${Number(formData.min).toLocaleString()}`,
+            max: `₹${Number(formData.max).toLocaleString()}`,
+            currency: formData.currency,
+            employeeCount: 0
+        };
+
+        setPayGrades([...payGrades, newGrade]);
+        setShowAdd(false);
+        setFormData({ name: '', currency: 'INR', min: '', max: '' });
+        alert("Pay Grade Created Successfully!");
+    };
+
+    const handleUpdate = () => {
+        const updatedGrades = payGrades.map(grade => {
+            if (grade.id === selectedGrade.id) {
+                return {
+                    ...grade,
+                    name: formData.name,
+                    currency: formData.currency,
+                    min: `₹${Number(formData.min).toLocaleString()}`,
+                    max: `₹${Number(formData.max).toLocaleString()}`
+                };
+            }
+            return grade;
+        });
+
+        setPayGrades(updatedGrades);
+        setShowEdit(false);
+        alert("Pay Grade Updated Successfully!");
+    };
+
+    const handleConfirmDelete = () => {
+        const updatedGrades = payGrades.filter(g => g.id !== selectedGrade.id);
+        setPayGrades(updatedGrades);
+        setShowDelete(false);
+        alert(`Deleted ${selectedGrade.name} successfully!`);
     };
 
     return (
@@ -44,7 +97,7 @@ export const PayGradeContent = () => {
                     <h5 className="fw-bold text-dark mb-1">Pay Grade Management</h5>
                     <p className="text-secondary small mb-0">Configure salary structures and grades</p>
                 </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => setShowAdd(true)}>
+                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={() => { setFormData({ name: '', currency: 'INR', min: '', max: '' }); setShowAdd(true); }}>
                     + Add New Grade
                 </button>
             </div>
@@ -134,6 +187,7 @@ export const PayGradeContent = () => {
                                         </span>
                                     </td>
                                     <td>
+                                        <button className="action-btn view me-1" title="Download PDF" onClick={() => handleDownloadPdf(grade)}><FaFilePdf /></button>
                                         <button className="action-btn edit" onClick={() => handleEdit(grade)}><FaEdit /></button>
                                         <button className="action-btn delete" onClick={() => handleDelete(grade)}><FaTrash /></button>
                                     </td>
@@ -157,30 +211,30 @@ export const PayGradeContent = () => {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Grade Name</label>
-                                        <input type="text" className="form-control" placeholder="e.g. Grade A" />
+                                        <input type="text" className="form-control" placeholder="e.g. Grade A" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Currency</label>
-                                        <select className="form-select">
-                                            <option>INR</option>
-                                            <option>USD</option>
+                                        <select className="form-select" value={formData.currency} onChange={(e) => setFormData({ ...formData, currency: e.target.value })}>
+                                            <option value="INR">INR</option>
+                                            <option value="USD">USD</option>
                                         </select>
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6 mb-3">
                                             <label className="form-label small fw-bold">Min Salary</label>
-                                            <input type="number" className="form-control" placeholder="0" />
+                                            <input type="number" className="form-control" placeholder="0" value={formData.min} onChange={(e) => setFormData({ ...formData, min: e.target.value })} />
                                         </div>
                                         <div className="col-md-6 mb-3">
                                             <label className="form-label small fw-bold">Max Salary</label>
-                                            <input type="number" className="form-control" placeholder="0" />
+                                            <input type="number" className="form-control" placeholder="0" value={formData.max} onChange={(e) => setFormData({ ...formData, max: e.target.value })} />
                                         </div>
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Save Grade</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleSave}>Save Grade</button>
                             </div>
                         </div>
                     </div>
@@ -200,30 +254,30 @@ export const PayGradeContent = () => {
                                 <form>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Grade Name</label>
-                                        <input type="text" className="form-control" defaultValue={selectedGrade.name} />
+                                        <input type="text" className="form-control" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Currency</label>
-                                        <select className="form-select" defaultValue={selectedGrade.currency}>
-                                            <option>INR</option>
-                                            <option>USD</option>
+                                        <select className="form-select" value={formData.currency} onChange={(e) => setFormData({ ...formData, currency: e.target.value })}>
+                                            <option value="INR">INR</option>
+                                            <option value="USD">USD</option>
                                         </select>
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6 mb-3">
                                             <label className="form-label small fw-bold">Min Salary</label>
-                                            <input type="text" className="form-control" defaultValue={selectedGrade.min} />
+                                            <input type="number" className="form-control" value={formData.min} onChange={(e) => setFormData({ ...formData, min: e.target.value })} />
                                         </div>
                                         <div className="col-md-6 mb-3">
                                             <label className="form-label small fw-bold">Max Salary</label>
-                                            <input type="text" className="form-control" defaultValue={selectedGrade.max} />
+                                            <input type="number" className="form-control" value={formData.max} onChange={(e) => setFormData({ ...formData, max: e.target.value })} />
                                         </div>
                                     </div>
                                 </form>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm">Update Grade</button>
+                                <button className="btn btn-primary btn-sm" onClick={handleUpdate}>Update Grade</button>
                             </div>
                         </div>
                     </div>
@@ -244,7 +298,73 @@ export const PayGradeContent = () => {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
+                                <button className="btn btn-danger btn-sm" onClick={handleConfirmDelete}>Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* PDF View Modal */}
+            {showPdf && selectedGrade && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Pay Grade Details - {selectedGrade.name}</h5>
+                                <button className="btn-close" onClick={() => setShowPdf(false)}></button>
+                            </div>
+                            <div className="modal-body p-5 bg-white">
+                                <div className="border p-4">
+                                    <div className="text-center mb-4">
+                                        <h3 className="fw-bold">Future Invo Solutions</h3>
+                                        <p className="text-muted">Pay Grade Structure Document</p>
+                                        <hr />
+                                    </div>
+                                    <div className="row mb-4">
+                                        <div className="col-6">
+                                            <h6 className="fw-bold">Grade Information:</h6>
+                                            <p className="mb-1"><strong>Name:</strong> {selectedGrade.name}</p>
+                                            <p className="mb-1"><strong>Code:</strong> GR-{selectedGrade.id}00X</p>
+                                            <p className="mb-1"><strong>Currency:</strong> {selectedGrade.currency}</p>
+                                        </div>
+                                        <div className="col-6 text-end">
+                                            <h6 className="fw-bold">Generated On:</h6>
+                                            <p>{new Date().toLocaleDateString()}</p>
+                                        </div>
+                                    </div>
+                                    <div className="table-responsive mb-4">
+                                        <table className="table table-bordered">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>Description</th>
+                                                    <th>Value</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Minimum Salary Slab</td>
+                                                    <td>{selectedGrade.min}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Maximum Salary Slab</td>
+                                                    <td>{selectedGrade.max}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Active Employees</td>
+                                                    <td>{selectedGrade.employeeCount}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div className="text-center mt-5">
+                                        <p className="small text-muted">This document is confidential and for internal use only.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={() => setShowPdf(false)}>Close</button>
+                                <button className="btn btn-primary" onClick={() => window.print()}>Download / Print PDF</button>
                             </div>
                         </div>
                     </div>

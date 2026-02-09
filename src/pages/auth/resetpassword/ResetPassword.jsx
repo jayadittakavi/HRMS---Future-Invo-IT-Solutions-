@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import sideImage from '../../../assets/images/loginimage.png';
 
@@ -11,9 +12,13 @@ const ResetPassword = () => {
     const [error, setError] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email;
+    const otp = location.state?.otp;
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,8 +28,8 @@ const ResetPassword = () => {
         e.preventDefault();
         setError('');
 
-        if (!email) {
-            setError('Email not found. Please restart the reset process.');
+        if (!email || !otp) {
+            setError('Missing session data (Email or OTP). Please restart the process.');
             return;
         }
 
@@ -43,7 +48,8 @@ const ResetPassword = () => {
                 },
                 body: JSON.stringify({
                     email: email,
-                    newPassword: formData.password
+                    otp: otp,
+                    password: formData.password
                 }),
             });
 
@@ -118,28 +124,48 @@ const ResetPassword = () => {
                                     <form onSubmit={handleSubmit}>
                                         <div className="mb-3">
                                             <label className="form-label fw-semibold">New Password</label>
-                                            <input
-                                                type="password"
-                                                className="form-control form-control-lg bg-card"
-                                                placeholder="••••••••"
-                                                name="password"
-                                                value={formData.password}
-                                                onChange={handleChange}
-                                                required
-                                            />
+                                            <div className="position-relative">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    className="form-control form-control-lg bg-card pe-5"
+                                                    placeholder="••••••••"
+                                                    name="password"
+                                                    value={formData.password}
+                                                    onChange={handleChange}
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn position-absolute top-50 end-0 translate-middle-y text-secondary border-0 bg-transparent"
+                                                    style={{ zIndex: 10 }}
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div className="mb-4">
                                             <label className="form-label fw-semibold">Confirm Password</label>
-                                            <input
-                                                type="password"
-                                                className="form-control form-control-lg bg-card"
-                                                placeholder="••••••••"
-                                                name="confirmPassword"
-                                                value={formData.confirmPassword}
-                                                onChange={handleChange}
-                                                required
-                                            />
+                                            <div className="position-relative">
+                                                <input
+                                                    type={showConfirmPassword ? "text" : "password"}
+                                                    className="form-control form-control-lg bg-card pe-5"
+                                                    placeholder="••••••••"
+                                                    name="confirmPassword"
+                                                    value={formData.confirmPassword}
+                                                    onChange={handleChange}
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn position-absolute top-50 end-0 translate-middle-y text-secondary border-0 bg-transparent"
+                                                    style={{ zIndex: 10 }}
+                                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                >
+                                                    {showConfirmPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <button type="submit" className="btn btn-primary btn-lg w-100 fw-bold shadow-sm" disabled={isLoading}>

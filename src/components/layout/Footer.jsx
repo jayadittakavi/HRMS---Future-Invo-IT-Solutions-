@@ -22,23 +22,23 @@ const Footer = () => {
                     <div className="col-lg-3 col-6">
                         <h5 className="fw-bold mb-4">Discover Future Invo</h5>
                         <ul className="list-unstyled text-muted small">
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">What is Future Invo?</a></li>
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Success Stories</a></li>
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Compare Competitors</a></li>
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Client Locations</a></li>
+                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">What is Future Invo?</Link></li>
+                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">Success Stories</Link></li>
+                            <li className="mb-2"><Link to="/features" className="text-white-50 text-decoration-none hover-white">Compare Competitors</Link></li>
+                            <li className="mb-2"><Link to="/contact" className="text-white-50 text-decoration-none hover-white">Client Locations</Link></li>
                             <li className="mb-2"><Link to="/contact" className="text-white-50 text-decoration-none hover-white">Support</Link></li>
                         </ul>
                     </div>
 
-                    {/* Column 3: Features */}
+                    {/* Column 3: Features (Already Updated) */}
                     <div className="col-lg-3 col-6">
                         <h5 className="fw-bold mb-4">Features</h5>
                         <ul className="list-unstyled text-muted small">
                             <li className="mb-2"><Link to="/assets" className="text-white-50 text-decoration-none hover-white">Assets</Link></li>
-                            <li className="mb-2"><Link to="/attendance" className="text-white-50 text-decoration-none hover-white">Attendance</Link></li>
+                            <li className="mb-2"><Link to="/feature/attendance" className="text-white-50 text-decoration-none hover-white">Attendance</Link></li>
                             <li className="mb-2"><Link to="/employees" className="text-white-50 text-decoration-none hover-white">Employee</Link></li>
                             <li className="mb-2"><Link to="/leaves" className="text-white-50 text-decoration-none hover-white">Leave</Link></li>
-                            <li className="mb-2"><Link to="/onboarding" className="text-white-50 text-decoration-none hover-white">Onboarding</Link></li>
+                            <li className="mb-2"><Link to="/feature/onboarding" className="text-white-50 text-decoration-none hover-white">Onboarding</Link></li>
                             <li className="mb-2"><Link to="/payroll" className="text-white-50 text-decoration-none hover-white">Payroll</Link></li>
                         </ul>
                     </div>
@@ -52,7 +52,7 @@ const Footer = () => {
 
                         <h5 className="fw-bold mb-4">Legal</h5>
                         <ul className="list-unstyled text-muted small mb-4">
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Privacy Policy</a></li>
+                            <li className="mb-2"><Link to="/privacy-policy" className="text-white-50 text-decoration-none hover-white">Privacy Policy</Link></li>
                         </ul>
 
                         {/* App Store Buttons Placeholder */}

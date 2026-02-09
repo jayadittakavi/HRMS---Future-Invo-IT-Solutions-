@@ -42,7 +42,7 @@ const Signup = () => {
         name: `${formData.firstName} ${formData.lastName} `
       };
 
-      const response = await fetch("http://192.168.1.13:5000/api/auth/super-admin/signup", {
+      const response = await fetch("http://192.168.1.5:5000/api/auth/super-admin/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

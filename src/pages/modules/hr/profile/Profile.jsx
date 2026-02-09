@@ -8,10 +8,15 @@ const ProfileContent = () => {
     const { user, updateProfile, logout } = useAuth();
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
-    const [name, setName] = useState(user?.name || '');
-    // Update local state when user context changes (e.g. after save)
+    const [name, setName] = useState(user?.name || user?.username || (user?.email ? user.email.split('@')[0] : ''));
+    const [pendingPic, setPendingPic] = useState(null);
+
+    // Update local state when user context changes
     useEffect(() => {
-        setName(user?.name || '');
+        if (user) {
+            setName(user.name || user.username || (user.email ? user.email.split('@')[0] : ''));
+            setPendingPic(null); // Reset pending changes on external user update
+        }
     }, [user]);
 
     const handleLogout = () => {
@@ -20,13 +25,19 @@ const ProfileContent = () => {
     };
 
     const handleSave = () => {
-        updateProfile({ name: name });
+        const updates = { name: name };
+        if (pendingPic) {
+            updates.profilePic = pendingPic;
+        }
+        updateProfile(updates);
+        setPendingPic(null);
         setIsEditing(false);
         alert('Profile updated successfully!');
     };
 
     const handleCancel = () => {
-        setName(user?.name || '');
+        setName(user?.name || user?.username || (user?.email ? user.email.split('@')[0] : ''));
+        setPendingPic(null);
         setIsEditing(false);
     };
 
@@ -39,11 +50,11 @@ const ProfileContent = () => {
                         <div className="position-relative d-inline-block mx-auto mb-3">
                             <div
                                 className="rounded-circle bg-primary bg-gradient text-white d-flex align-items-center justify-content-center shadow-lg overflow-hidden cursor-pointer position-relative"
-                                style={{ width: '120px', height: '120px', fontSize: '3rem', cursor: 'pointer' }}
+                                style={{ width: '120px', height: '120px', fontSize: '3rem', cursor: isEditing ? 'pointer' : 'default' }}
                                 onClick={() => isEditing && document.getElementById('profile-upload').click()}
                             >
-                                {user?.profilePic ? (
-                                    <img src={user.profilePic} alt="Profile" className="w-100 h-100 object-fit-cover" />
+                                {(pendingPic || user?.profilePic) ? (
+                                    <img src={pendingPic || user.profilePic} alt="Profile" className="w-100 h-100 object-fit-cover" />
                                 ) : (
                                     user?.name?.charAt(0) || 'U'
                                 )}
@@ -63,7 +74,7 @@ const ProfileContent = () => {
                                     if (file) {
                                         const reader = new FileReader();
                                         reader.onloadend = () => {
-                                            updateProfile({ profilePic: reader.result });
+                                            setPendingPic(reader.result);
                                         };
                                         reader.readAsDataURL(file);
                                     }
@@ -79,7 +90,7 @@ const ProfileContent = () => {
                                 onChange={(e) => setName(e.target.value)}
                             />
                         ) : (
-                            <h4 className="fw-bold text-main mb-1">{user?.name || 'User Name'}</h4>
+                            <h4 className="fw-bold text-main mb-1">{user?.name || user?.username || (user?.email ? user.email.split('@')[0] : 'User Name')}</h4>
                         )}
                         <p className="text-secondary mb-3">{user?.role || 'Role'}</p>
 
@@ -120,7 +131,7 @@ const ProfileContent = () => {
                             <form>
                                 <div className="row g-3">
                                     <div className="col-md-6">
-                                        <label className="form-label small text-secondary">Full Name</label>
+                                        <label className="form-label small text-secondary">User Name</label>
                                         <div className="input-group">
                                             <span className="input-group-text bg-card border-0"><FaUser className="text-secondary" /></span>
                                             <input

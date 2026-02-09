@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import { verifySignupOtpService } from './service/service';
 import sideImage from '../../../../assets/images/loginimage.png';
 import './SignupOtp.css';
 
 const SignupOtp = () => {
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [error, setError] = useState('');
-    const [timeLeft, setTimeLeft] = useState(30);
+    const [timeLeft, setTimeLeft] = useState(60);
     const [canResend, setCanResend] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
@@ -22,12 +22,35 @@ const SignupOtp = () => {
         }
     }, [timeLeft]);
 
-    const handleResend = () => {
-        setTimeLeft(30);
+    const handleResend = async () => {
+        if (!email || email === 'your email') {
+            alert("Error: No email address found. Please go back to Signup.");
+            return;
+        }
+
         setCanResend(false);
         setError('');
-        // Logic to resend OTP goes here
-        console.log('Resending Signup OTP to', email);
+
+        try {
+            const response = await verifySignupOtpService.resend(email);
+            const data = await response.json();
+
+            if (!response.ok) {
+                // Check if the backend response explicitly states why (e.g., "Email already verified" or "Wait 5 minutes")
+                const serverMsg = data.message || "Failed to resend OTP";
+                throw new Error(`Server Error (${response.status}): ${serverMsg}`);
+            }
+
+            // Restart timer only on success
+            setTimeLeft(60);
+            alert(`Success (${response.status}): OTP resent to ${email}`);
+
+        } catch (err) {
+            console.error("Resend OTP Error:", err);
+            // Show the exact error from the server to the user
+            alert(err.message || 'Failed to resend OTP. Please try again.');
+            setCanResend(true); // Allow retry immediately on failure
+        }
     };
 
     const handleChange = (element, index) => {
@@ -71,7 +94,7 @@ const SignupOtp = () => {
         try {
             setError('');
 
-            const response = await fetch("http://192.168.1.66:5000/api/auth/verify-signup-otp", {
+            const response = await fetch("http://192.168.1.13:5000/api/auth/verify-signup-otp", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

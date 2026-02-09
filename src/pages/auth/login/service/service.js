@@ -3,17 +3,13 @@ export const LOGIN_URL = "http://192.168.1.13:5000/api/auth/login";
 
 export const loginService = {
     login: async (email, password) => {
-        try {
-            const response = await fetch("http://192.168.1.13:5000/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email, password }),
-            });
-            return response;
-        } catch (error) {
-            throw error;
-        }
+        const response = await fetch("http://192.168.1.13:5000/api/auth/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+        });
+        return response;
     },
 };
