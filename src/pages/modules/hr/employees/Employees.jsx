@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaCheckCircle, FaBan } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus, FaFileCsv, FaUserPlus } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const EmployeesContent = () => {
+    const navigate = useNavigate();
     // Mock Data
     const [employees, setEmployees] = useState([
         { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', pay: 'N/A', type: 'Admin', status: 'Active' },
@@ -17,6 +19,10 @@ export const EmployeesContent = () => {
     const [showDelete, setShowDelete] = useState(false);
 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
+    const [filterDept, setFilterDept] = useState('');
+    const [filterName, setFilterName] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc'); // asc or desc
+    const [sortBy, setSortBy] = useState('id'); // id or name
 
 
     // Form Data State
@@ -40,6 +46,16 @@ export const EmployeesContent = () => {
 
     // Handlers
     // Handlers
+    const openAddModal = (type) => {
+        setFormData({
+            userAccount: '', name: '', email: '', phone: '',
+            dept: '', desig: '', type: type, joiningDate: '',
+            company: '', branch: '', payGrade: '', ctc: '',
+            manager: '', status: 'Active', lock: false
+        });
+        setShowAdd(true);
+    };
+
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -101,6 +117,40 @@ export const EmployeesContent = () => {
         });
     };
 
+    const handleExportCSV = () => {
+        const headers = ["ID,Username,Name,Email,Department,Designation,Phone,Status"];
+        const rows = employees.map(emp =>
+            `${emp.id},${emp.user},${emp.name},${emp.email},${emp.dept},${emp.desig},${emp.phone || ''},${emp.status}`
+        );
+        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "employees_list.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const handleCreateUsername = () => {
+        navigate('/create-username');
+    };
+
+    // Derived State for Filtering
+    const filteredEmployees = employees
+        .filter(emp => {
+            if (filterDept && filterDept !== 'Select Department' && emp.dept !== filterDept) return false;
+            if (filterName && !emp.name.toLowerCase().includes(filterName.toLowerCase())) return false;
+            return true;
+        })
+        .sort((a, b) => {
+            if (sortBy === 'name') {
+                return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            }
+            return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
+        });
+
+
     return (
         <>
             <div className="d-flex flex-column gap-3 mb-4">
@@ -110,29 +160,39 @@ export const EmployeesContent = () => {
 
                 <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
                     <div className="d-flex gap-2 flex-grow-1">
-                        <select className="form-select form-select-sm" style={{ maxWidth: '200px' }}>
-                            <option>Select Department</option>
+                        <select className="form-select form-select-sm" style={{ maxWidth: '200px' }} value={filterDept} onChange={(e) => setFilterDept(e.target.value)}>
+                            <option value="">Select Department</option>
                             <option>Administration</option>
                             <option>HR</option>
                             <option>Engineering</option>
                         </select>
-                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }}>
-                            <option>By Name</option>
+                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                            <option value="id">By ID</option>
+                            <option value="name">By Name</option>
                         </select>
-                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }}>
-                            <option>By Number</option>
+                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }} value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+                            <option value="asc">Ascending</option>
+                            <option value="desc">Descending</option>
                         </select>
                     </div>
                     <div className="d-flex gap-2">
-                        <button className="btn btn-success btn-sm d-flex align-items-center gap-2">
-                            <FaEdit /> EXPORT CSV
+                        <button className="btn btn-success btn-sm d-flex align-items-center gap-2" onClick={handleExportCSV}>
+                            <FaFileCsv /> EXPORT CSV
                         </button>
-                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2">
-                            <FaEdit /> CREATE USERNAME
+                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={handleCreateUsername}>
+                            <FaUserPlus /> CREATE USERNAME
                         </button>
-                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={() => setShowAdd(true)}>
-                            ADD
-                        </button>
+                        <div className="btn-group">
+                            <button type="button" className="btn btn-primary btn-sm dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
+                                <FaPlus /> ADD MEMBER
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end">
+                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Employee' } })}>Add Employee</button></li>
+                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'HR' } })}>Add HR</button></li>
+                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Manager' } })}>Add Manager</button></li>
+                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Admin' } })}>Add Admin</button></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -154,7 +214,7 @@ export const EmployeesContent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {employees.map((emp) => (
+                            {filteredEmployees.map((emp) => (
                                 <tr key={emp.id} className={emp.status === 'Inactive' ? 'opacity-50' : ''}>
                                     <td>{emp.user}</td>
                                     <td>{emp.name}</td>
@@ -195,7 +255,7 @@ export const EmployeesContent = () => {
                         <div className="modal-content">
                             <div className="modal-header border-0 pb-0">
                                 <div>
-                                    <h5 className="modal-title fw-bold">Add New Employee</h5>
+                                    <h5 className="modal-title fw-bold">Add New {formData.type}</h5>
                                     <p className="text-muted small mb-0">Enter employee information to add to the system</p>
                                 </div>
                                 <button className="btn-close" onClick={() => setShowAdd(false)}></button>

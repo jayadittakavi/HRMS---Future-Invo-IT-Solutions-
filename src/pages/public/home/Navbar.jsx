@@ -56,7 +56,7 @@ const Navbar = () => {
                                 <input
                                     type="text"
                                     placeholder="Search..."
-                                    className="form-control border-0 rounded-pill ps-5 bg-light"
+                                    className="form-control border-0 rounded-pill ps-5 glassy-search"
                                     style={{ width: '200px', fontSize: '0.9rem' }}
                                 />
                                 <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary opacity-75">

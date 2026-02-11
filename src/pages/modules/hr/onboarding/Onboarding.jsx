@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import {
-    FaUserPlus, FaFileAlt, FaCertificate, FaLaptopHouse,
-    FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaPrint, FaSearch
+    FaUserPlus, FaFileAlt, FaCertificate,
+    FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaPrint, FaSearch, FaEnvelope,
+    FaBriefcase, FaHandshake, FaMoneyBillWave, FaDoorOpen, FaChartLine
 } from 'react-icons/fa';
+import DashboardLayout from '../../../../components/layout/DashboardLayout';
 
 export const OnboardingContent = () => {
     const [activeTab, setActiveTab] = useState('onboarding');
     const [showLetterModal, setShowLetterModal] = useState(false);
     const [showCertModal, setShowCertModal] = useState(false);
-    const [showWFHModal, setShowWFHModal] = useState(false);
+
+    const [showTemplateModal, setShowTemplateModal] = useState(false);
+    const [showLetterTemplateModal, setShowLetterTemplateModal] = useState(false);
     const [selectedType, setSelectedType] = useState('');
+    const [selectedEmployee, setSelectedEmployee] = useState('');
 
     // --- MOCK DATA ---
     const candidates = [
@@ -23,6 +28,7 @@ export const OnboardingContent = () => {
         { id: 'appointment', title: 'Appointment Letter', desc: 'Confirm employment terms and conditions.' },
         { id: 'increment', title: 'Increment Letter', desc: 'Salary appraisal and role update.' },
         { id: 'relieving', title: 'Relieving Letter', desc: 'Formal exit documentation.' },
+        { id: 'performance', title: 'Performance Review Letter', desc: 'Employee performance evaluation and feedback.' },
     ];
 
     const certificateTemplates = [
@@ -31,10 +37,7 @@ export const OnboardingContent = () => {
         { id: 'internship', title: 'Internship Certificate', desc: 'Completion of internship program.' },
     ];
 
-    const wfhRequests = [
-        { id: 1, employee: "John Doe", startDate: "2024-06-01", endDate: "2024-06-05", reason: "Medical Emergency", status: "Pending" },
-        { id: 2, employee: "Jane Smith", startDate: "2024-06-10", endDate: "2024-06-12", reason: "Home Renovation", status: "Approved" },
-    ];
+
 
     // --- RENDER HELPERS ---
 
@@ -62,7 +65,10 @@ export const OnboardingContent = () => {
                                 <td className="text-secondary small">{c.role}</td>
                                 <td className="text-secondary small">{c.date}</td>
                                 <td>
-                                    <span className={`badge ${c.status === 'Completed' ? 'bg-success' : 'bg-primary'} bg-opacity-10 ${c.status === 'Completed' ? 'text-success' : 'text-primary'}`}>
+                                    <span className={`badge ${c.status === 'Completed' ? 'bg-success' :
+                                        c.status === 'Document Verification' ? 'bg-info' :
+                                            'bg-warning text-dark'
+                                        }`}>
                                         {c.status}
                                     </span>
                                 </td>
@@ -77,7 +83,20 @@ export const OnboardingContent = () => {
                                     <small className="text-muted d-block mt-1">{c.progress}% Completed</small>
                                 </td>
                                 <td>
-                                    <button className="btn btn-sm btn-outline-dark border-0"><FaEye /></button>
+                                    <div className="d-flex gap-2">
+                                        <button className="btn btn-sm btn-outline-dark border-0"><FaEye /></button>
+                                        <button
+                                            className="btn btn-sm btn-outline-primary border-0"
+                                            title="Send Letter"
+                                            onClick={() => {
+                                                setSelectedEmployee(c.name);
+                                                setSelectedType('Offer Letter');
+                                                setShowLetterModal(true);
+                                            }}
+                                        >
+                                            <FaEnvelope />
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -89,30 +108,16 @@ export const OnboardingContent = () => {
 
     const renderLetters = () => (
         <div>
-            <div className="row g-4 mb-4">
-                {letterTemplates.map(t => (
-                    <div className="col-md-3" key={t.id}>
-                        <div className="card h-100 hover-lift border-primary border-opacity-25" style={{ cursor: 'pointer' }} onClick={() => { setSelectedType(t.title); setShowLetterModal(true); }}>
-                            <div className="card-body text-center p-4">
-                                <div className="text-primary mb-3">
-                                    <FaFileAlt size={32} />
-                                </div>
-                                <h6 className="fw-bold text-dark">{t.title}</h6>
-                                <p className="text-secondary small mb-3">{t.desc}</p>
-                                <button className="btn btn-sm btn-outline-primary w-100">Generate</button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="card border-0 shadow-sm mt-4">
+            <div className="card border-0 shadow-sm">
                 <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h6 className="mb-0 fw-bold">Recent Generated Letters</h6>
-                    <div className="input-group input-group-sm" style={{ width: '250px' }}>
-                        <span className="input-group-text bg-white"><FaSearch /></span>
-                        <input type="text" className="form-control" placeholder="Search..." />
-                    </div>
+                    <button
+                        className="btn btn-primary btn-sm px-3 shadow-sm"
+                        onClick={() => setShowLetterTemplateModal(true)}
+                    >
+                        <FaFileAlt className="me-2" />
+                        Templates
+                    </button>
                 </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
@@ -145,26 +150,16 @@ export const OnboardingContent = () => {
 
     const renderCertificates = () => (
         <div>
-            <div className="row g-4 mb-4">
-                {certificateTemplates.map(t => (
-                    <div className="col-md-4" key={t.id}>
-                        <div className="card h-100 hover-lift border-warning border-opacity-25" style={{ cursor: 'pointer' }} onClick={() => { setSelectedType(t.title); setShowCertModal(true); }}>
-                            <div className="card-body text-center p-4">
-                                <div className="text-warning mb-3">
-                                    <FaCertificate size={32} />
-                                </div>
-                                <h6 className="fw-bold text-dark">{t.title}</h6>
-                                <p className="text-secondary small mb-3">{t.desc}</p>
-                                <button className="btn btn-sm btn-outline-warning text-dark w-100">Issue Certificate</button>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="card border-0 shadow-sm mt-4">
-                <div className="card-header bg-white py-3">
+            <div className="card border-0 shadow-sm">
+                <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h6 className="mb-0 fw-bold">Issued Certificates History</h6>
+                    <button
+                        className="btn btn-warning btn-sm text-dark px-3"
+                        onClick={() => setShowTemplateModal(true)}
+                    >
+                        <FaCertificate className="me-2" />
+                        Templates
+                    </button>
                 </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">
@@ -192,49 +187,7 @@ export const OnboardingContent = () => {
         </div>
     );
 
-    const renderWFH = () => (
-        <div className="card border-0 shadow-sm">
-            <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                <h6 className="mb-0 fw-bold">Remote Work / WFH Requests</h6>
-                <button className="btn btn-primary btn-sm" onClick={() => setShowWFHModal(true)}>+ New WFH Allocation</button>
-            </div>
-            <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0">
-                    <thead className="bg-light">
-                        <tr>
-                            <th className="ps-4">Employee</th>
-                            <th>Duration</th>
-                            <th>Reason</th>
-                            <th>Status</th>
-                            <th className="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {wfhRequests.map(r => (
-                            <tr key={r.id}>
-                                <td className="ps-4 fw-bold">{r.employee}</td>
-                                <td className="text-secondary small">{r.startDate} to {r.endDate}</td>
-                                <td className="text-secondary small">{r.reason}</td>
-                                <td>
-                                    <span className={`badge ${r.status === 'Approved' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                                        {r.status}
-                                    </span>
-                                </td>
-                                <td className="text-end pe-4">
-                                    {r.status === 'Pending' && (
-                                        <>
-                                            <button className="btn btn-sm btn-success me-1 p-1"><FaCheckCircle /></button>
-                                            <button className="btn btn-sm btn-danger p-1"><FaTimesCircle /></button>
-                                        </>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
+
 
     return (
         <div className="onboarding-content p-4">
@@ -268,14 +221,7 @@ export const OnboardingContent = () => {
                         <FaCertificate className="me-2" /> Certificates
                     </button>
                 </li>
-                <li className="nav-item">
-                    <button
-                        className={`nav-link fw-bold ${activeTab === 'wfh' ? 'active bg-primary' : 'text-secondary'}`}
-                        onClick={() => setActiveTab('wfh')}
-                    >
-                        <FaLaptopHouse className="me-2" /> WFH UI
-                    </button>
-                </li>
+
             </ul>
 
             {/* Content Area */}
@@ -283,7 +229,7 @@ export const OnboardingContent = () => {
                 {activeTab === 'onboarding' && renderOnboarding()}
                 {activeTab === 'letters' && renderLetters()}
                 {activeTab === 'certificates' && renderCertificates()}
-                {activeTab === 'wfh' && renderWFH()}
+
             </div>
 
             {/* --- MODALS --- */}
@@ -301,7 +247,21 @@ export const OnboardingContent = () => {
                                 <FormLayout>
                                     <div className="mb-3">
                                         <label className="form-label">Employee Name</label>
-                                        <input type="text" className="form-control" placeholder="Select Employee" />
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Select Employee"
+                                            defaultValue={selectedEmployee}
+                                            key={selectedEmployee}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Employee Email</label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            placeholder="Enter email address"
+                                        />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Date</label>
@@ -322,7 +282,7 @@ export const OnboardingContent = () => {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary" onClick={() => setShowLetterModal(false)}>Close</button>
-                                <button className="btn btn-primary">Generate Letter</button>
+                                <button className="btn btn-primary" onClick={() => { setShowLetterModal(false); alert('Letter Generated Successfully!'); }}>Generate Letter</button>
                             </div>
                         </div>
                     </div>
@@ -359,40 +319,106 @@ export const OnboardingContent = () => {
                 </div>
             )}
 
-            {/* WFH Modal */}
-            {showWFHModal && (
-                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
+
+
+            {/* Certificate Templates Modal */}
+            {showTemplateModal && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => setShowTemplateModal(false)}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Allocate WFH</h5>
-                                <button className="btn-close" onClick={() => setShowWFHModal(false)}></button>
+                            <div className="modal-header bg-white border-bottom">
+                                <h5 className="modal-title fw-bold text-dark">
+                                    <FaCertificate className="me-2 text-warning" />
+                                    Certificate Templates
+                                </h5>
+                                <button className="btn-close" onClick={() => setShowTemplateModal(false)}></button>
                             </div>
-                            <div className="modal-body">
-                                <FormLayout>
-                                    <div className="mb-3">
-                                        <label className="form-label">Employee</label>
-                                        <input type="text" className="form-control" />
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label">From</label>
-                                            <input type="date" className="form-control" />
+                            <div className="modal-body p-4">
+                                <div className="row g-4">
+                                    {certificateTemplates.map(t => (
+                                        <div className="col-md-4" key={t.id}>
+                                            <div
+                                                className="card h-100 border-warning border-2 shadow-sm"
+                                                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                                                onClick={() => {
+                                                    setSelectedType(t.title);
+                                                    setShowTemplateModal(false);
+                                                    setShowCertModal(true);
+                                                }}
+                                            >
+                                                <div className="card-body text-center p-4">
+                                                    <div className="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style={{ width: '80px', height: '80px' }}>
+                                                        <FaCertificate size={40} className="text-warning" />
+                                                    </div>
+                                                    <h6 className="fw-bold text-dark mb-2">{t.title}</h6>
+                                                    <p className="text-secondary small mb-3">{t.desc}</p>
+                                                    <button className="btn btn-warning text-dark w-100 fw-bold">
+                                                        ISSUE CERTIFICATE
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label">To</label>
-                                            <input type="date" className="form-control" />
-                                        </div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label">Reason / Project</label>
-                                        <input type="text" className="form-control" />
-                                    </div>
-                                </FormLayout>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary" onClick={() => setShowWFHModal(false)}>Cancel</button>
-                                <button className="btn btn-primary">Allocate</button>
+                            <div className="modal-footer border-0">
+                                <button className="btn btn-secondary" onClick={() => setShowTemplateModal(false)}>Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Letter Templates Modal */}
+            {showLetterTemplateModal && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={() => setShowLetterTemplateModal(false)}>
+                    <div className="modal-dialog modal-xl modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header bg-white border-bottom">
+                                <h5 className="modal-title fw-bold text-dark">
+                                    <FaFileAlt className="me-2 text-primary" />
+                                    HR Letter Templates
+                                </h5>
+                                <button className="btn-close" onClick={() => setShowLetterTemplateModal(false)}></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <div className="row g-4 d-flex justify-content-center">
+                                    {letterTemplates.map(t => (
+                                        <div className="col-md-4" key={t.id}>
+                                            <div
+                                                className="card h-100 border-primary border-2 shadow-sm"
+                                                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                                                onClick={() => {
+                                                    setSelectedType(t.title);
+                                                    setShowLetterTemplateModal(false);
+                                                    setShowLetterModal(true);
+                                                }}
+                                            >
+                                                <div className="card-body text-center p-4">
+                                                    <div className="mb-4 d-flex justify-content-center">
+                                                        {t.id === 'offer' && <FaBriefcase size={64} className="text-primary" />}
+                                                        {t.id === 'appointment' && <FaHandshake size={64} className="text-primary" />}
+                                                        {t.id === 'increment' && <FaMoneyBillWave size={64} className="text-primary" />}
+                                                        {t.id === 'relieving' && <FaDoorOpen size={64} className="text-primary" />}
+                                                        {t.id === 'performance' && <FaChartLine size={64} className="text-primary" />}
+                                                    </div>
+                                                    <h6 className="fw-bold text-dark mb-2">{t.title}</h6>
+                                                    <p className="text-secondary small mb-3">{t.desc}</p>
+                                                    <button className="btn btn-primary w-100 fw-bold">
+                                                        GENERATE LETTER
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0">
+                                <button className="btn btn-secondary" onClick={() => setShowLetterTemplateModal(false)}>Close</button>
                             </div>
                         </div>
                     </div>
@@ -408,3 +434,13 @@ const FormLayout = ({ children }) => (
         {children}
     </form>
 );
+
+const Onboarding = () => {
+    return (
+        <DashboardLayout title="">
+            <OnboardingContent />
+        </DashboardLayout>
+    );
+};
+
+export default Onboarding;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/images/fislogo1.png';
@@ -38,12 +38,22 @@ import {
     MdAdminPanelSettings, // Superadmin
     MdChecklist as MdTasks, // Task
     MdSecurity, // Audit Logs
+    MdExpandLess,
+    MdExpandMore
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
     const { user, logout } = useAuth(); // Assuming logout function exists in context
     const navigate = useNavigate();
     const role = user?.role?.toLowerCase() || 'new_user'; // Default to new_user if undefined
+    const [openDropdowns, setOpenDropdowns] = useState({});
+
+    const toggleDropdown = (name) => {
+        setOpenDropdowns(prev => ({
+            ...prev,
+            [name]: !prev[name]
+        }));
+    };
 
     // Helper to format role name for display
     const displayRole = role === 'new_user' ? 'New User' :
@@ -63,7 +73,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                 links = [
                     { name: 'Dashboard', icon: <MdDashboard size={20} />, path: '/dashboard' },
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
-                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance-management' },
+                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Daily Task', icon: <MdAssignmentInd size={20} />, path: '/daily-task' },
                     { name: 'Task', icon: <MdTasks size={20} />, path: '/tasks' },
                     { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
@@ -71,7 +81,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
 
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
-                    { name: 'Audit Logs', icon: <MdBarChart size={20} />, path: '/admin/audit-logs' },
+                    { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
+                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/admin/audit-logs' },
                 ];
                 break;
 
@@ -88,7 +99,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
                     { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                     { name: 'User Mgmt', icon: <MdPerson size={20} />, path: '/users' },
-                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/audit-logs' },
+                    { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/super-admin/audit-logs' },
                 ];
                 break;
 
@@ -97,11 +108,19 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                     { name: 'Dashboard', icon: <MdDashboard size={20} />, path: '/dashboard' },
                     { name: 'Employee Directory', icon: <MdPeople size={20} />, path: '/employee-directory' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Leave Requests', icon: <MdEventBusy size={20} />, path: '/leave-requests' },
+                    // { name: 'Leave Requests', icon: <MdEventBusy size={20} />, path: '/leave-requests' },
+                    {
+                        name: 'Request',
+                        icon: <MdEventBusy size={20} />,
+                        children: [
+                            { name: 'Leave', path: '/leave-requests' },
+                            { name: 'WFH', path: '/wfh-requests' },
+                            { name: 'Other Requests', path: '/other-requests' }
+                        ]
+                    },
                     { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
                     { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
                     { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
-                    { name: 'Performance Reviews', icon: <MdRateReview size={20} />, path: '/performance-reviews' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
                     { name: 'HR Reports', icon: <MdBarChart size={20} />, path: '/hr-reports' },
                 ];
@@ -158,23 +177,64 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
 
         return (
             <div className="d-flex flex-column gap-1 pt-2">
-                {links.map((link) => (
-                    <NavLink
-                        key={link.path}
-                        to={link.path}
-                        className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
-                        onClick={(e) => {
-                            if (window.innerWidth < 768) toggleSidebar();
-                            if (onNavigate) {
-                                e.preventDefault();
-                                onNavigate(link.path);
-                            }
-                        }}
-                    >
-                        <span className="sidebar-icon">{link.icon}</span>
-                        <span>{link.name}</span>
-                    </NavLink>
-                ))}
+                {links.map((link) => {
+                    if (link.children) {
+                        const isOpen = openDropdowns[link.name];
+                        return (
+                            <div key={link.name}>
+                                <div
+                                    className={`sidebar-link d-flex justify-content-between align-items-center ${isOpen ? 'active-dropdown' : ''}`}
+                                    onClick={() => toggleDropdown(link.name)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className="d-flex align-items-center gap-3">
+                                        <span className="sidebar-icon">{link.icon}</span>
+                                        <span>{link.name}</span>
+                                    </div>
+                                    {isOpen ? <MdExpandLess /> : <MdExpandMore />}
+                                </div>
+                                {isOpen && (
+                                    <div className="bg-dark bg-opacity-10 py-1 rounded-bottom mb-1">
+                                        {link.children.map(child => (
+                                            <NavLink
+                                                key={child.path}
+                                                to={child.path}
+                                                className={({ isActive }) => `sidebar-link ps-5 ${isActive ? 'active' : ''}`}
+                                                style={{ fontSize: '0.9em' }}
+                                                onClick={(e) => {
+                                                    if (window.innerWidth < 768) toggleSidebar();
+                                                    if (onNavigate) {
+                                                        e.preventDefault();
+                                                        onNavigate(child.path);
+                                                    }
+                                                }}
+                                            >
+                                                <span>{child.name}</span>
+                                            </NavLink>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+                    return (
+                        <NavLink
+                            key={link.path}
+                            to={link.path}
+                            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                            onClick={(e) => {
+                                if (window.innerWidth < 768) toggleSidebar();
+                                if (onNavigate) {
+                                    e.preventDefault();
+                                    onNavigate(link.path);
+                                }
+                            }}
+                        >
+                            <span className="sidebar-icon">{link.icon}</span>
+                            <span>{link.name}</span>
+                        </NavLink>
+                    );
+                })}
             </div>
         );
     };

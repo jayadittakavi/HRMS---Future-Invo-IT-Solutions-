@@ -8,6 +8,11 @@ import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../compone
 import { FaUsers, FaUserPlus, FaChalkboardTeacher } from 'react-icons/fa';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { OnboardingContent } from '../modules/hr/onboarding/Onboarding';
+import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
+import { RecruitmentContent } from '../modules/hr/recruitment/Recruitment';
+import { DocumentsContent } from '../modules/hr/documents/Documents';
+import { TrainingContent } from '../modules/hr/training/Training';
+import { HRReportsContent } from '../modules/hr/reports/HRReports';
 
 const HRDashboard = () => {
     const { user } = useAuth();
@@ -181,17 +186,14 @@ const HRDashboard = () => {
                 )}
 
                 {activeView === 'employees' && <EmployeesContent />}
+                {activeView === 'employee-directory' && <EmployeesContent />}
                 {activeView === 'attendance' && <AttendanceContent />}
-
-                {activeView === 'recruitment' && (
-                    <div className="p-5 text-center">
-                        <h3 className="text-muted">Recruitment Module Coming Soon</h3>
-                        <p>Manage job postings and applications here.</p>
-                    </div>
-                )}
-
-
-
+                {activeView === 'recruitment' && <RecruitmentContent />}
+                {activeView === 'documents' && <DocumentsContent />}
+                {activeView === 'training' && <TrainingContent />}
+                {activeView === 'hr-reports' && <HRReportsContent />}
+                {activeView === 'leave-management' && <LeaveManagementContent personal={false} />}
+                {activeView === 'leave-requests' && <LeaveManagementContent personal={false} />}
                 {activeView === 'onboarding' && <OnboardingContent />}
                 {activeView === 'profile' && <ProfileContent />}
             </div>

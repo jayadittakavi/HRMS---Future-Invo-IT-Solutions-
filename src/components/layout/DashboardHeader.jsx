@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
 
-const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
+const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
     const { user } = useAuth();
     const { toggleSettingsDrawer, skin, theme, toggleTheme } = useTheme();
 
@@ -25,7 +25,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
                 </button>
 
                 <span className="fw-bold text-main fs-5">
-                    {user?.name || 'Dashboard'}
+                    {title || 'Dashboard'}
                 </span>
             </div>
 
@@ -39,17 +39,11 @@ const DashboardHeader = ({ toggleSidebar, onNavigate }) => {
                         <input
                             type="text"
                             placeholder="Search..."
-                            className="form-control border-0 rounded-pill ps-5 text-main"
+                            className="form-control border-0 rounded-pill ps-5 text-main glassy-search"
                             style={{
                                 width: '250px',
-                                background: 'var(--bg-card)',
-                                backdropFilter: 'var(--glass-blur)',
-                                WebkitBackdropFilter: 'var(--glass-blur)',
-                                border: 'var(--glass-border)',
-                                boxShadow: 'var(--shadow-sm)', // Subtle pink & blue glow
                                 fontSize: '0.9rem',
                                 paddingRight: '1rem',
-                                color: 'var(--text-main)'
                             }}
                         />
                         <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary opacity-75">

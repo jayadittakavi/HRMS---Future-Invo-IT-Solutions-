@@ -44,7 +44,7 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
 
             {/* Main Content Wrapper */}
             <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden">
-                <DashboardHeader toggleSidebar={toggleSidebar} onNavigate={handleNavigate} />
+                <DashboardHeader title={title} toggleSidebar={toggleSidebar} onNavigate={handleNavigate} />
 
                 {/* Scrollable Content Area */}
                 <div className="flex-grow-1 overflow-auto p-4">

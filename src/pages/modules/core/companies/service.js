@@ -1,13 +1,14 @@
-const API_BASE = "http://192.168.1.5:5000/api";
+const API_BASE = "http://127.0.0.1:5000/api";
+
+// Hardcoded token as requested
+const VALID_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzA4NDI5ODN9.GxdFCd6FroibSvs9zAao7FOfdW3owKRB-USQBBN8f8c";
 
 // Helper to get auth header with token
 const authHeader = () => {
-    // Get token from localStorage (dynamic) - this fixes "Invalid Token" errors when the hardcoded one expires
-    const token = localStorage.getItem("authToken") || localStorage.getItem("token");
     return {
         headers: {
             "Content-Type": "application/json",
-            ...(token ? { "Authorization": `Bearer ${token}` } : {})
+            "Authorization": `Bearer ${VALID_TOKEN}`
         },
     };
 };
@@ -15,27 +16,17 @@ const authHeader = () => {
 export const companyService = {
     // 🔹 Get All Companies
     getAllCompanies: async () => {
-        const response = await fetch(`${API_BASE}/superadmin/companies`, {
+        const response = await fetch("http://127.0.0.1:5000/api/superadmin/companies", {
             method: "GET",
             ...authHeader()
         });
-        if (!response.ok) {
-            // Fallback to /api/companies if superadmin route fails or for compatibility
-            if (response.status === 404) {
-                const fallback = await fetch(`${API_BASE}/companies`, {
-                    method: "GET",
-                    ...authHeader()
-                });
-                return fallback.json();
-            }
-            throw new Error(await response.text());
-        }
+        if (!response.ok) throw new Error(await response.text());
         return response.json();
     },
 
     // 🔹 Get Single Company
     getCompanyById: async (id) => {
-        const response = await fetch(`${API_BASE}/companies/${id}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/superadmin/companies/${id}`, {
             method: "GET",
             ...authHeader()
         });
@@ -45,7 +36,7 @@ export const companyService = {
 
     // 🔹 Create New Company
     createCompany: async (data) => {
-        const response = await fetch(`${API_BASE}/superadmin/create-company`, {
+        const response = await fetch("http://127.0.0.1:5000/api/superadmin/create-company", {
             method: "POST",
             body: JSON.stringify(data),
             ...authHeader()
@@ -56,7 +47,7 @@ export const companyService = {
 
     // 🔹 Update Company
     updateCompany: async (id, data) => {
-        const response = await fetch(`${API_BASE}/companies/${id}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/superadmin/companies/${id}`, {
             method: "PUT",
             body: JSON.stringify(data),
             ...authHeader()
@@ -67,7 +58,7 @@ export const companyService = {
 
     // 🔹 Delete Company
     deleteCompany: async (id) => {
-        const response = await fetch(`${API_BASE}/companies/${id}`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/superadmin/companies/${id}`, {
             method: "DELETE",
             ...authHeader()
         });

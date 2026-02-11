@@ -24,13 +24,28 @@ export const CompaniesContent = () => {
     });
 
     // 🔹 Fetch companies
+    // 🔹 Fetch companies
     const fetchCompanies = async () => {
         setLoading(true);
         try {
-            const data = await companyService.getAllCompanies();
-            setCompanies(Array.isArray(data) ? data : []);
+            const response = await companyService.getAllCompanies();
+            console.log("Fetched companies response:", response);
+
+            let data = [];
+            if (Array.isArray(response)) {
+                data = response;
+            } else if (response && typeof response === 'object') {
+                if (Array.isArray(response.data)) data = response.data;
+                else if (Array.isArray(response.companies)) data = response.companies;
+                else if (Array.isArray(response.result)) data = response.result;
+            }
+
+            setCompanies(data);
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching companies:", err);
+            // Optional: setCompanies([]) on error is already implicit since it initializes as [] and we don't clear it on error here, 
+            // but normally we might want to clear or keep old data. 
+            // Let's keep existing behavior or just ensure we don't break.
         } finally {
             setLoading(false);
         }
@@ -141,10 +156,10 @@ export const CompaniesContent = () => {
                     ) : (
                         companies.map((c) => (
                             <tr key={c.id}>
-                                <td>{c.name}</td>
-                                <td>{c.company_Id}</td>
-                                <td>{c.industry}</td>
-                                <td>{`${c.city_branch || ''}, ${c.country || ''}`}</td>
+                                <td>{c.name || c.companyName || c.company_name}</td>
+                                <td>{c.company_Id || c.company_id || c.companyId || c.companyCode || c.id}</td>
+                                <td>{c.industry || c.industryType}</td>
+                                <td>{`${c.city_branch || c.city || c.branch || c.location || ''}, ${c.country || c.countryName || ''}`}</td>
                                 <td>
                                     <FaEdit
                                         className="me-3 text-primary"

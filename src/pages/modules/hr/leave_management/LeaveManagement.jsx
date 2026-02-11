@@ -25,7 +25,9 @@ export const LeaveManagementContent = ({ personal = false }) => {
     const [showApply, setShowApply] = useState(false);
     const [showApprove, setShowApprove] = useState(false);
     const [showReject, setShowReject] = useState(false);
+    const [showPolicies, setShowPolicies] = useState(false);
     const [selectedRequest, setSelectedRequest] = useState(null);
+    const [rejectionReason, setRejectionReason] = useState('');
 
     // Handlers
     const handleApprove = (req) => {
@@ -35,7 +37,39 @@ export const LeaveManagementContent = ({ personal = false }) => {
 
     const handleReject = (req) => {
         setSelectedRequest(req);
+        setRejectionReason('');
         setShowReject(true);
+    };
+
+    const confirmApproval = () => {
+        console.log('Approving leave for:', selectedRequest.employee);
+        // TODO: API call to approve leave
+        // Send approval notification
+        alert(`Leave approved for ${selectedRequest.employee}. Notification sent.`);
+        setShowApprove(false);
+        setSelectedRequest(null);
+    };
+
+    const confirmRejection = () => {
+        if (!selectedRequest) return;
+
+        console.log('Rejecting leave for:', selectedRequest.employee);
+        console.log('Rejection reason:', rejectionReason);
+
+        // TODO: API call to reject leave and send notification
+        const notificationMessage = rejectionReason
+            ? `Your leave request from ${selectedRequest.from} to ${selectedRequest.to} has been rejected. Reason: ${rejectionReason}`
+            : `Your leave request from ${selectedRequest.from} to ${selectedRequest.to} has been rejected.`;
+
+        // Simulate sending notification
+        console.log('Sending notification to:', selectedRequest.employee);
+        console.log('Notification message:', notificationMessage);
+
+        alert(`Leave rejected for ${selectedRequest.employee}.\nRejection notification sent to employee.`);
+
+        setShowReject(false);
+        setSelectedRequest(null);
+        setRejectionReason('');
     };
 
     return (
@@ -47,7 +81,7 @@ export const LeaveManagementContent = ({ personal = false }) => {
                 </div>
                 <div>
                     {!personal && (
-                        <button className="btn btn-outline-primary btn-sm px-3 rounded-pill me-2">
+                        <button className="btn btn-outline-primary btn-sm px-3 rounded-pill me-2" onClick={() => setShowPolicies(true)}>
                             Leave Policies
                         </button>
                     )}
@@ -162,7 +196,7 @@ export const LeaveManagementContent = ({ personal = false }) => {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowApprove(false)}>Cancel</button>
-                                <button className="btn btn-success btn-sm">Approve</button>
+                                <button className="btn btn-success btn-sm" onClick={confirmApproval}>Approve</button>
                             </div>
                         </div>
                     </div>
@@ -180,11 +214,130 @@ export const LeaveManagementContent = ({ personal = false }) => {
                             </div>
                             <div className="modal-body">
                                 <p>Are you sure you want to reject leave for <strong>{selectedRequest.employee}</strong>?</p>
-                                <textarea className="form-control mt-2" placeholder="Reason for rejection (optional)"></textarea>
+                                <textarea
+                                    className="form-control mt-2"
+                                    placeholder="Reason for rejection (optional)"
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    rows="3"
+                                ></textarea>
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowReject(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Reject</button>
+                                <button className="btn btn-danger btn-sm" onClick={confirmRejection}>Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Leave Policies Modal */}
+            {showPolicies && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setShowPolicies(false)}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header bg-primary bg-opacity-10">
+                                <h5 className="modal-title fw-bold text-primary">Company Leave Policies</h5>
+                                <button className="btn-close" onClick={() => setShowPolicies(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                {/* Leave Types Section */}
+                                <div className="mb-4">
+                                    <h6 className="fw-bold text-dark mb-3">Leave Types & Entitlements</h6>
+                                    <div className="table-responsive">
+                                        <table className="table table-bordered table-sm">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>Leave Type</th>
+                                                    <th>Annual Entitlement</th>
+                                                    <th>Carry Forward</th>
+                                                    <th>Notice Period</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td><strong>Annual Leave</strong></td>
+                                                    <td>20 days</td>
+                                                    <td>5 days max</td>
+                                                    <td>2 weeks</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Sick Leave</strong></td>
+                                                    <td>12 days</td>
+                                                    <td>Not allowed</td>
+                                                    <td>Same day (with medical certificate)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Casual Leave</strong></td>
+                                                    <td>10 days</td>
+                                                    <td>Not allowed</td>
+                                                    <td>1 day</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Maternity Leave</strong></td>
+                                                    <td>90 days</td>
+                                                    <td>N/A</td>
+                                                    <td>1 month</td>
+                                                </tr>
+                                                <tr>
+                                                    <td><strong>Paternity Leave</strong></td>
+                                                    <td>7 days</td>
+                                                    <td>N/A</td>
+                                                    <td>1 week</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* General Rules */}
+                                <div className="mb-4">
+                                    <h6 className="fw-bold text-dark mb-3">General Rules</h6>
+                                    <ul className="list-unstyled">
+                                        <li className="mb-2">
+                                            <span className="badge bg-primary me-2">1</span>
+                                            All leave requests must be submitted through the HRMS portal
+                                        </li>
+                                        <li className="mb-2">
+                                            <span className="badge bg-primary me-2">2</span>
+                                            Leave approval is subject to manager discretion and business needs
+                                        </li>
+                                        <li className="mb-2">
+                                            <span className="badge bg-primary me-2">3</span>
+                                            Medical certificate required for sick leave exceeding 2 consecutive days
+                                        </li>
+                                        <li className="mb-2">
+                                            <span className="badge bg-primary me-2">4</span>
+                                            Unused annual leave can be carried forward (max 5 days)
+                                        </li>
+                                        <li className="mb-2">
+                                            <span className="badge bg-primary me-2">5</span>
+                                            Emergency leave may be granted on a case-by-case basis
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* Application Process */}
+                                <div className="mb-3">
+                                    <h6 className="fw-bold text-dark mb-3">Application Process</h6>
+                                    <div className="alert alert-info">
+                                        <ol className="mb-0 ps-3">
+                                            <li>Submit leave request through HRMS portal</li>
+                                            <li>Manager reviews and approves/rejects request</li>
+                                            <li>Employee receives notification of decision</li>
+                                            <li>Approved leave is reflected in attendance records</li>
+                                        </ol>
+                                    </div>
+                                </div>
+
+                                {/* Contact Info */}
+                                <div className="alert alert-warning mb-0">
+                                    <strong>Note:</strong> For special circumstances or questions about leave policies,
+                                    please contact HR at <strong>hr@company.com</strong> or extension <strong>1234</strong>.
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button className="btn btn-primary btn-sm" onClick={() => setShowPolicies(false)}>Close</button>
                             </div>
                         </div>
                     </div>

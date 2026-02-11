@@ -6,16 +6,27 @@ import { useAuth } from '../../context/AuthContext';
 import {
     FaEdit,
     FaTrash,
-    FaSearch
+    FaSearch,
+    FaList,
+    FaIdCard,
+    FaUserCircle,
+
+    FaCheckCircle,
+    FaTimesCircle
 } from 'react-icons/fa';
 
 export const AttendanceContent = ({ personal = false }) => {
     const { user } = useAuth();
+
+
     // Filter States
     const [filterDateFrom, setFilterDateFrom] = useState('');
     const [filterDateTo, setFilterDateTo] = useState('');
     const [filterDay, setFilterDay] = useState('All');
     const [filterMonth, setFilterMonth] = useState('');
+
+    // View Mode State
+    const [viewMode, setViewMode] = useState('table');
 
     // Modal States
     const [showManualModal, setShowManualModal] = useState(false);
@@ -230,6 +241,7 @@ export const AttendanceContent = ({ personal = false }) => {
                 </div>
             </div>
 
+
             {/* Filters Section */}
             <div className="bg-white p-3 rounded shadow-sm mb-4">
                 {personal ? (
@@ -242,8 +254,8 @@ export const AttendanceContent = ({ personal = false }) => {
                         </div>
                         <div className="col-md-6">
                             <div className="input-group">
-                                <span className="input-group-text bg-white border-end-0 text-muted"><FaSearch className="text-secondary" /></span>
-                                <input type="text" className="form-control border-start-0 ps-0 text-secondary shadow-none" placeholder="Search..." />
+                                <span className="input-group-text bg-transparent border-end-0 text-muted"><FaSearch className="text-secondary" /></span>
+                                <input type="text" className="form-control border-start-0 ps-0 text-secondary shadow-none glassy-search" placeholder="Search..." />
                             </div>
                         </div>
                     </div>
@@ -272,8 +284,8 @@ export const AttendanceContent = ({ personal = false }) => {
                         <div className="row g-3 align-items-center mt-2">
                             <div className="col-md-6">
                                 <div className="input-group">
-                                    <span className="input-group-text bg-white border-end-0 text-muted"><FaSearch className="text-secondary" /></span>
-                                    <input type="text" className="form-control border-start-0 ps-0 text-secondary shadow-none" placeholder="Search..." />
+                                    <span className="input-group-text bg-transparent border-end-0 text-muted"><FaSearch className="text-secondary" /></span>
+                                    <input type="text" className="form-control border-start-0 ps-0 text-secondary shadow-none glassy-search" placeholder="Search..." />
                                 </div>
                             </div>
                             <div className="col-md-3">
@@ -289,58 +301,130 @@ export const AttendanceContent = ({ personal = false }) => {
 
             {/* Table Section */}
             <div className="bg-white rounded shadow-sm">
+                {/* View Toggle & Header */}
+                <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <h6 className="m-0 fw-bold text-muted">Records</h6>
+                    <div className="btn-group" role="group">
+                        <button type="button" className={`btn btn-sm ${viewMode === 'table' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => setViewMode('table')} title="List View">
+                            <FaList />
+                        </button>
+                        <button type="button" className={`btn btn-sm ${viewMode === 'card' ? 'btn-primary' : 'btn-outline-primary'}`} onClick={() => setViewMode('card')} title="ID Card View">
+                            <FaIdCard />
+                        </button>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="p-5 text-center text-muted">Loading attendance records...</div>
                 ) : error ? (
                     <div className="p-5 text-center text-danger">Error: {error}</div>
                 ) : (
-                    <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0">
-                            <thead className="bg-light">
-                                <tr>
-                                    <th className="border-bottom-0 text-dark fw-bold small ps-4">Date</th>
-                                    {!personal && <th className="border-bottom-0 text-dark fw-bold small">Name</th>}
-                                    <th className="border-bottom-0 text-dark fw-bold small">Punch-In</th>
-                                    <th className="border-bottom-0 text-dark fw-bold small">Punch-Out</th>
-                                    <th className="border-bottom-0 text-dark fw-bold small">Shift</th>
-                                    <th className="border-bottom-0 text-dark fw-bold small">Status</th>
-                                    {!personal && <th className="border-bottom-0 text-dark fw-bold small">Action</th>}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {attendanceData.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={personal ? 5 : 7} className="text-center p-4 text-muted">No attendance records found.</td>
-                                    </tr>
-                                ) : (
-                                    attendanceData.map((row) => (
-                                        <tr key={row.id}>
-                                            <td className="ps-4 fw-bold text-secondary">{row.date}</td>
-                                            {!personal && <td className="small text-dark fw-bold">{row.employee_name || row.name || row.employee_id || 'Unknown'}</td>}
-                                            <td className="small text-primary fw-bold">{formatTime(row.login_at || row.punch_in_time || row.punch_in)}</td>
-                                            <td className="small text-primary fw-bold">{formatTime(row.logout_at || row.punch_out_time || row.punch_out)}</td>
-                                            <td className="small text-secondary fw-bold">{row.shift || '-'}</td>
-                                            <td>
-                                                <span className={`badge ${getStatusBadge(row.status)}`}>
-                                                    {row.status}
-                                                </span>
-                                            </td>
-                                            {!personal && (
-                                                <td>
-                                                    <div className="d-flex gap-2">
-                                                        <button className="btn btn-sm btn-outline-primary border-0 p-1" onClick={() => handleEdit(row.id)}><FaEdit size={16} /></button>
-                                                        <button className="btn btn-sm btn-outline-danger border-0 p-1" onClick={() => handleDelete(row.id)}><FaTrash size={16} /></button>
-                                                    </div>
-                                                </td>
-                                            )}
+                    <>
+                        {viewMode === 'table' ? (
+                            <div className="table-responsive">
+                                <table className="table table-hover align-middle mb-0">
+                                    <thead className="bg-light">
+                                        <tr>
+                                            <th className="border-bottom-0 text-dark fw-bold small ps-4">Date</th>
+                                            {!personal && <th className="border-bottom-0 text-dark fw-bold small">Name</th>}
+                                            <th className="border-bottom-0 text-dark fw-bold small">Punch-In</th>
+                                            <th className="border-bottom-0 text-dark fw-bold small">Punch-Out</th>
+                                            <th className="border-bottom-0 text-dark fw-bold small">Shift</th>
+                                            <th className="border-bottom-0 text-dark fw-bold small">Status</th>
+                                            {!personal && <th className="border-bottom-0 text-dark fw-bold small">Action</th>}
                                         </tr>
-                                    ))
+                                    </thead>
+                                    <tbody>
+                                        {attendanceData.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={personal ? 5 : 7} className="text-center p-4 text-muted">No attendance records found.</td>
+                                            </tr>
+                                        ) : (
+                                            attendanceData.map((row) => (
+                                                <tr key={row.id}>
+                                                    <td className="ps-4 fw-bold text-secondary">{row.date}</td>
+                                                    {!personal && <td className="small text-dark fw-bold">{row.employee_name || row.name || row.employee_id || 'Unknown'}</td>}
+                                                    <td className="small text-primary fw-bold">{formatTime(row.login_at || row.punch_in_time || row.punch_in)}</td>
+                                                    <td className="small text-primary fw-bold">{formatTime(row.logout_at || row.punch_out_time || row.punch_out)}</td>
+                                                    <td className="small text-secondary fw-bold">{row.shift || '-'}</td>
+                                                    <td>
+                                                        <span className={`badge ${getStatusBadge(row.status)}`}>
+                                                            {row.status}
+                                                        </span>
+                                                    </td>
+                                                    {!personal && (
+                                                        <td>
+                                                            <div className="d-flex gap-2">
+                                                                <button className="btn btn-sm btn-outline-primary border-0 p-1" onClick={() => handleEdit(row.id)}><FaEdit size={16} /></button>
+                                                                <button className="btn btn-sm btn-outline-danger border-0 p-1" onClick={() => handleDelete(row.id)}><FaTrash size={16} /></button>
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <div className="p-4" style={{ backgroundColor: '#f8f9fa' }}>
+                                {attendanceData.length === 0 ? (
+                                    <div className="text-center p-4 text-muted">No attendance records found.</div>
+                                ) : (
+                                    <div className="row g-4">
+                                        {attendanceData.map((row) => (
+                                            <div className="col-md-4 col-lg-3" key={row.id}>
+                                                <div className="card border-0 shadow-sm h-100 hover-lift text-center position-relative overflow-hidden">
+                                                    {/* Decorative Header */}
+                                                    <div className="position-absolute top-0 start-0 w-100" style={{ height: '6px', background: 'linear-gradient(90deg, #0d6efd, #0dcaf0)' }}></div>
+
+                                                    <div className="card-body p-4 d-flex flex-column align-items-center">
+                                                        {/* Avatar */}
+                                                        <div className="mb-3 position-relative">
+                                                            <div className="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary border border-2 border-white shadow-sm" style={{ width: '80px', height: '80px', fontSize: '2rem' }}>
+                                                                <FaUserCircle />
+                                                            </div>
+                                                            <span className={`position-absolute bottom-0 end-0 p-2 rounded-circle border border-2 border-white ${row.status === 'Present' ? 'bg-success' : 'bg-secondary'}`}></span>
+                                                        </div>
+
+                                                        {/* Info */}
+                                                        <h6 className="fw-bold text-dark mb-1">{row.employee_name || row.name || 'Unknown'}</h6>
+                                                        <div className="small text-muted mb-2">{row.employee_id || 'ID: --'}</div>
+                                                        <div className="badge bg-light text-dark border mb-3">{row.shift || 'General Shift'}</div>
+
+                                                        {/* Times */}
+                                                        <div className="d-flex w-100 justify-content-between bg-light rounded p-2 mb-3">
+                                                            <div className="text-center">
+                                                                <div className="small text-muted fw-bold" style={{ fontSize: '0.7rem' }}>PUNCH IN</div>
+                                                                <div className="fw-bold text-primary">{formatTime(row.login_at || row.punch_in_time || row.punch_in)}</div>
+                                                            </div>
+                                                            <div className="vr opacity-25"></div>
+                                                            <div className="text-center">
+                                                                <div className="small text-muted fw-bold" style={{ fontSize: '0.7rem' }}>PUNCH OUT</div>
+                                                                <div className="fw-bold text-primary">{formatTime(row.logout_at || row.punch_out_time || row.punch_out)}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions - Only for Admin */}
+                                                        {!personal && (
+                                                            <div className="d-flex gap-2 w-100">
+                                                                <button className="btn btn-sm btn-outline-primary flex-grow-1" onClick={() => handleEdit(row.id)}>Edit</button>
+                                                                <button className="btn btn-sm btn-outline-danger flex-grow-1" onClick={() => handleDelete(row.id)}>Delete</button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
+
+
 
             {/* Manual Entry Modal */}
             {showManualModal && (
