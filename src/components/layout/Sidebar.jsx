@@ -42,7 +42,7 @@ import {
     MdExpandMore
 } from 'react-icons/md';
 
-const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
+const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     const { user, logout } = useAuth(); // Assuming logout function exists in context
     const navigate = useNavigate();
     const role = user?.role?.toLowerCase() || 'new_user'; // Default to new_user if undefined
@@ -129,12 +129,14 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
             case 'manager':
                 links = [
                     { name: 'Dashboard', icon: <MdDashboard size={20} />, path: '/dashboard' },
-                    { name: 'Team Members', icon: <MdGroups size={20} />, path: '/team-members' },
-                    { name: 'Team Attendance', icon: <MdFactCheck size={20} />, path: '/team-attendance' },
-                    { name: 'Leave Approvals', icon: <MdEventBusy size={20} />, path: '/leave-approvals' },
-                    { name: 'Performance Feedback', icon: <MdRateReview size={20} />, path: '/performance-feedback' },
-                    { name: 'Goals & Targets', icon: <MdTrackChanges size={20} />, path: '/goals' },
-                    { name: 'Team Reports', icon: <MdBarChart size={20} />, path: '/team-reports' },
+
+                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
+                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
+                    { name: 'Daily Task', icon: <MdAssignment size={20} />, path: '/daily-task' },
+                    { name: 'Task', icon: <MdTasks size={20} />, path: '/task' },
+                    { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/asset-allocation' },
+                    { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
+                    { name: 'Leave Management', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                 ];
                 break;
 
@@ -199,7 +201,10 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                                             <NavLink
                                                 key={child.path}
                                                 to={child.path}
-                                                className={({ isActive }) => `sidebar-link ps-5 ${isActive ? 'active' : ''}`}
+                                                className={({ isActive }) => {
+                                                    const isLinkActive = activePath !== undefined ? activePath === child.path : isActive;
+                                                    return `sidebar-link ps-5 ${isLinkActive ? 'active' : ''}`;
+                                                }}
                                                 style={{ fontSize: '0.9em' }}
                                                 onClick={(e) => {
                                                     if (window.innerWidth < 768) toggleSidebar();
@@ -221,7 +226,10 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
                         <NavLink
                             key={link.path}
                             to={link.path}
-                            className={({ isActive }) => `sidebar-link ${isActive ? 'active' : ''}`}
+                            className={({ isActive }) => {
+                                const isLinkActive = activePath !== undefined ? activePath === link.path : isActive;
+                                return `sidebar-link ${isLinkActive ? 'active' : ''}`;
+                            }}
                             onClick={(e) => {
                                 if (window.innerWidth < 768) toggleSidebar();
                                 if (onNavigate) {
@@ -242,7 +250,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate }) => {
     return (
         <div
             className={`sidebar-container h-100 d-flex flex-column transition-width ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
-            style={{ width: isOpen ? '260px' : '0', overflow: 'hidden', transition: 'width 0.3s ease' }}
+            style={{ width: '100%', overflow: 'hidden' }}
         >
             {/* Logo Area */}
             <div className="sidebar-header d-flex align-items-center mb-4 ps-2">

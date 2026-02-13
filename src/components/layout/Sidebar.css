@@ -49,15 +49,16 @@
 }
 
 .sidebar-link:hover {
-    background: var(--bg-body);
-    color: var(--primary-color) !important;
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff !important;
     transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .sidebar-link.active {
-    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     font-weight: 600;
 }
 

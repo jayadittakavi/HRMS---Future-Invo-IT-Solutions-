@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { attendanceService } from "./service/service";
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
+import BulkAttendanceModal from './BulkAttendanceModal';
 
 import {
     FaEdit,
@@ -9,27 +10,22 @@ import {
     FaSearch,
     FaList,
     FaIdCard,
-    FaUserCircle,
-
-    FaCheckCircle,
-    FaTimesCircle
+    FaUserCircle
 } from 'react-icons/fa';
 
 export const AttendanceContent = ({ personal = false }) => {
     const { user } = useAuth();
 
-
     // Filter States
     const [filterDateFrom, setFilterDateFrom] = useState('');
     const [filterDateTo, setFilterDateTo] = useState('');
-    const [filterDay, setFilterDay] = useState('All');
-    const [filterMonth, setFilterMonth] = useState('');
 
     // View Mode State
     const [viewMode, setViewMode] = useState('table');
 
     // Modal States
     const [showManualModal, setShowManualModal] = useState(false);
+    const [showBulkModal, setShowBulkModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [editingRecord, setEditingRecord] = useState(null);
 
@@ -41,7 +37,6 @@ export const AttendanceContent = ({ personal = false }) => {
     const [attendanceData, setAttendanceData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [debugResponse, setDebugResponse] = useState(null); // Re-added for critical debugging
 
     // Fetch Data
     const fetchAttendance = async () => {
@@ -58,10 +53,7 @@ export const AttendanceContent = ({ personal = false }) => {
                 response = await attendanceService.getAllAttendance(params.toString());
             }
 
-            setDebugResponse(response); // Store raw response
-
             // Robust data extraction
-            // Common patterns: plain array, { data: [] }, { attendance: [] }, { records: [] }
             let dataList = [];
             if (Array.isArray(response)) {
                 dataList = response;
@@ -71,7 +63,6 @@ export const AttendanceContent = ({ personal = false }) => {
                 else if (Array.isArray(response.records)) dataList = response.records;
                 else if (Array.isArray(response.employees)) dataList = response.employees;
                 else {
-                    // BRUTE FORCE: Find the first key that is an array
                     const keys = Object.keys(response);
                     for (const key of keys) {
                         if (Array.isArray(response[key])) {
@@ -94,44 +85,33 @@ export const AttendanceContent = ({ personal = false }) => {
 
     useEffect(() => {
         fetchAttendance();
-    }, [personal]); // Refetch if view mode changes
+    }, [personal]);
 
-    // Handlers
     // Handlers
     const handleManualAttendance = async (formData) => {
         try {
-            // Map frontend form data to backend expected format (snake_case)
             const payload = {
                 employee_id: formData.employeeId,
                 date: formData.date,
                 status: formData.status,
-                // Update to user requested keys from DB structure
-                punch_in_time: formData.punchIn,
-                punch_out_time: formData.punchOut,
-                shift: formData.shift,
-
-                // Keep fallbacks just in case
                 punch_in: formData.punchIn,
-                punch_out: formData.punchOut
+                punch_out: formData.punchOut,
+                shift: formData.shift
             };
 
             if (editingRecord) {
-                // Update existing record
                 await attendanceService.updateAttendance(editingRecord.id, payload);
                 alert("Attendance updated successfully!");
             } else {
-                // Add new record
                 await attendanceService.addManualAttendance(payload);
                 alert("Attendance added successfully!");
             }
             setShowManualModal(false);
             setEditingRecord(null);
-            fetchAttendance(); // Refresh list
+            fetchAttendance();
         } catch (err) {
             console.error("Manual attendance error", err);
-            // improvements to error alerting
-            const errorMessage = err.message || JSON.stringify(err);
-            alert("Failed to save attendance: " + errorMessage);
+            alert("Failed to save attendance: " + (err.message || "Unknown error"));
         }
     };
 
@@ -140,7 +120,7 @@ export const AttendanceContent = ({ personal = false }) => {
             try {
                 await attendanceService.deleteAttendance(id);
                 alert("Record deleted successfully");
-                fetchAttendance(); // Refresh list
+                fetchAttendance();
             } catch (err) {
                 console.error("Delete error", err);
                 alert("Failed to delete record: " + err.message);
@@ -169,7 +149,7 @@ export const AttendanceContent = ({ personal = false }) => {
             alert("Attendance imported successfully!");
             setShowImportModal(false);
             setImportFile(null);
-            fetchAttendance(); // Refresh list
+            fetchAttendance();
         } catch (err) {
             console.error("Import error", err);
             alert("Failed to import attendance: " + (err.message || "Unknown error"));
@@ -187,23 +167,18 @@ export const AttendanceContent = ({ personal = false }) => {
     // Helper for Time Formatting
     const formatTime = (timeStr) => {
         if (!timeStr) return '-';
-
-        // Try parsing the date string consistently
         const date = new Date(timeStr);
         if (!isNaN(date.getTime())) {
             let hours = date.getHours();
             const minutes = date.getMinutes().toString().padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours ? hours : 12;
             return `${hours}:${minutes} ${ampm}`;
         }
-
-        // Fallback for strings like "09:30:00" or simple splits
         if (timeStr.includes(' ')) {
             const parts = timeStr.split(' ');
             if (parts.length > 1) {
-                // Try to format the time part if it looks like HH:mm:ss
                 const timePart = parts[1];
                 if (timePart.includes(':')) {
                     const [h, m] = timePart.split(':');
@@ -216,7 +191,6 @@ export const AttendanceContent = ({ personal = false }) => {
                 return timePart;
             }
         }
-
         return timeStr;
     };
 
@@ -224,10 +198,10 @@ export const AttendanceContent = ({ personal = false }) => {
     const getStatusBadge = (status) => {
         if (!status) return 'bg-secondary';
         const s = status.toLowerCase();
-        if (s === 'present') return 'bg-success'; // Green
-        if (s === 'absent') return 'bg-danger';   // Red
-        if (s.includes('half')) return 'bg-warning text-dark'; // Yellow
-        if (s === 'late') return 'bg-info text-dark';    // Blue/Cyan
+        if (s === 'present') return 'bg-success';
+        if (s === 'absent') return 'bg-danger';
+        if (s.includes('half')) return 'bg-warning text-dark';
+        if (s === 'late') return 'bg-info text-dark';
         return 'bg-secondary';
     };
 
@@ -240,7 +214,6 @@ export const AttendanceContent = ({ personal = false }) => {
                     <button className="btn btn-outline-primary btn-sm" onClick={fetchAttendance}>Refresh</button>
                 </div>
             </div>
-
 
             {/* Filters Section */}
             <div className="bg-white p-3 rounded shadow-sm mb-4">
@@ -288,11 +261,20 @@ export const AttendanceContent = ({ personal = false }) => {
                                     <input type="text" className="form-control border-start-0 ps-0 text-secondary shadow-none glassy-search" placeholder="Search..." />
                                 </div>
                             </div>
-                            <div className="col-md-3">
-                                <button className="btn btn-outline-primary w-100 fw-bold border-primary text-primary" style={{ backgroundColor: 'transparent' }} onClick={() => { setEditingRecord(null); setShowManualModal(true); }}>MANUAL ENTRY</button>
+                            <div className="col-md-2">
+                                <button className="btn btn-outline-secondary w-100 fw-bold border-secondary text-secondary" onClick={() => { setEditingRecord(null); setShowManualModal(true); }}>
+                                    <span className="small">Manual</span>
+                                </button>
                             </div>
-                            <div className="col-md-3">
-                                <button className="btn btn-primary w-100 fw-bold border-0" style={{ backgroundColor: '#0d6efd' }} onClick={() => setShowImportModal(true)}>IMPORT CSV</button>
+                            <div className="col-md-2">
+                                <button className="btn btn-outline-primary w-100 fw-bold border-primary text-primary" onClick={() => setShowBulkModal(true)}>
+                                    <span className="small">Bulk Entry</span>
+                                </button>
+                            </div>
+                            <div className="col-md-2">
+                                <button className="btn btn-primary w-100 fw-bold border-0" style={{ backgroundColor: '#0d6efd' }} onClick={() => setShowImportModal(true)}>
+                                    <span className="small">Import CSV</span>
+                                </button>
                             </div>
                         </div>
                     </>
@@ -301,7 +283,6 @@ export const AttendanceContent = ({ personal = false }) => {
 
             {/* Table Section */}
             <div className="bg-white rounded shadow-sm">
-                {/* View Toggle & Header */}
                 <div className="d-flex justify-content-between align-items-center p-3 border-bottom">
                     <h6 className="m-0 fw-bold text-muted">Records</h6>
                     <div className="btn-group" role="group">
@@ -375,24 +356,17 @@ export const AttendanceContent = ({ personal = false }) => {
                                         {attendanceData.map((row) => (
                                             <div className="col-md-4 col-lg-3" key={row.id}>
                                                 <div className="card border-0 shadow-sm h-100 hover-lift text-center position-relative overflow-hidden">
-                                                    {/* Decorative Header */}
                                                     <div className="position-absolute top-0 start-0 w-100" style={{ height: '6px', background: 'linear-gradient(90deg, #0d6efd, #0dcaf0)' }}></div>
-
                                                     <div className="card-body p-4 d-flex flex-column align-items-center">
-                                                        {/* Avatar */}
                                                         <div className="mb-3 position-relative">
                                                             <div className="rounded-circle bg-light d-flex align-items-center justify-content-center text-primary border border-2 border-white shadow-sm" style={{ width: '80px', height: '80px', fontSize: '2rem' }}>
                                                                 <FaUserCircle />
                                                             </div>
                                                             <span className={`position-absolute bottom-0 end-0 p-2 rounded-circle border border-2 border-white ${row.status === 'Present' ? 'bg-success' : 'bg-secondary'}`}></span>
                                                         </div>
-
-                                                        {/* Info */}
                                                         <h6 className="fw-bold text-dark mb-1">{row.employee_name || row.name || 'Unknown'}</h6>
                                                         <div className="small text-muted mb-2">{row.employee_id || 'ID: --'}</div>
                                                         <div className="badge bg-light text-dark border mb-3">{row.shift || 'General Shift'}</div>
-
-                                                        {/* Times */}
                                                         <div className="d-flex w-100 justify-content-between bg-light rounded p-2 mb-3">
                                                             <div className="text-center">
                                                                 <div className="small text-muted fw-bold" style={{ fontSize: '0.7rem' }}>PUNCH IN</div>
@@ -404,8 +378,6 @@ export const AttendanceContent = ({ personal = false }) => {
                                                                 <div className="fw-bold text-primary">{formatTime(row.logout_at || row.punch_out_time || row.punch_out)}</div>
                                                             </div>
                                                         </div>
-
-                                                        {/* Actions - Only for Admin */}
                                                         {!personal && (
                                                             <div className="d-flex gap-2 w-100">
                                                                 <button className="btn btn-sm btn-outline-primary flex-grow-1" onClick={() => handleEdit(row.id)}>Edit</button>
@@ -423,8 +395,6 @@ export const AttendanceContent = ({ personal = false }) => {
                     </>
                 )}
             </div>
-
-
 
             {/* Manual Entry Modal */}
             {showManualModal && (
@@ -447,7 +417,15 @@ export const AttendanceContent = ({ personal = false }) => {
                 </div>
             )}
 
-            {/* Import CSV Modal (UI Only for now) */}
+            {/* Bulk Entry Modal */}
+            {showBulkModal && (
+                <BulkAttendanceModal
+                    onClose={() => setShowBulkModal(false)}
+                    onRefresh={fetchAttendance}
+                />
+            )}
+
+            {/* Import CSV Modal */}
             {showImportModal && (
                 <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
@@ -477,35 +455,29 @@ export const AttendanceContent = ({ personal = false }) => {
 };
 
 // Internal Form Component
-// Internal Form Component
 const ManualAttendanceForm = ({ onSubmit, onCancel, initialData }) => {
     const [formData, setFormData] = useState({
         employeeId: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'Unmarked', // Default
+        status: 'Unmarked',
         punchIn: '',
         punchOut: '',
         shift: 'General Shift (10:00 AM - 07:00 PM)'
     });
 
-    // Extract HH:mm from various time formats for input[type="time"]
     const extractTimeForInput = (timeVal) => {
         if (!timeVal) return '';
-        // If "YYYY-MM-DD HH:mm:ss"
         if (timeVal.includes(' ') && timeVal.includes(':')) {
-            const timePart = timeVal.split(' ')[1]; // "HH:mm:ss"
-            return timePart.substring(0, 5); // "HH:mm"
+            const timePart = timeVal.split(' ')[1];
+            return timePart.substring(0, 5);
         }
-        // If ISO string
         if (timeVal.includes('T')) {
             const date = new Date(timeVal);
             if (!isNaN(date.getTime())) {
                 return date.toTimeString().substring(0, 5);
             }
         }
-        // If already HH:mm
         if (timeVal.length === 5 && timeVal.includes(':')) return timeVal;
-
         return timeVal;
     };
 
@@ -515,9 +487,8 @@ const ManualAttendanceForm = ({ onSubmit, onCancel, initialData }) => {
                 employeeId: initialData.employee_id || initialData.name || '',
                 date: initialData.date || '',
                 status: initialData.status || 'Unmarked',
-                // Check all possible variations from potential backend mismatches
-                punchIn: extractTimeForInput(initialData.login_at || initialData.punch_in_time || initialData.punch_in || initialData.check_in),
-                punchOut: extractTimeForInput(initialData.logout_at || initialData.punch_out_time || initialData.punch_out || initialData.check_out),
+                punchIn: extractTimeForInput(initialData.login_at || initialData.punch_in_time || initialData.punch_in),
+                punchOut: extractTimeForInput(initialData.logout_at || initialData.punch_out_time || initialData.punch_out),
                 shift: initialData.shift || 'General Shift (10:00 AM - 07:00 PM)'
             });
         }

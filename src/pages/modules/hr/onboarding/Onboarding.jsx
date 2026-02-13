@@ -301,8 +301,36 @@ export const OnboardingContent = () => {
                             <div className="modal-body">
                                 <FormLayout>
                                     <div className="mb-3">
+                                        <label className="form-label">Certificate Name</label>
+                                        <input type="text" className="form-control" defaultValue={selectedType} placeholder="e.g. Experience Certificate" />
+                                    </div>
+                                    <div className="mb-3">
                                         <label className="form-label">Employee</label>
                                         <input type="text" className="form-control" placeholder="Search Employee" />
+                                    </div>
+                                    <div className="row g-3 mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Employee ID</label>
+                                            <input type="text" className="form-control" placeholder="E.g. EMP123" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Issue Date</label>
+                                            <input type="date" className="form-control" defaultValue={new Date().toISOString().split('T')[0]} />
+                                        </div>
+                                    </div>
+                                    <div className="row g-3 mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label">Company Name</label>
+                                            <input type="text" className="form-control" placeholder="Future Invo" defaultValue="Future Invo" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label">Company ID</label>
+                                            <input type="text" className="form-control" placeholder="Company ID" />
+                                        </div>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Designation</label>
+                                        <input type="text" className="form-control" placeholder="E.g. Frontend Developer, Backend Developer" />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label">Purpose / Comments</label>

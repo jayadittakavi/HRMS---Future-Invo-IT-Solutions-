@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
 import './DashboardLayout.css'; // Keeping for specific layout tweaks not covered by Bootstrap utils if needed, or remove if fully bootstrap
 
-const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
+const DashboardLayout = ({ children, title, onNavigate, bgImage, activePath }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const navigate = useNavigate();
 
@@ -33,8 +33,8 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage }) => {
             )}
 
             {/* Sidebar Wrapper */}
-            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: isSidebarOpen ? '280px' : '0', overflow: 'hidden', transition: 'width 0.3s' }}>
-                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} onNavigate={(path) => {
+            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: isSidebarOpen ? '260px' : '0', overflow: 'hidden', transition: 'width 0.3s' }}>
+                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} activePath={activePath} onNavigate={(path) => {
                     if (window.innerWidth < 768) {
                         setIsSidebarOpen(false);
                     }

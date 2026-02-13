@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
@@ -7,6 +7,7 @@ import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon 
 const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
     const { user } = useAuth();
     const { toggleSettingsDrawer, skin, theme, toggleTheme } = useTheme();
+    const navigate = useNavigate();
 
     return (
         <header className="border-bottom py-3 px-3 d-flex align-items-center justify-content-between sticky-top navbar-theme glass-header"
@@ -69,7 +70,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     <button
                         className="btn btn-link text-dark p-0 border-0 bg-transparent"
                         title="Profile"
-                        onClick={() => onNavigate && onNavigate('/profile')}
+                        onClick={() => navigate('/profile')}
                     >
                         <FaUserCircle size={28} />
                     </button>

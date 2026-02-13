@@ -70,9 +70,9 @@ export const attendanceService = {
         const token = localStorage.getItem("token") || localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const response = await fetch("http://192.168.1.5:5000/api/attendance", {
+        const response = await fetch(`${API_BASE}/attendance/import`, { // Assuming /import endpoint or POST /attendance handles file
             method: "POST",
-            headers: headers, // Let browser set Content-Type for FormData
+            headers: headers,
             body: formData
         });
 
@@ -82,23 +82,32 @@ export const attendanceService = {
 
     // 🔹 Get All Employees (for dropdowns)
     getAllEmployees: async () => {
-        // Try /employees first, if fails might be /users
-        const response = await fetch(`http://192.168.1.5:5000/api/attendance/me`, {
+        const response = await fetch(`${API_BASE}/employees`, {
             method: "GET",
-            ...authHeader()
-        });
-        if (!response.ok) {
-            // Fallback to /users if /employees not found
-            if (response.status === 404) {
-                const userResponse = await fetch(`${API_BASE}/users`, {
-                    method: "GET",
-                    ...authHeader()
-                });
-                if (!userResponse.ok) throw new Error(await userResponse.text());
-                return userResponse.json();
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${localStorage.getItem("token")}`
             }
-            throw new Error(await response.text());
-        }
+        });
+        if (!response.ok) throw new Error(await response.text());
         return response.json();
+    },
+
+    // 🔹 Bulk Manual Attendance
+    addBulkAttendance: async (attendanceList) => {
+        const promises = attendanceList.map(data =>
+            fetch(`${API_BASE}/attendance/manual`, {
+                method: "POST",
+                body: JSON.stringify(data),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                }
+            }).then(res => {
+                if (!res.ok) throw new Error(`Failed for ${data.employee_id}`);
+                return res.json();
+            })
+        );
+        return Promise.all(promises);
     }
 };
