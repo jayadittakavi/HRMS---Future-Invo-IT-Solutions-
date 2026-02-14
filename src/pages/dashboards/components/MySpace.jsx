@@ -1,150 +1,245 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { FaUserCircle, FaClock, FaCalendarDay, FaHistory, FaEdit, FaUserFriends, FaUserTie } from 'react-icons/fa';
-import { SimpleDonutChart } from '../../../components/charts/CustomCharts';
+import { FaUserCircle, FaClock, FaCalendarDay, FaHistory, FaUserFriends, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import {
+    Chart as ChartJS,
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    PointElement,
+    LineElement,
+} from 'chart.js';
+import { Doughnut, Bar, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+    ArcElement,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    PointElement,
+    LineElement
+);
 
 const MySpace = ({ role, onNavigate }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    // Mock Data for Personal Stats
-    const leaveBalance = [
-        { label: 'Casual', value: 5, color: '#3b82f6' },
-        { label: 'Sick', value: 7, color: '#10b981' },
-        { label: 'Earned', value: 12, color: '#f59e0b' }
-    ];
+    // --- Mock Data ---
 
-    const myAttendance = [
-        { label: 'Present', value: 22, color: '#10b981' },
-        { label: 'Absent', value: 1, color: '#ef4444' },
-        { label: 'Late', value: 3, color: '#f59e0b' }
-    ];
+    // 1. Leave Balance (Doughnut)
+    const leaveData = {
+        labels: ['Casual', 'Sick', 'Earned', 'Used'],
+        datasets: [
+            {
+                label: 'Days',
+                data: [5, 7, 12, 4],
+                backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#e5e7eb'],
+                borderWidth: 0,
+            },
+        ],
+    };
+
+    const leaveOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: { usePointStyle: true, boxWidth: 8 },
+            },
+        },
+    };
+
+    // 2. Weekly Attendance (Bar with Axes)
+    const weeklyAttendanceData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        datasets: [
+            {
+                label: 'Hours Worked',
+                data: [8.5, 9, 8.2, 8.8, 7.5],
+                backgroundColor: '#6366f1',
+                borderRadius: 4,
+            },
+            {
+                label: 'Break Time',
+                data: [1, 0.5, 1, 0.8, 1],
+                backgroundColor: '#cbd5e1',
+                borderRadius: 4,
+            },
+        ],
+    };
+
+    const weeklyAttendanceOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Hours' },
+                grid: { display: true, color: '#f3f4f6' },
+            },
+            x: {
+                grid: { display: false },
+            },
+        },
+        plugins: {
+            legend: { display: true, position: 'top' },
+        },
+    };
+
+    // 3. Performance/Stats (Line Chart)
+    const performanceData = {
+        labels: ['W1', 'W2', 'W3', 'W4'],
+        datasets: [
+            {
+                label: 'Tasks Completed',
+                data: [5, 8, 6, 10],
+                borderColor: '#ffffff',
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                tension: 0.4,
+                fill: true,
+            },
+        ],
+    };
+
+    const performanceOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { display: false },
+            x: { display: false },
+        },
+        plugins: {
+            legend: { display: false },
+        },
+        elements: {
+            point: { radius: 0 }
+        }
+    };
 
     const recentActions = [
-        { title: 'Leave Approved', desc: 'Your casual leave for 20th Feb approved.', date: '2 hrs ago', type: 'success' },
-        { title: 'Task Assigned', desc: 'New task: Update Documentation', date: '5 hrs ago', type: 'info' },
-        { title: 'Expense Rejected', desc: 'Reason: Missing Receipt', date: 'Yesterday', type: 'danger' }
-    ];
-
-    const teamStats = [
-        { label: 'Total Team', value: 12 },
-        { label: 'Present Today', value: 10 },
-        { label: 'On Leave', value: 2 }
+        { title: 'Leave Approved', desc: 'Your casual leave for 20th Feb approved.', date: '2 hrs ago', type: 'success', icon: <FaCheckCircle className="text-success" /> },
+        { title: 'Task Assigned', desc: 'New task: Update Documentation', date: '5 hrs ago', type: 'info', icon: <FaExclamationCircle className="text-primary" /> },
+        { title: 'Expense Rejected', desc: 'Reason: Missing Receipt', date: 'Yesterday', type: 'danger', icon: <FaExclamationCircle className="text-danger" /> }
     ];
 
     return (
         <div className="container-fluid p-0">
-            {/* Greeting */}
-            <h4 className="fw-bold mb-4">My Space</h4>
 
-            {/* Top Cards: Personal Stats */}
+            {/* Top Row: Profile & Stats Cards with Gradients */}
             <div className="row g-4 mb-4">
-                {/* Profile Card */}
-                <div className="col-md-4">
-                    <div className="dashboard-card bg-white h-100 d-flex flex-column align-items-center justify-content-center p-4">
-                        <div className="rounded-circle bg-light d-flex align-items-center justify-content-center text-secondary mb-3" style={{ width: '80px', height: '80px', fontSize: '2.5rem' }}>
-                            <FaUserCircle />
+                {/* Task Summary - Gradient Purple */}
+                <div className="col-md-6">
+                    <div className="dashboard-card bg-gradient-purple h-100 p-4 border-0">
+                        <h6 className="dashboard-card-title text-white opacity-75 mb-3">Task Performance</h6>
+                        <div className="d-flex justify-content-between align-items-end mb-2">
+                            <h2 className="dashboard-value text-white mb-0">29 Tasks</h2>
+                            <span className="badge bg-white text-primary bg-opacity-25">+12%</span>
                         </div>
-                        <h5 className="fw-bold mb-1">{user?.name || 'User Name'}</h5>
-                        <p className="text-muted mb-3">{user?.role || role}</p>
-                        <div className="d-flex gap-2">
-                            <button className="btn btn-sm btn-outline-primary rounded-pill px-3" onClick={() => navigate('/profile')}>View Profile</button>
-                            <button className="btn btn-sm btn-outline-secondary rounded-pill px-3" onClick={() => navigate('/profile')}>Edit</button>
+                        <div style={{ height: '100px' }}>
+                            <Line data={performanceData} options={performanceOptions} />
                         </div>
+                        <p className="opacity-75 small mt-2 mb-0 text-white">Great job! You're ahead of schedule.</p>
                     </div>
                 </div>
 
-                {/* Attendance Summary */}
-                <div className="col-md-4">
-                    <div className="dashboard-card bg-white h-100 p-4">
+                {/* Leave Balance - Gradient Orange */}
+                <div className="col-md-6">
+                    <div className="dashboard-card bg-gradient-orange h-100 p-4 border-0">
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="fw-bold text-secondary mb-0"><FaClock className="me-2" />My Attendance</h6>
-                            <span className="badge bg-success bg-opacity-10 text-success">96%</span>
+                            <h6 className="dashboard-card-title text-white opacity-75 mb-0"><FaCalendarDay className="me-2" />Leave Balance</h6>
+                            <button className="btn btn-sm btn-white text-orange py-0 px-2 fw-bold small" onClick={() => onNavigate && onNavigate('leave-management')}>Apply</button>
                         </div>
-                        <div className="d-flex align-items-center justify-content-between">
-                            <div className="position-relative" style={{ width: '100px', height: '100px' }}>
-                                <SimpleDonutChart segments={myAttendance} size="100px" centerText="26" />
+                        <div className="row text-center mt-4">
+                            <div className="col-4 border-end border-white border-opacity-25">
+                                <h4 className="dashboard-value text-white mb-0">5</h4>
+                                <small className="opacity-75 text-white">Casual</small>
                             </div>
-                            <div className="ps-3 flex-grow-1">
-                                <ul className="list-unstyled mb-0 small">
-                                    <li className="mb-1 d-flex justify-content-between fw-bold text-success"><span>Present:</span> <span>22</span></li>
-                                    <li className="mb-1 d-flex justify-content-between fw-bold text-danger"><span>Absent:</span> <span>1</span></li>
-                                    <li className="d-flex justify-content-between fw-bold text-warning"><span>Late:</span> <span>3</span></li>
-                                </ul>
+                            <div className="col-4 border-end border-white border-opacity-25">
+                                <h4 className="dashboard-value text-white mb-0">7</h4>
+                                <small className="opacity-75 text-white">Sick</small>
+                            </div>
+                            <div className="col-4">
+                                <h4 className="dashboard-value text-white mb-0">12</h4>
+                                <small className="opacity-75 text-white">Earned</small>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                {/* Leave Balance */}
-                <div className="col-md-4">
-                    <div className="dashboard-card bg-white h-100 p-4">
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="fw-bold text-secondary mb-0"><FaCalendarDay className="me-2" />Leave Balance</h6>
-                            <button className="btn btn-sm btn-light text-primary py-0" onClick={() => onNavigate && onNavigate('leave-management')}>Apply</button>
-                        </div>
-                        <div className="row g-2">
-                            {leaveBalance.map((lb, idx) => (
-                                <div key={idx} className="col-4 text-center">
-                                    <div className="p-2 rounded bg-light">
-                                        <h5 className="mb-0 fw-bold" style={{ color: lb.color }}>{lb.value}</h5>
-                                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>{lb.label}</small>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="mt-3 text-center">
-                            <small className="text-muted">Next Holiday: Independence Day (15 Aug)</small>
+                        <div className="mt-auto pt-4 text-center">
+                            <small className="opacity-75 text-white">Next Holiday: Independence Day (15 Aug)</small>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Role Specific Rows */}
+            {/* Middle Row: Charts with Axes and Values */}
             <div className="row g-4 mb-4">
-                {/* Recent Activity / Notifications - Common for All */}
+                {/* Weekly Attendance Bar Chart */}
+                <div className="col-md-8">
+                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h6 className="fw-bold text-secondary mb-0"><FaClock className="me-2" />Weekly Work Hours</h6>
+                            <select className="form-select form-select-sm w-auto border-0 bg-light">
+                                <option>This Week</option>
+                                <option>Last Week</option>
+                            </select>
+                        </div>
+                        <div style={{ height: '300px' }}>
+                            <Bar data={weeklyAttendanceData} options={weeklyAttendanceOptions} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Leave Usage Donut */}
+                <div className="col-md-4">
+                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                        <h6 className="fw-bold text-secondary mb-3">Leave Distribution</h6>
+                        <div style={{ position: 'relative', height: '250px', display: 'flex', justifyContent: 'center' }}>
+                            <Doughnut data={leaveData} options={leaveOptions} />
+                        </div>
+                        <div className="text-center mt-3">
+                            <p className="text-muted small">Total 28 Days Available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Bottom Row: Recent Activity & Manager Team Link */}
+            <div className="row g-4 mb-4">
                 <div className="col-md-6">
-                    <div className="dashboard-card bg-white h-100 p-4">
+                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
                         <h6 className="fw-bold text-secondary mb-3"><FaHistory className="me-2" />Recent Activity</h6>
                         <div className="list-group list-group-flush">
                             {recentActions.map((action, idx) => (
                                 <div key={idx} className="list-group-item bg-transparent px-0 border-bottom">
                                     <div className="d-flex w-100 justify-content-between">
-                                        <h6 className="mb-1 small fw-bold">{action.title}</h6>
+                                        <h6 className="mb-1 small fw-bold d-flex align-items-center gap-2">
+                                            {action.icon}
+                                            {action.title}
+                                        </h6>
                                         <small className="text-muted">{action.date}</small>
                                     </div>
-                                    <p className="mb-1 small text-secondary">{action.desc}</p>
+                                    <p className="mb-1 small text-secondary ps-4">{action.desc}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
                 </div>
 
-                {/* Conditional Admin/Manager/HR Team View */}
                 {(role === 'Administrator' || role === 'Manager' || role === 'HR') && (
                     <div className="col-md-6">
-                        <div className="dashboard-card bg-gradient-blue text-white h-100 p-4">
-                            <h6 className="fw-bold mb-4"><FaUserFriends className="me-2" />My Team Status</h6>
-                            <div className="d-flex justify-content-around text-center">
-                                <div>
-                                    <h2 className="fw-bold mb-0">{teamStats[0].value}</h2>
-                                    <small className="opacity-75">Total Members</small>
-                                </div>
-                                <div className="vr opacity-50"></div>
-                                <div>
-                                    <h2 className="fw-bold mb-0">{teamStats[1].value}</h2>
-                                    <small className="opacity-75">Present Today</small>
-                                </div>
-                                <div className="vr opacity-50"></div>
-                                <div>
-                                    <h2 className="fw-bold mb-0">{teamStats[2].value}</h2>
-                                    <small className="opacity-75">On Leave</small>
-                                </div>
-                            </div>
-                            <div className="mt-4 pt-3 border-top border-white border-opacity-25">
-                                <button className="btn btn-sm btn-light text-primary w-100 fw-bold" onClick={() => onNavigate && onNavigate('attendance')}>View Team Attendance</button>
-                            </div>
+                        <div className="dashboard-card bg-gradient-blue h-100 p-4 text-white border-0">
+                            <h6 className="fw-bold mb-4 text-white"><FaUserFriends className="me-2" />Quick Team Access</h6>
+                            <p className="opacity-75 mb-4 text-white">View your team's real-time status and manage their attendance.</p>
+                            <button className="btn btn-light text-primary fw-bold w-100 shadow-sm" onClick={() => onNavigate && onNavigate('attendance')}>Go to Team Attendance</button>
                         </div>
                     </div>
                 )}

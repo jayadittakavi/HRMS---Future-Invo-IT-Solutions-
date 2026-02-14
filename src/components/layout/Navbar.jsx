@@ -3,12 +3,14 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useNotification } from "../../context/NotificationContext"; // Added
 import logo from "../../assets/images/fislogo1.png";
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
 
 const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
     const { user, logout } = useAuth();
     const { toggleSettingsDrawer, theme, toggleTheme } = useTheme();
+    const { toggleNotificationDrawer, unreadCount } = useNotification(); // Added
     const navigate = useNavigate();
 
     const handleProfileClick = () => {
@@ -84,7 +86,7 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                                     <input
                                         type="text"
                                         placeholder="Search..."
-                                        className="form-control border-0 rounded-pill ps-5 glassy-search"
+                                        className="form-control rounded-pill ps-5 glassy-search"
                                         style={{ width: '220px', fontSize: '0.9rem' }}
                                     />
                                     <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary opacity-75">
@@ -97,12 +99,15 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                             <li className="nav-item d-flex align-items-center gap-3 ms-2">
                                 <div className="d-lg-none w-100 my-2 border-top"></div> {/* Divider for mobile */}
 
-                                <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0 position-relative`} title="Notifications">
+                                <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0 position-relative`} title="Notifications" onClick={toggleNotificationDrawer}>
                                     <FaBell size={20} />
                                     {/* Optional: Notification Badge */}
-                                    <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                                        <span className="visually-hidden">New alerts</span>
-                                    </span>
+                                    {unreadCount > 0 && (
+                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.6rem' }}>
+                                            {unreadCount}
+                                            <span className="visually-hidden">New alerts</span>
+                                        </span>
+                                    )}
                                 </button>
 
                                 <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0`} title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} onClick={toggleTheme}>

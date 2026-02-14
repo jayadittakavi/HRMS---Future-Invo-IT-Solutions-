@@ -2,11 +2,13 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotification } from '../../context/NotificationContext'; // Added
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
 
 const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
     const { user } = useAuth();
     const { toggleSettingsDrawer, skin, theme, toggleTheme } = useTheme();
+    const { toggleNotificationDrawer, unreadCount } = useNotification(); // Added
     const navigate = useNavigate();
 
     return (
@@ -55,11 +57,14 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
 
 
 
-                    <button className="btn btn-link text-secondary p-0 position-relative" title="Notifications">
+                    <button className="btn btn-link text-secondary p-0 position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
                         <FaBell size={20} />
-                        <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                            <span className="visually-hidden">New alerts</span>
-                        </span>
+                        {unreadCount > 0 && (
+                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.6rem' }}>
+                                {unreadCount}
+                                <span className="visually-hidden">New alerts</span>
+                            </span>
+                        )}
                     </button>
                     <button className="btn btn-link text-secondary p-0" title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} onClick={toggleTheme}>
                         {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}

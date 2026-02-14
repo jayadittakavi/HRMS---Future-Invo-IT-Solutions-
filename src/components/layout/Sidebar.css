@@ -1,24 +1,25 @@
-/* Clean Sidebar Styles - Dark Glass Mode */
+/* Clean Sidebar Styles - Dark Glass Mode with Blue Gradient */
 .sidebar-container {
-    background-color: var(--bg-sidebar);
-    border-right: 1px solid var(--border-color);
-    color: var(--text-main);
+    background: linear-gradient(135deg, rgba(30, 60, 114, 1) 0%, rgba(42, 82, 152, 1) 100%) !important;
+    /* Blue Gradient */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
     height: 100%;
     transition: all 0.3s ease;
 }
 
 .sidebar-header {
     padding: 1.5rem;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-role-label {
     font-size: 0.85rem;
     font-weight: 600;
-    opacity: 0.8;
+    opacity: 0.9;
     margin-bottom: 0.5rem;
     padding-left: 1.5rem;
-    color: var(--text-secondary);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .sidebar-nav-label {
@@ -26,16 +27,16 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    opacity: 0.6;
+    opacity: 0.8;
     margin-top: 1.5rem;
     margin-bottom: 0.75rem;
     padding-left: 1.5rem;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.6);
 }
 
 .sidebar-link {
     background: transparent;
-    color: var(--text-secondary) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
     text-decoration: none;
     padding: 0.75rem 1rem;
     display: flex;
@@ -49,23 +50,25 @@
 }
 
 .sidebar-link:hover {
-    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    background: rgba(255, 255, 255, 0.2);
     color: #ffffff !important;
     transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-link.active {
-    background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+    background: rgba(255, 255, 255, 0.25);
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .sidebar-text-logo {
-    color: var(--text-main);
+    color: #ffffff !important;
 }
 
+/* Ensure logo text is always white in this blue theme */
 [data-theme="dark"] .sidebar-text-logo {
     color: #ffffff;
 }
@@ -77,4 +80,10 @@
     justify-content: center;
     color: inherit;
     /* Inherit text color */
+}
+
+/* Active Dropdown Parent */
+.sidebar-link.active-dropdown {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff !important;
 }

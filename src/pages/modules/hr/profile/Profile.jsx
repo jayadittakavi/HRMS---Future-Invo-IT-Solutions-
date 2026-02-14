@@ -168,11 +168,7 @@ const ProfileContent = () => {
                             </div>
                         </div>
 
-                        <div className="mt-4">
-                            <button className="btn btn-outline-danger w-100 rounded-pill btn-sm" onClick={handleLogout}>
-                                Sign Out
-                            </button>
-                        </div>
+
                     </div>
                 </div>
 

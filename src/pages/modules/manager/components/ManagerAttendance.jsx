@@ -7,7 +7,7 @@ const ManagerAttendance = () => {
 
     // Mock Data based on the screenshot
     const attendanceData = [
-        { id: 1, name: 'Mohan Prasad', status: 'Absent', loggedTime: '0', loginAt: '', logoutAt: '', date: '27-09-2025', device: 'Android Mobile' },
+        { id: 1, name: 'Mohan Prasad', status: 'Absent', loggedTime: '0', loginAt: '-', logoutAt: '-', date: '27-09-2025', device: 'Android Mobile' },
         { id: 2, name: 'Kiran Desai', status: 'Present', loggedTime: '9.4', loginAt: '09:27', logoutAt: '19:51', date: '27-09-2025', device: 'Android Mobile' },
         { id: 3, name: 'Kavita Rao', status: 'Present', loggedTime: '7.3', loginAt: '10:14', logoutAt: '18:32', date: '27-09-2025', device: 'Laptop' },
         { id: 4, name: 'Suresh Reddy', status: 'Present', loggedTime: '8.97', loginAt: '10:08', logoutAt: '20:06', date: '27-09-2025', device: 'Tablet' },
@@ -15,7 +15,7 @@ const ManagerAttendance = () => {
         { id: 6, name: 'Sneha Patel', status: 'Present', loggedTime: '7.27', loginAt: '10:19', logoutAt: '18:35', date: '27-09-2025', device: 'Desktop' },
         { id: 7, name: 'Amit Verma', status: 'Present', loggedTime: '8.97', loginAt: '10:05', logoutAt: '20:03', date: '27-09-2025', device: 'Tablet' },
         { id: 8, name: 'Pooja Singh', status: 'Present', loggedTime: '8.12', loginAt: '09:57', logoutAt: '19:04', date: '27-09-2025', device: 'iPhone' },
-        { id: 9, name: 'Vikash Kumar', status: 'Absent', loggedTime: '0', loginAt: '', logoutAt: '', date: '27-09-2025', device: 'iPhone' },
+        { id: 9, name: 'Vikash Kumar', status: 'Absent', loggedTime: '0', loginAt: '-', logoutAt: '-', date: '27-09-2025', device: 'iPhone' },
         { id: 10, name: 'Anjali Gupta', status: 'Present', loggedTime: '8.95', loginAt: '10:16', logoutAt: '20:13', date: '27-09-2025', device: 'Desktop' },
     ];
 
@@ -59,7 +59,7 @@ const ManagerAttendance = () => {
                 </div>
 
                 <div className="ms-auto">
-                    <button className="btn btn-primary d-flex align-items-center gap-2 px-4" onClick={() => alert("Export function coming soon!")}>
+                    <button className="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" onClick={() => alert("Export function coming soon!")}>
                         EXPORT <MdFileDownload />
                     </button>
                 </div>
@@ -81,9 +81,9 @@ const ManagerAttendance = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {attendanceData.map(row => (
+                            {attendanceData.map((row) => (
                                 <tr key={row.id}>
-                                    <td className="py-3 ps-4 text-secondary">{row.name}</td>
+                                    <td className="py-3 ps-4 text-secondary fw-medium">{row.name}</td>
                                     <td className={`py-3 fw-bold ${getStatusStyle(row.status)}`}>{row.status}</td>
                                     <td className="py-3 text-secondary">{row.loggedTime}</td>
                                     <td className="py-3 text-secondary">{row.loginAt}</td>

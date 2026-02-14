@@ -1,15 +1,121 @@
 import React from 'react';
-import { SimpleDonutChart } from '../../../components/charts/CustomCharts';
-import { FaUsers, FaCalendarCheck, FaClipboardList, FaPlusCircle } from 'react-icons/fa';
+import { FaUsers, FaCalendarCheck, FaClipboardList, FaPlusCircle, FaChartLine } from 'react-icons/fa';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    PointElement,
+    LineElement
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    ArcElement,
+    PointElement,
+    LineElement
+);
 
 const ManagerOverallStats = ({ onNavigate }) => {
 
-    const teamAttendance = [
-        { label: 'Present', value: 8, color: '#10b981' },
-        { label: 'Absent', value: 1, color: '#ef4444' },
-        { label: 'On Leave', value: 2, color: '#f59e0b' },
-        { label: 'WFH', value: 1, color: '#3b82f6' }
-    ];
+    const teamAttendance = {
+        labels: ['Present', 'Absent', 'On Leave', 'WFH'],
+        datasets: [
+            {
+                label: '# of Members',
+                data: [8, 1, 2, 1],
+                backgroundColor: [
+                    '#10b981',
+                    '#ef4444',
+                    '#f59e0b',
+                    '#3b82f6',
+                ],
+                borderWidth: 0,
+            },
+        ],
+    };
+
+    const teamAttendanceOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    usePointStyle: true,
+                    boxWidth: 8
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        let label = context.label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        let value = context.raw;
+                        let total = context.chart._metasets[context.datasetIndex].total;
+                        let percentage = Math.round(value / total * 100) + '%';
+                        return label + value + ' (' + percentage + ')';
+                    }
+                }
+            }
+        },
+        cutout: '60%'
+    };
+
+    const attendanceTrendData = {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        datasets: [
+            {
+                label: 'Present',
+                data: [10, 11, 10, 9, 8],
+                borderColor: '#10b981',
+                backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                tension: 0.4,
+                fill: true,
+            },
+            {
+                label: 'Absent',
+                data: [1, 0, 1, 2, 3],
+                borderColor: '#ef4444',
+                backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                tension: 0.4,
+                fill: true,
+            }
+        ],
+    };
+
+    const attendanceTrendOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                grid: { display: false }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f3f4f6' }
+            },
+        },
+        plugins: {
+            legend: { position: 'top', align: 'end' }
+        },
+        elements: {
+            point: { radius: 3 }
+        }
+    };
+
 
     const pendingLeaves = [
         { name: 'John Doe', type: 'Sick Leave', duration: '2 Days', date: 'Feb 20-21' },
@@ -25,71 +131,93 @@ const ManagerOverallStats = ({ onNavigate }) => {
 
     return (
         <div>
-            {/* Top Stats Row */}
-            <div className="row g-4 mb-4">
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-white h-100 p-4 border-start border-4 border-primary">
+            <div className="d-flex justify-content-end mb-3">
+                <button
+                    className="btn btn-primary d-flex align-items-center gap-2 shadow-sm rounded-pill px-4"
+                    onClick={() => onNavigate('task')}
+                >
+                    <FaPlusCircle /> Create New Task
+                </button>
+            </div>
+
+            {/* Top Stats Row with Gradients */}
+            <div className="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
+                <div className="col">
+                    <div className="dashboard-card bg-gradient-purple h-100 p-4 border-0">
                         <div className="d-flex align-items-center mb-2">
-                            <FaUsers className="text-primary fs-4 me-2" />
-                            <h6 className="text-secondary fw-bold mb-0">Total Team</h6>
+                            <FaUsers className="fs-3 me-2 text-white opacity-75" />
+                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Total Team</h6>
                         </div>
-                        <h3 className="fw-bold mb-0">12</h3>
+                        <h3 className="dashboard-value text-white mb-0 display-6">12</h3>
+                        <small className="text-white opacity-75">Full Strength</small>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-white h-100 p-4 border-start border-4 border-success">
+                <div className="col">
+                    <div className="dashboard-card bg-gradient-green h-100 p-4 border-0">
                         <div className="d-flex align-items-center mb-2">
-                            <FaCalendarCheck className="text-success fs-4 me-2" />
-                            <h6 className="text-secondary fw-bold mb-0">Present Today</h6>
+                            <FaCalendarCheck className="fs-3 me-2 text-white opacity-75" />
+                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Present Today</h6>
                         </div>
-                        <h3 className="fw-bold mb-0">9</h3>
+                        <h3 className="dashboard-value text-white mb-0 display-6">9</h3>
+                        <small className="text-white opacity-75">75% Attendance</small>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-white h-100 p-4 border-start border-4 border-warning">
+                <div className="col">
+                    <div className="dashboard-card bg-gradient-orange h-100 p-4 border-0">
                         <div className="d-flex align-items-center mb-2">
-                            <FaClipboardList className="text-warning fs-4 me-2" />
-                            <h6 className="text-secondary fw-bold mb-0">Pending Tasks</h6>
+                            <FaClipboardList className="fs-3 me-2 text-white opacity-75" />
+                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Pending Tasks</h6>
                         </div>
-                        <h3 className="fw-bold mb-0">5</h3>
+                        <h3 className="dashboard-value text-white mb-0 display-6">5</h3>
+                        <small className="text-white opacity-75">Needs Review</small>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <button
-                        className="btn btn-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center fw-bold shadow-sm"
-                        style={{ minHeight: '120px' }}
-                        onClick={() => onNavigate('task')}
-                    >
-                        <FaPlusCircle className="fs-1 mb-2" />
-                        Create New Task
-                    </button>
+                <div className="col">
+                    <div className="dashboard-card bg-gradient-blue h-100 p-4 border-0">
+                        <div className="d-flex align-items-center mb-2">
+                            <FaChartLine className="fs-3 me-2 text-white opacity-75" />
+                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Avg. Efficiency</h6>
+                        </div>
+                        <h3 className="dashboard-value text-white mb-0 display-6">85%</h3>
+                        <small className="text-white opacity-75">Top Performance</small>
+                    </div>
                 </div>
             </div>
 
             <div className="row g-4 mb-4">
-                {/* Team Attendance Summary */}
-                <div className="col-md-4">
-                    <div className="dashboard-card h-100">
-                        <h6 className="dashboard-card-title mb-3">My Team Attendance (Today)</h6>
-                        <div className="py-3 d-flex justify-content-center">
-                            <SimpleDonutChart segments={teamAttendance} size="200px" centerText="12" />
+                {/* Team Attendance Trends (Line Chart) */}
+                <div className="col-md-8">
+                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h6 className="dashboard-card-title mb-0 fw-bold">Team Attendance Trends (This Week)</h6>
+                            <select className="form-select form-select-sm w-auto border-0 bg-light">
+                                <option>This Week</option>
+                                <option>Last Week</option>
+                            </select>
                         </div>
-                        <div className="d-flex flex-wrap justify-content-center gap-2 mt-2">
-                            {teamAttendance.map((item, idx) => (
-                                <span key={idx} className="badge rounded-pill text-dark border bg-light small d-flex align-items-center">
-                                    <span className="rounded-circle me-1" style={{ width: '8px', height: '8px', backgroundColor: item.color }}></span>
-                                    {item.label}: {item.value}
-                                </span>
-                            ))}
+                        <div style={{ height: '300px' }}>
+                            <Line data={attendanceTrendData} options={attendanceTrendOptions} />
                         </div>
                     </div>
                 </div>
 
-                {/* Pending Leave Requests */}
+                {/* Team Attendance Breakdown (Donut) */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100">
+                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                        <h6 className="dashboard-card-title mb-3 fw-bold">Today's Status</h6>
+                        <div className="py-3 d-flex justify-content-center" style={{ height: '250px' }}>
+                            <Doughnut data={teamAttendance} options={teamAttendanceOptions} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="row g-4 mb-4">
+                {/* Pending Leave Requests */}
+                <div className="col-md-6">
+                    <div className="dashboard-card h-100 bg-white p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
                         <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="dashboard-card-title mb-0">Pending Leave Requests</h6>
+                            <h6 className="dashboard-card-title mb-0 fw-bold">Pending Leave Requests</h6>
                             <span className="badge bg-danger rounded-pill">3</span>
                         </div>
                         <div className="list-group list-group-flush">
@@ -114,9 +242,9 @@ const ManagerOverallStats = ({ onNavigate }) => {
                 </div>
 
                 {/* Upcoming Holidays */}
-                <div className="col-md-4">
-                    <div className="dashboard-card h-100">
-                        <h6 className="dashboard-card-title mb-3">Upcoming Holidays</h6>
+                <div className="col-md-6">
+                    <div className="dashboard-card h-100 bg-white p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                        <h6 className="dashboard-card-title mb-3 fw-bold">Upcoming Holidays</h6>
                         <div className="list-group list-group-flush">
                             {upcomingHolidays.map((holiday, idx) => (
                                 <div key={idx} className="list-group-item bg-transparent px-0 border-bottom d-flex align-items-center">
