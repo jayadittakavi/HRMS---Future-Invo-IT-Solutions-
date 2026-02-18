@@ -68,19 +68,19 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     const renderLinks = () => {
         let links = [];
 
-        // Helper to generate the My Space link structure
-        const getMySpaceLink = (userRole) => {
+        // Helper to generate the Dashboard link structure
+        const getDashboardLink = (userRole) => {
             const commonIcon = <MdDashboard size={20} />;
 
-            // Define all dashboard options
-            const dashboards = {
-                superadmin: { name: 'Super Admin Dashboard', path: '/dashboard/super-admin' },
-                admin: { name: 'Admin Dashboard', path: '/dashboard/admin' },
-                hr: { name: 'HR Dashboard', path: '/dashboard/hr' },
-                manager: { name: 'Manager Dashboard', path: '/dashboard/manager' },
-                employee: { name: 'Employee Dashboard', path: '/dashboard/employee' },
-                accountant: { name: 'Accountant Dashboard', path: '/dashboard/accountant' },
-                newuser: { name: 'New User Dashboard', path: '/dashboard/new-user' }
+            // Define base paths
+            const paths = {
+                superadmin: '/dashboard/super-admin',
+                admin: '/dashboard/admin',
+                hr: '/dashboard/hr',
+                manager: '/dashboard/manager',
+                employee: '/dashboard/employee',
+                accountant: '/dashboard/accountant',
+                newuser: '/dashboard/new-user'
             };
 
             let children = [];
@@ -88,77 +88,79 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             switch (userRole) {
                 case 'superadmin':
                     children = [
-                        { ...dashboards.superadmin, name: 'My Dashboard' },
-                        dashboards.admin,
-                        dashboards.hr,
-                        dashboards.manager,
-                        dashboards.employee
+                        { name: 'My Space', path: '/dashboard/my-space' },
+                        { name: 'My Team', path: '/dashboard/my-team' },
                     ];
                     break;
                 case 'admin':
                     children = [
-                        { ...dashboards.admin, name: 'My Dashboard' },
-                        dashboards.hr,
-                        dashboards.manager,
-                        dashboards.employee
-                    ];
-                    break;
-                case 'manager':
-                    children = [
-                        { name: 'My Team', icon: commonIcon, path: '/dashboard/manager' },
-                        { name: 'My Dashboard', icon: commonIcon, path: '/dashboard/manager?tab=myspace' },
-                        dashboards.hr,
-                        dashboards.employee
+                        { name: 'My Space', path: '/dashboard/my-space' },
+                        { name: 'My Team', path: '/dashboard/my-team' },
                     ];
                     break;
                 case 'hr':
                     children = [
-                        { ...dashboards.hr, name: 'My Dashboard' },
-                        dashboards.employee
+                        { name: 'My Space', path: '/dashboard/my-space' },
+                        { name: 'My Team', path: '/dashboard/my-team' },
+                    ];
+                    break;
+                case 'manager':
+                    children = [
+                        { name: 'My Space', path: '/dashboard/my-space' },
+                        { name: 'My Team', path: '/dashboard/my-team' },
                     ];
                     break;
                 case 'employee':
-                    // No dropdown for employee
-                    return { name: 'My Space', icon: commonIcon, path: '/dashboard/employee' };
+                    children = [
+                        { name: 'My Space', path: '/dashboard/my-space' }
+                    ];
+                    break;
                 case 'accountant':
-                    return { name: 'My Space', icon: commonIcon, path: '/dashboard/accountant' };
+                    children = [
+                        { name: 'My Space', path: '/dashboard/my-space' }
+                    ];
+                    break;
                 case 'new_user':
                 case 'newuser':
-                    return { name: 'My Space', icon: commonIcon, path: '/welcome' };
+                    return { name: 'Dashboard', icon: commonIcon, path: '/welcome' };
                 default:
-                    return { name: 'My Space', icon: commonIcon, path: '/dashboard' };
+                    return { name: 'Dashboard', icon: commonIcon, path: '/dashboard' };
             }
 
             return {
-                name: 'My Space',
+                name: 'Dashboard',
                 icon: commonIcon,
                 children: children
             };
         };
 
-        const mySpaceLink = getMySpaceLink(role);
+        const dashboardLink = getDashboardLink(role);
 
         switch (role) {
             case 'admin':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
+                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
+                    { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Daily Task', icon: <MdAssignmentInd size={20} />, path: '/daily-task' },
                     { name: 'Task', icon: <MdTasks size={20} />, path: '/tasks' },
                     { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
 
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
-                    { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
                     { name: 'Audit Logs', icon: <MdSecurity size={20} />, path: '/admin/audit-logs' },
                 ];
                 break;
 
             case 'superadmin':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
+                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
+                    { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
                     { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
                     { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
@@ -175,7 +177,9 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
             case 'hr':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
+                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
+                    { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
                     { name: 'Employee Directory', icon: <MdPeople size={20} />, path: '/employee-directory' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     {
@@ -190,6 +194,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
                     { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
                     { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
                     { name: 'HR Reports', icon: <MdBarChart size={20} />, path: '/hr-reports' },
                 ];
@@ -197,23 +202,25 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
             case 'manager':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
                     { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Daily Task', icon: <MdAssignment size={20} />, path: '/daily-task' },
                     { name: 'Task', icon: <MdTasks size={20} />, path: '/task' },
                     { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/asset-allocation' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'Leave Management', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                 ];
                 break;
 
             case 'employee':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
                     { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
                     { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
                     { name: 'My Payslips', icon: <MdReceiptLong size={20} />, path: '/my-payslips' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
                     { name: 'My Performance', icon: <MdRateReview size={20} />, path: '/my-performance' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/my-documents' },
                     { name: 'Change Password', icon: <MdVpnKey size={20} />, path: '/change-password' },
@@ -222,7 +229,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
             case 'accountant':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
                     { name: 'Payroll Processing', icon: <MdAttachMoney size={20} />, path: '/payroll-processing' },
                     { name: 'Salary Structure', icon: <MdAccountBalanceWallet size={20} />, path: '/salary-structure' },
                     { name: 'Payslips', icon: <MdReceiptLong size={20} />, path: '/payslips' },
@@ -233,7 +240,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
             case 'new_user':
                 links = [
-                    mySpaceLink,
+                    dashboardLink,
                     { name: 'Complete Profile', icon: <MdPerson size={20} />, path: '/complete-profile' },
                     { name: 'Upload Documents', icon: <MdFileUpload size={20} />, path: '/upload-documents' },
                     { name: 'View Policies', icon: <MdPolicy size={20} />, path: '/policies' },
@@ -242,7 +249,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 break;
 
             default:
-                links = [mySpaceLink];
+                links = [dashboardLink];
         }
 
         return (

@@ -1,4 +1,4 @@
-const API_URL = 'http://192.168.1.13:5000/api/auth/reset-password';
+const API_URL = 'http://192.168.1.48:5000/api/auth/reset-password';
 
 export const resetPassword = async (email, newPassword) => {
     try {

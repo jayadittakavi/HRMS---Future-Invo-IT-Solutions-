@@ -54,73 +54,74 @@ const ManagerDashboard = () => {
     };
 
     return (
-        <DashboardLayout title="" onNavigate={handleNavigate} activePath={`/${activeView}`}>
-            <div className="container-fluid p-0">
-                {activeView === 'dashboard' && (
-                    <>
-                        {/* Welcome & Dashboard Toggle */}
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                            <div>
-                                <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Manager'}!</h2>
-                                <p className="text-secondary small mb-0">Here's what's happening today.</p>
-                            </div>
-                            <div className="bg-light p-1 rounded-pill d-flex border">
-                                <button
-                                    className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                    onClick={() => setDashboardType('overall')}
-                                >
-                                    My Team Overview
-                                </button>
+        <div className="container-fluid p-0">
+            {activeView === 'dashboard' && (
+                <>
+                    {/* Welcome & Dashboard Toggle */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Manager'}!</h2>
+                            <p className="text-secondary small mb-0">Here's what's happening today.</p>
+                        </div>
+                        <div className="bg-light p-1 rounded-pill d-flex border">
+                            <button
+                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
+                                onClick={() => navigate('/dashboard/manager')}
+                            >
+                                My Team Overview
+                            </button>
 
-                                {/* Role Switcher Split Area */}
-                                <div className={`d-flex align-items-center rounded-pill ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : ''}`}>
+                            {/* Role Switcher Split Area */}
+                            <div className={`d-flex align-items-center rounded-pill ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : ''}`}>
+                                <button
+                                    className={`btn btn-sm rounded-pill px-3 fw-bold ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
+                                    onClick={() => {
+                                        setDashboardType('myspace'); // Optimistic update for instant feedback
+                                        navigate('/dashboard/manager?tab=myspace');
+                                    }}
+                                >
+                                    My Space
+                                </button>
+                                <div className="dropdown">
                                     <button
-                                        className={`btn btn-sm rounded-pill px-3 fw-bold ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
-                                        onClick={() => {
-                                            setDashboardType('myspace'); // Optimistic update for instant feedback
-                                            navigate('/dashboard/manager?tab=myspace');
-                                        }}
+                                        className={`btn btn-sm rounded-pill px-2 fw-bold dropdown-toggle dropdown-toggle-split ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
                                     >
-                                        My Space
+                                        <span className="visually-hidden">Toggle Dropdown</span>
                                     </button>
-                                    <div className="dropdown">
-                                        <button
-                                            className={`btn btn-sm rounded-pill px-2 fw-bold dropdown-toggle dropdown-toggle-split ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
-                                            type="button"
-                                            data-bs-toggle="dropdown"
-                                            aria-expanded="false"
-                                        >
-                                            <span className="visually-hidden">Toggle Dropdown</span>
-                                        </button>
-                                        <ul className="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                                            <li><h6 className="dropdown-header small text-muted text-uppercase my-1">Switch View</h6></li>
-                                            <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/hr')}>HR Dashboard</button></li>
-                                            <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/employee')}>Employee Dashboard</button></li>
-                                        </ul>
-                                    </div>
+                                    <ul className="dropdown-menu dropdown-menu-end border-0 shadow-lg">
+                                        <li><h6 className="dropdown-header small text-muted text-uppercase my-1">Switch View</h6></li>
+                                        <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/hr')}>HR Dashboard</button></li>
+                                        <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/employee')}>Employee Dashboard</button></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Content Area */}
-                        {dashboardType === 'overall' ? <ManagerOverallStats onNavigate={handleNavigate} /> : <MySpace role="Manager" onNavigate={handleNavigate} />}
-                    </>
-                )}
+                    {/* Content Area */}
+                    {dashboardType === 'overall' ? <ManagerOverallStats onNavigate={handleNavigate} /> : <MySpace role="Manager" onNavigate={handleNavigate} />}
+                </>
+            )}
 
 
-                {/* Placeholders for Manager Views */}
-                {activeView === 'team-members' && <TeamMembers />}
+            {/* Placeholders for Manager Views */}
+            {activeView === 'team-members' && <TeamMembers />}
 
-                {activeView === 'daily-task' && <DailyTask />}
-                {activeView === 'task' && <Task />}
-                {activeView === 'asset-allocation' && <AssetAllocation />}
-                {activeView === 'travel-expenses' && <TravelExpenses />}
-                {activeView === 'leave-management' && <LeaveManagementContent personal={false} />}
-                {activeView === 'attendance' && <ManagerAttendance />}
-                {activeView === 'my-attendance' && <ManagerMyAttendance />}
+            {activeView === 'daily-task' && <DailyTask />}
+            {activeView === 'task' && <Task />}
+            {activeView === 'asset-allocation' && <AssetAllocation />}
+            {activeView === 'travel-expenses' && <TravelExpenses />}
+            {activeView === 'leave-management' && <LeaveManagementContent personal={false} initialTab="dashboard" />}
+            {activeView === 'my-leaves' && <LeaveManagementContent personal={true} initialTab="dashboard" />}
+            {activeView === 'request-leave' && <LeaveManagementContent personal={true} initialTab="apply" />}
+            {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
+            {activeView === 'attendance' && <ManagerAttendance />}
+            {activeView === 'my-attendance' && <ManagerMyAttendance />}
 
-            </div>
-        </DashboardLayout>
+        </div>
     );
 };
 

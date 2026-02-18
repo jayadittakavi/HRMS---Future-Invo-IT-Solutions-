@@ -33,6 +33,9 @@ import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
 
 /* Dashboard Layout & Manager */
 import DashboardManager from "./pages/dashboards/DashboardManager";
+import DashboardLayout from "./components/layout/DashboardLayout";
+import MySpace from "./pages/dashboards/components/MySpace";
+import MyTeam from "./pages/dashboards/components/MyTeam";
 
 /* Audit Logs */
 import SuperAdminAuditLogs from "./pages/superadmin/AuditLogs";
@@ -118,73 +121,27 @@ export default function App() {
               <Route path="/setup-organization" element={<SetupOrganization />} />
               <Route path="/calendar" element={<Calendar />} />
 
-              {/* Dashboard Redirector */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <DashboardManager />
-                  </ProtectedRoute>
-                }
-              />
+              {/* Dashboard Routes - Nested under DashboardLayout */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<DashboardManager />} />
 
-              {/* Role-Specific Dashboard Routes */}
-              <Route
-                path="/dashboard/super-admin"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin']}>
-                    <SuperAdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/admin"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin']}>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/manager"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager']}>
-                    <ManagerDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/hr"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr']}>
-                    <HRDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/employee"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr', 'employee']}>
-                    <EmployeeDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/accountant"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}>
-                    <AccountantDashboard />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/dashboard/new-user"
-                element={
-                  <ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'newuser']}>
-                    <NewUserDashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Shared Views */}
+                <Route path="my-space" element={<MySpace />} />
+                <Route path="my-team" element={<MyTeam />} />
+
+                {/* Role Specific Dashboards */}
+                <Route path="super-admin" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
+                <Route path="admin" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><AdminDashboard /></ProtectedRoute>} />
+                <Route path="manager" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager']}><ManagerDashboard /></ProtectedRoute>} />
+                <Route path="hr" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr']}><HRDashboard /></ProtectedRoute>} />
+                <Route path="employee" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr', 'employee']}><EmployeeDashboard /></ProtectedRoute>} />
+                <Route path="accountant" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><AccountantDashboard /></ProtectedRoute>} />
+                <Route path="new-user" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'newuser']}><NewUserDashboard /></ProtectedRoute>} />
+              </Route>
 
               <Route
                 path="/attendance"
@@ -224,7 +181,7 @@ export default function App() {
               <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr']}><Documents /></ProtectedRoute>} />
               <Route path="/hr-reports" element={<ProtectedRoute requiredRoles={['hr']}><HRReports /></ProtectedRoute>} />
               <Route path="/leave-requests" element={<ProtectedRoute requiredRoles={['hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
-              <Route path="/onboarding" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Onboarding /></ProtectedRoute>} />
+              <Route path="/onboarding" element={<ProtectedRoute requiredRoles={['superadmin', 'hr']}><Onboarding /></ProtectedRoute>} />
 
               {/* Manager Routes */}
               <Route path="/team-members" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Members" /></ProtectedRoute>} />

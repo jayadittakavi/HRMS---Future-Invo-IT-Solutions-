@@ -13,7 +13,7 @@ const ProfileContent = () => {
     const navigate = useNavigate();
 
     // State
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [employeeData, setEmployeeData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [name, setName] = useState(user?.name || '');
@@ -77,9 +77,7 @@ const ProfileContent = () => {
         setIsEditing(false);
     };
 
-    if (loading) {
-        return <div className="p-5 text-center text-secondary">Loading profile...</div>;
-    }
+
 
     // Merge Context User and Fetched Employee Data
     const displayUser = {

@@ -8,8 +8,8 @@ import sideImage from '../../../assets/images/loginimage.png';
 import './login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('superadmin@example.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();

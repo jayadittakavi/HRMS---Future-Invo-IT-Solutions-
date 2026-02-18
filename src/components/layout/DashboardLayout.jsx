@@ -1,19 +1,42 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
-import './DashboardLayout.css'; // Keeping for specific layout tweaks not covered by Bootstrap utils if needed, or remove if fully bootstrap
+import './DashboardLayout.css';
 
-const DashboardLayout = ({ children, title, onNavigate, bgImage, activePath }) => {
+const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const navigate = useNavigate();
+
+    const { user } = useAuth(); // Need user context to know role for base path
 
     // Use passed onNavigate or default to router navigation
     const handleNavigate = (path) => {
         if (onNavigate) {
             onNavigate(path);
         } else {
-            navigate(path);
+            // If path is absolute (starts with /), navigate directly
+            if (path.startsWith('/')) {
+                navigate(path);
+            } else {
+                // Otherwise, append to current dashboard path
+                // This is where we ensure we stay within the correct dashboard context
+                const role = user?.role?.toLowerCase();
+                let basePath = '/dashboard';
+                if (role === 'superadmin') basePath = '/dashboard/super-admin';
+                else if (role === 'admin') basePath = '/dashboard/admin';
+                else if (role === 'manager') basePath = '/dashboard/manager';
+                else if (role === 'hr') basePath = '/dashboard/hr';
+                else if (role === 'employee') basePath = '/dashboard/employee';
+
+                // If the path is just 'dashboard', go to the base path
+                if (path === 'dashboard') {
+                    navigate(basePath);
+                } else {
+                    navigate(`${basePath}/${path}`);
+                }
+            }
         }
     };
 
@@ -49,7 +72,8 @@ const DashboardLayout = ({ children, title, onNavigate, bgImage, activePath }) =
                 {/* Scrollable Content Area */}
                 <div className="flex-grow-1 overflow-auto p-4">
                     <div className="container-fluid">
-                        {children}
+                        {/* This renders the child route elements OR passed children */}
+                        {children || <Outlet />}
                     </div>
                 </div>
             </div>

@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from "../../context/AuthContext";
 import "../../components/layout/DashboardLayout.css";
 import { EmployeesContent } from "../modules/hr/employees/Employees";
 import { AttendanceContent } from '../attendance/Attendance';
-import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../components/charts/CustomCharts';
-import { FaUsers, FaUserPlus, FaChalkboardTeacher } from 'react-icons/fa';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { OnboardingContent } from '../modules/hr/onboarding/Onboarding';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
@@ -13,191 +11,90 @@ import { RecruitmentContent } from '../modules/hr/recruitment/Recruitment';
 import { DocumentsContent } from '../modules/hr/documents/Documents';
 import { TrainingContent } from '../modules/hr/training/Training';
 import { HRReportsContent } from '../modules/hr/reports/HRReports';
+import HROverallStats from './components/HROverallStats';
+import MySpace from './components/MySpace';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const HRDashboard = () => {
     const { user } = useAuth();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const [activeView, setActiveView] = useState('dashboard');
+
+    // Determine view type from URL query param `tab` (e.g. ?tab=myspace)
+    const tabParam = searchParams.get('tab');
+    const [dashboardType, setDashboardType] = useState('overall'); // 'overall' or 'myspace'
+
+    useEffect(() => {
+        if (tabParam === 'myspace') {
+            setDashboardType('myspace');
+        } else {
+            setDashboardType('overall');
+        }
+    }, [tabParam]);
 
     const handleNavigate = (path) => {
         const view = path.replace('/', '');
         setActiveView(view || 'dashboard');
     };
 
-    const hiringData = [
-        { label: 'Applied', value: 150, color: '#94a3b8' },
-        { label: 'Screening', value: 80, color: '#38bdf8' },
-        { label: 'Interview', value: 30, color: '#facc15' },
-        { label: 'Offer', value: 12, color: '#4ade80' },
-        { label: 'Hired', value: 8, color: '#16a34a' },
-    ];
-
-    const deptDistribution = [
-        { label: 'Eng', value: 40, color: '#3b82f6' },
-        { label: 'Sales', value: 25, color: '#f97316' },
-        { label: 'HR', value: 10, color: '#ec4899' },
-        { label: 'Mkt', value: 15, color: '#8b5cf6' },
-    ];
-
-    const applicationTrendData = [45, 52, 38, 65, 42, 58];
-
     return (
-        <DashboardLayout title="" onNavigate={handleNavigate}>
-            <div className="container-fluid p-0">
-                {activeView === 'dashboard' && (
-                    <>
-                        {/* Welcome Header */}
-                        <div className="mb-4">
+        <div className="container-fluid p-0">
+            {activeView === 'dashboard' && (
+                <>
+                    {/* Welcome Header */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div>
                             <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'HR Specialist'}!</h2>
-                            <div className="d-flex align-items-center gap-2">
-                                <span className="text-secondary fw-medium">Recruitment Status:</span>
-                                <span className="badge bg-danger text-white fw-bold">URGENT HIRING</span>
-                            </div>
+                            {dashboardType === 'overall' && (
+                                <div className="d-flex align-items-center gap-2">
+                                    <span className="text-secondary fw-medium">Recruitment Status:</span>
+                                    <span className="badge bg-danger text-white fw-bold">URGENT HIRING</span>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="row g-4 mb-4">
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-purple">
-                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaUsers /> Total Staff
-                                    </h6>
-                                    <h3 className="dashboard-value">1,234</h3>
-                                    <p className="small mb-0 fw-bold">↑ 12 New this month</p>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-orange">
-                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaUserPlus /> Open Positions
-                                    </h6>
-                                    <h3 className="dashboard-value">8</h3>
-                                    <p className="small mb-0 fw-bold">3 Critical</p>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card bg-gradient-blue">
-                                    <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                        <FaChalkboardTeacher /> Onboarding
-                                    </h6>
-                                    <h3 className="dashboard-value">3</h3>
-                                    <p className="small mb-0">Candidates in progress</p>
-                                </div>
-                            </div>
+                        {/* Toggle Buttons */}
+                        <div className="bg-light p-1 rounded-pill d-flex border">
+                            <button
+                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
+                                onClick={() => navigate('/dashboard/hr')}
+                            >
+                                My Team
+                            </button>
+                            <button
+                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
+                                onClick={() => navigate('/dashboard/hr?tab=myspace')}
+                            >
+                                My Space
+                            </button>
                         </div>
+                    </div>
 
-                        {/* Charts Row 1 */}
-                        <div className="row g-4 mb-4">
-                            <div className="col-md-8">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Recruitment Funnel</h6>
-                                    <SimpleBarChart data={hiringData} height="300px" />
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card h-100">
-                                    <h6 className="dashboard-card-title">Department Headcount</h6>
-                                    <div className="py-3 d-flex justify-content-center">
-                                        <SimpleDonutChart segments={deptDistribution} size="200px" centerText="100%" />
-                                    </div>
-                                    <div className="text-center mt-3 small text-secondary">
-                                        <div className="d-flex justify-content-center flex-wrap gap-2">
-                                            {deptDistribution.map((item, idx) => (
-                                                <span key={idx} className="fw-bold" style={{ color: item.color }}>● {item.label}</span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    {dashboardType === 'overall' ? <HROverallStats /> : <MySpace role="HR" onNavigate={handleNavigate} />}
+                </>
+            )}
 
-                        {/* Charts Row 2 */}
-                        <div className="row g-4 mb-4">
-                            <div className="col-md-12">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Application Trends (6 Months)</h6>
-                                    <div className="py-3">
-                                        <SimpleLineChart data={applicationTrendData} height="280px" color="#8b5cf6" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* HR Tables or Lists */}
-                        <div className="row g-4">
-                            <div className="col-md-8">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Recent Applications</h6>
-                                    <div className="table-responsive">
-                                        <table className="table table-hover table-sm">
-                                            <thead>
-                                                <tr>
-                                                    <th className="text-secondary small border-0">Candidate</th>
-                                                    <th className="text-secondary small border-0">Role</th>
-                                                    <th className="text-secondary small border-0">Date</th>
-                                                    <th className="text-secondary small border-0">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td className="fw-bold text-dark">Alice Cooper</td>
-                                                    <td className="text-secondary small">Frontend Dev</td>
-                                                    <td className="text-secondary small">May 21</td>
-                                                    <td><span className="badge bg-warning text-dark" style={{ fontSize: '0.7rem' }}>Interview</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="fw-bold text-dark">Bob Marley</td>
-                                                    <td className="text-secondary small">UI Designer</td>
-                                                    <td className="text-secondary small">May 20</td>
-                                                    <td><span className="badge bg-info text-dark" style={{ fontSize: '0.7rem' }}>Screening</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <td className="fw-bold text-dark">Charlie Puth</td>
-                                                    <td className="text-secondary small">Backend Dev</td>
-                                                    <td className="text-secondary small">May 19</td>
-                                                    <td><span className="badge bg-success" style={{ fontSize: '0.7rem' }}>Hired</span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-4">
-                                <div className="dashboard-card">
-                                    <h6 className="dashboard-card-title">Upcoming Interviews</h6>
-                                    <ul className="list-group list-group-flush">
-                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-bottom mb-2">
-                                            <div>
-                                                <h6 className="mb-0 fw-bold small text-dark">Frontend Dev</h6>
-                                                <small className="text-muted">10:00 AM - Alice C.</small>
-                                            </div>
-                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
-                                        </li>
-                                        <li className="list-group-item d-flex justify-content-between align-items-center bg-transparent px-0 border-0">
-                                            <div>
-                                                <h6 className="mb-0 fw-bold small text-dark">UI Designer</h6>
-                                                <small className="text-muted">02:00 PM - Bob M.</small>
-                                            </div>
-                                            <button className="btn btn-sm btn-outline-primary py-0 px-2">Join</button>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </>
-                )}
-
-                {activeView === 'employees' && <EmployeesContent />}
-                {activeView === 'employee-directory' && <EmployeesContent />}
-                {activeView === 'attendance' && <AttendanceContent />}
-                {activeView === 'recruitment' && <RecruitmentContent />}
-                {activeView === 'documents' && <DocumentsContent />}
-                {activeView === 'training' && <TrainingContent />}
-                {activeView === 'hr-reports' && <HRReportsContent />}
-                {activeView === 'leave-management' && <LeaveManagementContent personal={false} />}
-                {activeView === 'leave-requests' && <LeaveManagementContent personal={false} />}
-                {activeView === 'onboarding' && <OnboardingContent />}
-                {activeView === 'profile' && <ProfileContent />}
-            </div>
-        </DashboardLayout>
+            {activeView === 'employees' && <EmployeesContent />}
+            {activeView === 'employee-directory' && <EmployeesContent />}
+            {activeView === 'attendance' && <AttendanceContent />}
+            {activeView === 'recruitment' && <RecruitmentContent />}
+            {activeView === 'documents' && <DocumentsContent />}
+            {activeView === 'training' && <TrainingContent />}
+            {activeView === 'hr-reports' && <HRReportsContent />}
+            {/* Note: Leave Management has its own internal toggle for Personal vs Management, 
+                    but here we likely want the Management view by default for HR dash unless specifically in "My Space" context.
+                    However, Sidebar links to /leave-requests which triggers 'leave-requests' view.
+                */}
+            {activeView === 'leave-management' && <LeaveManagementContent personal={false} initialTab="dashboard" />}
+            {activeView === 'leave-requests' && <LeaveManagementContent personal={false} initialTab="pending" />}
+            {activeView === 'my-leaves' && <LeaveManagementContent personal={true} initialTab="dashboard" />}
+            {activeView === 'request-leave' && <LeaveManagementContent personal={true} initialTab="apply" />}
+            {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
+            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
+            {activeView === 'onboarding' && <OnboardingContent />}
+            {activeView === 'profile' && <ProfileContent />}
+        </div>
     );
 };
 

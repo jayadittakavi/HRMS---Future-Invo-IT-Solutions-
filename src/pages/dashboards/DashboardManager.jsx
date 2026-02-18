@@ -13,8 +13,14 @@ const DashboardManager = () => {
 
     if (!user) return null; // Or loading spinner
 
-    switch (user.role) {
+    // Normalize role to lowercase for consistent matching
+    const role = user.role ? user.role.toLowerCase() : 'employee';
+
+    console.log("DashboardManager: Rendering dashboard for role:", role);
+
+    switch (role) {
         case 'superadmin':
+        case 'super_admin':
             return <SuperAdminDashboard />;
         case 'admin':
             return <AdminDashboard />;
@@ -25,7 +31,7 @@ const DashboardManager = () => {
         case 'accountant':
             return <AccountantDashboard />;
         case 'newuser':
-            // Check status if needed, but for now just show the dashboard
+        case 'new_user':
             return <NewUserDashboard />;
         case 'employee':
         default:

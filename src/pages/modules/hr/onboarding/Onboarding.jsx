@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import {
     FaUserPlus, FaFileAlt, FaCertificate,
     FaCheckCircle, FaTimesCircle, FaDownload, FaEye, FaPrint, FaSearch, FaEnvelope,
-    FaBriefcase, FaHandshake, FaMoneyBillWave, FaDoorOpen, FaChartLine
+    FaBriefcase, FaHandshake, FaMoneyBillWave, FaDoorOpen, FaChartLine,
+    FaCode, FaPenFancy, FaGlobe
 } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import TemplateUI from './tabs/TemplateUI';
+import VariableUI from './tabs/VariableUI';
+import ApprovalUI from './tabs/ApprovalUI';
+import ESignUI from './tabs/ESignUI';
 
 export const OnboardingContent = () => {
     const [activeTab, setActiveTab] = useState('onboarding');
+    const [letterSubTab, setLetterSubTab] = useState('templates');
     const [showLetterModal, setShowLetterModal] = useState(false);
     const [showCertModal, setShowCertModal] = useState(false);
 
@@ -108,42 +114,48 @@ export const OnboardingContent = () => {
 
     const renderLetters = () => (
         <div>
-            <div className="card border-0 shadow-sm">
-                <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                    <h6 className="mb-0 fw-bold">Recent Generated Letters</h6>
+            {/* Letter Sub-Tabs */}
+            <ul className="nav nav-pills mb-4 bg-white p-2 rounded shadow-sm d-inline-flex" style={{ gap: '8px' }}>
+                <li className="nav-item">
                     <button
-                        className="btn btn-primary btn-sm px-3 shadow-sm"
-                        onClick={() => setShowLetterTemplateModal(true)}
+                        className={`nav-link fw-bold ${letterSubTab === 'templates' ? 'active bg-primary' : 'text-secondary'}`}
+                        onClick={() => setLetterSubTab('templates')}
                     >
-                        <FaFileAlt className="me-2" />
-                        Templates
+                        <FaGlobe className="me-2" /> Templates
                     </button>
-                </div>
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="bg-light">
-                            <tr>
-                                <th className="ps-4">Employee</th>
-                                <th>Type</th>
-                                <th>Generated On</th>
-                                <th>Status</th>
-                                <th className="text-end pe-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="ps-4 fw-bold">Alice Johnson</td>
-                                <td>Offer Letter</td>
-                                <td className="text-secondary small">May 15, 2024</td>
-                                <td><span className="badge bg-success">Sent</span></td>
-                                <td className="text-end pe-4">
-                                    <button className="btn btn-sm btn-light text-dark me-2"><FaPrint /></button>
-                                    <button className="btn btn-sm btn-light text-primary"><FaDownload /></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                </li>
+                <li className="nav-item">
+                    <button
+                        className={`nav-link fw-bold ${letterSubTab === 'variables' ? 'active bg-success' : 'text-secondary'}`}
+                        onClick={() => setLetterSubTab('variables')}
+                    >
+                        <FaCode className="me-2" /> Variables
+                    </button>
+                </li>
+                <li className="nav-item">
+                    <button
+                        className={`nav-link fw-bold ${letterSubTab === 'approval' ? 'active bg-warning text-dark' : 'text-secondary'}`}
+                        onClick={() => setLetterSubTab('approval')}
+                    >
+                        <FaCheckCircle className="me-2" /> Approval
+                    </button>
+                </li>
+                <li className="nav-item">
+                    <button
+                        className={`nav-link fw-bold ${letterSubTab === 'esign' ? 'active bg-info' : 'text-secondary'}`}
+                        onClick={() => setLetterSubTab('esign')}
+                    >
+                        <FaPenFancy className="me-2" /> E-sign
+                    </button>
+                </li>
+            </ul>
+
+            {/* Sub-Tab Content */}
+            <div>
+                {letterSubTab === 'templates' && <TemplateUI />}
+                {letterSubTab === 'variables' && <VariableUI />}
+                {letterSubTab === 'approval' && <ApprovalUI />}
+                {letterSubTab === 'esign' && <ESignUI />}
             </div>
         </div>
     );
