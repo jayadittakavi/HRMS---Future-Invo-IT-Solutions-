@@ -199,6 +199,7 @@ export default function App() {
               <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
               {/* Shared Payroll Route for Admin/Accountant */}
               <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />{/* Added Notifications Page */}
+              <Route path="/payroll-dashboard" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Payroll /></ProtectedRoute>} />
               <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><Payroll /></ProtectedRoute>} />
               <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
               <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />

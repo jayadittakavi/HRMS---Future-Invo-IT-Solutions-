@@ -148,7 +148,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Task', icon: <MdTasks size={20} />, path: '/tasks' },
                     { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
                     { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
 
                     { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
@@ -166,7 +166,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
                     { name: 'Pay Grade', icon: <MdAttachMoney size={20} />, path: '/pay-grade' },
                     { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
                     { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
@@ -194,7 +194,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
                     { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
                     { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
                     { name: 'HR Reports', icon: <MdBarChart size={20} />, path: '/hr-reports' },
                 ];
@@ -209,7 +209,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Task', icon: <MdTasks size={20} />, path: '/task' },
                     { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/asset-allocation' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
                     { name: 'Leave Management', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                 ];
                 break;
@@ -220,7 +220,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
                     { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
                     { name: 'My Payslips', icon: <MdReceiptLong size={20} />, path: '/my-payslips' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll' },
+
                     { name: 'My Performance', icon: <MdRateReview size={20} />, path: '/my-performance' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/my-documents' },
                     { name: 'Change Password', icon: <MdVpnKey size={20} />, path: '/change-password' },
