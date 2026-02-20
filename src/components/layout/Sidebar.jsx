@@ -196,7 +196,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
                     { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
-                    { name: 'HR Reports', icon: <MdBarChart size={20} />, path: '/hr-reports' },
                 ];
                 break;
 

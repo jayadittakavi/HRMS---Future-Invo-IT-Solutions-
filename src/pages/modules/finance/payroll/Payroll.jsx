@@ -49,7 +49,7 @@ export const PayrollContent = ({ personal = false }) => {
 
     const tabs = [
         { id: 'dashboard', label: 'Dashboard', access: ['admin', 'hr', 'manager'] },
-        { id: 'salary', label: 'Salary UI', access: ['admin', 'hr'] },
+        { id: 'salary', label: 'Salary UI', access: ['all'] },
         { id: 'statutory', label: 'Statutory UI', access: ['admin', 'hr'] },
         { id: 'payslip', label: 'Payslip UI', access: ['all'] }, // Visible for everyone, but component handles personal view
         { id: 'form16', label: 'Form-16 UI', access: ['all'] },

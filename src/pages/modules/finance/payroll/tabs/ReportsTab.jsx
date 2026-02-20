@@ -1,59 +1,425 @@
-import React from 'react';
-import { FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import React, { useState } from 'react';
 
-const ReportsTab = () => {
+/* ─── Report Definitions ───────────────────────────────────────────── */
+const REPORTS = [
+    {
+        id: 'salary-register',
+        label: 'Salary Register',
+        description: 'Monthly salary register with all earnings, deductions, and net pay for every employee.',
+        icon: '💰',
+        color: '#2563eb',
+        bg: '#eff6ff',
+        border: '#bfdbfe',
+        columns: ['Employee ID', 'Employee Name', 'Department', 'Basic', 'HRA', 'Allowances', 'Gross', 'Deductions', 'Net Pay'],
+        data: [
+            { eid: 'EMP001', name: 'Ravi Kumar', dept: 'Engineering', basic: '₹40,000', hra: '₹16,000', allow: '₹8,000', gross: '₹64,000', ded: '₹6,200', net: '₹57,800' },
+            { eid: 'EMP002', name: 'Priya Sharma', dept: 'HR', basic: '₹35,000', hra: '₹14,000', allow: '₹6,500', gross: '₹55,500', ded: '₹5,400', net: '₹50,100' },
+            { eid: 'EMP003', name: 'Amit Singh', dept: 'Finance', basic: '₹42,000', hra: '₹16,800', allow: '₹9,000', gross: '₹67,800', ded: '₹6,600', net: '₹61,200' },
+            { eid: 'EMP004', name: 'Neha Gupta', dept: 'Marketing', basic: '₹30,000', hra: '₹12,000', allow: '₹5,000', gross: '₹47,000', ded: '₹4,600', net: '₹42,400' },
+            { eid: 'EMP005', name: 'Suresh Patel', dept: 'Operations', basic: '₹38,000', hra: '₹15,200', allow: '₹7,500', gross: '₹60,700', ded: '₹5,900', net: '₹54,800' },
+        ],
+    },
+    {
+        id: 'income-tax-deductions',
+        label: 'Income Tax Deductions',
+        description: 'Detailed TDS deductions per employee including declarations and Form 16 summary.',
+        icon: '📊',
+        color: '#7c3aed',
+        bg: '#f5f3ff',
+        border: '#ddd6fe',
+        columns: ['Employee ID', 'Employee Name', 'PAN', 'Taxable Income', 'TDS This Month', 'TDS YTD', 'Tax Regime'],
+        data: [
+            { eid: 'EMP001', name: 'Ravi Kumar', pan: 'ABCDE1234F', taxable: '₹6,93,600', tds: '₹4,820', ytd: '₹57,840', regime: 'New' },
+            { eid: 'EMP002', name: 'Priya Sharma', pan: 'PQRST5678G', taxable: '₹6,01,200', tds: '₹3,760', ytd: '₹45,120', regime: 'Old' },
+            { eid: 'EMP003', name: 'Amit Singh', pan: 'LMNOP9012H', taxable: '₹7,34,400', tds: '₹5,390', ytd: '₹64,680', regime: 'New' },
+            { eid: 'EMP004', name: 'Neha Gupta', pan: 'UVWXY3456I', taxable: '₹5,08,800', tds: '₹2,040', ytd: '₹24,480', regime: 'Old' },
+            { eid: 'EMP005', name: 'Suresh Patel', pan: 'EFGHI7890J', taxable: '₹6,57,600', tds: '₹4,380', ytd: '₹52,560', regime: 'New' },
+        ],
+    },
+    {
+        id: 'professional-tax-deductions',
+        label: 'Professional Tax Deductions',
+        description: 'State-wise Professional Tax (PT) deductions report for compliance and remittance.',
+        icon: '🏛️',
+        color: '#0891b2',
+        bg: '#ecfeff',
+        border: '#a5f3fc',
+        columns: ['Employee ID', 'Employee Name', 'State', 'Gross Salary', 'PT Slab', 'PT Amount', 'Status'],
+        data: [
+            { eid: 'EMP001', name: 'Ravi Kumar', state: 'Karnataka', gross: '₹57,800', slab: '> ₹15,000', pt: '₹200', status: 'Remitted' },
+            { eid: 'EMP002', name: 'Priya Sharma', state: 'Maharashtra', gross: '₹50,100', slab: '> ₹10,000', pt: '₹200', status: 'Remitted' },
+            { eid: 'EMP003', name: 'Amit Singh', state: 'Karnataka', gross: '₹61,200', slab: '> ₹15,000', pt: '₹200', status: 'Pending' },
+            { eid: 'EMP004', name: 'Neha Gupta', state: 'Delhi', gross: '₹42,400', slab: 'Exempt', pt: '₹0', status: 'NA' },
+            { eid: 'EMP005', name: 'Suresh Patel', state: 'Gujarat', gross: '₹54,800', slab: 'Exempt', pt: '₹0', status: 'NA' },
+        ],
+    },
+    {
+        id: 'general-ledger',
+        label: 'General Ledger',
+        description: 'Complete payroll general ledger entries for accounting and audit reconciliation.',
+        icon: '📒',
+        color: '#059669',
+        bg: '#ecfdf5',
+        border: '#a7f3d0',
+        columns: ['Date', 'Ledger Account', 'Description', 'Debit (₹)', 'Credit (₹)', 'Balance (₹)'],
+        data: [
+            { date: '01 Feb 2026', account: 'Salary Payable', desc: 'Basic Salary - Feb 2026', debit: '1,85,000', credit: '-', balance: '1,85,000' },
+            { date: '01 Feb 2026', account: 'HRA Payable', desc: 'HRA Payout - Feb 2026', debit: '74,000', credit: '-', balance: '74,000' },
+            { date: '01 Feb 2026', account: 'PF Payable', desc: 'Employee PF - Feb 2026', debit: '-', credit: '22,200', balance: '-22,200' },
+            { date: '01 Feb 2026', account: 'TDS Payable', desc: 'TDS Deducted - Feb 2026', debit: '-', credit: '20,390', balance: '-20,390' },
+            { date: '28 Feb 2026', account: 'Bank Account', desc: 'Salary Disbursed', debit: '-', credit: '2,66,500', balance: '-2,66,500' },
+        ],
+    },
+    {
+        id: 'accounts-payable',
+        label: 'Accounts Payable',
+        description: 'Outstanding payroll liabilities including unpaid salaries, PF, PT, and TDS payables.',
+        icon: '📋',
+        color: '#d97706',
+        bg: '#fffbeb',
+        border: '#fde68a',
+        columns: ['Payable Head', 'Due Date', 'Amount (₹)', 'Paid (₹)', 'Outstanding (₹)', 'Status'],
+        data: [
+            { head: 'Net Salary - Feb 2026', due: '28 Feb 2026', amount: '2,66,300', paid: '2,66,300', outstanding: '0', status: 'Paid' },
+            { head: 'PF (Employer + Employee)', due: '15 Mar 2026', amount: '44,400', paid: '0', outstanding: '44,400', status: 'Pending' },
+            { head: 'ESI Contribution', due: '15 Mar 2026', amount: '8,750', paid: '0', outstanding: '8,750', status: 'Pending' },
+            { head: 'Professional Tax', due: '31 Mar 2026', amount: '800', paid: '400', outstanding: '400', status: 'Partial' },
+            { head: 'TDS (Income Tax)', due: '07 Mar 2026', amount: '20,390', paid: '20,390', outstanding: '0', status: 'Paid' },
+        ],
+    },
+];
+
+/* ─── Status Badge ─────────────────────────────────────────── */
+const StatusBadge = ({ value }) => {
+    const map = {
+        Remitted: { bg: '#dcfce7', color: '#166534' },
+        Pending: { bg: '#fef9c3', color: '#854d0e' },
+        NA: { bg: '#f3f4f6', color: '#6b7280' },
+        Paid: { bg: '#dcfce7', color: '#166534' },
+        Partial: { bg: '#ffedd5', color: '#9a3412' },
+    };
+    const style = map[value] || { bg: '#f3f4f6', color: '#374151' };
+    return (
+        <span className="badge rounded-pill px-2" style={{ background: style.bg, color: style.color, fontSize: '0.72rem', fontWeight: 600 }}>
+            {value}
+        </span>
+    );
+};
+
+/* ─── Report Detail View ───────────────────────────────────── */
+const ReportDetail = ({ report, month, onBack }) => {
+    const [search, setSearch] = useState('');
+    const [exported, setExported] = useState(null);
+
+    const handleExport = (type) => {
+        setExported(type);
+        setTimeout(() => setExported(null), 2500);
+    };
+
     return (
         <div className="container-fluid p-0">
-            <h5 className="fw-bold mb-3">Payroll Reports</h5>
-            <div className="table-responsive table-card">
-                <table className="table table-hover align-middle mb-0">
-                    <thead className="table-light">
-                        <tr>
-                            <th>Report Name</th>
-                            <th>Description</th>
-                            <th>Last Generated</th>
-                            <th className="text-end">Format</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Salary Register</td>
-                            <td>Monthly salary register with all components</td>
-                            <td>2 days ago</td>
-                            <td className="text-end">
-                                <button className="btn btn-sm btn-light text-success me-1"><FaFileExcel /></button>
-                                <button className="btn btn-sm btn-light text-danger"><FaFilePdf /></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PF Report</td>
-                            <td>EPF contribution report for filing</td>
-                            <td>1 week ago</td>
-                            <td className="text-end">
-                                <button className="btn btn-sm btn-light text-success me-1"><FaFileExcel /></button>
-                                <button className="btn btn-sm btn-light text-danger"><FaFilePdf /></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>ESI Report</td>
-                            <td>ESI contribution list</td>
-                            <td>1 week ago</td>
-                            <td className="text-end">
-                                <button className="btn btn-sm btn-light text-success me-1"><FaFileExcel /></button>
-                                <button className="btn btn-sm btn-light text-danger"><FaFilePdf /></button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Tax Deduction Report</td>
-                            <td>Income tax deductions summary</td>
-                            <td>Just now</td>
-                            <td className="text-end">
-                                <button className="btn btn-sm btn-light text-success me-1"><FaFileExcel /></button>
-                                <button className="btn btn-sm btn-light text-danger"><FaFilePdf /></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            {/* Breadcrumb */}
+            <div className="d-flex align-items-center gap-2 mb-4">
+                <button
+                    className="btn btn-sm btn-light rounded-3 px-3 d-flex align-items-center gap-1"
+                    onClick={onBack}
+                    style={{ fontSize: '0.82rem', color: '#555' }}
+                >
+                    <span>←</span> <span>Reports</span>
+                </button>
+                <span className="text-muted" style={{ fontSize: '0.8rem' }}>/</span>
+                <span className="fw-semibold" style={{ fontSize: '0.92rem' }}>{report.label}</span>
+            </div>
+
+            {/* Report Header Card */}
+            <div
+                className="card border-0 rounded-4 mb-4 p-4"
+                style={{ background: `linear-gradient(135deg, ${report.color}18 0%, ${report.color}08 100%)`, border: `1px solid ${report.border}` }}
+            >
+                <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div className="d-flex align-items-center gap-3">
+                        <div
+                            className="d-flex align-items-center justify-content-center rounded-3"
+                            style={{ width: 52, height: 52, background: report.bg, fontSize: '1.5rem', border: `1px solid ${report.border}` }}
+                        >
+                            {report.icon}
+                        </div>
+                        <div>
+                            <h5 className="fw-bold mb-1" style={{ color: '#111827' }}>{report.label}</h5>
+                            <p className="text-secondary small mb-0" style={{ maxWidth: 480 }}>{report.description}</p>
+                        </div>
+                    </div>
+                    <div className="d-flex align-items-center gap-2">
+                        {/* Month Picker */}
+                        <select className="form-select form-select-sm rounded-3" style={{ width: 150, fontSize: '0.82rem' }}>
+                            <option>February 2026</option>
+                            <option>January 2026</option>
+                            <option>December 2025</option>
+                            <option>November 2025</option>
+                        </select>
+                        {/* Export Buttons */}
+                        <button
+                            className="btn btn-sm rounded-3 fw-semibold d-flex align-items-center gap-1 px-3"
+                            style={{ background: '#16a34a', color: '#fff', fontSize: '0.8rem' }}
+                            onClick={() => handleExport('Excel')}
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                            Excel
+                        </button>
+                        <button
+                            className="btn btn-sm rounded-3 fw-semibold d-flex align-items-center gap-1 px-3"
+                            style={{ background: '#dc2626', color: '#fff', fontSize: '0.8rem' }}
+                            onClick={() => handleExport('PDF')}
+                        >
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                            PDF
+                        </button>
+                    </div>
+                </div>
+
+                {/* Export success toast */}
+                {exported && (
+                    <div
+                        className="mt-3 rounded-3 px-3 py-2 d-flex align-items-center gap-2"
+                        style={{ background: '#dcfce7', color: '#166534', fontSize: '0.8rem', width: 'fit-content' }}
+                    >
+                        <span>✓</span> {report.label} exported as {exported} successfully!
+                    </div>
+                )}
+            </div>
+
+            {/* Search + Table */}
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div className="d-flex align-items-center justify-content-between px-4 py-3 border-bottom" style={{ background: '#f8faff' }}>
+                    <span className="fw-semibold small text-secondary">Report Data — February 2026</span>
+                    <div className="input-group input-group-sm" style={{ width: 200 }}>
+                        <span className="input-group-text bg-white border-end-0">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                            </svg>
+                        </span>
+                        <input
+                            type="text"
+                            className="form-control border-start-0 ps-0"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+                </div>
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.81rem' }}>
+                        <thead>
+                            <tr style={{ background: '#f8faff', fontSize: '0.75rem', color: '#6b7280', fontWeight: 600 }}>
+                                {report.columns.map(col => (
+                                    <th key={col} className="border-0 py-3 px-4">{col}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {report.data
+                                .filter(row => JSON.stringify(row).toLowerCase().includes(search.toLowerCase()))
+                                .map((row, i) => (
+                                    <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                        {Object.values(row).map((val, j) => (
+                                            <td key={j} className="px-4 py-3">
+                                                {j === Object.values(row).length - 1 &&
+                                                    ['Remitted', 'Pending', 'NA', 'Paid', 'Partial'].includes(val)
+                                                    ? <StatusBadge value={val} />
+                                                    : <span style={{ color: j === 0 ? '#6b7280' : j === 1 ? '#111827' : '#374151', fontWeight: j === 1 ? 500 : 400 }}>
+                                                        {val}
+                                                    </span>
+                                                }
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="px-4 py-2 border-top bg-white">
+                    <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        Showing {report.data.length} records for February 2026
+                    </span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+/* ─── Main ReportsTab Component ───────────────────────────── */
+const ReportsTab = () => {
+    const [activeReport, setActiveReport] = useState(null);
+    const [selectedMonth, setSelectedMonth] = useState('February 2026');
+
+    const report = REPORTS.find(r => r.id === activeReport);
+
+    if (activeReport && report) {
+        return <ReportDetail report={report} month={selectedMonth} onBack={() => setActiveReport(null)} />;
+    }
+
+    return (
+        <div className="container-fluid p-0" style={{ maxWidth: 900 }}>
+            {/* Header */}
+            <div className="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                <div>
+                    <h5 className="fw-bold mb-0" style={{ color: '#111827' }}>Payroll Reports</h5>
+                    <p className="text-secondary small mb-0 mt-1">Generate and export payroll reports for compliance and accounting</p>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                    <select
+                        className="form-select form-select-sm rounded-3"
+                        style={{ width: 160, fontSize: '0.82rem' }}
+                        value={selectedMonth}
+                        onChange={e => setSelectedMonth(e.target.value)}
+                    >
+                        <option>February 2026</option>
+                        <option>January 2026</option>
+                        <option>December 2025</option>
+                        <option>November 2025</option>
+                    </select>
+                </div>
+            </div>
+
+            {/* Report Cards Grid */}
+            <div className="row g-3">
+                {REPORTS.map((rep) => (
+                    <div key={rep.id} className="col-md-6 col-12">
+                        <div
+                            className="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden"
+                            style={{ cursor: 'pointer', transition: 'all 0.22s ease', border: `1px solid #e5e7eb` }}
+                            onClick={() => setActiveReport(rep.id)}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.transform = 'translateY(-4px)';
+                                e.currentTarget.style.boxShadow = `0 12px 32px ${rep.color}22`;
+                                e.currentTarget.style.border = `1px solid ${rep.border}`;
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.transform = '';
+                                e.currentTarget.style.boxShadow = '';
+                                e.currentTarget.style.border = '1px solid #e5e7eb';
+                            }}
+                        >
+                            {/* Top Color Bar */}
+                            <div style={{ height: 4, background: rep.color, borderRadius: '16px 16px 0 0' }} />
+
+                            <div className="card-body p-4">
+                                {/* Icon */}
+                                <div
+                                    className="d-flex align-items-center justify-content-center rounded-3 mb-3"
+                                    style={{ width: 48, height: 48, background: rep.bg, fontSize: '1.4rem', border: `1px solid ${rep.border}` }}
+                                >
+                                    {rep.icon}
+                                </div>
+
+                                {/* Label */}
+                                <h6 className="fw-bold mb-1" style={{ color: '#111827', fontSize: '0.92rem' }}>
+                                    {rep.label}
+                                </h6>
+                                <p className="text-secondary mb-4" style={{ fontSize: '0.78rem', lineHeight: 1.55 }}>
+                                    {rep.description}
+                                </p>
+
+                                {/* Footer */}
+                                <div className="d-flex align-items-center justify-content-between">
+                                    <div className="d-flex align-items-center gap-1" style={{ color: rep.color, fontSize: '0.78rem', fontWeight: 600 }}>
+                                        <span>View Report</span>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                            <polyline points="12 5 19 12 12 19" />
+                                        </svg>
+                                    </div>
+                                    <div className="d-flex gap-1">
+                                        <button
+                                            className="btn btn-sm rounded-2 px-2 py-1"
+                                            style={{ background: '#dcfce7', color: '#166534', fontSize: '0.7rem', fontWeight: 600 }}
+                                            onClick={e => { e.stopPropagation(); }}
+                                            title="Export Excel"
+                                        >
+                                            XLS
+                                        </button>
+                                        <button
+                                            className="btn btn-sm rounded-2 px-2 py-1"
+                                            style={{ background: '#fee2e2', color: '#991b1b', fontSize: '0.7rem', fontWeight: 600 }}
+                                            onClick={e => { e.stopPropagation(); }}
+                                            title="Export PDF"
+                                        >
+                                            PDF
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Quick Summary Table (all reports in one view) */}
+            <div className="card border-0 shadow-sm rounded-4 mt-4">
+                <div className="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h6 className="fw-bold mb-0" style={{ color: '#111827' }}>Quick Access — All Reports</h6>
+                    <p className="text-secondary small mt-1 mb-0">Click any report to open it in detail view</p>
+                </div>
+                <div className="card-body px-4 pb-3 pt-3">
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.82rem' }}>
+                            <thead>
+                                <tr style={{ background: '#f8faff', fontSize: '0.75rem', color: '#6b7280', fontWeight: 600 }}>
+                                    <th className="border-0 py-2 px-3">Report Name</th>
+                                    <th className="border-0 py-2 px-3">Description</th>
+                                    <th className="border-0 py-2 px-3">Period</th>
+                                    <th className="border-0 py-2 px-3 text-end">Export</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {REPORTS.map((rep) => (
+                                    <tr
+                                        key={rep.id}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => setActiveReport(rep.id)}
+                                    >
+                                        <td className="px-3 py-3">
+                                            <div className="d-flex align-items-center gap-2">
+                                                <span style={{ fontSize: '1rem' }}>{rep.icon}</span>
+                                                <span className="fw-semibold" style={{ color: rep.color }}>{rep.label}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 text-secondary" style={{ maxWidth: 280 }}>{rep.description}</td>
+                                        <td className="px-3">
+                                            <span className="badge rounded-pill bg-light text-secondary border" style={{ fontSize: '0.72rem' }}>
+                                                {selectedMonth}
+                                            </span>
+                                        </td>
+                                        <td className="px-3 text-end">
+                                            <div className="d-flex gap-1 justify-content-end">
+                                                <button
+                                                    className="btn btn-sm rounded-2 px-2 py-1"
+                                                    style={{ background: '#dcfce7', color: '#166534', fontSize: '0.72rem', fontWeight: 600 }}
+                                                    onClick={e => e.stopPropagation()}
+                                                >
+                                                    XLS
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm rounded-2 px-2 py-1"
+                                                    style={{ background: '#fee2e2', color: '#991b1b', fontSize: '0.72rem', fontWeight: 600 }}
+                                                    onClick={e => e.stopPropagation()}
+                                                >
+                                                    PDF
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );

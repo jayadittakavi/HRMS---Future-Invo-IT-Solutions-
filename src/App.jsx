@@ -72,7 +72,6 @@ import Recruitment from "./pages/modules/hr/recruitment/Recruitment";
 import Training from "./pages/modules/hr/training/Training";
 import PerformanceReviews from "./pages/modules/hr/performance/PerformanceReviews";
 import Documents from "./pages/modules/hr/documents/Documents";
-import HRReports from "./pages/modules/hr/reports/HRReports";
 
 import Onboarding from "./pages/modules/hr/onboarding/Onboarding";
 
@@ -156,8 +155,6 @@ export default function App() {
               <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
               <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Loans /></ProtectedRoute>} />
               <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><TravelExpenses /></ProtectedRoute>} />
-              <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
-
               <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
               <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
 
@@ -179,7 +176,6 @@ export default function App() {
               <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><Training /></ProtectedRoute>} />
               <Route path="/performance-reviews" element={<ProtectedRoute requiredRoles={['hr']}><PerformanceReviews /></ProtectedRoute>} />
               <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr']}><Documents /></ProtectedRoute>} />
-              <Route path="/hr-reports" element={<ProtectedRoute requiredRoles={['hr']}><HRReports /></ProtectedRoute>} />
               <Route path="/leave-requests" element={<ProtectedRoute requiredRoles={['hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
               <Route path="/onboarding" element={<ProtectedRoute requiredRoles={['superadmin', 'hr']}><Onboarding /></ProtectedRoute>} />
 

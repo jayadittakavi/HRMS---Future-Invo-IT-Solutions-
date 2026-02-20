@@ -1,423 +1,209 @@
 import React, { useState } from 'react';
-import { FaCode, FaPlus, FaEdit, FaTrash, FaCopy, FaCheck } from 'react-icons/fa';
+
+/* ── Variable Data ─────────────────────────────────────── */
+const INITIAL_VARS = [
+    { id: 1, name: '{{employee_name}}', description: 'Full name of the employee', example: 'Alice Johnson', category: 'Employee', usedIn: ['Offer Letter', 'Appointment Letter', 'Relieving Letter'] },
+    { id: 2, name: '{{employee_id}}', description: 'Unique employee identifier', example: 'EMP-0042', category: 'Employee', usedIn: ['Appointment Letter'] },
+    { id: 3, name: '{{designation}}', description: 'Employee job title / designation', example: 'Frontend Developer', category: 'Employee', usedIn: ['Offer Letter', 'Appointment Letter'] },
+    { id: 4, name: '{{department}}', description: 'Department the employee belongs to', example: 'Engineering', category: 'Employee', usedIn: ['Appointment Letter'] },
+    { id: 5, name: '{{joining_date}}', description: 'Date employee officially joins', example: '01 March 2026', category: 'Date', usedIn: ['Offer Letter', 'Appointment Letter'] },
+    { id: 6, name: '{{last_working_day}}', description: 'Last date of employment', example: '28 February 2026', category: 'Date', usedIn: ['Relieving Letter'] },
+    { id: 7, name: '{{ctc_annual}}', description: 'Annual Cost to Company (salary)', example: '₹ 8,40,000', category: 'Finance', usedIn: ['Offer Letter'] },
+    { id: 8, name: '{{basic_salary}}', description: 'Monthly basic salary component', example: '₹ 35,000', category: 'Finance', usedIn: ['Appointment Letter', 'Increment Letter'] },
+    { id: 9, name: '{{company_name}}', description: 'Name of the organization', example: 'Future Invo IT Solutions', category: 'Company', usedIn: ['Offer Letter', 'Appointment Letter', 'Relieving Letter'] },
+    { id: 10, name: '{{signatory_name}}', description: 'Name of the authorizing signatory', example: 'Rahul Gupta', category: 'Company', usedIn: ['Offer Letter', 'Appointment Letter'] },
+    { id: 11, name: '{{notice_period}}', description: 'Notice period required per policy', example: '30 days', category: 'Policy', usedIn: ['Offer Letter', 'Relieving Letter'] },
+    { id: 12, name: '{{increment_percent}}', description: 'Percentage of salary increment', example: '15%', category: 'Finance', usedIn: ['Increment Letter'] },
+];
+
+const CAT_STYLE = {
+    Employee: { bg: '#eff6ff', color: '#1d4ed8', icon: '👤' },
+    Date: { bg: '#dcfce7', color: '#15803d', icon: '📅' },
+    Finance: { bg: '#fef3c7', color: '#b45309', icon: '💰' },
+    Company: { bg: '#f5f3ff', color: '#6d28d9', icon: '🏢' },
+    Policy: { bg: '#fff1f2', color: '#be123c', icon: '📋' },
+};
+
+const EMPTY = { name: '', description: '', example: '', category: 'Employee' };
 
 const VariableUI = () => {
-    const [variables, setVariables] = useState([
-        {
-            id: 1,
-            name: 'employee_name',
-            displayName: 'Employee Name',
-            dataType: 'String',
-            defaultValue: 'John Doe',
-            description: 'Full name of the employee',
-            category: 'Employee Info',
-            usageCount: 156
-        },
-        {
-            id: 2,
-            name: 'employee_id',
-            displayName: 'Employee ID',
-            dataType: 'String',
-            defaultValue: 'EMP001',
-            description: 'Unique employee identifier',
-            category: 'Employee Info',
-            usageCount: 142
-        },
-        {
-            id: 3,
-            name: 'joining_date',
-            displayName: 'Joining Date',
-            dataType: 'Date',
-            defaultValue: '2026-01-01',
-            description: 'Employee joining date',
-            category: 'Employment',
-            usageCount: 98
-        },
-        {
-            id: 4,
-            name: 'designation',
-            displayName: 'Designation',
-            dataType: 'String',
-            defaultValue: 'Software Engineer',
-            description: 'Job title or designation',
-            category: 'Employment',
-            usageCount: 134
-        },
-        {
-            id: 5,
-            name: 'salary',
-            displayName: 'Salary',
-            dataType: 'Number',
-            defaultValue: '50000',
-            description: 'Monthly salary amount',
-            category: 'Compensation',
-            usageCount: 87
-        },
-        {
-            id: 6,
-            name: 'company_name',
-            displayName: 'Company Name',
-            dataType: 'String',
-            defaultValue: 'Future Invo IT Solutions',
-            description: 'Organization name',
-            category: 'Company Info',
-            usageCount: 203
-        }
-    ]);
-
+    const [vars, setVars] = useState(INITIAL_VARS);
     const [showModal, setShowModal] = useState(false);
-    const [editingVariable, setEditingVariable] = useState(null);
-    const [copiedId, setCopiedId] = useState(null);
-    const [formData, setFormData] = useState({
-        name: '',
-        displayName: '',
-        dataType: 'String',
-        defaultValue: '',
-        description: '',
-        category: 'Employee Info'
-    });
+    const [editingId, setEditingId] = useState(null);
+    const [form, setForm] = useState(EMPTY);
+    const [search, setSearch] = useState('');
+    const [filterCat, setFilterCat] = useState('All');
+    const [copied, setCopied] = useState(null);
 
-    const handleAdd = () => {
-        setFormData({
-            name: '',
-            displayName: '',
-            dataType: 'String',
-            defaultValue: '',
-            description: '',
-            category: 'Employee Info'
-        });
-        setEditingVariable(null);
-        setShowModal(true);
-    };
-
-    const handleEdit = (variable) => {
-        setFormData(variable);
-        setEditingVariable(variable.id);
-        setShowModal(true);
-    };
-
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this variable?')) {
-            setVariables(variables.filter(v => v.id !== id));
-        }
-    };
-
-    const handleCopy = (variableName) => {
-        navigator.clipboard.writeText(`{{${variableName}}}`);
-        setCopiedId(variableName);
-        setTimeout(() => setCopiedId(null), 2000);
-    };
-
+    const openAdd = () => { setForm(EMPTY); setEditingId(null); setShowModal(true); };
+    const openEdit = (v) => { setForm(v); setEditingId(v.id); setShowModal(true); };
+    const handleDelete = (id) => { if (window.confirm('Delete this variable?')) setVars(vs => vs.filter(v => v.id !== id)); };
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (editingVariable) {
-            setVariables(variables.map(v => v.id === editingVariable ? { ...formData, id: editingVariable } : v));
+        if (editingId) {
+            setVars(vs => vs.map(v => v.id === editingId ? { ...form, id: editingId, usedIn: v.usedIn } : v));
         } else {
-            setVariables([...variables, {
-                ...formData,
-                id: Date.now(),
-                usageCount: 0
-            }]);
+            setVars(vs => [...vs, { ...form, id: Date.now(), usedIn: [] }]);
         }
         setShowModal(false);
     };
+    const handleCopy = (name) => {
+        navigator.clipboard.writeText(name).catch(() => { });
+        setCopied(name);
+        setTimeout(() => setCopied(null), 1500);
+    };
 
-    const categories = [...new Set(variables.map(v => v.category))];
+    const filtered = vars.filter(v =>
+        (filterCat === 'All' || v.category === filterCat) &&
+        (v.name.toLowerCase().includes(search.toLowerCase()) || v.description.toLowerCase().includes(search.toLowerCase()))
+    );
+
+    const categories = [...new Set(vars.map(v => v.category))];
 
     return (
-        <div className="container-fluid p-0">
-            {/* Header */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            {/* How Variables Work Banner */}
+            <div className="rounded-4 p-4 mb-4 d-flex align-items-start gap-3" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)', color: '#fff' }}>
+                <div style={{ fontSize: '1.8rem', lineHeight: 1 }}>🧩</div>
                 <div>
-                    <h5 className="fw-bold text-dark mb-1">Template Variables</h5>
-                    <p className="text-muted small mb-0">Manage dynamic variables for letter templates</p>
-                </div>
-                <button className="btn btn-success rounded-pill px-4 shadow-sm" onClick={handleAdd}>
-                    <FaPlus className="me-2" />
-                    Add Variable
-                </button>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="row g-4 mb-4">
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                            <div className="d-flex align-items-center">
-                                <div className="icon-box bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
-                                    <FaCode size={24} />
-                                </div>
-                                <div>
-                                    <h6 className="text-muted small mb-0">Total Variables</h6>
-                                    <h3 className="fw-bold mb-0">{variables.length}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                            <div className="d-flex align-items-center">
-                                <div className="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
-                                    <FaCode size={24} />
-                                </div>
-                                <div>
-                                    <h6 className="text-muted small mb-0">Categories</h6>
-                                    <h3 className="fw-bold mb-0">{categories.length}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                            <div className="d-flex align-items-center">
-                                <div className="icon-box bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
-                                    <FaCopy size={24} />
-                                </div>
-                                <div>
-                                    <h6 className="text-muted small mb-0">Total Usage</h6>
-                                    <h3 className="fw-bold mb-0">{variables.reduce((sum, v) => sum + v.usageCount, 0)}</h3>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm">
-                        <div className="card-body">
-                            <div className="d-flex align-items-center">
-                                <div className="icon-box bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
-                                    <FaCode size={24} />
-                                </div>
-                                <div>
-                                    <h6 className="text-muted small mb-0">Most Used</h6>
-                                    <h3 className="fw-bold mb-0" style={{ fontSize: '1rem' }}>
-                                        {variables.reduce((max, v) => v.usageCount > max.usageCount ? v : max, variables[0])?.displayName}
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 4 }}>How Dynamic Variables Work</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.85, lineHeight: 1.6 }}>
+                        Variables are placeholders inside letter templates that are automatically replaced with real employee data when a letter is generated.
+                        For example, <code style={{ background: 'rgba(255,255,255,0.15)', padding: '1px 6px', borderRadius: 4 }}>{'{{employee_name}}'}</code> becomes <strong>Alice Johnson</strong> in the final letter.
                     </div>
                 </div>
             </div>
 
-            {/* Variables Table */}
-            <div className="card border-0 shadow-sm">
-                <div className="card-body p-0">
-                    <div className="table-responsive">
-                        <table className="table table-hover align-middle mb-0">
-                            <thead className="bg-light">
-                                <tr>
-                                    <th className="border-0 px-4 py-3">Variable Name</th>
-                                    <th className="border-0 py-3">Display Name</th>
-                                    <th className="border-0 py-3">Data Type</th>
-                                    <th className="border-0 py-3">Default Value</th>
-                                    <th className="border-0 py-3">Category</th>
-                                    <th className="border-0 py-3">Usage</th>
-                                    <th className="border-0 py-3">Description</th>
-                                    <th className="border-0 py-3">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {variables.map(variable => (
-                                    <tr key={variable.id}>
-                                        <td className="px-4">
+            {/* Stats */}
+            <div className="row g-3 mb-4">
+                {categories.map((cat, i) => {
+                    const s = CAT_STYLE[cat] || { bg: '#f3f4f6', color: '#374151', icon: '📌' };
+                    return (
+                        <div key={i} className="col">
+                            <div className="card border-0 shadow-sm rounded-4 p-3 text-center" style={{ cursor: 'pointer', minWidth: 100 }} onClick={() => setFilterCat(filterCat === cat ? 'All' : cat)}>
+                                <div style={{ fontSize: '1.2rem' }}>{s.icon}</div>
+                                <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 2 }}>{cat}</div>
+                                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: s.color }}>{vars.filter(v => v.category === cat).length}</div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Table Card */}
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div className="px-4 py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2" style={{ background: '#f8faff' }}>
+                    <div className="d-flex gap-2 align-items-center flex-wrap">
+                        <div style={{ position: 'relative' }}>
+                            <input style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '5px 12px 5px 30px', fontSize: '0.8rem', outline: 'none', width: 200 }} placeholder="Search variables…" value={search} onChange={e => setSearch(e.target.value)} />
+                            <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', fontSize: '0.8rem', color: '#9ca3af' }}>🔍</span>
+                        </div>
+                        <select style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '5px 10px', fontSize: '0.8rem', color: '#374151' }} value={filterCat} onChange={e => setFilterCat(e.target.value)}>
+                            <option value="All">All Categories</option>
+                            {categories.map(c => <option key={c}>{c}</option>)}
+                        </select>
+                    </div>
+                    <button onClick={openAdd} style={{ background: '#7c3aed', color: '#fff', borderRadius: 10, border: 'none', padding: '7px 18px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
+                        + Add Variable
+                    </button>
+                </div>
+
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.81rem' }}>
+                        <thead>
+                            <tr style={{ background: '#f8faff', color: '#6b7280', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                <th className="border-0 py-3 px-4">Variable Name</th>
+                                <th className="border-0 py-3">Category</th>
+                                <th className="border-0 py-3">Description</th>
+                                <th className="border-0 py-3">Example Value</th>
+                                <th className="border-0 py-3">Used In Templates</th>
+                                <th className="border-0 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.length === 0 ? (
+                                <tr><td colSpan={6} className="text-center py-5 text-muted" style={{ fontSize: '0.85rem' }}>No variables found</td></tr>
+                            ) : filtered.map(v => {
+                                const cs = CAT_STYLE[v.category] || { bg: '#f3f4f6', color: '#374151', icon: '📌' };
+                                return (
+                                    <tr key={v.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                        <td className="px-4 py-3">
                                             <div className="d-flex align-items-center gap-2">
-                                                <code className="bg-light px-2 py-1 rounded text-success fw-bold" style={{ fontSize: '0.85rem' }}>
-                                                    {`{{${variable.name}}}`}
-                                                </code>
+                                                <code style={{ background: '#f0f9ff', color: '#0369a1', borderRadius: 6, padding: '3px 8px', fontSize: '0.78rem', fontFamily: 'monospace', border: '1px solid #e0f2fe', whiteSpace: 'nowrap' }}>{v.name}</code>
                                                 <button
-                                                    className="btn btn-sm btn-outline-secondary rounded-circle p-1"
-                                                    style={{ width: '24px', height: '24px' }}
-                                                    onClick={() => handleCopy(variable.name)}
-                                                    title="Copy variable"
-                                                >
-                                                    {copiedId === variable.name ? (
-                                                        <FaCheck size={10} className="text-success" />
-                                                    ) : (
-                                                        <FaCopy size={10} />
-                                                    )}
-                                                </button>
+                                                    onClick={() => handleCopy(v.name)}
+                                                    title="Copy to clipboard"
+                                                    style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: '0.75rem', color: copied === v.name ? '#16a34a' : '#9ca3af', padding: 0 }}
+                                                >{copied === v.name ? '✅' : '📋'}</button>
                                             </div>
                                         </td>
-                                        <td className="fw-bold text-dark">{variable.displayName}</td>
-                                        <td>
-                                            <span className={`badge ${variable.dataType === 'String' ? 'bg-primary' :
-                                                    variable.dataType === 'Number' ? 'bg-success' :
-                                                        variable.dataType === 'Date' ? 'bg-info' :
-                                                            'bg-secondary'
-                                                } bg-opacity-10 text-${variable.dataType === 'String' ? 'primary' :
-                                                    variable.dataType === 'Number' ? 'success' :
-                                                        variable.dataType === 'Date' ? 'info' :
-                                                            'secondary'
-                                                }`}>
-                                                {variable.dataType}
-                                            </span>
+                                        <td className="py-3">
+                                            <span style={{ background: cs.bg, color: cs.color, borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700 }}>{cs.icon} {v.category}</span>
                                         </td>
-                                        <td className="text-secondary small">
-                                            <code className="bg-light px-2 py-1 rounded">{variable.defaultValue}</code>
+                                        <td className="py-3" style={{ color: '#374151', maxWidth: 200 }}>{v.description}</td>
+                                        <td className="py-3">
+                                            <span style={{ background: '#f8faff', color: '#374151', borderRadius: 6, padding: '2px 8px', fontSize: '0.76rem', fontStyle: 'italic', border: '1px solid #e5e7eb' }}>{v.example}</span>
                                         </td>
-                                        <td>
-                                            <span className="badge bg-warning bg-opacity-10 text-warning">
-                                                {variable.category}
-                                            </span>
+                                        <td className="py-3">
+                                            <div className="d-flex flex-wrap gap-1">
+                                                {v.usedIn.length === 0 ? (
+                                                    <span style={{ color: '#9ca3af', fontSize: '0.72rem' }}>Not used yet</span>
+                                                ) : v.usedIn.map((t, i) => (
+                                                    <span key={i} style={{ background: '#eff6ff', color: '#2563eb', borderRadius: 6, padding: '1px 6px', fontSize: '0.68rem', fontWeight: 600 }}>{t}</span>
+                                                ))}
+                                            </div>
                                         </td>
-                                        <td>
-                                            <span className="badge bg-info bg-opacity-10 text-info">
-                                                {variable.usageCount} times
-                                            </span>
-                                        </td>
-                                        <td className="text-secondary small" style={{ maxWidth: '200px' }}>
-                                            {variable.description}
-                                        </td>
-                                        <td>
+                                        <td className="py-3">
                                             <div className="d-flex gap-2">
-                                                <button
-                                                    className="btn btn-sm btn-outline-primary rounded-circle"
-                                                    onClick={() => handleEdit(variable)}
-                                                    title="Edit"
-                                                >
-                                                    <FaEdit size={12} />
-                                                </button>
-                                                <button
-                                                    className="btn btn-sm btn-outline-danger rounded-circle"
-                                                    onClick={() => handleDelete(variable.id)}
-                                                    title="Delete"
-                                                >
-                                                    <FaTrash size={12} />
-                                                </button>
+                                                <button title="Edit" onClick={() => openEdit(v)} style={{ width: 28, height: 28, borderRadius: 7, border: 'none', background: '#f5f3ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7c3aed', cursor: 'pointer', fontSize: '0.75rem' }}>✏️</button>
+                                                <button title="Delete" onClick={() => handleDelete(v.id)} style={{ width: 28, height: 28, borderRadius: 7, border: 'none', background: '#fff1f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#dc2626', cursor: 'pointer', fontSize: '0.75rem' }}>🗑</button>
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            {/* Variable Usage Guide */}
-            <div className="card border-0 shadow-sm mt-4">
-                <div className="card-body">
-                    <h6 className="fw-bold mb-3">How to Use Variables</h6>
-                    <div className="bg-light p-3 rounded">
-                        <p className="small mb-2">To use a variable in your template, simply copy the variable code and paste it in your template content:</p>
-                        <code className="d-block bg-white p-2 rounded mb-2">
-                            Dear {`{{employee_name}}`}, <br />
-                            Your Employee ID is {`{{employee_id}}`}. <br />
-                            You will be joining us on {`{{joining_date}}`} as {`{{designation}}`}.
-                        </code>
-                        <p className="small text-muted mb-0">Variables will be automatically replaced with actual values when generating letters.</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Add/Edit Modal */}
+            {/* Modal */}
             {showModal && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-lg">
-                        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: '15px' }}>
-                            <div className="modal-header border-0 pb-0">
-                                <h5 className="modal-title fw-bold">
-                                    {editingVariable ? 'Edit Variable' : 'Add New Variable'}
-                                </h5>
-                                <button
-                                    type="button"
-                                    className="btn-close"
-                                    onClick={() => setShowModal(false)}
-                                ></button>
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.45)' }}>
+                    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 500 }}>
+                        <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 20 }}>
+                            <div style={{ height: 4, background: '#7c3aed', borderRadius: '20px 20px 0 0' }} />
+                            <div className="modal-header border-0 px-4 pt-4 pb-2">
+                                <div>
+                                    <h5 className="fw-bold mb-0" style={{ fontSize: '1rem' }}>{editingId ? '✏️ Edit Variable' : '➕ Add New Variable'}</h5>
+                                    <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>Define a reusable placeholder for letter templates</div>
+                                </div>
+                                <button className="btn-close" onClick={() => setShowModal(false)} />
                             </div>
                             <form onSubmit={handleSubmit}>
-                                <div className="modal-body">
-                                    <div className="row g-3">
-                                        <div className="col-md-6">
-                                            <label className="form-label small text-muted fw-bold">Variable Name (Code)</label>
-                                            <input
-                                                type="text"
-                                                className="form-control font-monospace"
-                                                value={formData.name}
-                                                onChange={e => setFormData({ ...formData, name: e.target.value.toLowerCase().replace(/\s+/g, '_') })}
-                                                placeholder="e.g., employee_name"
-                                                required
-                                            />
-                                            <small className="text-muted">Use lowercase with underscores</small>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label small text-muted fw-bold">Display Name</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={formData.displayName}
-                                                onChange={e => setFormData({ ...formData, displayName: e.target.value })}
-                                                placeholder="e.g., Employee Name"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label small text-muted fw-bold">Data Type</label>
-                                            <select
-                                                className="form-select"
-                                                value={formData.dataType}
-                                                onChange={e => setFormData({ ...formData, dataType: e.target.value })}
-                                            >
-                                                <option value="String">String</option>
-                                                <option value="Number">Number</option>
-                                                <option value="Date">Date</option>
-                                                <option value="Boolean">Boolean</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label small text-muted fw-bold">Category</label>
-                                            <select
-                                                className="form-select"
-                                                value={formData.category}
-                                                onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                            >
-                                                <option value="Employee Info">Employee Info</option>
-                                                <option value="Employment">Employment</option>
-                                                <option value="Compensation">Compensation</option>
-                                                <option value="Company Info">Company Info</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-12">
-                                            <label className="form-label small text-muted fw-bold">Default Value</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                value={formData.defaultValue}
-                                                onChange={e => setFormData({ ...formData, defaultValue: e.target.value })}
-                                                placeholder="e.g., John Doe"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="col-12">
-                                            <label className="form-label small text-muted fw-bold">Description</label>
-                                            <textarea
-                                                className="form-control"
-                                                rows="3"
-                                                value={formData.description}
-                                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                                placeholder="Brief description of this variable"
-                                                required
-                                            ></textarea>
-                                        </div>
+                                <div className="modal-body px-4 pt-2 pb-2">
+                                    <div className="mb-3">
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Variable Name * <span style={{ color: '#9ca3af', fontWeight: 400 }}>(e.g. {'{{employee_name}}'})</span></label>
+                                        <input required className="form-control form-control-sm rounded-3" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="{{variable_name}}" style={{ fontFamily: 'monospace' }} />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Category</label>
+                                        <select className="form-select form-select-sm rounded-3" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                                            <option>Employee</option><option>Date</option><option>Finance</option><option>Company</option><option>Policy</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Description *</label>
+                                        <input required className="form-control form-control-sm rounded-3" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What does this variable represent?" />
+                                    </div>
+                                    <div className="mb-2">
+                                        <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Example Value</label>
+                                        <input className="form-control form-control-sm rounded-3" value={form.example} onChange={e => setForm({ ...form, example: e.target.value })} placeholder="e.g. Alice Johnson" />
                                     </div>
                                 </div>
-                                <div className="modal-footer border-0">
-                                    <button
-                                        type="button"
-                                        className="btn btn-light rounded-pill px-4"
-                                        onClick={() => setShowModal(false)}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button type="submit" className="btn btn-success rounded-pill px-4">
-                                        {editingVariable ? 'Update Variable' : 'Add Variable'}
-                                    </button>
+                                <div className="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+                                    <button type="button" onClick={() => setShowModal(false)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#f1f5f9', border: 'none', color: '#374151', fontWeight: 600 }}>Cancel</button>
+                                    <button type="submit" style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#7c3aed', border: 'none', color: '#fff', fontWeight: 700 }}>{editingId ? 'Update' : 'Add Variable'}</button>
                                 </div>
                             </form>
                         </div>
