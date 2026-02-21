@@ -9,27 +9,42 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
     const maxValue = Math.max(...data.map(d => d.value || 0)) || 100;
 
     return (
-        <div style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '15px', padding: '20px 10px' }}>
+        <div style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', padding: '30px 5px 10px' }}>
             {data.map((item, index) => (
-                <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end' }}>
+                <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
 
-                    {/* Tooltip-like value on hover could be added here, for now static value on top if space permits or simple bars */}
+                    {/* Top Label (Value or Percentage) */}
+                    <div style={{
+                        position: 'absolute',
+                        bottom: `${(item.value / maxValue) * 100 + 5}%`,
+                        fontSize: '0.65rem',
+                        fontWeight: '800',
+                        color: item.color || '#3b82f6',
+                        whiteSpace: 'nowrap'
+                    }}>
+                        {item.topLabel || item.value}
+                    </div>
+
                     <div
                         className="chart-bar-visual"
                         style={{
-                            width: '40%',
-                            minWidth: '12px',
-                            maxWidth: '50px',
+                            width: '45%',
+                            minWidth: '10px',
+                            maxWidth: '40px',
                             height: `${(item.value / maxValue) * 100}%`,
                             background: item.color ? `linear-gradient(180deg, ${item.color} 0%, ${item.color}90 100%)` : 'linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)',
-                            borderRadius: '50px', // Fully rounded bars for modern look
+                            borderRadius: '12px 12px 4px 4px',
                             transition: 'height 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                             position: 'relative',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                         }}
                         title={`${item.label}: ${item.value}`}
                     ></div>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '12px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '10px', gap: '2px' }}>
+                        <span style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', textAlign: 'center' }}>{item.label}</span>
+                        {item.subLabel && <span style={{ fontSize: '0.55rem', color: '#94a3b8', fontWeight: '600' }}>{item.subLabel}</span>}
+                    </div>
                 </div>
             ))}
         </div>

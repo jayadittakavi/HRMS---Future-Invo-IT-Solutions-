@@ -123,7 +123,7 @@ const AddDevice = () => {
                     <div className="card border-0 shadow-sm">
                         <div className="card-body">
                             <div className="d-flex align-items-center">
-                                <div className="icon-box bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                                <div className="text-primary me-3">
                                     <FaDesktop size={24} />
                                 </div>
                                 <div>
@@ -204,7 +204,7 @@ const AddDevice = () => {
                                     <tr key={device.id}>
                                         <td className="px-4">
                                             <div className="d-flex align-items-center">
-                                                <div className="icon-box bg-primary bg-opacity-10 text-primary rounded p-2 me-2">
+                                                <div className="text-primary me-3">
                                                     <FaDesktop size={16} />
                                                 </div>
                                                 <span className="fw-bold text-dark">{device.deviceName}</span>

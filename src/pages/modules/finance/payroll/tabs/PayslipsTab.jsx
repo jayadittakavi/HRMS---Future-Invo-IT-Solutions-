@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEye, FaTrash, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes } from 'react-icons/fa';
 
-const PayslipsTab = ({ personal = false }) => {
+const PayslipsTab = ({ personal = false, onTabChange }) => {
     // Mock Data
     const [payrolls, setPayrolls] = useState([
         { id: 1, employeeId: 'EMP004', employee: 'Rahul Sharma', designation: 'Senior Developer', department: 'Engineering', period: 'June 2025', payDate: '2025-07-02', basic: 45000, hra: 18000, transport: 5000, gross: 78000, deductions: 6500, net: 71500, status: 'Paid', leaves: 3, lop: 0 },
@@ -41,6 +41,17 @@ const PayslipsTab = ({ personal = false }) => {
         }
     };
 
+    const handleEdit = (slip) => {
+        setFormData({
+            ...formData,
+            employee: slip.employee,
+            basic: slip.basic,
+            hra: slip.hra,
+            transport: slip.transport,
+        });
+        setShowAddModal(true);
+    };
+
     const handleCalculate = () => {
         // Mock Calculation Logic used in the form
         const earnings = Number(formData.basic) + Number(formData.hra) + Number(formData.transport) + Number(formData.communication);
@@ -48,8 +59,13 @@ const PayslipsTab = ({ personal = false }) => {
         alert(`Estimated Net Salary: ₹${earnings - deductions}`);
     };
 
+    const handleGenerate = () => {
+        alert('Payslip generated and saved successfully!');
+        setShowAddModal(false);
+    };
+
     return (
-        <>
+        <div className="animate__animated animate__fadeIn">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h5 className="fw-bold text-dark mb-1">{personal ? 'My Payslips' : 'Payslip Management'}</h5>
@@ -58,32 +74,32 @@ const PayslipsTab = ({ personal = false }) => {
                     </p>
                 </div>
                 {!personal && (
-                    <button className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2" onClick={() => setShowAddModal(true)}>
+                    <button className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2 shadow-sm" onClick={() => setShowAddModal(true)}>
                         <FaPlus size={12} /> Add Payslip
                     </button>
                 )}
             </div>
 
-            <div className="table-card">
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div className="table-responsive">
-                    <table className="table custom-table align-middle">
+                    <table className="table custom-table align-middle mb-0">
                         <thead className="bg-light">
-                            <tr>
-                                {!personal && <th>Employee</th>}
+                            <tr style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                {!personal && <th className="px-4">Employee</th>}
                                 <th>Pay Period</th>
                                 <th>Total Earnings</th>
                                 <th>Total Deductions</th>
                                 <th>Net Salary</th>
                                 <th>Pay Date</th>
                                 <th>Status</th>
-                                <th className="text-end">Actions</th>
+                                <th className="text-end px-4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {payrolls.map((slip) => (
-                                <tr key={slip.id}>
+                                <tr key={slip.id} onClick={() => handlePrint(slip)} style={{ cursor: 'pointer' }}>
                                     {!personal && (
-                                        <td>
+                                        <td className="px-4">
                                             <div className="d-flex flex-column">
                                                 <span className="fw-bold text-dark">{slip.employee}</span>
                                                 <span className="text-muted small">{slip.employeeId}</span>
@@ -91,31 +107,31 @@ const PayslipsTab = ({ personal = false }) => {
                                         </td>
                                     )}
                                     <td><span className="badge bg-light text-dark border">{slip.period}</span></td>
-                                    <td className="text-success">₹{slip.gross.toLocaleString()}</td>
-                                    <td className="text-danger">₹{slip.deductions.toLocaleString()}</td>
+                                    <td className="text-success fw-semibold">₹{slip.gross.toLocaleString()}</td>
+                                    <td className="text-danger fw-semibold">₹{slip.deductions.toLocaleString()}</td>
                                     <td><span className="fw-bold text-primary">₹{slip.net.toLocaleString()}</span></td>
-                                    <td>{slip.payDate}</td>
+                                    <td className="text-secondary">{slip.payDate}</td>
                                     <td>
-                                        <span className={`badge ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
+                                        <span className={`badge rounded-pill ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
                                             {slip.status}
                                         </span>
                                     </td>
-                                    <td className="text-end">
-                                        <button className="btn btn-sm btn-light text-primary me-1" title="Print/View" onClick={() => handlePrint(slip)}>
+                                    <td className="text-end px-4">
+                                        <button className="btn btn-sm btn-light text-primary me-1 rounded-circle p-2" title="Print/View" onClick={(e) => { e.stopPropagation(); handlePrint(slip); }}>
                                             <FaPrint />
                                         </button>
                                         {!personal && (
                                             <>
-                                                <button className="btn btn-sm btn-light text-secondary me-1" title="Edit">
+                                                <button className="btn btn-sm btn-light text-secondary me-1 rounded-circle p-2" title="Edit" onClick={(e) => { e.stopPropagation(); handleEdit(slip); }}>
                                                     <FaEdit />
                                                 </button>
-                                                <button className="btn btn-sm btn-light text-danger" title="Delete" onClick={() => handleDelete(slip.id)}>
+                                                <button className="btn btn-sm btn-light text-danger rounded-circle p-2" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(slip.id); }}>
                                                     <FaTrash />
                                                 </button>
                                             </>
                                         )}
                                         {personal && (
-                                            <button className="btn btn-sm btn-light text-dark" title="Download PDF" onClick={() => handlePrint(slip)}>
+                                            <button className="btn btn-sm btn-light text-dark rounded-circle p-2" title="Download PDF" onClick={(e) => { e.stopPropagation(); handlePrint(slip); }}>
                                                 <FaFilePdf />
                                             </button>
                                         )}
@@ -126,6 +142,11 @@ const PayslipsTab = ({ personal = false }) => {
                     </table>
                 </div>
             </div>
+            <style>{`
+                .custom-table tbody tr:hover {
+                    background-color: #f8faff !important;
+                }
+            `}</style>
 
             {/* Print/View Modal */}
             {showPrintModal && selectedSlip && (
@@ -329,13 +350,13 @@ const PayslipsTab = ({ personal = false }) => {
                             </div>
                             <div className="modal-footer">
                                 <button className="btn btn-light" onClick={() => setShowAddModal(false)}>Close</button>
-                                <button className="btn btn-primary px-4">Generate & Save Payslip</button>
+                                <button className="btn btn-primary px-4" onClick={handleGenerate}>Generate & Save Payslip</button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-        </>
+        </div>
     );
 };
 

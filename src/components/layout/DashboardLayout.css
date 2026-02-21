@@ -260,6 +260,8 @@
 .bg-gradient-green .dashboard-card-title,
 .bg-gradient-orange .dashboard-card-title {
     color: rgba(255, 255, 255, 0.9) !important;
+    text-transform: uppercase;
+    font-size: 0.75rem;
 }
 
 .bg-gradient-purple {

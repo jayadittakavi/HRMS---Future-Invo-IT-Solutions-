@@ -96,7 +96,9 @@ const MySpace = ({ role, onNavigate }) => {
             <div className="row g-4 mb-4">
                 {/* Today's Check-in Card */}
                 <div className="col-md-4">
-                    <div className="dashboard-card bg-gradient-purple text-white p-4 h-100">
+                    <div className="dashboard-card bg-gradient-purple text-white p-4 h-100"
+                        onClick={() => go('my-attendance')}
+                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}>
                         <div className="d-flex justify-content-between align-items-start mb-4">
                             <div>
                                 <h6 className="fw-bold opacity-75 mb-1">Today's Status</h6>
@@ -122,8 +124,13 @@ const MySpace = ({ role, onNavigate }) => {
 
                 {/* Leave Balances Summary */}
                 <div className="col-md-8">
-                    <div className="dashboard-card bg-white p-4 h-100">
-                        <h6 className="fw-bold text-dark mb-3">Available Leave Balances</h6>
+                    <div className="dashboard-card bg-white p-4 h-100"
+                        onClick={() => go('my-leaves')}
+                        style={{ cursor: 'pointer' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                            <h6 className="fw-bold text-dark mb-0">Available Leave Balances</h6>
+                            <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0">View Balance Details</button>
+                        </div>
                         <div className="row g-3">
                             {[
                                 { type: 'Casual', rem: 7, total: 12, color: 'primary' },
@@ -152,7 +159,9 @@ const MySpace = ({ role, onNavigate }) => {
             <div className="row g-4 mb-4">
                 {/* Pie Chart: Attendance Monthly Distribution */}
                 <div className="col-md-3">
-                    <div className="dashboard-card bg-white h-100 p-4 text-center">
+                    <div className="dashboard-card bg-white h-100 p-4 text-center"
+                        onClick={() => go('my-attendance')}
+                        style={{ cursor: 'pointer' }}>
                         <h6 className="text-secondary fw-bold small text-uppercase mb-4">Status Breakdown</h6>
                         <div style={{ width: '150px', margin: '0 auto', position: 'relative' }}>
                             <Doughnut data={attendancePieData} options={{ cutout: '80%', plugins: { legend: { display: false } } }} />
@@ -170,7 +179,9 @@ const MySpace = ({ role, onNavigate }) => {
 
                 {/* Bar Chart: Attendance Trend */}
                 <div className="col-md-5">
-                    <div className="dashboard-card bg-white h-100 p-4">
+                    <div className="dashboard-card bg-white h-100 p-4"
+                        onClick={() => go('my-attendance')}
+                        style={{ cursor: 'pointer' }}>
                         <h6 className="text-dark fw-bold mb-4">Weekly Presence Trend</h6>
                         <div style={{ height: '200px' }}>
                             <Bar data={attendanceTrendData} options={{
@@ -185,7 +196,9 @@ const MySpace = ({ role, onNavigate }) => {
 
                 {/* Line Chart: Leave Usage Trend */}
                 <div className="col-md-4">
-                    <div className="dashboard-card bg-white h-100 p-4">
+                    <div className="dashboard-card bg-white h-100 p-4"
+                        onClick={() => go('my-leaves')}
+                        style={{ cursor: 'pointer' }}>
                         <h6 className="text-dark fw-bold mb-4">Annual Leave Usage</h6>
                         <div style={{ height: '200px' }}>
                             <Line data={leaveTrendData} options={{
@@ -203,7 +216,10 @@ const MySpace = ({ role, onNavigate }) => {
             <div className="row g-4">
                 <div className="col-md-8">
                     <div className="dashboard-card bg-white p-4">
-                        <h6 className="fw-bold text-dark mb-4">Personal Activity Log</h6>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h6 className="fw-bold text-dark mb-0">Personal Activity Log</h6>
+                            <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0" onClick={() => go('my-attendance')}>View History</button>
+                        </div>
                         <div className="table-responsive">
                             <table className="table table-hover align-middle mb-0">
                                 <thead>
@@ -216,12 +232,12 @@ const MySpace = ({ role, onNavigate }) => {
                                 </thead>
                                 <tbody>
                                     {[
-                                        { record: 'Punch In', date: 'May 23, 2026', time: '09:12 AM', badge: 'success', status: 'On Time' },
-                                        { record: 'Leave Applied', date: 'May 22, 2026', time: '11:45 AM', badge: 'warning', status: 'Pending' },
-                                        { record: 'Late Mark', date: 'May 21, 2026', time: '09:45 AM', badge: 'danger', status: 'Late' },
-                                        { record: 'Punch Out', date: 'May 20, 2026', time: '06:10 PM', badge: 'info', status: 'Checked Out' },
+                                        { record: 'Punch In', date: 'May 23, 2026', time: '09:12 AM', badge: 'success', status: 'On Time', link: 'my-attendance' },
+                                        { record: 'Leave Applied', date: 'May 22, 2026', time: '11:45 AM', badge: 'warning', status: 'Pending', link: 'my-leaves' },
+                                        { record: 'Late Mark', date: 'May 21, 2026', time: '09:45 AM', badge: 'danger', status: 'Late', link: 'my-attendance' },
+                                        { record: 'Punch Out', date: 'May 20, 2026', time: '06:10 PM', badge: 'info', status: 'Checked Out', link: 'my-attendance' },
                                     ].map((r, i) => (
-                                        <tr key={i}>
+                                        <tr key={i} onClick={() => go(r.link)} style={{ cursor: 'pointer' }}>
                                             <td className="text-secondary py-3 px-3">{r.date}</td>
                                             <td className="fw-bold text-dark silver-text py-3 px-3">{r.record}</td>
                                             <td className="text-secondary py-3 px-3">{r.time}</td>
@@ -241,14 +257,20 @@ const MySpace = ({ role, onNavigate }) => {
                 {/* Holidays List */}
                 <div className="col-md-4">
                     <div className="dashboard-card bg-white p-4">
-                        <h6 className="fw-bold text-dark mb-4">Upcoming Holidays</h6>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h6 className="fw-bold text-dark mb-0">Upcoming Holidays</h6>
+                            <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0" onClick={() => navigate('/calendar')}>Calendar View</button>
+                        </div>
                         <div className="d-flex flex-column gap-3">
                             {[
                                 { date: 'AUG 15', name: 'Independence Day', sub: 'National Holiday' },
                                 { date: 'OCT 02', name: 'Gandhi Jayanti', sub: 'National Holiday' },
                                 { date: 'DEC 25', name: 'Christmas', sub: 'Gazetted Holiday' },
                             ].map((h, i) => (
-                                <div key={i} className="d-flex align-items-center gap-3 p-3 rounded-3 border-start border-4 border-danger bg-light border-top border-bottom border-end">
+                                <div key={i}
+                                    className="d-flex align-items-center gap-3 p-3 rounded-3 border-start border-4 border-danger bg-light border-top border-bottom border-end"
+                                    onClick={() => navigate('/calendar')}
+                                    style={{ cursor: 'pointer' }}>
                                     <div className="text-center" style={{ minWidth: '60px' }}>
                                         <div className="fw-bold text-danger h5 mb-0">{h.date.split(' ')[1]}</div>
                                         <div className="small text-muted fw-bold">{h.date.split(' ')[0]}</div>

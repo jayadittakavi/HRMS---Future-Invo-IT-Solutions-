@@ -122,105 +122,141 @@ const AvatarCircle = ({ initials, color }) => (
 
 const avatarColors = ['#2563eb', '#7c3aed', '#059669', '#dc2626'];
 
-const renderOnboarding = (onViewDocs, onSendLetter) => (
-    <div>
-        {/* Stats bar */}
-        <div className="row g-3 mb-4">
-            {[
-                { label: 'Total Hires', value: candidates.length, color: '#2563eb', bg: '#eff6ff', icon: '👤' },
-                { label: 'Documents Pending', value: candidates.filter(c => c.status !== 'Completed').length, color: '#dc2626', bg: '#fef2f2', icon: '📁' },
-                { label: 'In Progress', value: candidates.filter(c => c.status !== 'Completed' && c.status !== 'Pending').length, color: '#d97706', bg: '#fef3c7', icon: '⏳' },
-                { label: 'Verified', value: candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
-            ].map((s, i) => (
-                <div key={i} className="col-md-3 col-6">
-                    <div className="card border-0 shadow-sm rounded-4 h-100">
-                        <div className="card-body p-3 d-flex align-items-center gap-3">
-                            <div style={{ width: 44, height: 44, borderRadius: 12, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>{s.icon}</div>
-                            <div>
-                                <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.label}</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
+const renderOnboarding = (onViewDocs, onSendLetter) => {
+    const handleStatClick = (label) => {
+        alert(`Filtering candidates by: ${label}`);
+    };
+
+    const handleAddNewHire = () => {
+        alert('Opening "Add New Hire" wizard...');
+    };
+
+    return (
+        <div className="animate__animated animate__fadeIn">
+            {/* Stats bar */}
+            <div className="row g-3 mb-4">
+                {[
+                    { label: 'Total Hires', value: candidates.length, color: '#2563eb', bg: '#eff6ff', icon: '👤' },
+                    { label: 'Documents Pending', value: candidates.filter(c => c.status !== 'Completed').length, color: '#dc2626', bg: '#fef2f2', icon: '📁' },
+                    { label: 'In Progress', value: candidates.filter(c => c.status !== 'Completed' && c.status !== 'Pending').length, color: '#d97706', bg: '#fef3c7', icon: '⏳' },
+                    { label: 'Verified', value: candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
+                ].map((s, i) => (
+                    <div key={i} className="col-md-3 col-6">
+                        <div
+                            className="card border-0 shadow-sm rounded-4 h-100 onboarding-stat-card"
+                            style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => handleStatClick(s.label)}
+                        >
+                            <div className="card-body p-3 d-flex align-items-center gap-3">
+                                <div style={{ width: 44, height: 44, borderRadius: 12, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>{s.icon}</div>
+                                <div>
+                                    <div style={{ fontSize: '0.72rem', color: '#6b7280', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.label}</div>
+                                    <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            ))}
-        </div>
+                ))}
+            </div>
 
-        <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-            <div className="px-4 py-3 border-bottom d-flex align-items-center justify-content-between" style={{ background: '#f8faff' }}>
-                <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>Document Submission & Tracking</div>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Manage educational certificates and ID proofs for joiners</div>
+            <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div className="px-4 py-3 border-bottom d-flex align-items-center justify-content-between" style={{ background: '#f8faff' }}>
+                    <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>Document Submission & Tracking</div>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Manage educational certificates and ID proofs for joiners</div>
+                    </div>
+                    <button
+                        className="btn btn-sm rounded-3 px-3 hover-scale"
+                        style={{ background: '#2563eb', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}
+                        onClick={handleAddNewHire}
+                    >
+                        + Add New Hire
+                    </button>
                 </div>
-                <button className="btn btn-sm rounded-3 px-3" style={{ background: '#2563eb', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>
-                    + Add New Hire
-                </button>
-            </div>
-            <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.82rem' }}>
-                    <thead>
-                        <tr style={{ background: '#f8faff', color: '#6b7280', fontSize: '0.73rem', fontWeight: 600 }}>
-                            <th className="border-0 py-3 px-4">Candidate</th>
-                            <th className="border-0 py-3">Department</th>
-                            <th className="border-0 py-3">Joining Date</th>
-                            <th className="border-0 py-3">Status</th>
-                            <th className="border-0 py-3">Submission</th>
-                            <th className="border-0 py-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {candidates.map((c, i) => {
-                            const st = statusStyle[c.status];
-                            return (
-                                <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                    <td className="px-4 py-3">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <AvatarCircle initials={c.avatar} color={avatarColors[i % 4]} />
-                                            <div>
-                                                <div style={{ fontWeight: 700, color: '#111827' }}>{c.name}</div>
-                                                <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{c.role}</div>
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.82rem' }}>
+                        <thead>
+                            <tr style={{ background: '#f8faff', color: '#6b7280', fontSize: '0.73rem', fontWeight: 600 }}>
+                                <th className="border-0 py-3 px-4">Candidate</th>
+                                <th className="border-0 py-3">Department</th>
+                                <th className="border-0 py-3">Joining Date</th>
+                                <th className="border-0 py-3">Status</th>
+                                <th className="border-0 py-3">Submission</th>
+                                <th className="border-0 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {candidates.map((c, i) => {
+                                const st = statusStyle[c.status];
+                                return (
+                                    <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => onViewDocs(c)}>
+                                        <td className="px-4 py-3">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <AvatarCircle initials={c.avatar} color={avatarColors[i % 4]} />
+                                                <div>
+                                                    <div style={{ fontWeight: 700, color: '#111827' }}>{c.name}</div>
+                                                    <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{c.role}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-3">
-                                        <span style={{ fontSize: '0.75rem', color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 500 }}>{c.dept}</span>
-                                    </td>
-                                    <td className="py-3" style={{ color: '#6b7280' }}>{c.date}</td>
-                                    <td className="py-3">
-                                        <span style={{ background: st.bg, color: st.color, borderRadius: 20, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: st.dot, display: 'inline-block' }} />
-                                            {c.status}
-                                        </span>
-                                    </td>
-                                    <td className="py-3">
-                                        <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden', width: '100px' }}>
-                                            <div style={{ width: `${c.progress}%`, height: '100%', borderRadius: 99, background: c.progress === 100 ? '#16a34a' : '#2563eb' }} />
-                                        </div>
-                                        <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{c.progress}% Docs Verified</div>
-                                    </td>
-                                    <td className="py-3">
-                                        <div className="d-flex gap-2">
-                                            <button
-                                                title="View Documents"
-                                                onClick={() => onViewDocs(c)}
-                                                style={{ padding: '4px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'flex', alignItems: 'center', gap: 5 }}
-                                            >
-                                                <IconFile /> Verify
-                                            </button>
-                                            <button title="Send Letter" onClick={() => onSendLetter(c.name)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}>
-                                                <IconMail />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
+                                        </td>
+                                        <td className="py-3">
+                                            <span style={{ fontSize: '0.75rem', color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 500 }}>{c.dept}</span>
+                                        </td>
+                                        <td className="py-3" style={{ color: '#6b7280' }}>{c.date}</td>
+                                        <td className="py-3">
+                                            <span style={{ background: st.bg, color: st.color, borderRadius: 20, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: st.dot, display: 'inline-block' }} />
+                                                {c.status}
+                                            </span>
+                                        </td>
+                                        <td className="py-3">
+                                            <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden', width: '100px' }}>
+                                                <div style={{ width: `${c.progress}%`, height: '100%', borderRadius: 99, background: c.progress === 100 ? '#16a34a' : '#2563eb' }} />
+                                            </div>
+                                            <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{c.progress}% Docs Verified</div>
+                                        </td>
+                                        <td className="py-3">
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    title="View Documents"
+                                                    onClick={(e) => { e.stopPropagation(); onViewDocs(c); }}
+                                                    style={{ padding: '4px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'flex', alignItems: 'center', gap: 5 }}
+                                                    className="onboarding-action-btn"
+                                                >
+                                                    <IconFile /> Verify
+                                                </button>
+                                                <button
+                                                    title="Send Letter"
+                                                    onClick={(e) => { e.stopPropagation(); onSendLetter(c.name); }}
+                                                    style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}
+                                                    className="onboarding-action-btn"
+                                                >
+                                                    <IconMail />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
             </div>
+            <style>{`
+            .onboarding-stat-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 16px rgba(0,0,0,0.08) !important;
+            }
+            .onboarding-action-btn:hover {
+                background: #f1f5f9 !important;
+                transform: scale(1.05);
+            }
+            .hover-scale { transition: all 0.2s; }
+            .hover-scale:hover { transform: scale(1.03); }
+        `}</style>
         </div>
-    </div>
-);
+    );
+};
 
 /* ── Certificates Tab ───────────────────────────────────── */
 const certTemplates = [
@@ -368,7 +404,7 @@ const LETTER_SUB_TABS = [
 ];
 
 /* ── Main Component ─────────────────────────────────────── */
-const OnboardingContent = () => {
+export const OnboardingContent = () => {
     const [activeTab, setActiveTab] = useState('onboarding');
     const [letterSubTab, setLetterSubTab] = useState('templates');
     const [sendLetterModal, setSendLetterModal] = useState(null);

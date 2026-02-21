@@ -1,15 +1,31 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
 import { FaUsers, FaUserPlus, FaChalkboardTeacher, FaChartLine, FaUmbrellaBeach, FaUserCheck, FaSmile, FaVenusMars, FaBirthdayCake } from 'react-icons/fa';
 
 const HROverallStats = () => {
-    const recruitmentFunnel = [
+    const navigate = useNavigate();
+
+    const rawRecruitmentData = [
         { label: 'Applied', value: 150, color: '#94a3b8' },
         { label: 'Screening', value: 80, color: '#38bdf8' },
         { label: 'Interview', value: 30, color: '#facc15' },
         { label: 'Offer', value: 12, color: '#4ade80' },
         { label: 'Hired', value: 8, color: '#16a34a' },
     ];
+
+    const recruitmentFunnel = rawRecruitmentData.map((item, index, arr) => {
+        const totalApplied = arr[0].value;
+        const prevValue = index > 0 ? arr[index - 1].value : item.value;
+        const conversion = index > 0 ? ((item.value / prevValue) * 100).toFixed(0) : 100;
+        const ofTotal = ((item.value / totalApplied) * 100).toFixed(0);
+
+        return {
+            ...item,
+            topLabel: `${item.value}`,
+            subLabel: index === 0 ? '100% Total' : `${conversion}% Conv.`
+        };
+    });
 
     const deptDistribution = [
         { label: 'Engineering', value: 40, color: '#3b82f6' },
@@ -21,12 +37,16 @@ const HROverallStats = () => {
 
     const teamGrowthData = [850, 1100, 980, 1250, 1120, 1234];
 
+    const handleJoinMeeting = (role) => {
+        alert(`Starting video session for ${role} position...`);
+    };
+
     return (
         <>
             {/* Top Stats Cards */}
             <div className="row g-4 mb-4">
                 <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-purple">
+                    <div className="dashboard-card bg-gradient-purple" onClick={() => navigate('/employee-directory')} style={{ cursor: 'pointer' }}>
                         <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                             <FaUsers /> Total Staff
                         </h6>
@@ -35,7 +55,7 @@ const HROverallStats = () => {
                     </div>
                 </div>
                 <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-orange">
+                    <div className="dashboard-card bg-gradient-orange" onClick={() => navigate('/recruitment')} style={{ cursor: 'pointer' }}>
                         <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                             <FaUserPlus /> Open Positions
                         </h6>
@@ -44,7 +64,7 @@ const HROverallStats = () => {
                     </div>
                 </div>
                 <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-blue">
+                    <div className="dashboard-card bg-gradient-blue" onClick={() => navigate('/onboarding')} style={{ cursor: 'pointer' }}>
                         <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                             <FaChalkboardTeacher /> Onboarding
                         </h6>
@@ -53,7 +73,7 @@ const HROverallStats = () => {
                     </div>
                 </div>
                 <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-green">
+                    <div className="dashboard-card bg-gradient-green" onClick={() => navigate('/performance-reviews')} style={{ cursor: 'pointer' }}>
                         <h6 className="dashboard-card-title d-flex align-items-center gap-2">
                             <FaChartLine /> Team Performance
                         </h6>
@@ -112,7 +132,12 @@ const HROverallStats = () => {
                     <div className="dashboard-card">
                         <div className="d-flex justify-content-between align-items-center mb-3">
                             <h6 className="dashboard-card-title mb-0">Recent Applications</h6>
-                            <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0">View All</button>
+                            <button
+                                className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0"
+                                onClick={() => navigate('/recruitment')}
+                            >
+                                View All
+                            </button>
                         </div>
                         <div className="table-responsive">
                             <table className="table table-hover align-middle mb-0">
@@ -131,7 +156,7 @@ const HROverallStats = () => {
                                         { name: 'Charlie Puth', role: 'Backend Developer', date: 'May 19, 2026', badge: 'success', label: 'Hired' },
                                         { name: 'David Gandy', role: 'Project Manager', date: 'May 18, 2026', badge: 'secondary', label: 'Shortlisted' },
                                     ].map((r, i) => (
-                                        <tr key={i}>
+                                        <tr key={i} onClick={() => alert(`Opening profile for ${r.name}`)} style={{ cursor: 'pointer' }}>
                                             <td className="fw-bold text-dark silver-text py-2">{r.name}</td>
                                             <td className="text-secondary small py-2">{r.role}</td>
                                             <td className="text-secondary small py-2">{r.date}</td>
@@ -163,7 +188,13 @@ const HROverallStats = () => {
                                         <div className="fw-bold small text-dark">{iv.role}</div>
                                         <div className="text-muted" style={{ fontSize: '0.7rem' }}>{iv.details}</div>
                                     </div>
-                                    <button className="btn btn-sm btn-primary py-1 px-3" style={{ fontSize: '0.7rem' }}>Join</button>
+                                    <button
+                                        className="btn btn-sm btn-primary py-1 px-3"
+                                        style={{ fontSize: '0.7rem' }}
+                                        onClick={() => handleJoinMeeting(iv.role)}
+                                    >
+                                        Join
+                                    </button>
                                 </div>
                             ))}
                         </div>

@@ -513,14 +513,19 @@ const StatutoryTab = () => {
                             </thead>
                             <tbody>
                                 {[
-                                    { comp: 'Provident Fund (EPF)', icon: '🏦', act: 'EPF Act 1952', emp: '12%', employer: '12%', cap: '₹15,000 Basic', due: '15th of month', color: '#2563eb' },
-                                    { comp: 'Employee State Insurance', icon: '🏥', act: 'ESI Act 1948', emp: '0.75%', employer: '3.25%', cap: '₹21,000 Gross', due: '15th of month', color: '#059669' },
-                                    { comp: 'Professional Tax (KA)', icon: '🏛️', act: 'State Act', emp: '₹200/mo', employer: 'Nil', cap: 'Above ₹15,000', due: '20th of month', color: '#0891b2' },
-                                    { comp: 'Gratuity', icon: '⭐', act: 'Gratuity Act', emp: 'Nil', employer: 'Funded by Employer', cap: 'After 5 yrs service', due: '30 days of eligibility', color: '#d97706' },
-                                    { comp: 'Income Tax (TDS)', icon: '📊', act: 'IT Act 1961', emp: 'As per slab', employer: 'Deductor', cap: 'Above exemption limit', due: '7th of month', color: '#7c3aed' },
-                                    { comp: 'Labour Welfare Fund', icon: '👷', act: 'State LWF Acts', emp: '₹20/mo (KA)', employer: '₹40/mo (KA)', cap: 'State-wise', due: 'Monthly/Half-yearly', color: '#be185d' },
+                                    { id: 'pf', comp: 'Provident Fund (EPF)', icon: '🏦', act: 'EPF Act 1952', emp: '12%', employer: '12%', cap: '₹15,000 Basic', due: '15th of month', color: '#2563eb' },
+                                    { id: 'esi', comp: 'Employee State Insurance', icon: '🏥', act: 'ESI Act 1948', emp: '0.75%', employer: '3.25%', cap: '₹21,000 Gross', due: '15th of month', color: '#059669' },
+                                    { id: 'pt', comp: 'Professional Tax (KA)', icon: '🏛️', act: 'State Act', emp: '₹200/mo', employer: 'Nil', cap: 'Above ₹15,000', due: '20th of month', color: '#0891b2' },
+                                    { id: 'gratuity', comp: 'Gratuity', icon: '⭐', act: 'Gratuity Act', emp: 'Nil', employer: 'Funded by Employer', cap: 'After 5 yrs service', due: '30 days of eligibility', color: '#d97706' },
+                                    { id: 'income-tax', comp: 'Income Tax (TDS)', icon: '📊', act: 'IT Act 1961', emp: 'As per slab', employer: 'Deductor', cap: 'Above exemption limit', due: '7th of month', color: '#7c3aed' },
+                                    { id: 'lwf', comp: 'Labour Welfare Fund', icon: '👷', act: 'State LWF Acts', emp: '₹20/mo (KA)', employer: '₹40/mo (KA)', cap: 'State-wise', due: 'Monthly/Half-yearly', color: '#be185d' },
                                 ].map((row, i) => (
-                                    <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                    <tr
+                                        key={i}
+                                        style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }}
+                                        onClick={() => setActiveAct(row.id)}
+                                        className="statutory-row"
+                                    >
                                         <td className="px-3 py-3">
                                             <div className="d-flex align-items-center gap-2">
                                                 <span style={{ fontSize: '1rem' }}>{row.icon}</span>
@@ -544,6 +549,11 @@ const StatutoryTab = () => {
                     </div>
                 </div>
             </div>
+            <style>{`
+                .statutory-row:hover {
+                    background-color: #f8faff !important;
+                }
+            `}</style>
         </div>
     );
 };

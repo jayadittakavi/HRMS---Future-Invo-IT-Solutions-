@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import SalaryStructureAssignment from './SalaryStructureAssignment';
+import SalarySlip from './SalarySlip';
 
 /* ─── Sub-navigation items in the Salary UI ─────────── */
 const SALARY_SECTIONS = [
@@ -80,7 +81,7 @@ const PlaceholderSection = ({ title, description, onBack }) => (
 );
 
 /* ─── Main SalaryTab Component ────────────────────────── */
-const SalaryTab = () => {
+const SalaryTab = ({ onTabChange }) => {
     const [activeSection, setActiveSection] = useState(null);
 
     /* ── If a sub-section is selected, render it ──── */
@@ -88,7 +89,11 @@ const SalaryTab = () => {
         return <SalaryStructureAssignment onBack={() => setActiveSection(null)} />;
     }
 
-    if (activeSection && activeSection !== 'salary-structure-assignment') {
+    if (activeSection === 'salary-slip') {
+        return <SalarySlip onBack={() => setActiveSection(null)} />;
+    }
+
+    if (activeSection && !['salary-structure-assignment', 'salary-slip'].includes(activeSection)) {
         const section = SALARY_SECTIONS.find(s => s.id === activeSection);
         return (
             <PlaceholderSection
@@ -99,17 +104,35 @@ const SalaryTab = () => {
         );
     }
 
+    const handleEditComponent = (name) => {
+        alert(`Opening Edit Modal for Salary Component: ${name}`);
+    };
+
+    const handleCreateAssignment = () => {
+        setActiveSection('salary-structure-assignment');
+    };
+
     /* ── Default: Show Salary UI grid ───────────────── */
     return (
-        <div className="container-fluid p-0">
+        <div className="container-fluid p-0 animate__animated animate__fadeIn">
             {/* Header */}
             <div className="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h5 className="fw-bold mb-0" style={{ color: '#111827' }}>Salary UI</h5>
+                    <h5 className="fw-bold mb-0" style={{ color: '#111827' }}>Salary Management</h5>
                     <p className="text-secondary small mb-0 mt-1">
                         Manage salary structures, components, and assignments
                     </p>
                 </div>
+                <button
+                    className="btn btn-primary btn-sm px-3 rounded-3 shadow-sm d-flex align-items-center gap-2"
+                    onClick={handleCreateAssignment}
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                        <line x1="12" y1="5" x2="12" y2="19" />
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    New Assignment
+                </button>
             </div>
 
             {/* Salary Sections Grid */}
@@ -117,7 +140,7 @@ const SalaryTab = () => {
                 {SALARY_SECTIONS.map((section) => (
                     <div key={section.id} className="col-xl-3 col-lg-4 col-md-6 col-12">
                         <div
-                            className="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden"
+                            className="card border-0 shadow-sm rounded-4 h-100 position-relative overflow-hidden section-card"
                             style={{
                                 cursor: 'pointer',
                                 transition: 'all 0.22s ease',
@@ -190,9 +213,12 @@ const SalaryTab = () => {
 
             {/* Legacy Salary Components Table */}
             <div className="card border-0 shadow-sm rounded-4 mt-4">
-                <div className="card-header bg-white border-0 pt-4 px-4 pb-0">
-                    <h6 className="fw-bold mb-0" style={{ color: '#111827' }}>Salary Components Summary</h6>
-                    <p className="text-secondary small mb-0 mt-1">Active components across all salary structures</p>
+                <div className="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 className="fw-bold mb-0" style={{ color: '#111827' }}>Salary Components Summary</h6>
+                        <p className="text-secondary small mb-0 mt-1">Active components across all salary structures</p>
+                    </div>
+                    <button className="btn btn-sm btn-outline-primary rounded-3 px-3" onClick={() => alert('Opening Bulk Update tool...')}>Bulk Update</button>
                 </div>
                 <div className="card-body px-4 pb-4 pt-3">
                     <div className="table-responsive">
@@ -215,7 +241,7 @@ const SalaryTab = () => {
                                     { name: 'PF (Employee)', type: 'Deduction', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
                                     { name: 'Professional Tax', type: 'Deduction', calc: 'Fixed Slab', freq: 'Monthly', status: 'Active' },
                                 ].map((row, i) => (
-                                    <tr key={i}>
+                                    <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name)}>
                                         <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name}</td>
                                         <td className="px-3">
                                             <span className={`badge rounded-pill ${row.type === 'Earning' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`} style={{ fontSize: '0.72rem' }}>
@@ -228,7 +254,13 @@ const SalaryTab = () => {
                                             <span className="badge rounded-pill bg-success bg-opacity-10 text-success" style={{ fontSize: '0.72rem' }}>● {row.status}</span>
                                         </td>
                                         <td className="px-3 text-end">
-                                            <button className="btn btn-sm btn-light rounded-2 px-3" style={{ fontSize: '0.75rem' }}>Edit</button>
+                                            <button
+                                                className="btn btn-sm btn-light rounded-2 px-3 hover-primary-light"
+                                                style={{ fontSize: '0.75rem' }}
+                                                onClick={(e) => { e.stopPropagation(); handleEditComponent(row.name); }}
+                                            >
+                                                Edit
+                                            </button>
                                         </td>
                                     </tr>
                                 ))}
@@ -237,6 +269,13 @@ const SalaryTab = () => {
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                .hover-primary-light:hover {
+                    background: #eff6ff !important;
+                    color: #2563eb !important;
+                }
+            `}</style>
         </div>
     );
 };

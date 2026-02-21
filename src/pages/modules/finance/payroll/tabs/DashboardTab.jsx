@@ -2,15 +2,15 @@ import React from 'react';
 import { FaMoneyBillWave, FaUserTie, FaChartLine, FaCalendarAlt, FaDownload, FaFileUpload, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../../../components/charts/CustomCharts';
 
-const DashboardTab = () => {
+const DashboardTab = ({ onTabChange }) => {
     // Mock Data
     const monthlyPayoutData = [4.2, 4.5, 4.8, 5.2, 5.4, 5.6]; // In Lakhs
     const deptPayoutData = [
-        { label: 'Engineering', value: 2.8, color: '#4f46e5' },
-        { label: 'Sales', value: 1.2, color: '#f59e0b' },
-        { label: 'Marketing', value: 0.8, color: '#10b981' },
-        { label: 'HR', value: 0.4, color: '#ef4444' },
-        { label: 'Admin', value: 0.4, color: '#6366f1' },
+        { label: 'Engineering', value: 2.8, color: '#4f46e5', tab: 'salary' },
+        { label: 'Sales', value: 1.2, color: '#f59e0b', tab: 'salary' },
+        { label: 'Marketing', value: 0.8, color: '#10b981', tab: 'salary' },
+        { label: 'HR', value: 0.4, color: '#ef4444', tab: 'salary' },
+        { label: 'Admin', value: 0.4, color: '#6366f1', tab: 'salary' },
     ];
 
     const recentPayouts = [
@@ -22,8 +22,17 @@ const DashboardTab = () => {
 
     const cardStyle = { background: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' };
 
+    const handleRunPayroll = () => {
+        alert('Initializing Payroll Engine for the current period...');
+        onTabChange('salary');
+    };
+
+    const handleExport = () => {
+        alert('Generating comprehensive payroll report for May 2026...');
+    };
+
     return (
-        <div className="container-fluid p-0">
+        <div className="container-fluid p-0 animate__animated animate__fadeIn">
             {/* Header / Quick Actions */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
@@ -31,10 +40,18 @@ const DashboardTab = () => {
                     <p className="text-secondary small mb-0">Summary of salary disbursements and compliance status.</p>
                 </div>
                 <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary px-3 shadow-sm border-0 bg-white" style={{ fontWeight: 600 }}>
+                    <button
+                        className="btn btn-sm btn-outline-primary px-3 shadow-sm border-0 bg-white hover-scale"
+                        style={{ fontWeight: 600 }}
+                        onClick={handleExport}
+                    >
                         <FaDownload className="me-2" /> Export Report
                     </button>
-                    <button className="btn btn-sm btn-primary px-3 shadow-sm border-0" style={{ fontWeight: 600, background: '#4f46e5' }}>
+                    <button
+                        className="btn btn-sm btn-primary px-3 shadow-sm border-0 hover-scale"
+                        style={{ fontWeight: 600, background: '#4f46e5' }}
+                        onClick={handleRunPayroll}
+                    >
                         Run Payroll
                     </button>
                 </div>
@@ -43,13 +60,17 @@ const DashboardTab = () => {
             {/* Quick Stats */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Total Payout', val: '₹5.6L', icon: <FaMoneyBillWave size={22} />, bg: 'primary', trend: '+8.4%', trendUp: true },
-                    { label: 'Processed', val: '124', icon: <FaUserTie size={22} />, bg: 'success', trend: '+3', trendUp: true },
-                    { label: 'Avg Salary', val: '₹45k', icon: <FaChartLine size={22} />, bg: 'info', trend: '-1.2%', trendUp: false },
-                    { label: 'Pending', val: '12', icon: <FaCalendarAlt size={22} />, bg: 'warning', trend: 'Monthly', trendUp: null },
+                    { label: 'Total Payout', val: '₹5.6L', icon: <FaMoneyBillWave size={22} />, bg: 'primary', trend: '+8.4%', trendUp: true, tab: 'salary' },
+                    { label: 'Processed', val: '124', icon: <FaUserTie size={22} />, bg: 'success', trend: '+3', trendUp: true, tab: 'payslip' },
+                    { label: 'Avg Salary', val: '₹45k', icon: <FaChartLine size={22} />, bg: 'info', trend: '-1.2%', trendUp: false, tab: 'reports' },
+                    { label: 'Pending', val: '12', icon: <FaCalendarAlt size={22} />, bg: 'warning', trend: 'Monthly', trendUp: null, tab: 'statutory' },
                 ].map((stat, i) => (
                     <div key={i} className="col-md-3">
-                        <div className="card border-0 shadow-sm" style={{ borderRadius: '12px' }}>
+                        <div
+                            className="card border-0 shadow-sm dash-clickable-card"
+                            style={{ borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                            onClick={() => onTabChange(stat.tab)}
+                        >
                             <div className="card-body p-4">
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <div style={{ color: `var(--bs-${stat.bg})` }}>
@@ -74,7 +95,7 @@ const DashboardTab = () => {
             <div className="row g-4 mb-4">
                 {/* Component Breakdown: Earnings vs Deductions */}
                 <div className="col-md-8">
-                    <div className="card h-100 p-4" style={cardStyle}>
+                    <div className="card h-100 p-4" style={{ ...cardStyle, cursor: 'pointer' }} onClick={() => onTabChange('salary')}>
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <h6 className="fw-bold mb-0">Payroll Component Analysis (May 2026)</h6>
                         </div>
@@ -134,14 +155,14 @@ const DashboardTab = () => {
                                 <small className="text-muted d-block">Est. Net Disbursement</small>
                                 <h4 className="fw-bold text-primary mb-0">₹5,60,000.00</h4>
                             </div>
-                            <button className="btn btn-sm btn-light border fw-bold text-dark px-3 mt-2">View Full Breakdown</button>
+                            <button className="btn btn-sm btn-light border fw-bold text-dark px-3 mt-2" onClick={(e) => { e.stopPropagation(); onTabChange('salary'); }}>View Full Breakdown</button>
                         </div>
                     </div>
                 </div>
 
                 {/* Donut Chart: Dept Distribution */}
                 <div className="col-md-4">
-                    <div className="card h-100 p-4" style={cardStyle}>
+                    <div className="card h-100 p-4" style={{ ...cardStyle, cursor: 'pointer' }} onClick={() => onTabChange('reports')}>
                         <h6 className="fw-bold mb-4">Dept-wise Distribution</h6>
                         <div className="d-flex justify-content-center py-2">
                             <SimpleDonutChart segments={deptPayoutData} size="200px" centerText="100%" />
@@ -164,7 +185,7 @@ const DashboardTab = () => {
             <div className="row g-4">
                 {/* Recent Payroll Runs */}
                 <div className="col-md-8">
-                    <div className="card p-4" style={cardStyle}>
+                    <div className="card p-4 h-100" style={cardStyle}>
                         <h6 className="fw-bold mb-4">Recent Payroll Runs</h6>
                         <div className="table-responsive">
                             <table className="table table-hover align-middle mb-0">
@@ -179,7 +200,7 @@ const DashboardTab = () => {
                                 </thead>
                                 <tbody>
                                     {recentPayouts.map((p, i) => (
-                                        <tr key={i}>
+                                        <tr key={i} style={{ cursor: 'pointer' }} onClick={() => { alert(`Viewing details for Payroll Run ${p.id}`); onTabChange('payslip'); }}>
                                             <td className="fw-bold text-primary small py-3">{p.id}</td>
                                             <td className="fw-semibold text-dark py-3">{p.period}</td>
                                             <td className="text-secondary text-center py-3">{p.count}</td>
@@ -199,7 +220,7 @@ const DashboardTab = () => {
 
                 {/* Statutory Compliance Summary */}
                 <div className="col-md-4">
-                    <div className="card p-4 h-100" style={cardStyle}>
+                    <div className="card p-4 h-100 dash-status-card" style={{ ...cardStyle, cursor: 'pointer' }} onClick={() => onTabChange('statutory')}>
                         <h6 className="fw-bold mb-4">Statutory Compliance Status</h6>
                         {[
                             { label: 'Provident Fund (PF)', status: 'On Track', color: 'success', date: 'Paid on May 15' },
@@ -218,6 +239,22 @@ const DashboardTab = () => {
                     </div>
                 </div>
             </div>
+
+            <style>{`
+                .dash-clickable-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+                }
+                .hover-scale {
+                    transition: transform 0.2s;
+                }
+                .hover-scale:hover {
+                    transform: scale(1.05);
+                }
+                .dash-status-card:hover {
+                    background: #f8faff !important;
+                }
+            `}</style>
         </div>
     );
 };

@@ -27,23 +27,23 @@ export const PayrollContent = ({ personal = false }) => {
     const renderContent = () => {
         switch (activeTab) {
             case 'dashboard':
-                return <DashboardTab />;
+                return <DashboardTab onTabChange={setActiveTab} />;
             case 'salary':
-                return <SalaryTab />;
+                return <SalaryTab onTabChange={setActiveTab} />;
             case 'statutory':
-                return <StatutoryTab />;
+                return <StatutoryTab onTabChange={setActiveTab} />;
             case 'payslip':
-                return <PayslipsTab personal={personal} />;
+                return <PayslipsTab personal={personal} onTabChange={setActiveTab} />;
             case 'form16':
-                return <Form16Tab />;
+                return <Form16Tab onTabChange={setActiveTab} />;
             case 'fnf':
-                return <FullAndFinalTab />;
+                return <FullAndFinalTab onTabChange={setActiveTab} />;
             case 'letters':
-                return <LettersTab />;
+                return <LettersTab onTabChange={setActiveTab} />;
             case 'reports':
-                return <ReportsTab />;
+                return <ReportsTab onTabChange={setActiveTab} />;
             default:
-                return <DashboardTab />;
+                return <DashboardTab onTabChange={setActiveTab} />;
         }
     };
 

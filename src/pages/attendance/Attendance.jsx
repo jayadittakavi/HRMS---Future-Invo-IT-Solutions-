@@ -52,7 +52,7 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'dashboard': return <AttendanceDashboard />;
+            case 'dashboard': return <AttendanceDashboard onTabChange={setActiveTab} />;
             case 'my-attendance': return <MyAttendanceList />;
             case 'mark': return <MarkAttendance />;
             case 'bulk': return <BulkAttendance />;

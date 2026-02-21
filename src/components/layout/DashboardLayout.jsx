@@ -3,7 +3,7 @@ import { useNavigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Sidebar from './Sidebar';
 import DashboardHeader from './DashboardHeader';
-import './DashboardLayout.css';
+import AskMeAI from '../common/AskMeAI';
 
 const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -77,8 +77,12 @@ const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
                     </div>
                 </div>
             </div>
+
+            {/* AI Chatbot for Roles */}
+            <AskMeAI />
         </div>
     );
 };
+
 
 export default DashboardLayout;
