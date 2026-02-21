@@ -39,10 +39,70 @@ const IconDownload = () => (
 
 /* ── Onboarding Table ───────────────────────────────────── */
 const candidates = [
-    { id: 1, name: 'Alice Johnson', role: 'Frontend Developer', dept: 'Engineering', date: '2026-02-20', status: 'In Progress', progress: 60, avatar: 'AJ' },
-    { id: 2, name: 'Bob Smith', role: 'UI/UX Designer', dept: 'Design', date: '2026-02-22', status: 'Document Verification', progress: 80, avatar: 'BS' },
-    { id: 3, name: 'Charlie Davis', role: 'Backend Developer', dept: 'Engineering', date: '2026-02-25', status: 'Completed', progress: 100, avatar: 'CD' },
-    { id: 4, name: 'Diana Roy', role: 'HR Analyst', dept: 'HR', date: '2026-03-01', status: 'Pending', progress: 20, avatar: 'DR' },
+    {
+        id: 1, name: 'Alice Johnson', role: 'Frontend Developer', dept: 'Engineering', date: '2026-02-20', status: 'In Progress', progress: 60, avatar: 'AJ',
+        docs: {
+            educational: [
+                { label: '10th Certificate', status: 'Verified', date: 'Feb 15' },
+                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 15' },
+                { label: 'Degree Certificate', status: 'Pending', date: '-' },
+                { label: 'PG Certificate', status: 'Not Required', date: '-' },
+            ],
+            identity: [
+                { label: 'PAN Card', status: 'Verified', date: 'Feb 16' },
+                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 16' },
+                { label: 'Passport', status: 'Pending', date: '-' },
+            ]
+        }
+    },
+    {
+        id: 2, name: 'Bob Smith', role: 'UI/UX Designer', dept: 'Design', date: '2026-02-22', status: 'Document Verification', progress: 80, avatar: 'BS',
+        docs: {
+            educational: [
+                { label: '10th Certificate', status: 'Verified', date: 'Feb 18' },
+                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 18' },
+                { label: 'Degree Certificate', status: 'Verified', date: 'Feb 19' },
+                { label: 'PG Certificate', status: 'Pending', date: '-' },
+            ],
+            identity: [
+                { label: 'PAN Card', status: 'Verified', date: 'Feb 18' },
+                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 18' },
+                { label: 'Passport', status: 'Verified', date: 'Feb 19' },
+            ]
+        }
+    },
+    {
+        id: 3, name: 'Charlie Davis', role: 'Backend Developer', dept: 'Engineering', date: '2026-02-25', status: 'Completed', progress: 100, avatar: 'CD',
+        docs: {
+            educational: [
+                { label: '10th Certificate', status: 'Verified', date: 'Feb 10' },
+                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 10' },
+                { label: 'Degree Certificate', status: 'Verified', date: 'Feb 11' },
+                { label: 'PG Certificate', status: 'Verified', date: 'Feb 11' },
+            ],
+            identity: [
+                { label: 'PAN Card', status: 'Verified', date: 'Feb 10' },
+                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 10' },
+                { label: 'Passport', status: 'Verified', date: 'Feb 11' },
+            ]
+        }
+    },
+    {
+        id: 4, name: 'Diana Roy', role: 'HR Analyst', dept: 'HR', date: '2026-03-01', status: 'Pending', progress: 20, avatar: 'DR',
+        docs: {
+            educational: [
+                { label: '10th Certificate', status: 'Pending', date: '-' },
+                { label: 'Inter Certificate', status: 'Pending', date: '-' },
+                { label: 'Degree Certificate', status: 'Pending', date: '-' },
+                { label: 'PG Certificate', status: 'Pending', date: '-' },
+            ],
+            identity: [
+                { label: 'PAN Card', status: 'Pending', date: '-' },
+                { label: 'Aadhaar Card', status: 'Pending', date: '-' },
+                { label: 'Passport', status: 'Pending', date: '-' },
+            ]
+        }
+    },
 ];
 
 const statusStyle = {
@@ -62,15 +122,15 @@ const AvatarCircle = ({ initials, color }) => (
 
 const avatarColors = ['#2563eb', '#7c3aed', '#059669', '#dc2626'];
 
-const renderOnboarding = (onSendLetter) => (
+const renderOnboarding = (onViewDocs, onSendLetter) => (
     <div>
         {/* Stats bar */}
         <div className="row g-3 mb-4">
             {[
                 { label: 'Total Hires', value: candidates.length, color: '#2563eb', bg: '#eff6ff', icon: '👤' },
-                { label: 'Completed', value: candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
+                { label: 'Documents Pending', value: candidates.filter(c => c.status !== 'Completed').length, color: '#dc2626', bg: '#fef2f2', icon: '📁' },
                 { label: 'In Progress', value: candidates.filter(c => c.status !== 'Completed' && c.status !== 'Pending').length, color: '#d97706', bg: '#fef3c7', icon: '⏳' },
-                { label: 'Pending', value: candidates.filter(c => c.status === 'Pending').length, color: '#6b7280', bg: '#f1f5f9', icon: '🕐' },
+                { label: 'Verified', value: candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
             ].map((s, i) => (
                 <div key={i} className="col-md-3 col-6">
                     <div className="card border-0 shadow-sm rounded-4 h-100">
@@ -89,8 +149,8 @@ const renderOnboarding = (onSendLetter) => (
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div className="px-4 py-3 border-bottom d-flex align-items-center justify-content-between" style={{ background: '#f8faff' }}>
                 <div>
-                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>New Hire Onboarding Status</div>
-                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Track onboarding progress for all new joiners</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>Document Submission & Tracking</div>
+                    <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>Manage educational certificates and ID proofs for joiners</div>
                 </div>
                 <button className="btn btn-sm rounded-3 px-3" style={{ background: '#2563eb', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>
                     + Add New Hire
@@ -104,7 +164,7 @@ const renderOnboarding = (onSendLetter) => (
                             <th className="border-0 py-3">Department</th>
                             <th className="border-0 py-3">Joining Date</th>
                             <th className="border-0 py-3">Status</th>
-                            <th className="border-0 py-3" style={{ width: '20%' }}>Progress</th>
+                            <th className="border-0 py-3">Submission</th>
                             <th className="border-0 py-3">Actions</th>
                         </tr>
                     </thead>
@@ -133,15 +193,19 @@ const renderOnboarding = (onSendLetter) => (
                                         </span>
                                     </td>
                                     <td className="py-3">
-                                        <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden' }}>
+                                        <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden', width: '100px' }}>
                                             <div style={{ width: `${c.progress}%`, height: '100%', borderRadius: 99, background: c.progress === 100 ? '#16a34a' : '#2563eb' }} />
                                         </div>
-                                        <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{c.progress}% Completed</div>
+                                        <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{c.progress}% Docs Verified</div>
                                     </td>
                                     <td className="py-3">
                                         <div className="d-flex gap-2">
-                                            <button title="View" style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}>
-                                                <IconEye />
+                                            <button
+                                                title="View Documents"
+                                                onClick={() => onViewDocs(c)}
+                                                style={{ padding: '4px 12px', borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'flex', alignItems: 'center', gap: 5 }}
+                                            >
+                                                <IconFile /> Verify
                                             </button>
                                             <button title="Send Letter" onClick={() => onSendLetter(c.name)} style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}>
                                                 <IconMail />
@@ -161,14 +225,12 @@ const renderOnboarding = (onSendLetter) => (
 /* ── Certificates Tab ───────────────────────────────────── */
 const certTemplates = [
     { id: 'experience', title: 'Experience Certificate', desc: 'Proof of employment duration and role.', icon: '📄', color: '#2563eb', bg: '#eff6ff' },
-    { id: 'noc', title: 'NOC Letter', desc: 'No Objection Certificate for visa/loans.', icon: '✅', color: '#059669', bg: '#ecfdf5' },
     { id: 'internship', title: 'Internship Certificate', desc: 'Completion of internship program.', icon: '🎓', color: '#7c3aed', bg: '#f5f3ff' },
     { id: 'appreciation', title: 'Appreciation Letter', desc: 'Formal recognition for outstanding work.', icon: '⭐', color: '#d97706', bg: '#fffbeb' },
 ];
 
 const issuedCerts = [
     { name: 'Mark Wilson', type: 'Experience Certificate', date: 'Apr 10, 2024', id: 'EMP-101' },
-    { name: 'Priya Nair', type: 'NOC Letter', date: 'Mar 22, 2024', id: 'EMP-087' },
     { name: 'Rohan Mehta', type: 'Internship Certificate', date: 'Feb 14, 2024', id: 'EMP-055' },
 ];
 
@@ -306,10 +368,11 @@ const LETTER_SUB_TABS = [
 ];
 
 /* ── Main Component ─────────────────────────────────────── */
-export const OnboardingContent = () => {
+const OnboardingContent = () => {
     const [activeTab, setActiveTab] = useState('onboarding');
     const [letterSubTab, setLetterSubTab] = useState('templates');
     const [sendLetterModal, setSendLetterModal] = useState(null);
+    const [viewDocsCandidate, setViewDocsCandidate] = useState(null);
 
     const MAIN_TABS = [
         { id: 'onboarding', label: 'Onboarding', icon: <IconUser />, desc: 'Track new hire progress' },
@@ -346,7 +409,78 @@ export const OnboardingContent = () => {
             </div>
 
             {/* Onboarding Tab */}
-            {activeTab === 'onboarding' && renderOnboarding((name) => setSendLetterModal(name))}
+            {activeTab === 'onboarding' && renderOnboarding((cand) => setViewDocsCandidate(cand), (name) => setSendLetterModal(name))}
+
+            {/* Document Verification Modal */}
+            {viewDocsCandidate && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div className="modal-header border-0 bg-primary bg-opacity-10 py-4 px-4">
+                                <div className="d-flex align-items-center gap-3">
+                                    <AvatarCircle initials={viewDocsCandidate.avatar} color="#2563eb" />
+                                    <div>
+                                        <h5 className="fw-bold mb-0 text-dark">Document Checklist: {viewDocsCandidate.name}</h5>
+                                        <p className="small text-secondary mb-0">Verify educational certificates and identity documents</p>
+                                    </div>
+                                </div>
+                                <button className="btn-close" onClick={() => setViewDocsCandidate(null)}></button>
+                            </div>
+                            <div className="modal-body p-4 bg-light bg-opacity-25">
+                                <div className="row g-4">
+                                    {/* Educational Section */}
+                                    <div className="col-md-6">
+                                        <div className="card h-100 border-0 shadow-sm rounded-4 p-4">
+                                            <h6 className="fw-bold d-flex align-items-center gap-2 mb-4">
+                                                <span style={{ fontSize: '1.2rem' }}>🎓</span> Educational Certificates
+                                            </h6>
+                                            {viewDocsCandidate.docs.educational.map((doc, idx) => (
+                                                <div key={idx} className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom last-border-none">
+                                                    <div>
+                                                        <div className="small fw-bold text-dark">{doc.label}</div>
+                                                        <div className="text-muted" style={{ fontSize: '0.65rem' }}>Updated: {doc.date}</div>
+                                                    </div>
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <span className={`badge rounded-pill ${doc.status === 'Verified' ? 'bg-success' : doc.status === 'Pending' ? 'bg-warning' : 'bg-light text-secondary'} small`} style={{ fontSize: '0.65rem' }}>{doc.status}</span>
+                                                        <button className="btn btn-sm btn-light py-1 px-2 border" style={{ fontSize: '0.65rem' }}>View</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {/* Identity Section */}
+                                    <div className="col-md-6">
+                                        <div className="card h-100 border-0 shadow-sm rounded-4 p-4">
+                                            <h6 className="fw-bold d-flex align-items-center gap-2 mb-4">
+                                                <span style={{ fontSize: '1.2rem' }}>🆔</span> ID Proofs
+                                            </h6>
+                                            {viewDocsCandidate.docs.identity.map((doc, idx) => (
+                                                <div key={idx} className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom last-border-none">
+                                                    <div>
+                                                        <div className="small fw-bold text-dark">{doc.label}</div>
+                                                        <div className="text-muted" style={{ fontSize: '0.65rem' }}>Updated: {doc.date}</div>
+                                                    </div>
+                                                    <div className="d-flex align-items-center gap-2">
+                                                        <span className={`badge rounded-pill ${doc.status === 'Verified' ? 'bg-success' : doc.status === 'Pending' ? 'bg-warning' : 'bg-light text-secondary'} small`} style={{ fontSize: '0.65rem' }}>{doc.status}</span>
+                                                        <button className="btn btn-sm btn-light py-1 px-2 border" style={{ fontSize: '0.65rem' }}>View</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0 p-4 pt-1 d-flex justify-content-between">
+                                <div className="text-muted small">Checked by: <strong>Admin</strong></div>
+                                <div className="d-flex gap-2">
+                                    <button className="btn btn-light rounded-3 px-4 fw-bold small" onClick={() => setViewDocsCandidate(null)}>Close</button>
+                                    <button className="btn btn-primary rounded-3 px-4 fw-bold small" style={{ background: '#2563eb' }}>Verify All Documents</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Letters Tab */}
             {activeTab === 'letters' && (

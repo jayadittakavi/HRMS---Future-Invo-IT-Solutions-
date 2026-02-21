@@ -1,124 +1,170 @@
 import React from 'react';
 import { Doughnut, Line } from 'react-chartjs-2';
-import { FaCalendarPlus, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import {
+    Chart as ChartJS, ArcElement, Tooltip, Legend,
+    CategoryScale, LinearScale, PointElement, LineElement, Filler
+} from 'chart.js';
+import { FaCalendarPlus, FaClock, FaCheckCircle, FaTimesCircle, FaUmbrellaBeach } from 'react-icons/fa';
 
-const LeaveDashboard = () => {
-    // Mock Data
-    const balanceData = {
-        labels: ['Sick Leave', 'Casual Leave', 'Privilege Leave', 'Used'],
-        datasets: [{
-            data: [5, 3, 10, 4],
-            backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#cbd5e1'],
-            borderWidth: 0,
-        }]
-    };
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
 
-    const trendData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [{
-            label: 'Leaves Taken',
-            data: [2, 1, 3, 0, 1, 2],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            fill: true,
-            tension: 0.4
-        }]
-    };
+/* ── shared card ── */
+const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '12px 14px' };
 
-    return (
-        <div className="container-fluid p-0">
-            {/* Top Stats */}
-            <div className="row g-4 mb-4">
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm h-100 bg-gradient-purple text-white p-3 d-flex align-items-center justify-content-between" style={{ borderRadius: '15px' }}>
+const kpis = [
+    { val: '12', label: 'Total Balance', icon: <FaCalendarPlus size={14} />, grad: 'linear-gradient(135deg,#7928ca,#ff0080)' },
+    { val: '3', label: 'Pending', icon: <FaClock size={14} />, grad: 'linear-gradient(135deg,#f97316,#ef4444)' },
+    { val: '8', label: 'Approved', icon: <FaCheckCircle size={14} />, grad: 'linear-gradient(135deg,#10b981,#059669)' },
+    { val: '1', label: 'Rejected', icon: <FaTimesCircle size={14} />, grad: 'linear-gradient(135deg,#ef4444,#b91c1c)' },
+];
+
+const leaveTypes = [
+    { label: 'Casual Leave', total: 10, used: 3, color: '#4f46e5' },
+    { label: 'Sick Leave', total: 7, used: 2, color: '#10b981' },
+    { label: 'Privilege Leave', total: 15, used: 5, color: '#f59e0b' },
+];
+
+const doughnutData = {
+    labels: ['Sick', 'Casual', 'Privilege', 'Used'],
+    datasets: [{ data: [5, 3, 10, 4], backgroundColor: ['#ef4444', '#f59e0b', '#10b981', '#cbd5e1'], borderWidth: 0, cutout: '70%' }],
+};
+
+const trendData = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+    datasets: [{ label: 'Leaves Taken', data: [2, 1, 3, 0, 1, 2], borderColor: '#4f46e5', backgroundColor: 'rgba(79,70,229,0.08)', fill: true, tension: 0.4, pointRadius: 3, pointHoverRadius: 5 }],
+};
+
+const recentRequests = [
+    { name: 'Alice Wonder', type: 'Sick Leave', from: 'Feb 20', to: 'Feb 22', days: 3, status: 'Pending', avatar: 'AW' },
+    { name: 'Bob Carter', type: 'Casual Leave', from: 'Feb 25', to: 'Feb 25', days: 1, status: 'Approved', avatar: 'BC' },
+    { name: 'Carol Singh', type: 'Privilege', from: 'Mar 02', to: 'Mar 05', days: 4, status: 'Approved', avatar: 'CS' },
+    { name: 'David Patel', type: 'Sick Leave', from: 'Feb 18', to: 'Feb 18', days: 1, status: 'Rejected', avatar: 'DP' },
+];
+
+const statusBadge = (s) => ({
+    Pending: { bg: '#fef3c7', color: '#92400e' },
+    Approved: { bg: '#d1fae5', color: '#065f46' },
+    Rejected: { bg: '#fee2e2', color: '#991b1b' },
+}[s] || { bg: '#f1f5f9', color: '#475569' });
+
+const avatarColor = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5];
+
+const LeaveDashboard = ({ personal = false }) => (
+    <div>
+        {/* ── KPI Row ── */}
+        <div className="row g-2 mb-2">
+            {kpis.map((k, i) => (
+                <div key={i} className="col-6 col-md-3">
+                    <div style={{ background: k.grad, borderRadius: 10, padding: '10px 14px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <h3 className="fw-bold mb-0">12</h3>
-                            <small className="opacity-75 text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Total Leaves</small>
+                            <div style={{ fontSize: '0.62rem', opacity: 0.85, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k.label}</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.1 }}>{k.val}</div>
                         </div>
-                        <FaCalendarPlus className="fs-1 opacity-50" />
+                        <div style={{ opacity: 0.55 }}>{k.icon}</div>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm h-100 bg-gradient-orange text-white p-3 d-flex align-items-center justify-content-between" style={{ borderRadius: '15px' }}>
-                        <div>
-                            <h3 className="fw-bold mb-0">3</h3>
-                            <small className="opacity-75 text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Pending Requests</small>
+            ))}
+        </div>
+
+        {/* ── Leave Balance Bar Cards ── */}
+        <div className="row g-2 mb-2">
+            {leaveTypes.map((lt, i) => (
+                <div key={i} className="col-md-4">
+                    <div style={card}>
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                            <div className="fw-bold" style={{ fontSize: '0.78rem' }}>{lt.label}</div>
+                            <div style={{ fontSize: '0.68rem', color: lt.color, fontWeight: 700 }}>{lt.total - lt.used} left</div>
                         </div>
-                        <FaClock className="fs-1 opacity-50" />
+                        <div style={{ height: 5, background: '#f1f5f9', borderRadius: 3 }}>
+                            <div style={{ height: '100%', width: `${(lt.used / lt.total) * 100}%`, background: lt.color, borderRadius: 3, transition: 'width 0.5s' }} />
+                        </div>
+                        <div className="d-flex justify-content-between mt-1">
+                            <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.used} used</span>
+                            <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.total} total</span>
+                        </div>
                     </div>
                 </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm h-100 bg-gradient-green text-white p-3 d-flex align-items-center justify-content-between" style={{ borderRadius: '15px' }}>
-                        <div>
-                            <h3 className="fw-bold mb-0">8</h3>
-                            <small className="opacity-75 text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Leaves Approved</small>
-                        </div>
-                        <FaCheckCircle className="fs-1 opacity-50" />
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card border-0 shadow-sm h-100 bg-gradient-red text-white p-3 d-flex align-items-center justify-content-between" style={{ borderRadius: '15px' }}>
-                        <div>
-                            <h3 className="fw-bold mb-0">1</h3>
-                            <small className="opacity-75 text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Leaves Rejected</small>
-                        </div>
-                        <FaTimesCircle className="fs-1 opacity-50" />
+            ))}
+        </div>
+
+        {/* ── Charts ── */}
+        <div className="row g-2 mb-2">
+            <div className="col-md-4">
+                <div style={{ ...card, textAlign: 'center' }}>
+                    <div className="fw-bold mb-2" style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Balance Distribution</div>
+                    <div style={{ height: 150, position: 'relative' }}>
+                        <Doughnut data={doughnutData} options={{
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+                                tooltip: { bodyFont: { size: 10 }, titleFont: { size: 10 } }
+                            }
+                        }} />
                     </div>
                 </div>
             </div>
-
-            {/* Charts */}
-            <div className="row g-4 mb-4">
-                <div className="col-md-4">
-                    <div className="card border-0 shadow-sm h-100 p-4" style={{ borderRadius: '15px' }}>
-                        <h6 className="fw-bold text-secondary mb-3">Leave Balance Distribution</h6>
-                        <div className="d-flex justify-content-center" style={{ height: '250px' }}>
-                            <Doughnut data={balanceData} options={{ maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }} />
-                        </div>
+            <div className="col-md-8">
+                <div style={card}>
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <div className="fw-bold" style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monthly Leave Trend</div>
+                        <select className="form-select form-select-sm border-0 bg-light w-auto" style={{ fontSize: '0.7rem' }}>
+                            <option>2026</option><option>2025</option>
+                        </select>
                     </div>
-                </div>
-                <div className="col-md-8">
-                    <div className="card border-0 shadow-sm h-100 p-4" style={{ borderRadius: '15px' }}>
-                        <h6 className="fw-bold text-secondary mb-3">Monthly Leave Trend</h6>
-                        <div style={{ height: '250px' }}>
-                            <Line data={trendData} options={{ maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }} />
-                        </div>
+                    <div style={{ height: 130 }}>
+                        <Line data={trendData} options={{
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 9 }, maxTicksLimit: 4 } },
+                                x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                            },
+                            plugins: { legend: { display: false }, tooltip: { bodyFont: { size: 10 }, titleFont: { size: 10 } } }
+                        }} />
                     </div>
-                </div>
-            </div>
-
-            {/* Recent Requests Table Placeholder */}
-            <div className="card border-0 shadow-sm" style={{ borderRadius: '15px' }}>
-                <div className="card-header bg-white border-0 py-3">
-                    <h6 className="mb-0 fw-bold text-secondary">Recent Leave Requests</h6>
-                </div>
-                <div className="table-responsive">
-                    <table className="table table-hover align-middle mb-0">
-                        <thead className="bg-light">
-                            <tr>
-                                <th className="ps-4 text-secondary small text-uppercase">Employee</th>
-                                <th className="text-secondary small text-uppercase">Type</th>
-                                <th className="text-secondary small text-uppercase">From</th>
-                                <th className="text-secondary small text-uppercase">To</th>
-                                <th className="text-secondary small text-uppercase">Reason</th>
-                                <th className="text-secondary small text-uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td className="ps-4 fw-medium">Alice Wonder</td>
-                                <td className="text-secondary">Sick Leave</td>
-                                <td className="text-secondary small">2025-02-20</td>
-                                <td className="text-secondary small">2025-02-22</td>
-                                <td className="text-secondary small text-truncate" style={{ maxWidth: '150px' }}>Feeling unwell due to fever...</td>
-                                <td><span className="badge bg-warning text-dark">Pending</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
-    );
-};
+
+        {/* ── Recent Requests Table ── */}
+        <div style={card}>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="fw-bold" style={{ fontSize: '0.82rem' }}>Recent Leave Requests</div>
+                <span style={{ fontSize: '0.68rem', background: '#ede9fe', color: '#4f46e5', borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>
+                    {recentRequests.length} total
+                </span>
+            </div>
+            <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.76rem' }}>
+                <thead>
+                    <tr>
+                        {['Employee', 'Type', 'Period', 'Days', 'Status'].map(h => (
+                            <th key={h} style={{ padding: '5px 8px', fontSize: '0.63rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>{h}</th>
+                        ))}
+                    </tr>
+                </thead>
+                <tbody>
+                    {recentRequests.map((r, i) => {
+                        const badge = statusBadge(r.status);
+                        return (
+                            <tr key={i}>
+                                <td style={{ padding: '6px 8px' }}>
+                                    <div className="d-flex align-items-center gap-2">
+                                        <div style={{ width: 26, height: 26, borderRadius: '50%', background: avatarColor(i), color: '#fff', fontSize: '0.6rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{r.avatar}</div>
+                                        <span className="fw-bold">{r.name}</span>
+                                    </div>
+                                </td>
+                                <td style={{ padding: '6px 8px', color: '#64748b' }}>{r.type}</td>
+                                <td style={{ padding: '6px 8px', color: '#64748b' }}>{r.from} → {r.to}</td>
+                                <td style={{ padding: '6px 8px' }}><span style={{ fontWeight: 700 }}>{r.days}d</span></td>
+                                <td style={{ padding: '6px 8px' }}>
+                                    <span style={{ background: badge.bg, color: badge.color, borderRadius: 20, padding: '2px 10px', fontSize: '0.63rem', fontWeight: 700 }}>{r.status}</span>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
 
 export default LeaveDashboard;

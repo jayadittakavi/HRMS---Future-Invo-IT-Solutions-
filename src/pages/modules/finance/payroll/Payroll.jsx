@@ -49,13 +49,13 @@ export const PayrollContent = ({ personal = false }) => {
 
     const tabs = [
         { id: 'dashboard', label: 'Dashboard', access: ['admin', 'hr', 'manager'] },
-        { id: 'salary', label: 'Salary UI', access: ['all'] },
-        { id: 'statutory', label: 'Statutory UI', access: ['admin', 'hr'] },
-        { id: 'payslip', label: 'Payslip UI', access: ['all'] }, // Visible for everyone, but component handles personal view
-        { id: 'form16', label: 'Form-16 UI', access: ['all'] },
-        { id: 'fnf', label: 'F&F UI', access: ['admin', 'hr'] },
-        { id: 'letters', label: 'Letter UI', access: ['admin', 'hr'] },
-        { id: 'reports', label: 'Reports UI', access: ['admin', 'hr', 'manager'] }
+        { id: 'salary', label: 'Salary', access: ['all'] },
+        { id: 'statutory', label: 'Statutory', access: ['admin', 'hr'] },
+        { id: 'payslip', label: 'Payslips', access: ['all'] },
+        { id: 'form16', label: 'Form-16', access: ['all'] },
+        { id: 'fnf', label: 'F&F', access: ['admin', 'hr'] },
+        { id: 'letters', label: 'Letters', access: ['admin', 'hr'] },
+        { id: 'reports', label: 'Reports', access: ['admin', 'hr', 'manager'] }
     ];
 
     return (
