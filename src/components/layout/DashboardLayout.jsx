@@ -55,9 +55,9 @@ const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
                 ></div>
             )}
 
-            {/* Sidebar Wrapper */}
-            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: isSidebarOpen ? '260px' : '0', overflow: 'hidden', transition: 'width 0.3s' }}>
-                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} activePath={activePath} onNavigate={(path) => {
+            {/* Sidebar Wrapper (Fixed Width) */}
+            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: '260px', minWidth: '260px', overflow: 'hidden' }}>
+                <Sidebar isOpen={true} toggleSidebar={toggleSidebar} activePath={activePath} onNavigate={(path) => {
                     if (window.innerWidth < 768) {
                         setIsSidebarOpen(false);
                     }

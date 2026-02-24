@@ -12,7 +12,9 @@ import { AttendanceContent } from '../attendance/Attendance';
 import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { BranchesContent } from '../modules/core/branches/Branches';
-import AuditLogs from '../superadmin/AuditLogs';
+import { DelegationContent } from '../modules/administration/delegation/Delegation';
+import { VisitorContent } from '../modules/administration/visitor/Visitor';
+import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 import '../../components/layout/DashboardLayout.css';
 import OverallStats from './components/OverallStats';
 import MySpace from './components/MySpace';
@@ -46,30 +48,15 @@ const SuperAdminDashboard = () => {
         <div className="container-fluid p-0">
             {activeView === 'dashboard' && (
                 <>
-                    {/* Welcome & Dashboard Toggle */}
+                    {/* Welcome & Dashboard Title */}
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
                             <p className="text-secondary small mb-0">Here's what's happening today.</p>
                         </div>
-                        <div className="bg-light p-1 rounded-pill d-flex border">
-                            <button
-                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                onClick={() => navigate('/dashboard/super-admin')}
-                            >
-                                My Team
-                            </button>
-                            <button
-                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                onClick={() => navigate('/dashboard/super-admin?tab=myspace')}
-                            >
-                                My Space
-                            </button>
-                        </div>
                     </div>
 
-                    {/* Content Area */}
-                    {dashboardType === 'overall' ? <OverallStats /> : <MySpace role="Super Admin" onNavigate={handleNavigate} />}
+                    <OverallStats />
                 </>
             )}
 
@@ -85,6 +72,9 @@ const SuperAdminDashboard = () => {
             {activeView === 'pay-grade' && <PayGradeContent />}
             {activeView === 'profile' && <ProfileContent />}
             {activeView === 'audit-logs' && <AuditLogs role="superadmin" />}
+            {activeView === 'delegation' && <DelegationContent />}
+            {activeView === 'visitors' && <VisitorContent />}
+            {activeView === 'desk-management' && <DeskManagementContent />}
         </div>
     );
 };

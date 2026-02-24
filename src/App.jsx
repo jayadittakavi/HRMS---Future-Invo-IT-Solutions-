@@ -78,7 +78,7 @@ import Onboarding from "./pages/modules/hr/onboarding/Onboarding";
 /* Administration */
 import Delegation from "./pages/modules/administration/delegation/Delegation";
 import Visitor from "./pages/modules/administration/visitor/Visitor";
-import DeskBooking from "./pages/modules/administration/desk/DeskBooking";
+import DeskManagement from "./pages/modules/administration/desk/DeskManagement";
 
 /* Finance */
 import Payroll from "./pages/modules/finance/payroll/Payroll";
@@ -86,22 +86,19 @@ import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
 import PayGrade from "./pages/modules/finance/pay_grade/PayGrade";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
-
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
 import ChangePassword from "./pages/settings/ChangePassword";
 import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
 import WhatsAppChat from "./components/common/WhatsAppChat";
+import Helpdesk from "./pages/modules/helpdesk/Helpdesk";
 
 function AppContent() {
   const location = useLocation();
-  const isDashboardPage = location.pathname.startsWith('/dashboard') ||
-    location.pathname.startsWith('/employee-directory') ||
-    location.pathname.startsWith('/attendance') ||
-    location.pathname.startsWith('/leave-requests') ||
-    location.pathname.startsWith('/payroll') ||
-    location.pathname.startsWith('/profile');
+  // Show WhatsApp only on Home, Features, About, Contact, and Calendar pages
+  const allowedPaths = ['/', '/home', '/features', '/about', '/contact', '/calendar'];
+  const showWhatsApp = allowedPaths.includes(location.pathname);
 
   return (
     <>
@@ -161,26 +158,29 @@ function AppContent() {
           }
         />
 
-        <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><DailyTask /></ProtectedRoute>} />
-        <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
-        <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Loans /></ProtectedRoute>} />
-        <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><TravelExpenses /></ProtectedRoute>} />
-        <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><LeaveManagement /></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
+        <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><DailyTask /></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
+        <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Loans /></ProtectedRoute>} />
+        <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><TravelExpenses /></ProtectedRoute>} />
+        <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><UserManagement /></ProtectedRoute>} />
 
         {/* Administration - Delegation, Visitor, Desk */}
         <Route path="/delegation" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr']}><Delegation /></ProtectedRoute>} />
-        <Route path="/visitors" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Visitor /></ProtectedRoute>} />
-        <Route path="/desk-booking" element={<ProtectedRoute><DeskBooking /></ProtectedRoute>} />
+        <Route path="/visitors" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><Visitor /></ProtectedRoute>} />
+        <Route path="/desk-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><DeskManagement /></ProtectedRoute>} />
+
+        {/* Helpdesk */}
+        <Route path="/helpdesk" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee', 'accountant']}><Helpdesk /></ProtectedRoute>} />
 
         {/* Audit Logs */}
         <Route path="/super-admin/audit-logs" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminAuditLogs /></ProtectedRoute>} />
-        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['admin', 'superadmin']}><AdminAuditLogs /></ProtectedRoute>} />
+        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['admin', 'superadmin', 'hr']}><AdminAuditLogs /></ProtectedRoute>} />
 
         {/* Additional Dashboard Routes */}
         <Route path="/companies" element={<ProtectedRoute requiredRoles={['superadmin']}><Companies /></ProtectedRoute>} />
         <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin']}><Branches /></ProtectedRoute>} />
-        <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
 
         {/* HR Routes */}
         <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><Employees /></ProtectedRoute>} />
@@ -227,9 +227,9 @@ function AppContent() {
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
 
         {/* Admin Routes */}
-        <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
-        <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><Payroll /></ProtectedRoute>} />
-        <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
+        <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
+        <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Payroll /></ProtectedRoute>} />
+        <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
 
         {/* New User Routes */}
         <Route path="/welcome" element={<ProtectedRoute requiredRoles={['newuser']}><NewUserDashboard /></ProtectedRoute>} />
@@ -242,7 +242,7 @@ function AppContent() {
       </Routes>
       <SettingsDrawer />
       <NotificationDrawer />
-      {!isDashboardPage && <WhatsAppChat />}
+      {showWhatsApp && <WhatsAppChat />}
     </>
   );
 }

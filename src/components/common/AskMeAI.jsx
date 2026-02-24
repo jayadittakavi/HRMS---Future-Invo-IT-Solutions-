@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './AskMeAI.css';
+import { FaRobot, FaTimes, FaPaperPlane } from 'react-icons/fa';
 
 const AskMeAI = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,8 +21,9 @@ const AskMeAI = () => {
 
         // Simulate bot response
         setTimeout(() => {
+            const botResponse = "I'm currently in demo mode. I can help you navigate through the HRMS, explain payroll features, or assist with leave management. What would you like to know?";
             setMessages(prev => [...prev, {
-                text: "I'm currently in demo mode. I can help you navigate through the HRMS, explain payroll features, or assist with leave management. What would you like to know?",
+                text: botResponse,
                 isBot: true
             }]);
         }, 1000);
@@ -33,7 +35,7 @@ const AskMeAI = () => {
             {!isOpen && (
                 <div className="chat-trigger" onClick={toggleChat}>
                     <div className="ai-icon">
-                        <i className="fas fa-robot"></i>
+                        <FaRobot />
                     </div>
                     <span>Ask Me</span>
                 </div>
@@ -44,11 +46,11 @@ const AskMeAI = () => {
                 <div className="chat-window">
                     <div className="chat-header">
                         <div className="header-info">
-                            <i className="fas fa-robot"></i>
+                            <FaRobot />
                             <span>AI Assistant</span>
                         </div>
                         <button className="close-btn" onClick={toggleChat}>
-                            <i className="fas fa-times"></i>
+                            <FaTimes />
                         </button>
                     </div>
 
@@ -70,8 +72,8 @@ const AskMeAI = () => {
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                         />
-                        <button onClick={handleSend}>
-                            <i className="fas fa-paper-plane"></i>
+                        <button className="send-btn" onClick={handleSend}>
+                            <FaPaperPlane />
                         </button>
                     </div>
                 </div>

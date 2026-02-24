@@ -27,14 +27,6 @@ const HROverallStats = () => {
         };
     });
 
-    const deptDistribution = [
-        { label: 'Engineering', value: 40, color: '#3b82f6' },
-        { label: 'Sales', value: 25, color: '#f97316' },
-        { label: 'HR', value: 10, color: '#ec4899' },
-        { label: 'Marketing', value: 15, color: '#8b5cf6' },
-        { label: 'Others', value: 10, color: '#64748b' },
-    ];
-
     const teamGrowthData = [850, 1100, 980, 1250, 1120, 1234];
 
     const handleJoinMeeting = (role) => {
@@ -83,27 +75,10 @@ const HROverallStats = () => {
                 </div>
             </div>
 
-            {/* Charts Section: Pie, Bar, Line */}
+            {/* Charts Section: Bar, Line */}
             <div className="row g-4 mb-4">
-                {/* Pie Chart - Dept Distribution */}
-                <div className="col-md-4">
-                    <div className="dashboard-card h-100">
-                        <h6 className="dashboard-card-title">Department Allocation</h6>
-                        <div className="py-3 d-flex justify-content-center">
-                            <SimpleDonutChart segments={deptDistribution} size="200px" centerText="100%" />
-                        </div>
-                        <div className="text-center mt-3 small text-secondary">
-                            <div className="d-flex justify-content-center flex-wrap gap-2">
-                                {deptDistribution.map((item, idx) => (
-                                    <span key={idx} className="fw-bold" style={{ color: item.color }}>● {item.label}</span>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Bar Chart - Recruitment Funnel */}
-                <div className="col-md-4">
+                <div className="col-md-6">
                     <div className="dashboard-card h-100">
                         <h6 className="dashboard-card-title">Recruitment Funnel</h6>
                         <div className="py-2">
@@ -113,7 +88,7 @@ const HROverallStats = () => {
                 </div>
 
                 {/* Line Chart - Team Growth */}
-                <div className="col-md-4">
+                <div className="col-md-6">
                     <div className="dashboard-card h-100">
                         <h6 className="dashboard-card-title">Team Growth Trend</h6>
                         <div className="py-3">

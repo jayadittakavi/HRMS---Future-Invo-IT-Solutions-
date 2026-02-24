@@ -10,6 +10,8 @@ import { FaCalendarCheck, FaUmbrellaBeach, FaTasks, FaFileInvoiceDollar, FaClock
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { attendanceService } from '../attendance/service/service';
 import { useEffect } from 'react';
+import { VisitorContent } from '../modules/administration/visitor/Visitor';
+import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
@@ -330,6 +332,8 @@ const EmployeeDashboard = () => {
             {activeView === 'profile' && <ProfileContent />}
             {activeView === 'my-leaves' && <LeaveManagementContent personal={true} />}
             {activeView === 'my-payslips' && <PayrollContent personal={true} />}
+            {activeView === 'visitors' && <VisitorContent />}
+            {activeView === 'desk-management' && <DeskManagementContent />}
         </div>
     );
 };

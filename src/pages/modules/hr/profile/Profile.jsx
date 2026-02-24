@@ -35,6 +35,7 @@ const IcoLock = () => <Ico d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 
 const IcoEdit = () => <Ico d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />;
 const IcoCheck = () => <Ico d="M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4 12 14.01l-3-3" />;
 const IcoCamera = () => <Ico d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 17a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" />;
+const IcoBell = () => <Ico d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0" />;
 
 /* ── Info Field (read-only display) ─────────────────────── */
 const InfoField = ({ label, value, icon, editable, onChange, type = 'text', placeholder }) => (
@@ -130,6 +131,12 @@ const ProfileContent = () => {
         setEditForm(f => ({ ...f, name: employeeData?.name || user?.name || '', phone: employeeData?.phone || '' }));
         setPendingPic(null);
         setIsEditing(false);
+    };
+
+    const handleSubscribe = () => {
+        const subscribeLink = "https://futureinvo.com/subscribe";
+        alert(`🔗 Link to subscribe: ${subscribeLink}\n\nSuccess! A subscription invite has been sent to your email: ${user?.email || 'your registered email'}.`);
+        console.log(`Sending subscription link to ${user?.email}: ${subscribeLink}`);
     };
 
     /* Merged display data */
@@ -265,9 +272,24 @@ const ProfileContent = () => {
                                         </button>
                                     </>
                                 ) : (
-                                    <button onClick={() => setIsEditing(true)} style={{ borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700, background: meta.gradient, border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: `0 4px 12px ${meta.color}40` }}>
-                                        <IcoEdit /> Edit Profile
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={handleSubscribe}
+                                            style={{
+                                                borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700,
+                                                background: '#fff', border: `1.5px solid ${meta.color}`, color: meta.color,
+                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
+                                                transition: 'all 0.2s'
+                                            }}
+                                            onMouseOver={e => e.currentTarget.style.background = `${meta.color}10`}
+                                            onMouseOut={e => e.currentTarget.style.background = '#fff'}
+                                        >
+                                            <IcoBell /> Subscribe
+                                        </button>
+                                        <button onClick={() => setIsEditing(true)} style={{ borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700, background: meta.gradient, border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: `0 4px 12px ${meta.color}40` }}>
+                                            <IcoEdit /> Edit Profile
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>

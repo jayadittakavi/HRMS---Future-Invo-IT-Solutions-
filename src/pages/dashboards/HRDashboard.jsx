@@ -12,7 +12,9 @@ import { DocumentsContent } from '../modules/hr/documents/Documents';
 import { TrainingContent } from '../modules/hr/training/Training';
 import { HRReportsContent } from '../modules/hr/reports/HRReports';
 import HROverallStats from './components/HROverallStats';
-import MySpace from './components/MySpace';
+import { DelegationContent } from '../modules/administration/delegation/Delegation';
+import { VisitorContent } from '../modules/administration/visitor/Visitor';
+import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const HRDashboard = () => {
@@ -20,18 +22,6 @@ const HRDashboard = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const [activeView, setActiveView] = useState('dashboard');
-
-    // Determine view type from URL query param `tab` (e.g. ?tab=myspace)
-    const tabParam = searchParams.get('tab');
-    const [dashboardType, setDashboardType] = useState('overall'); // 'overall' or 'myspace'
-
-    useEffect(() => {
-        if (tabParam === 'myspace') {
-            setDashboardType('myspace');
-        } else {
-            setDashboardType('overall');
-        }
-    }, [tabParam]);
 
     const handleNavigate = (path) => {
         const view = path.replace('/', '');
@@ -46,32 +36,14 @@ const HRDashboard = () => {
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'HR Specialist'}!</h2>
-                            {dashboardType === 'overall' && (
-                                <div className="d-flex align-items-center gap-2">
-                                    <span className="text-secondary fw-medium">Recruitment Status:</span>
-                                    <span className="badge bg-danger text-white fw-bold">URGENT HIRING</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Toggle Buttons */}
-                        <div className="bg-light p-1 rounded-pill d-flex border">
-                            <button
-                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                onClick={() => navigate('/dashboard/hr')}
-                            >
-                                My Team
-                            </button>
-                            <button
-                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                onClick={() => navigate('/dashboard/hr?tab=myspace')}
-                            >
-                                My Space
-                            </button>
+                            <div className="d-flex align-items-center gap-2">
+                                <span className="text-secondary fw-medium">Recruitment Status:</span>
+                                <span className="badge bg-danger text-white fw-bold">URGENT HIRING</span>
+                            </div>
                         </div>
                     </div>
 
-                    {dashboardType === 'overall' ? <HROverallStats /> : <MySpace role="HR" onNavigate={handleNavigate} />}
+                    <HROverallStats />
                 </>
             )}
 
@@ -93,6 +65,9 @@ const HRDashboard = () => {
             {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
             {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
             {activeView === 'onboarding' && <OnboardingContent />}
+            {activeView === 'delegation' && <DelegationContent />}
+            {activeView === 'visitors' && <VisitorContent />}
+            {activeView === 'desk-management' && <DeskManagementContent />}
             {activeView === 'profile' && <ProfileContent />}
         </div>
     );

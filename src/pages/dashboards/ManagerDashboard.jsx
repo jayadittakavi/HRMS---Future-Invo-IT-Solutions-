@@ -14,6 +14,9 @@ import TravelExpenses from '../modules/manager/components/TravelExpenses';
 import ManagerAttendance from '../modules/manager/components/ManagerAttendance';
 import ManagerMyAttendance from '../modules/manager/components/ManagerMyAttendance';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
+import { DelegationContent } from '../modules/administration/delegation/Delegation';
+import { VisitorContent } from '../modules/administration/visitor/Visitor';
+import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 
 const ManagerDashboard = () => {
     const { user } = useAuth();
@@ -57,52 +60,15 @@ const ManagerDashboard = () => {
         <div className="container-fluid p-0">
             {activeView === 'dashboard' && (
                 <>
-                    {/* Welcome & Dashboard Toggle */}
+                    {/* Welcome & Dashboard Title */}
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
                             <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Manager'}!</h2>
                             <p className="text-secondary small mb-0">Here's what's happening today.</p>
                         </div>
-                        <div className="bg-light p-1 rounded-pill d-flex border">
-                            <button
-                                className={`btn btn-sm rounded-pill px-4 fw-bold ${dashboardType === 'overall' ? 'btn-white shadow-sm' : 'text-secondary border-0'}`}
-                                onClick={() => navigate('/dashboard/manager')}
-                            >
-                                My Team Overview
-                            </button>
-
-                            {/* Role Switcher Split Area */}
-                            <div className={`d-flex align-items-center rounded-pill ${dashboardType === 'myspace' ? 'btn-white shadow-sm' : ''}`}>
-                                <button
-                                    className={`btn btn-sm rounded-pill px-3 fw-bold ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
-                                    onClick={() => {
-                                        setDashboardType('myspace'); // Optimistic update for instant feedback
-                                        navigate('/dashboard/manager?tab=myspace');
-                                    }}
-                                >
-                                    My Space
-                                </button>
-                                <div className="dropdown">
-                                    <button
-                                        className={`btn btn-sm rounded-pill px-2 fw-bold dropdown-toggle dropdown-toggle-split ${dashboardType === 'myspace' ? 'text-dark' : 'text-secondary border-0'}`}
-                                        type="button"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
-                                    >
-                                        <span className="visually-hidden">Toggle Dropdown</span>
-                                    </button>
-                                    <ul className="dropdown-menu dropdown-menu-end border-0 shadow-lg">
-                                        <li><h6 className="dropdown-header small text-muted text-uppercase my-1">Switch View</h6></li>
-                                        <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/hr')}>HR Dashboard</button></li>
-                                        <li><button className="dropdown-item small fw-medium" onClick={() => navigate('/dashboard/employee')}>Employee Dashboard</button></li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
-                    {/* Content Area */}
-                    {dashboardType === 'overall' ? <ManagerOverallStats onNavigate={handleNavigate} /> : <MySpace role="Manager" onNavigate={handleNavigate} />}
+                    <ManagerOverallStats onNavigate={handleNavigate} />
                 </>
             )}
 
@@ -120,6 +86,9 @@ const ManagerDashboard = () => {
             {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
             {activeView === 'attendance' && <ManagerAttendance />}
             {activeView === 'my-attendance' && <ManagerMyAttendance />}
+            {activeView === 'delegation' && <DelegationContent />}
+            {activeView === 'visitors' && <VisitorContent />}
+            {activeView === 'desk-management' && <DeskManagementContent />}
 
         </div>
     );

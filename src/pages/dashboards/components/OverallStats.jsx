@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
 import { FaUsers, FaBuilding, FaClipboardList, FaMoneyBillWave, FaUserTie, FaUserCog, FaUserShield } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const OverallStats = () => {
+    const navigate = useNavigate();
+
     // Mock Data for Overall Stats
     const stats = [
-        { label: 'Total Companies', value: 12, icon: <FaBuilding />, color: 'bg-gradient-purple' },
-        { label: 'Total Branches', value: 45, icon: <FaBuilding />, color: 'bg-gradient-blue' },
-        { label: 'Total Admins', value: 8, icon: <FaUserShield />, color: 'bg-gradient-green' },
-        { label: 'Total HRs', value: 24, icon: <FaUserTie />, color: 'bg-gradient-orange' },
-        { label: 'Total Managers', value: 56, icon: <FaUserCog />, color: 'bg-gradient-cyan' },
-        { label: 'Total Employees', value: 1308, icon: <FaUsers />, color: 'bg-gradient-pink' },
+        { label: 'Total Companies', value: 12, icon: <FaBuilding />, color: 'bg-gradient-purple', path: '/companies' },
+        { label: 'Total Branches', value: 45, icon: <FaBuilding />, color: 'bg-gradient-blue', path: '/branches' },
+        { label: 'Total Admins', value: 8, icon: <FaUserShield />, color: 'bg-gradient-green', path: '/users' },
+        { label: 'Total HRs', value: 24, icon: <FaUserTie />, color: 'bg-gradient-orange', path: '/users' },
+        { label: 'Total Managers', value: 56, icon: <FaUserCog />, color: 'bg-gradient-cyan', path: '/users' },
+        { label: 'Total Employees', value: 1308, icon: <FaUsers />, color: 'bg-gradient-pink', path: '/employees' },
     ];
 
     const attendanceSummary = [
@@ -31,13 +34,22 @@ const OverallStats = () => {
 
     const revenueTrend = [120, 135, 125, 145, 160, 155, 170, 180, 190, 200, 210, 220];
 
+    const handleAction = (type, data) => {
+        console.log(`${type} Action:`, data);
+        alert(`${type} successful!`);
+    };
+
     return (
         <div>
             {/* Top Counters Row */}
             <div className="row g-4 mb-4">
                 {stats.map((stat, index) => (
                     <div className="col-md-2 col-6" key={index}>
-                        <div className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100`}>
+                        <div
+                            className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm`}
+                            onClick={() => navigate(stat.path)}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <div className="d-flex align-items-center mb-2">
                                 <div className="rounded-circle bg-white bg-opacity-25 p-2 me-2 fs-5 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
                                     {stat.icon}
@@ -54,7 +66,7 @@ const OverallStats = () => {
             <div className="row g-4 mb-4">
                 {/* Attendance Summary Donut */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100">
+                    <div className="dashboard-card h-100 shadow-sm">
                         <h6 className="dashboard-card-title">Today's Attendance</h6>
                         <div className="py-3 d-flex justify-content-center">
                             <SimpleDonutChart segments={attendanceSummary} size="200px" centerText="Total" />
@@ -72,7 +84,7 @@ const OverallStats = () => {
 
                 {/* Pending Requests List */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100">
+                    <div className="dashboard-card h-100 shadow-sm">
                         <h6 className="dashboard-card-title mb-3 d-flex justify-content-between align-items-center">
                             Pending Requests <span className="badge bg-danger rounded-pill">12</span>
                         </h6>
@@ -82,24 +94,24 @@ const OverallStats = () => {
                                     <div className="d-flex align-items-center gap-2">
                                         <div className="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', fontSize: '0.8rem' }}>JD</div>
                                         <div>
-                                            <div className="fw-bold text-dark">John Doe</div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Casual Leave - 2 Days</div>
+                                            <div className="fw-bold text-dark">Employee {i}</div>
+                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Leave Request - {i} Day(s)</div>
                                         </div>
                                     </div>
                                     <div className="d-flex gap-1">
-                                        <button className="btn btn-sm btn-success py-0 px-2" style={{ fontSize: '0.7rem' }}>✓</button>
-                                        <button className="btn btn-sm btn-danger py-0 px-2" style={{ fontSize: '0.7rem' }}>✕</button>
+                                        <button className="btn btn-sm btn-success py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Approve', i)}>✓</button>
+                                        <button className="btn btn-sm btn-danger py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Reject', i)}>✕</button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <button className="btn btn-link w-100 text-center text-primary small mt-2">View All Requests</button>
+                        <button className="btn btn-link w-100 text-center text-primary fw-bold small mt-2" onClick={() => navigate('/leave-management')}>View All Requests</button>
                     </div>
                 </div>
 
                 {/* Company Growth / Trend */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100">
+                    <div className="dashboard-card h-100 shadow-sm">
                         <h6 className="dashboard-card-title">Revenue / Growth Trend</h6>
                         <SimpleLineChart data={revenueTrend} height="200px" color="#3b82f6" />
                     </div>
@@ -109,13 +121,13 @@ const OverallStats = () => {
             {/* Department Distribution Bar Chart */}
             <div className="row g-4 mb-4">
                 <div className="col-md-8">
-                    <div className="dashboard-card">
+                    <div className="dashboard-card shadow-sm">
                         <h6 className="dashboard-card-title">Employees by Department</h6>
                         <SimpleBarChart data={departmentData} height="300px" />
                     </div>
                 </div>
                 <div className="col-md-4">
-                    <div className="dashboard-card bg-gradient-orange h-100 text-white">
+                    <div className="dashboard-card bg-gradient-orange h-100 text-white shadow-sm border-0">
                         <div className="d-flex align-items-center justify-content-between mb-4">
                             <h6 className="mb-0 fw-bold">System Alerts</h6>
                             <FaClipboardList className="fs-4 opacity-50" />
