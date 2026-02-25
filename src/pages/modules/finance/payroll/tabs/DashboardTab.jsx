@@ -1,8 +1,10 @@
 import React from 'react';
 import { FaMoneyBillWave, FaUserTie, FaChartLine, FaCalendarAlt, FaDownload, FaFileUpload, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { useAutomation } from '../../../../../context/AutomationContext';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../../../components/charts/CustomCharts';
 
 const DashboardTab = ({ onTabChange }) => {
+    const { triggerEvent } = useAutomation();
     // Mock Data
     const monthlyPayoutData = [4.2, 4.5, 4.8, 5.2, 5.4, 5.6]; // In Lakhs
     const deptPayoutData = [
@@ -24,6 +26,14 @@ const DashboardTab = ({ onTabChange }) => {
 
     const handleRunPayroll = () => {
         alert('Initializing Payroll Engine for the current period...');
+
+        // Trigger Automation
+        triggerEvent('onPayrollRun', {
+            module: 'Payroll',
+            period: 'May 2026',
+            totalEmployees: 124
+        });
+
         onTabChange('salary');
     };
 

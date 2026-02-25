@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../../../context/AuthContext';
-import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useAuth } from '../../../context/AuthContext';
+import DashboardLayout from '../../../components/layout/DashboardLayout';
+import { useAutomation } from '../../../context/AutomationContext';
 import {
     MdDashboard, MdAddCircle, MdList, MdPeople, MdHistory,
     MdMoreVert, MdSearch, MdFilterList, MdCheckCircle,
@@ -11,6 +12,7 @@ import {
 
 export const HelpdeskContent = () => {
     const { user } = useAuth();
+    const { triggerEvent } = useAutomation();
     const role = user?.role?.toLowerCase() || 'employee';
 
     const [activeTab, setActiveTab] = useState('dashboard');
@@ -310,7 +312,11 @@ export const HelpdeskContent = () => {
                         </div>
                         <div className="d-flex gap-2 mt-4">
                             <button className="btn btn-light w-100 rounded-pill" onClick={() => setShowCreateModal(false)}>Cancel</button>
-                            <button className="btn btn-primary w-100 rounded-pill shadow-sm" onClick={() => { handleAction('Create Ticket', {}); setShowCreateModal(false); }}>Submit Ticket</button>
+                            <button className="btn btn-primary w-100 rounded-pill shadow-sm" onClick={() => {
+                                handleAction('Create Ticket', {});
+                                triggerEvent('onCreate', { module: 'Helpdesk', category: 'IT Support', creator: user?.name });
+                                setShowCreateModal(false);
+                            }}>Submit Ticket</button>
                         </div>
                     </div>
                 </div>

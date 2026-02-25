@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FaPaperPlane, FaCalendarAlt, FaInfoCircle } from 'react-icons/fa';
 import { MdDateRange } from 'react-icons/md';
+import { useAutomation } from '../../../../../context/AutomationContext';
 
 const leaveTypes = ['Sick Leave', 'Casual Leave', 'Privilege Leave', 'Maternity Leave', 'Paternity Leave', 'Compensatory Leave'];
 
@@ -16,6 +17,7 @@ const balances = {
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
 
 const ApplyLeave = () => {
+    const { triggerEvent } = useAutomation();
     const [formData, setFormData] = useState({ type: 'Sick Leave', startDate: '', endDate: '', halfDay: false, halfDayType: 'Morning', reason: '', attachment: null });
     const [submitted, setSubmitted] = useState(false);
 
@@ -28,6 +30,15 @@ const ApplyLeave = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setSubmitted(true);
+
+        // Trigger Automation Event
+        triggerEvent('onApply', {
+            module: 'Leave',
+            employeeName: 'Self',
+            leaveType: formData.type,
+            duration: days
+        });
+
         setTimeout(() => setSubmitted(false), 3000);
     };
 

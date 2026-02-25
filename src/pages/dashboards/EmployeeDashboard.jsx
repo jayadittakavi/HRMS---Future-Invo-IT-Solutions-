@@ -1,112 +1,70 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { AttendanceContent } from '../../pages/attendance/Attendance';
 import '../../components/layout/DashboardLayout.css';
-import { SimpleBarChart, SimpleDonutChart } from '../../components/charts/CustomCharts';
+import { SimpleBarChart } from '../../components/charts/CustomCharts';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
-import { FaCalendarCheck, FaUmbrellaBeach, FaTasks, FaFileInvoiceDollar, FaClock, FaBusinessTime, FaSignInAlt, FaSignOutAlt, FaMugHot } from 'react-icons/fa';
+import { FaCalendarCheck, FaUmbrellaBeach, FaListCheck, FaFileInvoiceDollar, FaRightToBracket, FaRightFromBracket, FaMugHot, FaCircleCheck } from 'react-icons/fa6';
+import { MdOutlineWavingHand, MdOutlineNotificationsActive } from 'react-icons/md';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { attendanceService } from '../attendance/service/service';
-import { useEffect } from 'react';
 import { VisitorContent } from '../modules/administration/visitor/Visitor';
 import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
+    const [activeView, setActiveView] = useState('dashboard');
     const [todayStatus, setTodayStatus] = useState({
         date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
         status: 'Absent',
         checkIn: '--:--',
         checkOut: '--:--',
         workingHours: '0h 0m',
-        shift: '10:00 AM - 07:00 PM', // Default
+        shift: '10:00 AM - 07:00 PM',
         isLate: false,
-        lateBy: null
     });
 
     useEffect(() => {
         const fetchTodayStatus = async () => {
             try {
                 const data = await attendanceService.getMyAttendance();
-                // Find today's record (matching YYYY-MM-DD)
                 const todayStr = new Date().toISOString().split('T')[0];
-                const todayRecord = data.find(record => {
-                    // Handle different potential date formats from API
-                    if (!record.date) return false;
-                    return record.date.startsWith(todayStr) || record.date.split('T')[0] === todayStr;
-                });
+                const todayRecord = data.find(record => record.date?.startsWith(todayStr));
 
                 if (todayRecord) {
                     const formatTime = (timeStr) => {
                         if (!timeStr) return '--:--';
-                        try {
-                            const dateObj = new Date(timeStr);
-                            if (isNaN(dateObj.getTime())) {
-                                // Fallback for simple time strings if API returns "HH:MM:SS"
-                                return timeStr.substring(0, 5);
-                            }
-                            return dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        } catch (e) {
-                            return '--:--';
-                        }
+                        const dateObj = new Date(timeStr);
+                        return isNaN(dateObj.getTime()) ? timeStr.substring(0, 5) : dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     };
 
-                    const checkIn = formatTime(todayRecord.punch_in_time); // Using punch_in_time based on context
-                    const checkOut = formatTime(todayRecord.punch_out_time); // Using punch_out_time based on context
-
-                    // Calculate working hours
+                    const start = new Date(todayRecord.punch_in_time);
+                    const end = todayRecord.punch_out_time ? new Date(todayRecord.punch_out_time) : new Date();
+                    const diffMs = end - start;
                     let duration = '0h 0m';
-                    if (todayRecord.punch_in_time) {
-                        const start = new Date(todayRecord.punch_in_time);
-                        const end = todayRecord.punch_out_time ? new Date(todayRecord.punch_out_time) : new Date();
-                        const diffMs = end - start;
-                        if (diffMs > 0) {
-                            const diffHrs = Math.floor(diffMs / 3600000);
-                            const diffMins = Math.floor((diffMs % 3600000) / 60000);
-                            duration = `${diffHrs}h ${diffMins}m`;
-                        }
+                    if (diffMs > 0) {
+                        duration = `${Math.floor(diffMs / 3600000)}h ${Math.floor((diffMs % 3600000) / 60000)}m`;
                     }
-
-                    // Determine Status (Prioritize API status, else derive)
-                    let status = todayRecord.status || 'Present';
-                    // Example logic for "Late" if not explicitly "Late" status but checking logic
-                    const isLate = status.toLowerCase().includes('late');
 
                     setTodayStatus(prev => ({
                         ...prev,
-                        status: status,
-                        checkIn: checkIn,
-                        checkOut: checkOut,
+                        status: todayRecord.status || 'Present',
+                        checkIn: formatTime(todayRecord.punch_in_time),
+                        checkOut: formatTime(todayRecord.punch_out_time),
                         workingHours: duration,
-                        isLate: isLate,
-                        // lateBy: isLate ? '5 MINS' : null // Mocking calculation for now or need shift start time
+                        isLate: (todayRecord.status || '').toLowerCase().includes('late'),
                     }));
                 }
             } catch (error) {
                 console.error("Error fetching attendance status:", error);
             }
         };
-
         fetchTodayStatus();
-
-        // Optional: Update timer every minute for live "working hours" if currently checked in
         const interval = setInterval(fetchTodayStatus, 60000);
         return () => clearInterval(interval);
     }, []);
-
-
-    const handleNavigate = (path) => {
-        const view = path.replace('/', '');
-        setActiveView(view || 'dashboard');
-    };
-
-    const attendanceStats = [
-        { label: 'Present', value: 22, color: '#10b981' },
-        { label: 'Leave', value: 2, color: '#f59e0b' },
-        { label: 'Holiday', value: 6, color: '#3b82f6' },
-    ];
 
     const salaryHistory = [
         { label: 'Jan', value: 45000, color: '#3b82f6' },
@@ -117,223 +75,207 @@ const EmployeeDashboard = () => {
     ];
 
     return (
-        <div className="container-fluid p-0">
+        <div className="animate__animated animate__fadeIn">
             {activeView === 'dashboard' && (
-                <>
+                <div className="container-fluid p-0">
                     {/* Welcome Header */}
-                    <div className="mb-4">
-                        <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || (user?.email ? user.email.split('@')[0].charAt(0).toUpperCase() + user.email.split('@')[0].slice(1) : 'Employee')}!</h2>
-                        <div className="d-flex align-items-center gap-2">
-                            <span className="text-secondary fw-medium">Next Pay Date:</span>
-                            <span className="badge bg-primary text-white fw-bold">JUN 30</span>
+                    <div className="d-flex justify-content-between align-items-end mb-4 pb-2">
+                        <div>
+                            <div className="d-flex align-items-center gap-2 mb-1">
+                                <h3 className="fw-bold text-dark mb-0">
+                                    <MdOutlineWavingHand className="text-warning me-2" />
+                                    Hey, {user?.name || 'Employee'}!
+                                </h3>
+                            </div>
+                            <p className="text-secondary small mb-0">Here's what's happening with your work profile today.</p>
+                        </div>
+                        <div className="d-flex gap-3 align-items-center">
+                            <div className="text-end d-none d-md-block">
+                                <span className="text-muted smaller d-block mb-1">NEXT PAY DATE</span>
+                                <span className="fw-bold text-primary ls-tight">JUNE 30, 2026</span>
+                            </div>
+                            <div className="bg-white p-2 rounded-circle shadow-sm position-relative cursor-pointer hover-scale transition-all">
+                                <MdOutlineNotificationsActive size={20} className="text-primary" />
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-2 border-white" style={{ padding: '0.35em' }}>
+                                    <span className="visually-hidden">unread notifications</span>
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Top Cards */}
-                    {/* Quick Personal Snapshot (Status, Shift, Timings) */}
+                    {/* Today's Status Large Card */}
                     <div className="row g-4 mb-4">
-                        <div className="col-md-12">
-                            <div className="dashboard-card bg-white border-0 shadow-sm">
-                                <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-                                    <h6 className="dashboard-card-title mb-0 d-flex align-items-center gap-2">
-                                        <FaBusinessTime className="text-primary" /> Today's Status
-                                    </h6>
-                                    <div className="d-flex gap-2">
-                                        {todayStatus.isLate && (
-                                            <span className="badge bg-danger bg-opacity-10 text-danger border border-danger px-3 rounded-pill fw-bold">
-                                                LATE
-                                            </span>
-                                        )}
-                                        <span className="badge bg-light text-secondary border px-3 rounded-pill">
-                                            {todayStatus.date}
+                        <div className="col-12">
+                            <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                                <div className="card-body p-0">
+                                    <div className="p-4 border-bottom bg-light-subtle d-flex justify-content-between align-items-center">
+                                        <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                                            <FaCalendarCheck className="text-primary" /> At a Glance
+                                        </h6>
+                                        <span className="badge-modern approved rounded-pill fw-bold small">
+                                            <div className="dot"></div> {todayStatus.date}
                                         </span>
                                     </div>
-                                </div>
-
-                                <div className="row g-4 text-center">
-                                    {/* Attendance Status */}
-                                    <div className="col-md-3 border-end">
-                                        <div className="mb-2 text-secondary small text-uppercase fw-bold">Current Status</div>
-                                        <h4 className={`fw-bold mb-1 ${todayStatus.status === 'Absent' ? 'text-secondary' : todayStatus.isLate ? 'text-warning' : 'text-success'}`}>
-                                            {todayStatus.status}
-                                        </h4>
-                                        <div className="small text-muted">
-                                            {todayStatus.checkIn !== '--:--' ? `Checked in at ${todayStatus.checkIn}` : 'Not checked in yet'}
+                                    <div className="p-4 row g-0 text-center">
+                                        <div className="col-md-3 border-end py-3">
+                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Status</p>
+                                            <h4 className={`fw-bold mb-1 ${todayStatus.status === 'Absent' ? 'text-danger' : todayStatus.isLate ? 'text-warning' : 'text-success'}`}>
+                                                {todayStatus.status}
+                                            </h4>
+                                            <div className="small text-muted">{todayStatus.checkIn !== '--:--' ? `Since ${todayStatus.checkIn}` : 'Check-in Pending'}</div>
                                         </div>
-                                    </div>
-
-                                    {/* Shift Timing */}
-                                    <div className="col-md-3 border-end">
-                                        <div className="mb-2 text-secondary small text-uppercase fw-bold">Shift Timing</div>
-                                        <h5 className="fw-bold text-dark mb-1">{todayStatus.shift}</h5>
-                                        <div className="small text-muted">General Shift (9h)</div>
-                                    </div>
-
-                                    {/* Clock In / Out */}
-                                    <div className="col-md-3 border-end">
-                                        <div className="mb-2 text-secondary small text-uppercase fw-bold">Clock In / Out</div>
-                                        <div className="d-flex justify-content-center gap-4">
-                                            <div className="text-start">
-                                                <div className="d-flex align-items-center gap-1 small text-success fw-bold">
-                                                    <FaSignInAlt /> In
+                                        <div className="col-md-3 border-end py-3 px-3">
+                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Shift</p>
+                                            <h5 className="fw-bold text-dark mb-1">{todayStatus.shift}</h5>
+                                            <div className="small text-muted">9 Hours General</div>
+                                        </div>
+                                        <div className="col-md-3 border-end py-3 px-3">
+                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Timings</p>
+                                            <div className="d-flex justify-content-center gap-4 align-items-center mt-2">
+                                                <div className="text-center">
+                                                    <span className="d-block smaller text-success fw-bold mb-1">IN</span>
+                                                    <span className="fw-bold h5 mb-0 ls-tight">{todayStatus.checkIn}</span>
                                                 </div>
-                                                <span className="d-block fw-bold display-6" style={{ fontSize: '1.2rem' }}>{todayStatus.checkIn}</span>
+                                                <div className="vr h-100 mx-2"></div>
+                                                <div className="text-center">
+                                                    <span className="d-block smaller text-muted fw-bold mb-1">OUT</span>
+                                                    <span className="fw-bold h5 mb-0 text-muted ls-tight">{todayStatus.checkOut}</span>
+                                                </div>
                                             </div>
-                                            <div className="border-start mx-2"></div>
-                                            <div className="text-start">
-                                                <div className="d-flex align-items-center gap-1 small text-secondary fw-bold">
-                                                    <FaSignOutAlt /> Out
-                                                </div>
-                                                <span className="d-block text-muted fw-bold" style={{ fontSize: '1.2rem' }}>{todayStatus.checkOut}</span>
+                                        </div>
+                                        <div className="col-md-3 py-3 px-3">
+                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Logged Hours</p>
+                                            <h4 className="fw-bold text-primary mb-1 ls-tight">{todayStatus.workingHours}</h4>
+                                            <div className="progress mt-2 mx-auto" style={{ height: '6px', maxWidth: '120px' }}>
+                                                <div className="progress-bar bg-primary rounded-pill" style={{ width: '45%' }}></div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* Working Hours */}
-                                    <div className="col-md-3">
-                                        <div className="mb-2 text-secondary small text-uppercase fw-bold">Working Hours</div>
-                                        <h4 className="fw-bold text-primary mb-1">{todayStatus.workingHours}</h4>
-                                        <div className="progress mt-2" style={{ height: '6px' }}>
-                                            <div className="progress-bar bg-primary" style={{ width: '45%' }}></div>
-                                        </div>
-                                        <div className="small text-muted mt-1">Target: 9h/day</div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Secondary Stats Row */}
+                    {/* Quick Stats Grid */}
                     <div className="row g-4 mb-4">
                         <div className="col-md-4">
-                            <div className="dashboard-card bg-gradient-blue text-white">
-                                <h6 className="dashboard-card-title d-flex align-items-center gap-2 text-white">
-                                    <FaUmbrellaBeach className="fs-5" /> Leave Balance
-                                </h6>
-                                <h3 className="dashboard-value text-white">12 Days</h3>
-                                <p className="small mb-0 opacity-75">Casual & Sick Leaves Remaining</p>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="dashboard-card bg-gradient-orange text-white">
-                                <h6 className="dashboard-card-title d-flex align-items-center gap-2 text-white">
-                                    <FaTasks className="fs-5" /> Pending Actions
-                                </h6>
-                                <h3 className="dashboard-value text-white">3 Tasks</h3>
-                                <p className="small fw-bold mb-0 opacity-75">Compliance Training Pending</p>
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="dashboard-card bg-gradient-green text-white">
-                                <h6 className="dashboard-card-title d-flex align-items-center gap-2 text-white">
-                                    <FaMugHot className="fs-5" /> Next Holiday
-                                </h6>
-                                <h3 className="dashboard-value text-white">Aug 15</h3>
-                                <p className="small fw-bold mb-0 opacity-75">Independence Day (Upcoming)</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Charts Row (New) */}
-                    <div className="row g-4 mb-4">
-                        <div className="col-md-4">
-                            <div className="dashboard-card">
-                                <h6 className="dashboard-card-title d-flex justify-content-between align-items-center">
-                                    Attendance Summary <span className="badge bg-light text-secondary">January 2026</span>
-                                </h6>
-                                <div className="mt-3">
-                                    <div className="d-flex justify-content-between border-bottom py-2">
-                                        <span className="text-secondary small">Total Working Days</span>
-                                        <span className="fw-bold text-dark">26</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between border-bottom py-2">
-                                        <span className="text-secondary small">Present Days</span>
-                                        <span className="fw-bold text-success">24</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between border-bottom py-2">
-                                        <span className="text-secondary small">Absent Days</span>
-                                        <span className="fw-bold text-danger">1</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between border-bottom py-2">
-                                        <span className="text-secondary small">Late Count</span>
-                                        <span className="fw-bold text-warning">1</span>
-                                    </div>
-                                    <div className="d-flex justify-content-between pt-2">
-                                        <span className="text-secondary small">Overtime (Approved)</span>
-                                        <span className="fw-bold text-primary">2h 30m</span>
-                                    </div>
+                            <div className="card border-0 shadow-sm rounded-4 premium-card-blue text-white overflow-hidden p-4 h-100 position-relative">
+                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Leave Balance</h6>
+                                <div className="d-flex align-items-end gap-2 mb-2">
+                                    <h2 className="fw-bold mb-0">12</h2>
+                                    <span className="mb-1 fw-medium h5 opacity-75">Days</span>
                                 </div>
+                                <p className="smaller mb-0 opacity-75">Next Leave Approval: Pending</p>
+                                <FaUmbrellaBeach className="card-floating-icon text-white opacity-10" size={80} />
                             </div>
                         </div>
-                        <div className="col-md-8">
-                            <div className="dashboard-card">
-                                <h6 className="dashboard-card-title">Salary History (Last 5 Months)</h6>
-                                <SimpleBarChart data={salaryHistory} height="180px" />
+                        <div className="col-md-4">
+                            <div className="card border-0 shadow-sm rounded-4 premium-card-orange text-white overflow-hidden p-4 h-100 position-relative">
+                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Action Required</h6>
+                                <div className="d-flex align-items-end gap-2 mb-2">
+                                    <h2 className="fw-bold mb-0">03</h2>
+                                    <span className="mb-1 fw-medium h5 opacity-75">Tasks</span>
+                                </div>
+                                <p className="smaller mb-0 opacity-75">Compliance & Security training</p>
+                                <FaListCheck className="card-floating-icon text-white opacity-10" size={80} />
+                            </div>
+                        </div>
+                        <div className="col-md-4">
+                            <div className="card border-0 shadow-sm rounded-4 premium-card-green text-white overflow-hidden p-4 h-100 position-relative">
+                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Next Holiday</h6>
+                                <div className="d-flex align-items-end gap-2 mb-2">
+                                    <h2 className="fw-bold mb-0">Aug 15</h2>
+                                </div>
+                                <p className="smaller mb-0 opacity-75">Independence Day (Fri)</p>
+                                <FaMugHot className="card-floating-icon text-white opacity-10" size={80} />
                             </div>
                         </div>
                     </div>
 
-                    {/* Recent Payslips & Tasks */}
+                    {/* Chart & History Row */}
                     <div className="row g-4">
-                        <div className="col-md-8">
-                            <div className="dashboard-card">
-                                <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                                    <FaFileInvoiceDollar className="text-primary" /> Recent Payslips
+                        <div className="col-lg-8">
+                            <div className="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <div className="d-flex justify-content-between align-items-center mb-4">
+                                    <h6 className="fw-bold text-dark mb-0">Salary Trend (Last 5 Months)</h6>
+                                    <div className="badge-modern pending rounded-pill">Net Pay Overview</div>
+                                </div>
+                                <SimpleBarChart data={salaryHistory} height="240px" />
+                            </div>
+                        </div>
+                        <div className="col-lg-4">
+                            <div className="card border-0 shadow-sm rounded-4 p-4 h-100">
+                                <h6 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                                    <FaFileInvoiceDollar className="text-primary" /> Current Payslips
                                 </h6>
-                                <div className="d-flex flex-column gap-2">
-                                    <div className="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="bg-light p-2 rounded text-primary fw-bold">MAY</div>
-                                            <div>
-                                                <h6 className="mb-0 text-dark small fw-bold">May 2024 Salary</h6>
-                                                <small className="text-muted">Paid on May 31, 2024</small>
+                                <div className="d-flex flex-column gap-3">
+                                    {['MAY', 'APR', 'MAR'].map((month, idx) => (
+                                        <div key={month} className={`d-flex align-items-center justify-content-between p-3 rounded-4 bg-light hover-bg-light transition-all cursor-pointer`}>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="bg-primary-subtle text-primary rounded-3 px-2 py-1 fw-bold smaller">{month}</div>
+                                                <div>
+                                                    <div className="fw-bold text-dark smaller">{month} 2024 Log</div>
+                                                    <div className="text-muted smallest">Ref: #PS-2024-0{idx + 5}</div>
+                                                </div>
                                             </div>
+                                            <FaCircleCheck className="text-success opacity-50" />
                                         </div>
-                                        <button className="btn btn-sm btn-outline-dark">Download</button>
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center p-2 border-bottom">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className="bg-light p-2 rounded text-primary fw-bold">APR</div>
-                                            <div>
-                                                <h6 className="mb-0 text-dark small fw-bold">April 2024 Salary</h6>
-                                                <small className="text-muted">Paid on Apr 30, 2024</small>
-                                            </div>
-                                        </div>
-                                        <button className="btn btn-sm btn-outline-dark">Download</button>
-                                    </div>
+                                    ))}
+                                    <button className="btn btn-primary btn-sm rounded-pill mt-2 py-2 shadow-sm">View Full History</button>
                                 </div>
                             </div>
                         </div>
-                        <div className="col-md-4">
-                            <div className="dashboard-card">
-                                <h6 className="dashboard-card-title">My Tasks</h6>
-                                <ul className="list-group list-group-flush">
-                                    <li className="list-group-item bg-transparent px-0 border-bottom mb-1">
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" id="myTask1" />
-                                            <label className="form-check-label text-secondary small" htmlFor="myTask1">Submit Weekly Report</label>
-                                        </div>
-                                    </li>
-                                    <li className="list-group-item bg-transparent px-0 border-0">
-                                        <div className="form-check">
-                                            <input className="form-check-input" type="checkbox" id="myTask2" />
-                                            <label className="form-check-label text-secondary small" htmlFor="myTask2">Update Project Status</label>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
                     </div>
-                </>
+                </div>
             )}
 
             {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
-
             {activeView === 'profile' && <ProfileContent />}
             {activeView === 'my-leaves' && <LeaveManagementContent personal={true} />}
             {activeView === 'my-payslips' && <PayrollContent personal={true} />}
             {activeView === 'visitors' && <VisitorContent />}
             {activeView === 'desk-management' && <DeskManagementContent />}
+
+            <style>{`
+                .smaller { font-size: 0.75rem; }
+                .smallest { font-size: 0.65rem; }
+                .ls-1 { letter-spacing: 0.05rem; }
+                .ls-tight { letter-spacing: -0.05rem; }
+                
+                .premium-card-blue { 
+                    background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #60a5fa 100%);
+                    box-shadow: 0 10px 20px rgba(30, 58, 138, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                }
+                .premium-card-orange { 
+                    background: linear-gradient(135deg, #9a3412 0%, #f97316 50%, #fb923c 100%);
+                    box-shadow: 0 10px 20px rgba(154, 52, 18, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                }
+                .premium-card-green { 
+                    background: linear-gradient(135deg, #064e3b 0%, #10b981 50%, #34d399 100%);
+                    box-shadow: 0 10px 20px rgba(6, 78, 59, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                }
+                
+                .card-floating-icon {
+                    position: absolute; right: -15px; bottom: -15px;
+                    transform: rotate(-15deg); pointer-events: none;
+                }
+                
+                .hover-scale:hover { transform: scale(1.05); }
+                .hover-bg-light:hover { background-color: #f1f5f9 !important; }
+                
+                .badge-modern {
+                    display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+                    border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+                }
+                .approved { background: #dcfce7; color: #166534; }
+                .pending { background: #fef9c3; color: #854d0e; }
+                .badge-modern .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+                
+                .transition-all { transition: all 0.2s ease-in-out; }
+            `}</style>
         </div>
     );
 };

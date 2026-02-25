@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { MdSave } from 'react-icons/md';
+import { useAutomation } from '../../../context/AutomationContext';
 
 const MarkAttendance = () => {
+    const { triggerEvent } = useAutomation();
     const [formData, setFormData] = useState({
         employeeId: '',
         name: '', // Auto-populate this based on API fetch ideally
@@ -19,6 +21,14 @@ const MarkAttendance = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Trigger Automation
+        triggerEvent('onMark', {
+            module: 'Attendance',
+            employeeName: formData.name || 'Unknown',
+            status: formData.status
+        });
+
         alert('Attendance Marked Successfully (Mock)!');
         // Implement save logic via props or service
     };

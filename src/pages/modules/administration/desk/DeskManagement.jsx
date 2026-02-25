@@ -21,18 +21,22 @@ export const DeskManagementContent = () => {
     const [showDeskModal, setShowDeskModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [selectedDesk, setSelectedDesk] = useState(null);
+    const [selectedFloor, setSelectedFloor] = useState(null);
+    const [showFloorModal, setShowFloorModal] = useState(false);
+    const [floorModalView, setFloorModalView] = useState('options'); // 'options' | 'layout'
+
 
     // Mock Data
     const [desks, setDesks] = useState([
         { id: 'D01', name: 'Desk 101', floor: '1st Floor', wing: 'Alpha', status: 'Available', type: 'Hot Desk', team: 'Engineering' },
-        { id: 'D02', name: 'Desk 102', floor: '1st Floor', wing: 'Alpha', status: 'Booked', type: 'Hot Desk', team: 'Engineering', bookedBy: 'John Doe' },
-        { id: 'D03', name: 'Desk 103', floor: '2nd Floor', wing: 'Beta', status: 'Assigned', type: 'Permanent', team: 'HR', bookedBy: 'Alice Smith' },
+        { id: 'D02', name: 'Desk 102', floor: '1st Floor', wing: 'Alpha', status: 'Booked', type: 'Hot Desk', team: 'Engineering', bookedBy: 'John Doe', allocatedAt: '10:00 AM' },
+        { id: 'D03', name: 'Desk 103', floor: '2nd Floor', wing: 'Beta', status: 'Assigned', type: 'Permanent', team: 'HR', bookedBy: 'Alice Smith', allocatedAt: 'Feb 20, 09:15 AM' },
         { id: 'D04', name: 'Desk 104', floor: '1st Floor', wing: 'Gamma', status: 'Available', type: 'Hot Desk', team: 'Marketing' },
     ]);
 
     const [bookings, setBookings] = useState([
-        { id: 'B01', deskId: 'D02', employee: 'John Doe', date: '2026-02-25', status: 'Confirmed', team: 'Engineering' },
-        { id: 'B02', deskId: 'D04', employee: 'Bob Wilson', date: '2026-02-25', status: 'Pending Approval', team: 'Engineering' },
+        { id: 'B01', deskId: 'D02', employee: 'John Doe', date: '2026-02-25', time: '10:00 AM', status: 'Confirmed', team: 'Engineering' },
+        { id: 'B02', deskId: 'D04', employee: 'Bob Wilson', date: '2026-02-25', time: '02:30 PM', status: 'Pending Approval', team: 'Engineering' },
     ]);
 
     const stats = {
@@ -214,12 +218,31 @@ export const DeskManagementContent = () => {
                         <div className="row g-4">
                             {['1st Floor', '2nd Floor', '3rd Floor'].map(floor => (
                                 <div key={floor} className="col-md-4">
-                                    <div className="p-4 border rounded-4 bg-light">
-                                        <h6 className="fw-bold mb-3">{floor}</h6>
-                                        <div className="progress mb-3" style={{ height: '10px' }}>
-                                            <div className="progress-bar" role="progressbar" style={{ width: floor === '1st Floor' ? '70%' : '30%' }}></div>
+                                    <div
+                                        className="p-4 border rounded-4 bg-white shadow-sm floor-card cursor-pointer transition-all h-100"
+                                        onClick={() => {
+                                            setSelectedFloor(floor);
+                                            setFloorModalView('options');
+                                            setShowFloorModal(true);
+                                        }}
+                                    >
+                                        <div className="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 className="fw-bold mb-0 text-main">{floor}</h6>
+                                            <span className="badge bg-primary-subtle text-primary border border-primary small">Manage</span>
                                         </div>
-                                        <small className="text-secondary">{floor === '1st Floor' ? '28 / 40 occupied' : '12 / 40 occupied'}</small>
+                                        <div className="progress mb-3" style={{ height: '10px', borderRadius: '5px' }}>
+                                            <div
+                                                className={`progress-bar progress-bar-striped progress-bar-animated ${floor === '1st Floor' ? 'bg-primary' : floor === '2nd Floor' ? 'bg-success' : 'bg-warning'}`}
+                                                role="progressbar"
+                                                style={{ width: floor === '1st Floor' ? '70%' : floor === '2nd Floor' ? '30%' : '42%' }}
+                                            ></div>
+                                        </div>
+                                        <div className="d-flex justify-content-between align-items-center">
+                                            <small className="text-secondary fw-medium">
+                                                {floor === '1st Floor' ? '28 / 40 occupied' : floor === '2nd Floor' ? '12 / 40 occupied' : '17 / 40 occupied'}
+                                            </small>
+                                            <button className="btn btn-sm btn-link text-decoration-none p-0 fw-bold">Open View</button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -235,6 +258,7 @@ export const DeskManagementContent = () => {
                                     <th className="px-4 py-3 border-0">Desk ID</th>
                                     <th className="py-3 border-0">Location</th>
                                     <th className="py-3 border-0">Team</th>
+                                    {activeTab === 'allocation' && <th className="py-3 border-0">Allocation Time</th>}
                                     <th className="py-3 border-0">Status</th>
                                     <th className="py-3 border-0 text-center">Action</th>
                                 </tr>
@@ -248,6 +272,11 @@ export const DeskManagementContent = () => {
                                             <div className="text-muted small">{desk.floor} - {desk.wing} Wing</div>
                                         </td>
                                         <td className="py-3 fw-medium">{desk.team}</td>
+                                        {activeTab === 'allocation' && (
+                                            <td className="py-3 small fw-bold text-primary">
+                                                {desk.allocatedAt || '--'}
+                                            </td>
+                                        )}
                                         <td className="py-3">
                                             <span className={getStatusStyle(desk.status)}>{desk.status}</span>
                                         </td>
@@ -283,7 +312,7 @@ export const DeskManagementContent = () => {
                                     <th className="px-4 py-3 border-0">Booking ID</th>
                                     <th className="py-3 border-0">Desk</th>
                                     <th className="py-3 border-0">Employee</th>
-                                    <th className="py-3 border-0">Date</th>
+                                    <th className="py-3 border-0">Date & Time</th>
                                     <th className="py-3 border-0">Status</th>
                                     <th className="py-3 border-0 text-center">Action</th>
                                 </tr>
@@ -294,7 +323,10 @@ export const DeskManagementContent = () => {
                                         <td className="px-4 py-3 fw-bold">{booking.id}</td>
                                         <td className="py-3 fw-medium">{booking.deskId}</td>
                                         <td className="py-3 fw-medium">{booking.employee}</td>
-                                        <td className="py-3 small">{booking.date}</td>
+                                        <td className="py-3 small">
+                                            <div className="fw-bold">{booking.date}</div>
+                                            <div className="text-primary fw-medium">{booking.time}</div>
+                                        </td>
                                         <td className="py-3">
                                             <span className={getStatusStyle(booking.status)}>{booking.status}</span>
                                         </td>
@@ -434,12 +466,137 @@ export const DeskManagementContent = () => {
                 </div>
             )}
 
+            {showFloorModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1050 }}>
+                    <div className="card border-0 shadow-lg rounded-4 p-0 animate__animated animate__fadeInUp overflow-hidden" style={{ width: '650px', maxWidth: '90vw' }}>
+                        {/* Modal Header */}
+                        <div className="p-4 bg-primary text-white d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 className="fw-bold mb-0">{selectedFloor} - {floorModalView === 'options' ? 'Actions' : 'Office Layout'}</h5>
+                                <p className="mb-0 small opacity-75">{floorModalView === 'options' ? 'Select an operation' : 'Click a desk to select and book'}</p>
+                            </div>
+                            <div className="d-flex gap-2">
+                                {floorModalView === 'layout' && (
+                                    <button className="btn btn-sm btn-light rounded-pill px-3 fw-bold" onClick={() => setFloorModalView('options')}>Back</button>
+                                )}
+                                <button className="btn btn-link text-white p-0" onClick={() => setShowFloorModal(false)}><MdCancel size={24} /></button>
+                            </div>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-4 bg-white" style={{ minHeight: '400px' }}>
+                            {floorModalView === 'options' ? (
+                                <div className="row g-4 pt-2">
+                                    {[
+                                        { title: 'Floor Layout', icon: <MdLocationOn />, color: 'success', desc: 'Visual map of the office layout', view: 'layout' },
+                                        { title: 'Book Desk', icon: <MdEventAvailable />, color: 'info', desc: 'Browse and book a desk instantly', view: 'layout' },
+                                        { title: 'View Desk List', icon: <MdWindow />, color: 'primary', desc: 'Full list of desks and status', action: 'view-desks' },
+                                        { title: 'Report', icon: <MdFactCheck />, color: 'secondary', desc: 'Download occupancy records', action: 'report' },
+                                        { title: 'Maintenance', icon: <MdCheckCircle />, color: 'warning', desc: 'Cleaning and sanitization status', action: 'cleaning' },
+                                        { title: 'Floor Rules', icon: <MdSettings />, color: 'dark', desc: 'Configure floor specific settings', action: 'settings' },
+                                    ].map((item, idx) => (
+                                        <div className="col-md-6" key={idx}>
+                                            <div
+                                                className="p-3 border rounded-4 floor-action-item transition-all cursor-pointer h-100 d-flex align-items-center gap-3"
+                                                onClick={() => {
+                                                    if (item.view) {
+                                                        setFloorModalView(item.view);
+                                                    } else {
+                                                        handleAction(item.title, { floor: selectedFloor });
+                                                        if (item.action === 'view-desks') {
+                                                            setActiveTab(role === 'employee' ? 'booking' : 'desks');
+                                                            setShowFloorModal(false);
+                                                        }
+                                                    }
+                                                }}
+                                            >
+                                                <div className={`bg-${item.color}-subtle p-3 rounded-4 text-${item.color} fs-3`}>{item.icon}</div>
+                                                <div>
+                                                    <h6 className="fw-bold mb-1">{item.title}</h6>
+                                                    <p className="text-secondary smaller mb-0">{item.desc}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="animate__animated animate__fadeIn">
+                                    {/* Layout Legend */}
+                                    <div className="d-flex justify-content-center gap-4 mb-4 pb-3 border-bottom">
+                                        <div className="d-flex align-items-center gap-2 small fw-medium">
+                                            <div className="rounded-1" style={{ width: '15px', height: '15px', backgroundColor: '#dcfce7', border: '1px solid #22c55e' }}></div> Available
+                                        </div>
+                                        <div className="d-flex align-items-center gap-2 small fw-medium">
+                                            <div className="rounded-1" style={{ width: '15px', height: '15px', backgroundColor: '#fee2e2', border: '1px solid #ef4444' }}></div> Occupied
+                                        </div>
+                                        <div className="d-flex align-items-center gap-2 small fw-medium">
+                                            <div className="rounded-1" style={{ width: '15px', height: '15px', backgroundColor: '#dbeafe', border: '1px solid #3b82f6' }}></div> Assigned
+                                        </div>
+                                    </div>
+
+                                    {/* Interactive Grid */}
+                                    <div className="desk-grid-container p-3 rounded-4 bg-light shadow-inner border border-2 overflow-auto" style={{ maxHeight: '350px' }}>
+                                        <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(5, 1fr)', minWidth: '500px' }}>
+                                            {Array.from({ length: 25 }).map((_, i) => {
+                                                const deskNum = 101 + i;
+                                                const deskId = `D${deskNum}`;
+                                                // Mock mapping to existing data
+                                                const actualDesk = desks.find(d => d.id === deskId) || { status: i % 3 === 0 ? 'Booked' : i % 5 === 0 ? 'Assigned' : 'Available' };
+
+                                                return (
+                                                    <div
+                                                        key={i}
+                                                        className={`desk-cell p-3 rounded-3 text-center transition-all cursor-pointer ${actualDesk.status === 'Available' ? 'bg-success-subtle border-success text-success' :
+                                                            actualDesk.status === 'Assigned' ? 'bg-primary-subtle border-primary text-primary' :
+                                                                'bg-danger-subtle border-danger text-danger opacity-75'
+                                                            }`}
+                                                        style={{ border: '2px solid', position: 'relative' }}
+                                                        onClick={() => {
+                                                            if (actualDesk.status === 'Available') {
+                                                                setSelectedDesk({ id: deskId, floor: selectedFloor });
+                                                                setShowBookingModal(true);
+                                                            } else {
+                                                                alert('This desk is already occupied.');
+                                                            }
+                                                        }}
+                                                    >
+                                                        <MdWindow className="mb-1 d-block mx-auto fs-5" />
+                                                        <div className="smaller fw-bold">{deskId}</div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                    <p className="text-center mt-3 text-secondary small fw-medium">Front of Office / Main Entrance</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-3 bg-light border-top d-flex justify-content-between align-items-center">
+                            <div className="small text-secondary ps-2">Viewing floor specific data</div>
+                            <button className="btn btn-secondary rounded-pill px-4 shadow-sm fw-bold" onClick={() => setShowFloorModal(false)}>Close</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <style>{`
                 .border-bottom-light { border-bottom: 1px solid #f1f5f9; }
                 .nav-pills .nav-link { font-weight: 600; font-size: 0.9rem; transition: all 0.2s; white-space: nowrap; }
                 .nav-pills .nav-link.active { background-color: var(--primary-color) !important; color: #fff !important; }
                 .progress { background-color: #e2e8f0; }
                 .text-main { color: #1e293b; }
+                .cursor-pointer { cursor: pointer; }
+                .floor-card { transition: all 0.3s ease; border: 1px solid #eef2f6 !important; }
+                .floor-card:hover { transform: translateY(-5px); border-color: var(--primary-color) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important; }
+                .floor-action-item { background: #fff; border: 1px solid #eef2f6; }
+                .floor-action-item:hover { background-color: #f8fafc !important; border-color: var(--primary-color) !important; transform: scale(1.02); }
+                .desk-cell { transition: all 0.2s ease; }
+                .desk-cell:hover { transform: scale(1.1); z-index: 10; font-weight: bold; }
+                .desk-cell.bg-success-subtle:hover { cursor: crosshair; }
+                .smaller { font-size: 0.75rem; }
+                .shadow-inner { box-shadow: inset 0 2px 4px rgba(0,0,0,0.06); }
             `}</style>
         </div>
     );

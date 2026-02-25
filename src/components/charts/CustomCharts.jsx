@@ -161,12 +161,25 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
                     filter="url(#shadow)"
                 />
 
-                {/* Dots */}
+                {/* Dots and Labels */}
                 {data.map((val, i) => {
                     const x = (i / (data.length - 1)) * width;
                     const y = 200 - ((val / max) * 180);
                     return (
-                        <circle key={i} cx={x} cy={y} r="4" fill="var(--bg-card)" stroke={color} strokeWidth="2" />
+                        <g key={i}>
+                            <circle cx={x} cy={y} r="5" fill="var(--bg-card)" stroke={color} strokeWidth="3" />
+                            <text
+                                x={x}
+                                y={y - 12}
+                                textAnchor="middle"
+                                fontSize="14"
+                                fontWeight="800"
+                                fill={color}
+                                style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
+                            >
+                                {typeof val === 'number' ? `$${val}` : val}
+                            </text>
+                        </g>
                     );
                 })}
             </svg>

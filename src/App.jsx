@@ -5,6 +5,7 @@ import NotificationDrawer from "./pages/common/NotificationDrawer"; // Added
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext"; // Added
+import { AutomationProvider } from "./context/AutomationContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /* Public Pages */
@@ -93,6 +94,7 @@ import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
 import WhatsAppChat from "./components/common/WhatsAppChat";
 import Helpdesk from "./pages/modules/helpdesk/Helpdesk";
+import AutomationCenter from "./pages/modules/administration/automation/AutomationCenter";
 
 function AppContent() {
   const location = useLocation();
@@ -170,8 +172,9 @@ function AppContent() {
         <Route path="/visitors" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><Visitor /></ProtectedRoute>} />
         <Route path="/desk-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><DeskManagement /></ProtectedRoute>} />
 
-        {/* Helpdesk */}
+        {/* Helpdesk & Automation */}
         <Route path="/helpdesk" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee', 'accountant']}><Helpdesk /></ProtectedRoute>} />
+        <Route path="/automation-center" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><AutomationCenter /></ProtectedRoute>} />
 
         {/* Audit Logs */}
         <Route path="/super-admin/audit-logs" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminAuditLogs /></ProtectedRoute>} />
@@ -252,9 +255,11 @@ export default function App() {
     <AuthProvider>
       <ThemeProvider>
         <NotificationProvider>
-          <BrowserRouter>
-            <AppContent />
-          </BrowserRouter>
+          <AutomationProvider>
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
+          </AutomationProvider>
         </NotificationProvider>
       </ThemeProvider>
     </AuthProvider>
