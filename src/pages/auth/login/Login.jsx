@@ -81,79 +81,79 @@ const Login = () => {
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100 overflow-hidden">
+    <div className="login-container">
       <Navbar />
-      <div className="container-fluid login-container flex-grow-1">
-        <div className="card login-card">
-          <div className="row g-0 h-100">
-            {/* Form Side */}
-            <div className="col-lg-6 p-4 d-flex flex-column justify-content-center bg-white">
-              <div className="mb-4">
-                <h3 className="login-title">
-                  Login to HRMS <br />
-                  your work starts here!
-                </h3>
-              </div>
-
-              {error && (
-                <div className="alert alert-danger py-2 small" role="alert">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label className="form-label">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    placeholder="name@company.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      className="form-control border-end-0"
-                      placeholder="••••••••"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      className="btn password-toggle-btn px-3"
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
-
-                <div className="d-flex justify-content-start mb-4">
-                  <Link
-                    to="/forgot-password"
-                    className="forgot-password-link"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-
-                <button type="submit" className="btn login-btn">
-                  LOGIN
-                </button>
-              </form>
+      <div className="card login-card">
+        <div className="row g-0 h-100 w-100">
+          {/* Form Side */}
+          <div className="col-lg-6 p-4 p-md-5 d-flex flex-column justify-content-center bg-white">
+            <div className="mb-4">
+              <h3 className="login-title">
+                Login to HRMS <br />
+                your work starts here!
+              </h3>
             </div>
 
-            {/* Image Side */}
-            <div className="col-lg-6 d-none d-lg-block p-0 login-image-container">
+            {error && (
+              <div className="alert alert-danger py-2 small" role="alert">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Email Address</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="name@company.com"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label">Password</label>
+                <div className="input-group">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className="form-control border-end-0"
+                    placeholder="••••••••"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <button
+                    className="btn password-toggle-btn px-3"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <Link to="/forgot-password" gap className="forgot-password-link">
+                  Forgot password?
+                </Link>
+              </div>
+
+              <button type="submit" className="btn login-btn">
+                LOGIN
+              </button>
+
+              <div className="mt-4 text-center">
+                <span className="small text-muted">Don't have an account? </span>
+                <Link to="/signup" className="small fw-bold text-primary text-decoration-none">Create Account</Link>
+              </div>
+            </form>
+          </div>
+
+          {/* Image Side */}
+          <div className="col-lg-6 d-none d-lg-block p-0">
+            <div className="login-image-container h-100 w-100">
               <img
                 src={sideImage}
                 alt="HRMS Dashboard"

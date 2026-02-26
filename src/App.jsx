@@ -99,7 +99,7 @@ import AutomationCenter from "./pages/modules/administration/automation/Automati
 function AppContent() {
   const location = useLocation();
   // Show WhatsApp only on Home, Features, About, Contact, and Calendar pages
-  const allowedPaths = ['/', '/home', '/features', '/about', '/contact', '/calendar'];
+  const allowedPaths = ['/home', '/features', '/about', '/contact', '/calendar'];
   const showWhatsApp = allowedPaths.includes(location.pathname);
 
   return (
