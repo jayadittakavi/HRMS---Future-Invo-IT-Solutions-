@@ -1,81 +1,93 @@
-/* Signup Page CSS */
+/* Signup Page CSS - Scholarly Inspired */
 
 .signup-container {
-    background-color: var(--bg-body);
-    /* Use theme var */
-    /* min-height: 100vh; REMOVED */
-    height: 100%;
+    background-color: #f8fafc;
+    /* Fallback */
+    min-height: calc(100vh - 70px);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 2rem;
 }
 
 .signup-card {
-    border: none;
-    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
     overflow: hidden;
-    max-width: 900px;
     width: 100%;
+    max-width: 480px;
+    transition: transform 0.3s ease;
 }
 
 .signup-title {
-    color: #1e40af;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    color: #1e293b;
+    font-weight: 800;
+    font-size: 1.75rem;
+    letter-spacing: -0.025em;
 }
 
 .signup-input {
     padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background-color: #fcfcfc;
 }
 
 .signup-input:focus {
     outline: none;
-    border-color: #1e40af;
-    box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
+    background-color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .password-toggle-btn {
-    border-color: #e2e8f0;
-    border-top-right-radius: 0.5rem;
-    border-bottom-right-radius: 0.5rem;
+    border: 1.5px solid #e2e8f0;
+    border-left: none;
+    background-color: #fcfcfc;
+    border-top-right-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+    color: #94a3b8;
+    padding: 0 1rem;
 }
 
 .password-toggle-btn:hover {
-    background-color: #f8f9fa;
-    border-color: #cbd5e1;
+    background-color: #f8fafc;
+    color: #475569;
 }
 
 .signup-btn {
-    background-color: #1e40af;
-    border-color: #1e40af;
-    padding: 0.75rem;
-    font-weight: bold;
+    background-color: #2563eb;
+    border: none;
+    padding: 0.875rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    font-size: 1rem;
     width: 100%;
-    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    transition: all 0.2s ease;
 }
 
 .signup-btn:hover {
-    background-color: #1e3a8a;
-    border-color: #1e3a8a;
+    background-color: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
 }
 
 .login-link {
-    color: #3b82f6;
+    color: #2563eb;
     text-decoration: none;
+    transition: color 0.2s ease;
 }
 
 .login-link:hover {
+    color: #1d4ed8;
     text-decoration: underline;
 }
 
 .signup-image {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: none;
+    /* No longer needed in centered layout */
 }

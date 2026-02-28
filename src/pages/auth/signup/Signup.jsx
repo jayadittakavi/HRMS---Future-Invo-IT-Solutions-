@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../../../components/layout/Navbar';
 import sideImage from '../../../assets/images/sigupbg.png';
+import logo from '../../../assets/images/fislogo1.png';
+import scholarlyBg from '../../../assets/images/scholarly_bg.png';
 import './Signup.css';
 
 const Signup = () => {
@@ -72,13 +74,13 @@ const Signup = () => {
   return (
     <div className="d-flex flex-column min-vh-100 overflow-hidden">
       <Navbar />
-      <div className="container-fluid signup-container flex-grow-1">
-        <div className="card signup-card">
-          <div className="row g-0 h-100">
-            {/* Form Side */}
-            <div className="col-lg-6 p-5 d-flex flex-column justify-content-center bg-card">
-              <div className="mb-4 text-center text-lg-start">
-                <h3 className="signup-title">Create an account</h3>
+      <div className="container-fluid signup-container flex-grow-1" style={{ backgroundImage: `url(${scholarlyBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="d-flex flex-column align-items-center w-100">
+          <div className="card signup-card shadow-lg border-0 py-4 px-2" style={{ maxWidth: '500px', borderRadius: '1.5rem' }}>
+            <div className="card-body p-4">
+              <div className="mb-4 text-center">
+                <h3 className="signup-title mb-1">Create an account</h3>
+                <p className="text-secondary small">Join our HRMS platform to manage your workforce seamlessly.</p>
               </div>
 
               {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
@@ -163,25 +165,16 @@ const Signup = () => {
                   </div>
                 </div>
 
-                <button type="submit" className="btn btn-primary signup-btn">
+                <button type="submit" className="btn btn-primary signup-btn mb-3">
                   Sign Up
                 </button>
 
                 <div className="text-center">
                   <span className="text-secondary small">
-                    Already have an account? <Link to="/login" className="login-link">Login here</Link>
+                    Already have an account? <Link to="/login" className="login-link fw-bold">Login here</Link>
                   </span>
                 </div>
               </form>
-            </div>
-
-            {/* Image Side */}
-            <div className="col-lg-6 d-none d-lg-block p-0 position-relative">
-              <img
-                src={sideImage}
-                alt="HRMS Dashboard"
-                className="img-fluid signup-image"
-              />
             </div>
           </div>
         </div>

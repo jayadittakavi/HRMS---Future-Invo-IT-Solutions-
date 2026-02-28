@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUserTie, FaCalculator, FaUser, FaCrown, FaBriefcase, FaMoneyBillWave } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 
@@ -270,9 +270,40 @@ export const UserManagementContent = () => {
                                 <div className="card h-100 border-0 shadow-sm hover-shadow transition-all relative overflow-hidden">
                                     <div className="card-body p-4">
                                         <div className="d-flex justify-content-between align-items-start mb-3">
-                                            <div className="p-2 rounded-circle bg-primary bg-opacity-10 text-primary">
-                                                <FaUserShield size={24} />
-                                            </div>
+                                            {(() => {
+                                                let icon, colorClass, bgClass;
+                                                switch (role.name) {
+                                                    case 'Super Admin':
+                                                        icon = <FaCrown size={24} />;
+                                                        colorClass = 'text-warning';
+                                                        bgClass = 'bg-warning';
+                                                        break;
+                                                    case 'HR':
+                                                        icon = <FaUsers size={24} />;
+                                                        colorClass = 'text-success';
+                                                        bgClass = 'bg-success';
+                                                        break;
+                                                    case 'Manager':
+                                                        icon = <FaUserTie size={24} />;
+                                                        colorClass = 'text-info';
+                                                        bgClass = 'bg-info';
+                                                        break;
+                                                    case 'Accountant':
+                                                        icon = <FaCalculator size={24} />;
+                                                        colorClass = 'text-danger';
+                                                        bgClass = 'bg-danger';
+                                                        break;
+                                                    default:
+                                                        icon = <FaUser size={24} />;
+                                                        colorClass = 'text-secondary';
+                                                        bgClass = 'bg-secondary';
+                                                }
+                                                return (
+                                                    <div className={`p-2 rounded-circle ${bgClass} bg-opacity-10 ${colorClass}`}>
+                                                        {icon}
+                                                    </div>
+                                                );
+                                            })()}
                                             <button
                                                 className="btn btn-light btn-sm rounded-circle shadow-sm"
                                                 onClick={() => handleEditRoleClick(role)}
@@ -287,7 +318,7 @@ export const UserManagementContent = () => {
 
                                         <div className="d-flex flex-wrap gap-2 mt-auto">
                                             {role.name === 'Super Admin' ? (
-                                                <span className="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                                                <span className="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
                                                     Full System Access
                                                 </span>
                                             ) : (
