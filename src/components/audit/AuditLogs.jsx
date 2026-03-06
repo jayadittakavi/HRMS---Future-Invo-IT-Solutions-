@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../layout/DashboardLayout';
 import AuditLogTable from './AuditLogTable';
+import { useSearch } from '../../context/SearchContext';
 import { FaSearch, FaSyncAlt, FaClipboardList, FaFilter } from 'react-icons/fa';
 import { auditService } from './auditService';
 
@@ -17,7 +18,12 @@ const AuditLogs = ({ role }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [searchQuery, setSearchQuery] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchQuery, setSearchQuery] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearchQuery(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [filterModule, setFilterModule] = useState('');
     const [filterAction, setFilterAction] = useState('');
     const [showAll, setShowAll] = useState(false);
@@ -106,7 +112,11 @@ const AuditLogs = ({ role }) => {
                                 className="form-control border-start-0 ps-2 glassy-search"
                                 placeholder="Search logs..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSearchQuery(val);
+                                    setGlobalSearchTerm(val);
+                                }}
                             />
                         </div>
 

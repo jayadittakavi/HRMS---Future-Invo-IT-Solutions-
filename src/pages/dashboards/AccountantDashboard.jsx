@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
-import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { useAuth } from '../../context/AuthContext';
 import { SimpleLineChart, SimpleBarChart, SimpleDonutChart } from '../../components/charts/CustomCharts';
 import { FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
@@ -152,7 +151,6 @@ const AccountantDashboard = () => {
             )}
 
             {activeView === 'payroll' && <PayrollContent />}
-            {(activeView === 'pay-grade' || activeView === 'pay-grades') && <PayGradeContent />}
 
             {activeView === 'invoices' && (
                 <div className="p-5 text-center">

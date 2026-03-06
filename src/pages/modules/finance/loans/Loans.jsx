@@ -1,8 +1,16 @@
-import { SimpleBarChart, SimpleDonutChart } from '../../../../components/charts/CustomCharts'; // Assuming PieChart exists or using Donut
-import { FaHandHoldingUsd, FaMoneyBillAlt, FaPercent } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { SimpleBarChart, SimpleDonutChart } from '../../../../components/charts/CustomCharts';
+import { FaHandHoldingUsd, FaMoneyBillAlt, FaPercent, FaSearch } from 'react-icons/fa';
+import { useSearch } from '../../../../context/SearchContext';
+import DashboardLayout from '../../../../components/layout/DashboardLayout';
 
 export const LoansContent = () => {
-    // ... (keep data same)
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
     const loans = [
         { id: 101, employee: 'Rajesh Kumar', amount: '₹50,000', type: 'Personal', emi: '₹5,000', tenure: '10 Months', status: 'Active' },
         { id: 102, employee: 'Sneha Patel', amount: '₹2,00,000', type: 'Home Renovation', emi: '₹10,000', tenure: '20 Months', status: 'Approved' },
@@ -77,7 +85,23 @@ export const LoansContent = () => {
 
             {/* Loan Requests Table */}
             <div className="bg-white rounded shadow-sm p-4">
-                <h5 className="fw-bold mb-3">Recent Loan Requests</h5>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                    <h5 className="fw-bold mb-0">Recent Loan Requests</h5>
+                    <div className="input-group input-group-sm" style={{ width: '250px' }}>
+                        <span className="input-group-text bg-light border-0"><FaSearch /></span>
+                        <input
+                            type="text"
+                            className="form-control border-0 bg-light"
+                            placeholder="Search employee or type..."
+                            value={searchTerm}
+                            onChange={e => {
+                                const val = e.target.value;
+                                setSearchTerm(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
+                    </div>
+                </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle">
                         <thead className="bg-light">
@@ -92,7 +116,11 @@ export const LoansContent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {loans.map(loan => (
+                            {loans.filter(loan =>
+                                loan.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                loan.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                String(loan.id).includes(searchTerm)
+                            ).map(loan => (
                                 <tr key={loan.id}>
                                     <td className="text-muted">#{loan.id}</td>
                                     <td className="fw-bold">{loan.employee}</td>

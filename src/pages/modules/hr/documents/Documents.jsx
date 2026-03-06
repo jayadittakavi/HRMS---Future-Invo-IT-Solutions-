@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useSearch } from '../../../../context/SearchContext';
 import { FaFilePdf, FaFileUpload, FaTrash, FaEye, FaSearch, FaDownload, FaCheckCircle } from 'react-icons/fa';
 
 export const DocumentsContent = () => {
@@ -7,6 +8,12 @@ export const DocumentsContent = () => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     const policies = [
         { id: 1, name: 'Employee Handbook 2024', type: 'PDF', size: '2.4 MB', uploadDate: 'Jan 10, 2024', url: '#' },
@@ -81,7 +88,23 @@ export const DocumentsContent = () => {
             {activeTab === 'policies' && (
                 <div className="card border-0 shadow-sm">
                     <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                        <h6 className="fw-bold mb-0">All Policies</h6>
+                        <div className="d-flex align-items-center gap-3">
+                            <h6 className="fw-bold mb-0">All Policies</h6>
+                            <div className="input-group input-group-sm" style={{ width: '200px' }}>
+                                <span className="input-group-text bg-light border-0"><FaSearch /></span>
+                                <input
+                                    type="text"
+                                    className="form-control border-0 bg-light"
+                                    placeholder="Search policies..."
+                                    value={search}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSearch(val);
+                                        setGlobalSearchTerm(val);
+                                    }}
+                                />
+                            </div>
+                        </div>
                         <button className="btn btn-primary btn-sm"><FaFileUpload className="me-2" /> Upload Policy</button>
                     </div>
                     <div className="table-responsive">
@@ -96,7 +119,9 @@ export const DocumentsContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {policies.map(doc => (
+                                {policies.filter(doc =>
+                                    doc.name.toLowerCase().includes(search.toLowerCase())
+                                ).map(doc => (
                                     <tr key={doc.id}>
                                         <td className="ps-4 fw-bold">
                                             <FaFilePdf className="text-danger me-2" /> {doc.name}
@@ -146,7 +171,17 @@ export const DocumentsContent = () => {
                         <h6 className="mb-0 fw-bold">Submitted Documents</h6>
                         <div className="input-group input-group-sm w-auto">
                             <span className="input-group-text bg-light border-0"><FaSearch /></span>
-                            <input type="text" className="form-control border-0 bg-light" placeholder="Search employee..." />
+                            <input
+                                type="text"
+                                className="form-control border-0 bg-light"
+                                placeholder="Search employee..."
+                                value={search}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setSearch(val);
+                                    setGlobalSearchTerm(val);
+                                }}
+                            />
                         </div>
                     </div>
                     <div className="table-responsive">
@@ -161,7 +196,10 @@ export const DocumentsContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {employeeDocs.map(doc => (
+                                {employeeDocs.filter(doc =>
+                                    doc.employee.toLowerCase().includes(search.toLowerCase()) ||
+                                    doc.name.toLowerCase().includes(search.toLowerCase())
+                                ).map(doc => (
                                     <tr key={doc.id}>
                                         <td className="ps-4 fw-bold">{doc.employee}</td>
                                         <td>{doc.name}</td>

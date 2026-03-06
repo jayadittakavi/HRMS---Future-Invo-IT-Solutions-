@@ -1,4 +1,5 @@
-const API_URL = 'http://192.168.1.5:5000/api/auth/reset-password';
+const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+const API_URL = `${BASE_URL}/auth/reset-password`;
 
 export const resetPassword = async (email, newPassword) => {
     try {

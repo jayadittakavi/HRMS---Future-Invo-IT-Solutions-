@@ -15,7 +15,6 @@ const AddMember = () => {
         joiningDate: '',
         company: '',
         branch: '',
-        payGrade: '',
         ctc: '',
         manager: '',
         status: 'Active',
@@ -110,11 +109,7 @@ const AddMember = () => {
                                     <label className="form-label">Manager</label>
                                     <input type="text" className="form-control" name="manager" value={formData.manager} onChange={handleInputChange} placeholder="Reporting Manager" />
                                 </div>
-                                <div className="col-md-6">
-                                    <label className="form-label">Pay Grade</label>
-                                    <input type="text" className="form-control" name="payGrade" value={formData.payGrade} onChange={handleInputChange} />
-                                </div>
-                                <div className="col-md-6">
+                                <div className="col-12">
                                     <label className="form-label">CTC (Yearly)</label>
                                     <input type="number" className="form-control" name="ctc" value={formData.ctc} onChange={handleInputChange} />
                                 </div>

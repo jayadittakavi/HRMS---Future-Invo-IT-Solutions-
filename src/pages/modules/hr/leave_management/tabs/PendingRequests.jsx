@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaCheck, FaTimes, FaEye, FaSearch, FaFilter } from 'react-icons/fa';
 import { MdPendingActions } from 'react-icons/md';
+import { useSearch } from '../../../../../context/SearchContext';
 
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
 
@@ -15,7 +16,12 @@ const avatarColor = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6
 
 const PendingRequests = () => {
     const [requests, setRequests] = useState(initRequests);
-    const [search, setSearch] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [viewId, setViewId] = useState(null);
     const [rejectModal, setRejectModal] = useState(null);
     const [rejectReason, setRejectReason] = useState('');
@@ -67,7 +73,11 @@ const PendingRequests = () => {
                             type="text"
                             placeholder="Search..."
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
+                            onChange={e => {
+                                const val = e.target.value;
+                                setSearch(val);
+                                setGlobalSearchTerm(val);
+                            }}
                             style={{ paddingLeft: 28, paddingRight: 10, height: 30, fontSize: '0.75rem', border: '1px solid #e2e8f0', borderRadius: 8, outline: 'none', width: 180 }}
                         />
                     </div>

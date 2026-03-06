@@ -1,12 +1,9 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "http://192.168.1.48:5000";
-
-export const SIGNUP_URL = "http://192.168.1.48:5000/auth/super-admin/signup";
-export const VERIFY_OTP_URL = "http://192.168.1.48:5000/auth/verify-signup-otp";
+const BASE_URL = "/api";
 
 export const signupService = {
     signupSuperAdmin: async (userData) => {
         try {
-            const response = await fetch("http://192.168.1.48:5000/auth/super-admin/signup", {
+            const response = await fetch(`${BASE_URL}/auth/super-admin/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -21,7 +18,7 @@ export const signupService = {
 
     verifySignupOtp: async (data) => {
         try {
-            const response = await fetch("http://192.168.1.5:5000/api/auth/verify-signup-otp", {
+            const response = await fetch(`${BASE_URL}/auth/verify-signup-otp`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

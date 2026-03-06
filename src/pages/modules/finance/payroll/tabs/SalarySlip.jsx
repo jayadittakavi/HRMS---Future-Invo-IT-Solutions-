@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearch } from '../../../../../context/SearchContext';
 import {
     MdFormatListBulleted,
     MdSave,
@@ -22,6 +23,12 @@ const SalarySlip = ({ onBack }) => {
         branch: '',
         salaryStructure: ''
     });
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     return (
         <div className="salary-slip-view container-fluid p-0 animate__animated animate__fadeIn">
@@ -61,11 +68,17 @@ const SalarySlip = ({ onBack }) => {
             {/* Filter Bar */}
             <div className="filter-bar-container bg-white border rounded-3 p-2 mb-4">
                 <div className="d-flex align-items-center flex-wrap gap-2">
-                    <div className="filter-item-group d-flex align-items-center gap-1 bg-light px-2 py-1 rounded-2 border" style={{ minWidth: '130px' }}>
+                    <div className="filter-item-group d-flex align-items-center gap-1 bg-light px-2 py-1 rounded-2 border" style={{ minWidth: '200px' }}>
                         <input
                             type="text"
                             className="form-control form-control-sm border-0 bg-transparent p-0"
-                            placeholder="ID"
+                            placeholder="Global Search (Name/ID)"
+                            value={search}
+                            onChange={e => {
+                                const val = e.target.value;
+                                setSearch(val);
+                                setGlobalSearchTerm(val);
+                            }}
                         />
                         <span className="text-muted small">≈</span>
                     </div>

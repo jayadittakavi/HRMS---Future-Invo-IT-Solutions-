@@ -141,47 +141,42 @@ const ManagerOverallStats = ({ onNavigate }) => {
             </div>
 
             {/* Top Stats Row with Gradients */}
-            <div className="row row-cols-1 row-cols-md-2 row-cols-xl-4 g-4 mb-4">
-                <div className="col">
-                    <div className="dashboard-card bg-gradient-purple h-100 p-4 border-0">
-                        <div className="d-flex align-items-center mb-2">
-                            <FaUsers className="fs-3 me-2 text-white opacity-75" />
-                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Total Team</h6>
+            <div className="row g-4 mb-4">
+                {[
+                    { label: 'Total Team', value: '12', icon: <FaUsers />, color: 'bg-gradient-purple', sub: 'Full Strength' },
+                    { label: 'Present Today', value: '9', icon: <FaCalendarCheck />, color: 'bg-gradient-green', sub: '75% Attendance' },
+                    { label: 'Pending Tasks', value: '5', icon: <FaClipboardList />, color: 'bg-gradient-orange', sub: 'Needs Review' },
+                    { label: 'Avg. Efficiency', value: '85%', icon: <FaChartLine />, color: 'bg-gradient-blue', sub: 'Top Performance' },
+                    { label: 'Clocked Hours', value: '42h', icon: <FaPlusCircle />, color: 'bg-gradient-cyan', sub: 'This Week' },
+                    { label: 'Active Goals', value: '3', icon: <FaChartLine />, color: 'bg-gradient-pink', sub: 'On Track' },
+                ].map((stat, index) => (
+                    <div className="col-md-2 col-6" key={index}>
+                        <div
+                            className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm border-0`}
+                            style={{
+                                borderRadius: '24px',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                        >
+                            <div className="d-flex align-items-center mb-3">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center"
+                                    style={{
+                                        width: '52px',
+                                        height: '52px',
+                                        background: 'rgba(255, 255, 255, 0.15)',
+                                        backdropFilter: 'blur(8px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                                    }}>
+                                    <span style={{ fontSize: '1.4rem', color: '#ffffff' }}>{stat.icon}</span>
+                                </div>
+                            </div>
+                            <h6 className="dashboard-card-title text-white mb-1 opacity-90 fw-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>{stat.label}</h6>
+                            <h3 className="dashboard-value text-white mb-0 fw-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{stat.value}</h3>
+                            <p className="small mb-0 opacity-75 mt-1" style={{ fontSize: '0.6rem' }}>{stat.sub}</p>
                         </div>
-                        <h3 className="dashboard-value text-white mb-0 display-6">12</h3>
-                        <small className="text-white opacity-75">Full Strength</small>
                     </div>
-                </div>
-                <div className="col">
-                    <div className="dashboard-card bg-gradient-green h-100 p-4 border-0">
-                        <div className="d-flex align-items-center mb-2">
-                            <FaCalendarCheck className="fs-3 me-2 text-white opacity-75" />
-                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Present Today</h6>
-                        </div>
-                        <h3 className="dashboard-value text-white mb-0 display-6">9</h3>
-                        <small className="text-white opacity-75">75% Attendance</small>
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="dashboard-card bg-gradient-orange h-100 p-4 border-0">
-                        <div className="d-flex align-items-center mb-2">
-                            <FaClipboardList className="fs-3 me-2 text-white opacity-75" />
-                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Pending Tasks</h6>
-                        </div>
-                        <h3 className="dashboard-value text-white mb-0 display-6">5</h3>
-                        <small className="text-white opacity-75">Needs Review</small>
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="dashboard-card bg-gradient-blue h-100 p-4 border-0">
-                        <div className="d-flex align-items-center mb-2">
-                            <FaChartLine className="fs-3 me-2 text-white opacity-75" />
-                            <h6 className="dashboard-card-title text-white mb-0 opacity-75">Avg. Efficiency</h6>
-                        </div>
-                        <h3 className="dashboard-value text-white mb-0 display-6">85%</h3>
-                        <small className="text-white opacity-75">Top Performance</small>
-                    </div>
-                </div>
+                ))}
             </div>
 
             <div className="row g-4 mb-4">

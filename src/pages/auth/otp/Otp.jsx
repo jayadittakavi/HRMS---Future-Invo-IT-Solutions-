@@ -71,7 +71,7 @@ const ResetOtp = () => {
             setError('');
 
             // Direct fetch call
-            const response = await fetch("http://192.168.1.48:5000/api/auth/verify-reset-otp", {
+            const response = await fetch("/api/auth/verify-reset-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, otp: otpValue })

@@ -1,0 +1,57 @@
+const SUPERADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzI3ODU3NzB9.v_BgdU5Xi4p6imxFD75VeEj33b5sx4curQSxbFGXknA";
+const API_BASE = "/api/superadmin";
+
+export const departmentService = {
+    getDepartments: async () => {
+        const response = await fetch(`${API_BASE}/departments`, {
+            headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch departments");
+        return response.json();
+    },
+
+    createDepartment: async (data) => {
+        const response = await fetch(`${API_BASE}/departments`, {
+            method: "POST",
+            headers: {
+                'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error("Failed to create department");
+        return response.json();
+    },
+
+    updateDepartment: async (id, data) => {
+        const response = await fetch(`${API_BASE}/departments/${id}`, {
+            method: "PUT",
+            headers: {
+                'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error("Failed to update department");
+        return response.json();
+    },
+
+    toggleStatus: async (id) => {
+        const response = await fetch(`${API_BASE}/departments/${id}/toggle-status`, {
+            method: "PUT",
+            headers: {
+                'Authorization': `Bearer ${SUPERADMIN_TOKEN}`
+            }
+        });
+        if (!response.ok) throw new Error("Failed to toggle status");
+        return response.json();
+    },
+
+    getCompanies: async () => {
+        const response = await fetch(`${API_BASE}/companies`, {
+            headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch companies");
+        return response.json();
+    }
+};

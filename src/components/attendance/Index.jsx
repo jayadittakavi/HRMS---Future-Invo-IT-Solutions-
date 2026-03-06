@@ -11,13 +11,19 @@ import {
     FaExclamationCircle
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
+import { useSearch } from '../../context/SearchContext';
 import { attendanceService } from './attendanceService';
 
 export const AttendanceContent = () => {
     // Filter States
     const [filterDate, setFilterDate] = useState('2024-05-31');
     const [filterDept, setFilterDept] = useState('All');
-    const [searchTerm, setSearchTerm] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    React.useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     const { user, token } = useAuth(); // Assuming token is available in context
     const [attendanceData, setAttendanceData] = useState([]);
@@ -119,7 +125,17 @@ export const AttendanceContent = () => {
                     <div className="action-group">
                         <div className="search-box filter-input glassy-search px-3 rounded" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <FaSearch color="#94a3b8" />
-                            <input type="text" placeholder="Search employee..." style={{ border: 'none', outline: 'none', background: 'transparent', color: 'inherit', width: '100%' }} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                            <input
+                                type="text"
+                                placeholder="Search employee..."
+                                style={{ border: 'none', outline: 'none', background: 'transparent', color: 'inherit', width: '100%' }}
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSearchTerm(val);
+                                    setGlobalSearchTerm(val);
+                                }}
+                            />
                         </div>
                         <button className="btn-outline"><FaFileExport /> Export</button>
                         <button className="btn-gradient">Mark Attendance</button>
@@ -138,7 +154,10 @@ export const AttendanceContent = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {displayData.map((row) => (
+                        {displayData.filter(row =>
+                            row.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                            row.id.toLowerCase().includes(searchTerm.toLowerCase())
+                        ).map((row) => (
                             <tr key={row.id}>
                                 <td>
                                     <div className="user-cell">

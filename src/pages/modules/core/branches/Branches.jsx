@@ -1,20 +1,73 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaBan, FaCheckCircle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaBan, FaCheckCircle, FaSearch } from 'react-icons/fa';
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
+import { useSearch } from "../../../../context/SearchContext";
 import "../../../../components/layout/DashboardLayout.css";
 import BranchMap from "../../../../components/BranchMap";
 
 export const BranchesContent = () => {
-    // Mock Data
-    const [branches, setBranches] = useState([
-        { id: 1, name: 'Bangalore Main Branch', company: 'TrickuWeb Technologies', address: 'Tech Park, Bangalore', location: '12.9716, 77.5946', status: 'Active' },
-        { id: 2, name: 'Hyderabad Main Branch', company: 'InnovateSoft Solutions', address: 'HITEC City, Hyderabad', location: '17.3850, 78.4867', status: 'Active' },
-        { id: 3, name: 'Pune Main Branch', company: 'TechForward India', address: 'Hinjewadi, Pune', location: '18.5204, 73.8567', status: 'Active' },
-        { id: 4, name: 'Mumbai Corporate Office', company: 'Alpha Corp', address: 'Bandra Kurla Complex, Mumbai', location: '19.0760, 72.8777', status: 'Active' },
-        { id: 5, name: 'Chennai Tech Hub', company: 'Beta Industries', address: 'Tidel Park, Chennai', location: '13.0827, 80.2707', status: 'Active' },
-        { id: 6, name: 'Delhi NCR Office', company: 'Gamma Enterprises', address: 'Cyber City, Gurgaon', location: '28.4595, 77.0266', status: 'Inactive' },
-        { id: 7, name: 'Kolkata Center', company: 'Epsilon Tech', address: 'Sector V, Salt Lake, Kolkata', location: '22.5726, 88.3639', status: 'Active' },
-    ]);
+    const [branches, setBranches] = useState([]);
+    const [companiesList, setCompaniesList] = useState([]);
+    const [reload, setReload] = useState(false);
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    React.useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
+
+    const SUPERADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzI3ODU3NzB9.v_BgdU5Xi4p6imxFD75VeEj33b5sx4curQSxbFGXknA";
+    const API_BASE = "/api/superadmin";
+
+    React.useEffect(() => {
+        const fetchBranches = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/branches`, {
+                    headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
+                        const mappedData = result.data.map(b => ({
+                            id: b.id,
+                            company_id: b.company_id || null,
+                            name: cleanText(b.branch_name),
+                            company: cleanText(b.company_name),
+                            address: cleanText(b.address),
+                            state: cleanText(b.state),
+                            location: b.latitude && b.longitude ? `${b.latitude}, ${b.longitude}` : '',
+                            lat: b.latitude,
+                            lng: b.longitude,
+                            status: b.status || 'Active'
+                        }));
+                        setBranches(mappedData);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching branches:", error);
+            }
+        };
+
+        const fetchCompanies = async () => {
+            try {
+                const response = await fetch(`${API_BASE}/companies`, {
+                    headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.data) {
+                        setCompaniesList(result.data);
+                    }
+                }
+            } catch (error) {
+                console.error("Error fetching companies:", error);
+            }
+        };
+
+        fetchBranches();
+        fetchCompanies();
+    }, [reload]);
 
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
@@ -42,40 +95,116 @@ export const BranchesContent = () => {
 
     const handleEdit = (branch) => {
         setSelectedBranch(branch);
-        setFormData(branch);
+        setFormData({
+            ...branch,
+            company: branch.company_id || ''
+        });
         setShowEdit(true);
     };
 
-    const handleSaveBranch = () => {
-        if (!formData.name) return;
-        const newBranch = {
-            id: branches.length + 1,
-            ...formData,
-            // Mock location generation if empty
-            location: formData.location || '0.0, 0.0'
-        };
-        setBranches([...branches, newBranch]);
-        setShowAdd(false);
-    };
+    const handleSaveBranch = async () => {
+        if (!formData.name || !formData.company) return; // Need both for API
 
-    const handleUpdateBranch = () => {
-        if (!selectedBranch) return;
-        const updatedList = branches.map(b =>
-            b.id === selectedBranch.id ? { ...formData, id: selectedBranch.id } : b
-        );
-        setBranches(updatedList);
-        setShowEdit(false);
-    };
-
-    const toggleStatus = (id) => {
-        const updatedBranches = branches.map(branch => {
-            if (branch.id === id) {
-                return { ...branch, status: branch.status === 'Active' ? 'Inactive' : 'Active' };
+        let lat = null, lng = null;
+        if (formData.location) {
+            const parts = formData.location.split(',');
+            if (parts.length === 2) {
+                lat = parts[0].trim();
+                lng = parts[1].trim();
             }
-            return branch;
-        });
-        setBranches(updatedBranches);
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/branches`, {
+                method: "POST",
+                headers: {
+                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    company_id: formData.company, // Storing ID in formData.company from select
+                    branch_name: formData.name,
+                    address: formData.address,
+                    latitude: lat,
+                    longitude: lng,
+                    status: formData.status
+                })
+            });
+
+            if (response.ok) {
+                setReload(!reload); // Refetch
+                setShowAdd(false);
+            } else {
+                console.error("Failed to save branch");
+            }
+        } catch (error) {
+            console.error("Error saving branch:", error);
+        }
     };
+
+    const handleUpdateBranch = async () => {
+        if (!selectedBranch) return;
+
+        let lat = null, lng = null;
+        if (formData.location) {
+            const parts = formData.location.split(',');
+            if (parts.length === 2) {
+                lat = parts[0].trim();
+                lng = parts[1].trim();
+            }
+        }
+
+        try {
+            const response = await fetch(`${API_BASE}/branches/${selectedBranch.id}`, {
+                method: "PUT",
+                headers: {
+                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    branch_name: formData.name,
+                    address: formData.address,
+                    latitude: lat,
+                    longitude: lng,
+                    status: formData.status
+                })
+            });
+
+            if (response.ok) {
+                setReload(!reload);
+                setShowEdit(false);
+            }
+        } catch (error) {
+            console.error("Error updating branch:", error);
+        }
+    };
+
+    const toggleStatus = async (id) => {
+        try {
+            const response = await fetch(`${API_BASE}/branches/${id}/toggle-status`, {
+                method: "PUT",
+                headers: {
+                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                }
+            });
+
+            if (response.ok) {
+                setReload(!reload); // Refetch list
+            }
+        } catch (error) {
+            console.error("Error toggling branch status:", error);
+        }
+    };
+
+    const filteredBranches = branches.filter(branch => {
+        const query = searchTerm.toLowerCase();
+        return (
+            (branch.name || '').toLowerCase().includes(query) ||
+            (branch.company || '').toLowerCase().includes(query) ||
+            (branch.address || '').toLowerCase().includes(query) ||
+            (branch.state || '').toLowerCase().includes(query)
+        );
+    });
 
     return (
         <>
@@ -84,9 +213,26 @@ export const BranchesContent = () => {
                     <h5 className="fw-bold text-dark mb-1">Branch Management</h5>
                     <p className="text-secondary small mb-0">Manage company branches</p>
                 </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
-                    + Add Branch
-                </button>
+                <div className="d-flex gap-2 align-items-center">
+                    <div className="position-relative">
+                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search branches..."
+                            className="form-control form-control-sm rounded-pill ps-5"
+                            style={{ width: '250px' }}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchTerm(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
+                    </div>
+                    <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
+                        + Add Branch
+                    </button>
+                </div>
             </div>
 
             <div className="table-card">
@@ -97,35 +243,41 @@ export const BranchesContent = () => {
                                 <th>Branch Name</th>
                                 <th>Company</th>
                                 <th>Address</th>
+                                <th>State</th>
                                 <th>Location</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {branches.map((branch) => (
-                                <tr key={branch.id} className={branch.status === 'Inactive' ? 'opacity-50' : ''}>
-                                    <td><span className="fw-bold text-dark">{branch.name}</span></td>
-                                    <td>{branch.company}</td>
-                                    <td>{branch.address}</td>
-                                    <td>{branch.location}</td>
-                                    <td>
-                                        <span className={`badge ${branch.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                                            {branch.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button className="action-btn edit" onClick={() => handleEdit(branch)}><FaEdit /></button>
-                                        <button
-                                            className={`action-btn ${branch.status === 'Active' ? 'delete' : 'edit'}`}
-                                            title={branch.status === 'Active' ? "Deactivate Branch" : "Activate Branch"}
-                                            onClick={() => toggleStatus(branch.id)}
-                                        >
-                                            {branch.status === 'Active' ? <FaBan /> : <FaCheckCircle className="text-success" />}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {filteredBranches.length === 0 ? (
+                                <tr><td colSpan="7" className="text-center py-4 text-muted">No branches found.</td></tr>
+                            ) : (
+                                filteredBranches.map((branch) => (
+                                    <tr key={branch.id} className={branch.status === 'Inactive' ? 'opacity-50' : ''}>
+                                        <td><span className="fw-bold text-dark">{branch.name}</span></td>
+                                        <td>{branch.company}</td>
+                                        <td>{branch.address}</td>
+                                        <td>{branch.state}</td>
+                                        <td>{branch.location}</td>
+                                        <td>
+                                            <span className={`badge ${branch.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
+                                                {branch.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button className="action-btn edit" onClick={() => handleEdit(branch)}><FaEdit /></button>
+                                            <button
+                                                className={`action-btn ${branch.status === 'Active' ? 'delete' : 'edit'}`}
+                                                title={branch.status === 'Active' ? "Deactivate Branch" : "Activate Branch"}
+                                                onClick={() => toggleStatus(branch.id)}
+                                            >
+                                                {branch.status === 'Active' ? <FaBan /> : <FaCheckCircle className="text-success" />}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -133,7 +285,7 @@ export const BranchesContent = () => {
 
             {/* Map Section */}
             <div className="mt-4">
-                <BranchMap branches={branches} />
+                <BranchMap branches={filteredBranches} />
             </div>
 
             {/* Add Modal */}
@@ -167,8 +319,9 @@ export const BranchesContent = () => {
                                             onChange={handleInputChange}
                                         >
                                             <option value="">Select Company</option>
-                                            <option value="TrickuWeb Technologies">TrickuWeb Technologies</option>
-                                            <option value="InnovateSoft Solutions">InnovateSoft Solutions</option>
+                                            {companiesList.map((comp, idx) => (
+                                                <option key={idx} value={comp.id}>{comp.company_name || comp.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="mb-3">
@@ -233,8 +386,10 @@ export const BranchesContent = () => {
                                             value={formData.company}
                                             onChange={handleInputChange}
                                         >
-                                            <option value="TrickuWeb Technologies">TrickuWeb Technologies</option>
-                                            <option value="InnovateSoft Solutions">InnovateSoft Solutions</option>
+                                            <option value="">Select Company</option>
+                                            {companiesList.map((comp, idx) => (
+                                                <option key={idx} value={comp.id}>{comp.company_name || comp.name}</option>
+                                            ))}
                                         </select>
                                     </div>
                                     <div className="mb-3">
@@ -279,8 +434,6 @@ export const BranchesContent = () => {
                     </div>
                 </div>
             )}
-
-            {/* Modal for Delete Removed */}
         </>
     );
 };

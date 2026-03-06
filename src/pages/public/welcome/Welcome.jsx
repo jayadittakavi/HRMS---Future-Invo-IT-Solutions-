@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'; // Splash screen with theme-specific background
 import { useNavigate } from 'react-router-dom';
 import './welcome.css';
 import logo from "../../../assets/images/fislogo1.png";
-import bgImage from "../../../assets/images/welcom bg1.jpg";
+import bgImage from "../../../assets/images/hrms_splash_bg_1772781261664.png";
 
 const Welcome = () => {
   const navigate = useNavigate();

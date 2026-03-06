@@ -94,17 +94,26 @@ const SignupOtp = () => {
         try {
             setError('');
 
-            const response = await fetch("http://192.168.1.13:5000/api/auth/verify-signup-otp", {
+            const response = await fetch("/api/auth/verify-signup-otp", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Accept": "application/json"
                 },
                 body: JSON.stringify({ email, otp: otpValue }),
             });
-            const data = await response.json();
+
+            const responseText = await response.text();
+            let data = {};
+            try {
+                data = responseText ? JSON.parse(responseText) : {};
+            } catch (e) {
+                console.warn("OTP response not JSON:", responseText);
+            }
 
             if (!response.ok) {
-                throw new Error(data.message || 'Signup verification failed');
+                const serverMsg = data.message || responseText || `Server Error ${response.status}`;
+                throw new Error(serverMsg);
             }
 
             // Connection to Dashboard established here
@@ -112,8 +121,10 @@ const SignupOtp = () => {
                 // Auto-login logic
                 const userData = data.user || { role: 'superadmin', email };
                 localStorage.setItem('authToken', data.token);
+                localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(userData));
 
+                alert('Account verified successfully! Redirecting to dashboard...');
                 // Force page reload to ensure all states (like AuthContext) are refreshed from localStorage
                 window.location.href = '/dashboard/super-admin';
             } else {
@@ -123,8 +134,12 @@ const SignupOtp = () => {
             }
 
         } catch (err) {
-            console.error(err);
-            setError(err.message || 'Invalid OTP. Please try again.');
+            console.error("OTP Verification Error:", err);
+            if (err instanceof TypeError && err.message === 'Failed to fetch') {
+                setError('Network Error: Could not connect to the verification server. Please check your connection.');
+            } else {
+                setError(`Verification Failed: ${err.message}`);
+            }
         }
     };
 

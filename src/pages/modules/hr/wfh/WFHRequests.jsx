@@ -3,6 +3,8 @@ import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { FaLaptopHouse, FaCheckCircle, FaTimesCircle, FaSearch, FaPlus, FaTimes, FaDownload } from 'react-icons/fa';
 import { MdPendingActions } from 'react-icons/md';
 import { useAuth } from '../../../../context/AuthContext';
+import { useSearch } from '../../../../context/SearchContext';
+import { useEffect } from 'react';
 
 /* ─── shared style tokens ─── */
 const card = {
@@ -41,7 +43,12 @@ const WFHRequests = () => {
     const isManager = ['superadmin', 'admin', 'hr', 'manager'].includes(user?.role?.toLowerCase());
 
     const [requests, setRequests] = useState(initRequests);
-    const [search, setSearch] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [statusFilter, setStatus] = useState('All');
     const [showModal, setShowModal] = useState(false);
     const [toast, setToast] = useState('');
@@ -152,7 +159,11 @@ const WFHRequests = () => {
                                     type="text"
                                     placeholder="Search employee or dept..."
                                     value={search}
-                                    onChange={e => setSearch(e.target.value)}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSearch(val);
+                                        setGlobalSearchTerm(val);
+                                    }}
                                     style={{ paddingLeft: 27, paddingRight: 10, height: 30, fontSize: '0.74rem', border: '1px solid #e2e8f0', borderRadius: 6, width: 200, outline: 'none', color: '#1e293b' }}
                                 />
                             </div>

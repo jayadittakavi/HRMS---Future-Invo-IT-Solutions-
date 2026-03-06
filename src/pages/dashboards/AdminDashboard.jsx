@@ -12,7 +12,6 @@ import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveMana
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
 import { FinancialYearContent } from '../modules/finance/financial_year/FinancialYear';
 import { UserManagementContent } from '../modules/core/user_management/UserManagement';
-import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { CompaniesContent } from '../modules/core/companies/Companies';
 import { BranchesContent } from '../modules/core/branches/Branches';
@@ -85,7 +84,6 @@ const AdminDashboard = () => {
             {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
             {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
             {activeView === 'users' && <UserManagementContent />}
-            {activeView === 'pay-grade' && <PayGradeContent />}
             {activeView === 'delegation' && <DelegationContent />}
             {activeView === 'visitors' && <VisitorContent />}
             {activeView === 'desk-management' && <DeskManagementContent />}

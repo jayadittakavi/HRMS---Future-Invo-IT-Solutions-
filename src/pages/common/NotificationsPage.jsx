@@ -5,7 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { FaBell, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle, FaTrash, FaCheckDouble } from 'react-icons/fa';
 
 const NotificationsPage = () => {
-    const { notifications, markAllAsRead, clearNotifications } = useNotification();
+    const { notifications, markAllAsRead, markAsRead, deleteNotification, clearNotifications } = useNotification();
     const { theme } = useTheme();
 
     const getIcon = (type) => {
@@ -36,7 +36,12 @@ const NotificationsPage = () => {
                         {notifications.length > 0 ? (
                             <div className="list-group list-group-flush">
                                 {notifications.map(notif => (
-                                    <div key={notif.id} className={`list-group-item p-4 d-flex align-items-center gap-3 ${!notif.read ? 'bg-light' : ''}`}>
+                                    <div
+                                        key={notif.id}
+                                        className={`list-group-item p-4 d-flex align-items-center gap-3 transition-all ${!notif.read ? 'bg-light' : ''}`}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => markAsRead(notif.id)}
+                                    >
                                         <div className="p-2 rounded-circle bg-light border">
                                             {getIcon(notif.type)}
                                         </div>
@@ -45,11 +50,23 @@ const NotificationsPage = () => {
                                                 <h6 className={`mb-1 fw-bold ${!notif.read ? 'text-dark' : 'text-secondary'}`}>{notif.title}</h6>
                                                 <small className="text-muted">{notif.time}</small>
                                             </div>
-                                            <p className="mb-0 text-secondary">{notif.message}</p>
+                                            <p className="mb-0 text-secondary small">{notif.message}</p>
                                         </div>
-                                        {!notif.read && (
-                                            <div className="badge bg-primary rounded-circle p-1"> </div>
-                                        )}
+                                        <div className="d-flex align-items-center gap-3">
+                                            {!notif.read && (
+                                                <div className="badge bg-primary rounded-circle p-1" style={{ width: '8px', height: '8px' }}> </div>
+                                            )}
+                                            <button
+                                                className="btn btn-link text-danger p-0 border-0"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    deleteNotification(notif.id);
+                                                }}
+                                                title="Delete Notification"
+                                            >
+                                                <FaTrash size={16} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>

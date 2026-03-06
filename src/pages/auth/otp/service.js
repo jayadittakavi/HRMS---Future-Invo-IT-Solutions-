@@ -1,4 +1,5 @@
-export const VERIFY_RESET_OTP_URL = "http://192.168.1.13:5000/api/auth/verify-reset-otp";
+const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+export const VERIFY_RESET_OTP_URL = `${BASE_URL}/auth/verify-reset-otp`;
 
 export const otpService = {
     verifyResetOtp: async (email, otp) => {

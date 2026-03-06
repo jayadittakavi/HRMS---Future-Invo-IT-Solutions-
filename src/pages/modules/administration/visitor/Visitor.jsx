@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
+import { useSearch } from '../../../../context/SearchContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import {
     MdPersonAdd, MdAssignment, MdHistory, MdBarChart,
@@ -12,7 +13,12 @@ export const VisitorContent = () => {
     const role = user?.role?.toLowerCase() || 'employee';
 
     const [activeTab, setActiveTab] = useState('request');
-    const [searchTerm, setSearchTerm] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [showModal, setShowModal] = useState(false);
     const [showFilter, setShowFilter] = useState(false);
     const [filters, setFilters] = useState({
@@ -157,7 +163,11 @@ export const VisitorContent = () => {
                                 className="form-control border-0 shadow-none bg-transparent ps-3"
                                 placeholder="Search visitor by name or purpose..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSearchTerm(val);
+                                    setGlobalSearchTerm(val);
+                                }}
                             />
                             <button
                                 className={`btn ${showFilter ? 'btn-primary' : 'btn-light'} rounded-pill px-3 border ms-2 d-flex align-items-center gap-1`}

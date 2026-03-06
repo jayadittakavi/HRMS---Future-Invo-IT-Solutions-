@@ -5,11 +5,9 @@ import { CompaniesContent } from '../modules/core/companies/Companies';
 import { EmployeesContent } from '../modules/hr/employees/Employees';
 import { DepartmentsContent } from '../modules/core/departments/Departments';
 import { PayrollContent } from '../modules/finance/payroll/Payroll';
-import { FinancialYearContent } from '../modules/finance/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../modules/hr/leave_management/LeaveManagement';
 import { UserManagementContent } from '../modules/core/user_management/UserManagement';
 import { AttendanceContent } from '../attendance/Attendance';
-import { PayGradeContent } from '../modules/finance/pay_grade/PayGrade';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { BranchesContent } from '../modules/core/branches/Branches';
 import { DelegationContent } from '../modules/administration/delegation/Delegation';
@@ -18,6 +16,7 @@ import { DeskManagementContent } from '../modules/administration/desk/DeskManage
 import '../../components/layout/DashboardLayout.css';
 import OverallStats from './components/OverallStats';
 import MySpace from './components/MySpace';
+import AuditLogs from '../../components/audit/AuditLogs'; // Added missing import
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const SuperAdminDashboard = () => {
@@ -65,11 +64,9 @@ const SuperAdminDashboard = () => {
             {activeView === 'departments' && <DepartmentsContent />}
             {activeView === 'branches' && <BranchesContent />}
             {activeView === 'payroll' && <PayrollContent />}
-            {activeView === 'financial-year' && <FinancialYearContent />}
             {activeView === 'leave-management' && <LeaveManagementContent />}
             {activeView === 'users' && <UserManagementContent />}
             {activeView === 'attendance' && <AttendanceContent />}
-            {activeView === 'pay-grade' && <PayGradeContent />}
             {activeView === 'profile' && <ProfileContent />}
             {activeView === 'audit-logs' && <AuditLogs role="superadmin" />}
             {activeView === 'delegation' && <DelegationContent />}

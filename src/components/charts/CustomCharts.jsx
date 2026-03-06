@@ -188,3 +188,74 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
 };
 
 export const SimpleAreaChart = SimpleLineChart; // Alias for now
+
+/**
+ * Modern Trend Chart with Bezier Curves
+ */
+export const ModernTrendChart = ({ data = [], color = '#6366f1', height = '200px' }) => {
+    const max = Math.max(...data) || 100;
+    const width = 500;
+    const h = 220;
+
+    // Convert data to points
+    const points = data.map((val, i) => ({
+        x: (i / (data.length - 1)) * width,
+        y: h - 20 - ((val / max) * (h - 60))
+    }));
+
+    // Re-calculating in component to be safe
+    const actualCurvePath = (() => {
+        if (points.length < 2) return "";
+        let path = `M ${points[0].x},${points[0].y}`;
+        for (let i = 0; i < points.length - 1; i++) {
+            const cp1x = (points[i].x + points[i + 1].x) / 2;
+            path += ` C ${cp1x},${points[i].y} ${cp1x},${points[i + 1].y} ${points[points.length - 1].x === points[i + 1].x ? points[i + 1].x : cp1x},${points[i + 1].y}`;
+        }
+        // Actually a simpler way for SVG path
+        return points.reduce((acc, p, i, a) => {
+            if (i === 0) return `M ${p.x},${p.y}`;
+            const prev = a[i - 1];
+            const cp1x = (prev.x + p.x) / 2;
+            return `${acc} C ${cp1x},${prev.y} ${cp1x},${p.y} ${p.x},${p.y}`;
+        }, "");
+    })();
+
+    return (
+        <div style={{ width: '100%', height, overflow: 'visible', position: 'relative' }}>
+            <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                <defs>
+                    <linearGradient id="modernGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+                        <stop offset="100%" stopColor={color} stopOpacity="0" />
+                    </linearGradient>
+                </defs>
+
+                {/* Area Fill */}
+                <path
+                    d={`${actualCurvePath} L ${width},${h} L 0,${h} Z`}
+                    fill="url(#modernGradient)"
+                />
+
+                {/* Stroke Line */}
+                <path
+                    d={actualCurvePath}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                />
+
+                {/* Markers - Only show some for clarity */}
+                {points.map((p, i) => (i % 2 === 0 || i === points.length - 1) && (
+                    <g key={i}>
+                        <circle cx={p.x} cy={p.y} r="4" fill="#ffffff" stroke={color} strokeWidth="2" />
+                        <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="12" fontWeight="700" fill={color}>
+                            {data[i]}$
+                        </text>
+                    </g>
+                ))}
+            </svg>
+        </div>
+    );
+};

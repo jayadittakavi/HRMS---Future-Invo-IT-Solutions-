@@ -6,11 +6,9 @@ import { AssetsContent } from '../../modules/operations/assets/Assets';
 import { AssetCategoriesContent } from '../../modules/operations/assets/AssetCategories';
 import { EmployeesContent } from '../../modules/hr/employees/Employees';
 import { PayrollContent } from '../../modules/finance/payroll/Payroll';
-import { FinancialYearContent } from '../../modules/finance/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../../modules/hr/leave_management/LeaveManagement';
 import { AttendanceContent } from '../../attendance/Attendance';
 import { UserManagementContent } from '../../modules/core/user_management/UserManagement';
-import { PayGradeContent } from '../../modules/finance/pay_grade/PayGrade';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, SimpleAreaChart } from '../components/charts/CustomCharts';
 import { useAuth } from '../context/AuthContext';
 import React, { useState } from 'react';
@@ -312,11 +310,9 @@ const SuperAdminDashboard = () => {
                 {activeView === 'asset-categories' && <AssetCategoriesContent />}
                 {activeView === 'employees' && <EmployeesContent />}
                 {activeView === 'payroll' && <PayrollContent />}
-                {activeView === 'financial-year' && <FinancialYearContent />}
                 {activeView === 'attendance' && <AttendanceContent />}
                 {activeView === 'leave-management' && <LeaveManagementContent />}
                 {activeView === 'users' && <UserManagementContent />}
-                {activeView === 'pay-grade' && <PayGradeContent />}
             </div>
         </DashboardLayout>
     );

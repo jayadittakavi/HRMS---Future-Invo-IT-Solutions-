@@ -196,12 +196,6 @@ export const EmployeesContent = () => {
 
                                         {/* Row 6 */}
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">PayGrade *</label>
-                                            <select className="form-select">
-                                                <option>Select PayGrade</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6">
                                             <label className="form-label small fw-bold">CTC (Annual)</label>
                                             <input type="number" className="form-control" placeholder="600000" />
                                         </div>

@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus, FaFileCsv, FaUserPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus, FaFileCsv, FaSearch } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useSearch } from '../../../../context/SearchContext';
+import { useAuth } from '../../../../context/AuthContext';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const EmployeesContent = () => {
     const navigate = useNavigate();
+    const { user: currentUser } = useAuth();
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     // Mock Data
     const [employees, setEmployees] = useState([
-        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', pay: 'N/A', type: 'Admin', status: 'Active' },
-        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', pay: 'N/A', type: 'Manager', status: 'Active' },
-        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', pay: 'N/A', type: 'Employee', status: 'Active' },
+        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: '1', desig: 'System Administrator', type: 'Admin', company: 'N/A', status: 'Active' },
+        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: '2', desig: 'HR Manager', type: 'Manager', company: 'N/A', status: 'Active' },
+        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: '3', desig: 'Software Developer', type: 'Employee', company: 'N/A', status: 'Active' },
+        { id: 4, user: 'admin', name: 'System Admin', email: 'admin@trickuweb.com', dept: '1', desig: 'System Administrator', type: 'Admin', company: 'N/A', status: 'Active' },
+        { id: 5, user: 'manager', name: 'Department Manager', email: 'manager@trickuweb.com', dept: '2', desig: 'Department Manager', type: 'Manager', company: 'N/A', status: 'Active' },
     ]);
 
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
+    const [showStatusModal, setShowStatusModal] = useState(false);
 
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [filterDept, setFilterDept] = useState('');
-    const [filterName, setFilterName] = useState('');
+    const [filterName, setFilterName] = useState(globalSearchTerm);
     const [sortOrder, setSortOrder] = useState('asc'); // asc or desc
     const [sortBy, setSortBy] = useState('id'); // id or name
+
+    // Sync local search with global search
+    React.useEffect(() => {
+        setFilterName(globalSearchTerm);
+    }, [globalSearchTerm]);
 
 
     // Form Data State
@@ -34,10 +45,11 @@ export const EmployeesContent = () => {
         dept: '',
         desig: '',
         type: 'Employee',
+        username: '',
+        password: '',
         joiningDate: '',
         company: '',
         branch: '',
-        payGrade: '',
         ctc: '',
         manager: '',
         status: 'Active',
@@ -50,7 +62,8 @@ export const EmployeesContent = () => {
         setFormData({
             userAccount: '', name: '', email: '', phone: '',
             dept: '', desig: '', type: type, joiningDate: '',
-            company: '', branch: '', payGrade: '', ctc: '',
+            username: '', password: '',
+            company: '', branch: '', ctc: '',
             manager: '', status: 'Active', lock: false
         });
         setShowAdd(true);
@@ -79,12 +92,12 @@ export const EmployeesContent = () => {
 
     const handleDelete = (emp) => {
         setSelectedEmployee(emp);
-        setShowDelete(true);
+        setShowStatusModal(true);
     };
 
-    const confirmDelete = () => {
-        setEmployees(employees.filter(e => e.id !== selectedEmployee.id));
-        setShowDelete(false);
+    const confirmStatusToggle = () => {
+        toggleStatus(selectedEmployee.id);
+        setShowStatusModal(false);
     };
 
     const toggleStatus = (id) => {
@@ -112,7 +125,8 @@ export const EmployeesContent = () => {
         setFormData({
             userAccount: '', name: '', email: '', phone: '',
             dept: '', desig: '', type: 'Employee', joiningDate: '',
-            company: '', branch: '', payGrade: '', ctc: '',
+            username: '', password: '',
+            company: '', branch: '', ctc: '',
             manager: '', status: 'Active', lock: false
         });
     };
@@ -132,9 +146,7 @@ export const EmployeesContent = () => {
         document.body.removeChild(link);
     };
 
-    const handleCreateUsername = () => {
-        navigate('/create-username');
-    };
+
 
     // Derived State for Filtering
     const filteredEmployees = employees
@@ -152,48 +164,43 @@ export const EmployeesContent = () => {
 
 
     return (
-        <>
-            <div className="d-flex flex-column gap-3 mb-4">
-                <div className="d-flex justify-content-between align-items-center">
-                    <h5 className="fw-bold text-dark mb-0">Employee Details</h5>
+        <div className="fade-in">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 className="fw-bold text-dark mb-1">Employee Management</h4>
+                    <p className="text-secondary small mb-0">Manage employee records and information</p>
                 </div>
+                <button
+                    type="button"
+                    className="btn btn-primary px-4 fw-bold shadow-sm d-flex align-items-center gap-2"
+                    onClick={() => openAddModal('Employee')}
+                >
+                    <FaPlus /> ADD EMPLOYEE
+                </button>
+            </div>
 
-                <div className="d-flex flex-wrap gap-2 justify-content-between align-items-center bg-white p-3 rounded shadow-sm">
-                    <div className="d-flex gap-2 flex-grow-1">
-                        <select className="form-select form-select-sm" style={{ maxWidth: '200px' }} value={filterDept} onChange={(e) => setFilterDept(e.target.value)}>
-                            <option value="">Select Department</option>
-                            <option>Administration</option>
-                            <option>HR</option>
-                            <option>Engineering</option>
-                        </select>
-                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }} value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-                            <option value="id">By ID</option>
-                            <option value="name">By Name</option>
-                        </select>
-                        <select className="form-select form-select-sm" style={{ maxWidth: '150px' }} value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
-                            <option value="asc">Ascending</option>
-                            <option value="desc">Descending</option>
-                        </select>
+            <div className="bg-white p-3 rounded shadow-sm mb-4 border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                <div className="d-flex gap-2 flex-grow-1 align-items-center">
+                    <div className="position-relative">
+                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
+                        <input
+                            type="text"
+                            className="form-control form-control-sm rounded ps-5 bg-light border-0"
+                            style={{ width: '300px' }}
+                            placeholder="Search by name or username..."
+                            value={filterName}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFilterName(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
                     </div>
-                    <div className="d-flex gap-2">
-                        <button className="btn btn-success btn-sm d-flex align-items-center gap-2" onClick={handleExportCSV}>
-                            <FaFileCsv /> EXPORT CSV
-                        </button>
-                        <button className="btn btn-primary btn-sm d-flex align-items-center gap-2" onClick={handleCreateUsername}>
-                            <FaUserPlus /> CREATE USERNAME
-                        </button>
-                        <div className="btn-group">
-                            <button type="button" className="btn btn-primary btn-sm dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false">
-                                <FaPlus /> ADD MEMBER
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end">
-                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Employee' } })}>Add Employee</button></li>
-                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'HR' } })}>Add HR</button></li>
-                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Manager' } })}>Add Manager</button></li>
-                                <li><button className="dropdown-item" onClick={() => navigate('/add-member', { state: { type: 'Admin' } })}>Add Admin</button></li>
-                            </ul>
-                        </div>
-                    </div>
+                </div>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-light btn-sm border d-flex align-items-center gap-2" onClick={handleExportCSV}>
+                        <FaFileCsv className="text-success" /> EXPORT
+                    </button>
                 </div>
             </div>
 
@@ -204,41 +211,40 @@ export const EmployeesContent = () => {
                             <tr>
                                 <th>Username</th>
                                 <th>Name</th>
-                                <th>Phone</th>
-                                <th>Gender</th>
-                                <th>City</th>
-                                <th>Status</th>
-                                <th>Download</th>
-                                <th>Created At</th>
-                                <th>Action</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Designation</th>
+                                <th>Type</th>
+                                <th>Company ID</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredEmployees.map((emp) => (
                                 <tr key={emp.id} className={emp.status === 'Inactive' ? 'opacity-50' : ''}>
-                                    <td>{emp.user}</td>
+                                    <td className="fw-bold">{emp.user}</td>
                                     <td>{emp.name}</td>
-                                    <td>{emp.phone || '+91 9876543210'}</td>
-                                    <td>Female</td>
-                                    <td>{emp.city || 'Mumbai'}</td>
+                                    <td className="text-secondary small">{emp.email}</td>
+                                    <td>{emp.dept}</td>
+                                    <td>{emp.desig}</td>
                                     <td>
-                                        <span className={`badge ${emp.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                                            {emp.status}
+                                        <span className={`badge ${emp.type === 'Admin' ? 'bg-purple-role' : emp.type === 'Manager' ? 'bg-purple-soft-role' : 'bg-secondary'} rounded-pill px-3`}>
+                                            {emp.type}
                                         </span>
                                     </td>
-                                    <td>---</td>
-                                    <td>27-09-2025</td>
+                                    <td>{emp.company || 'N/A'}</td>
                                     <td>
                                         <div className="d-flex gap-2">
-                                            <button className="btn btn-sm btn-outline-primary border-0" onClick={() => handleEdit(emp)}><FaEdit /></button>
+                                            <button className="btn btn-sm btn-light border p-2" onClick={() => handleEdit(emp)} title="Edit">
+                                                <FaEdit className="text-primary" />
+                                            </button>
                                             <button
-                                                className="btn btn-sm btn-outline-warning border-0"
-                                                onClick={() => toggleStatus(emp.id)}
+                                                className={`btn btn-sm ${emp.status === 'Active' ? 'btn-danger' : 'btn-success'} p-2`}
+                                                onClick={() => handleDelete(emp)}
                                                 title={emp.status === 'Active' ? "Deactivate" : "Activate"}
                                             >
                                                 {emp.status === 'Active' ? <FaBan /> : <FaCheckCircle />}
                                             </button>
-                                            <button className="btn btn-sm btn-outline-danger border-0" onClick={() => handleDelete(emp)}><FaTrash /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -285,6 +291,20 @@ export const EmployeesContent = () => {
                                             <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Phone number" />
                                         </div>
 
+                                        {/* Credentials Section */}
+                                        <div className="col-12"><h6 className="text-primary small fw-bold border-bottom pb-1 mt-2">Login Credentials</h6></div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Username <span className="text-danger">*</span></label>
+                                            <input type="text" className="form-control form-control-sm" name="username" value={formData.username} onChange={handleInputChange} placeholder="Create username" required />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold">Password <span className="text-danger">*</span></label>
+                                            <input type="password" name="password" className="form-control form-control-sm" value={formData.password} onChange={handleInputChange} placeholder="Set password" required />
+                                        </div>
+                                        <div className="col-12 text-muted xsmall" style={{ fontSize: '0.7rem' }}>
+                                            The user will use these credentials to access their account.
+                                        </div>
+
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Department</label>
                                             <select className="form-select" name="dept" value={formData.dept} onChange={handleInputChange}>
@@ -328,14 +348,6 @@ export const EmployeesContent = () => {
                                             </select>
                                         </div>
 
-                                        <div className="col-md-6">
-                                            <label className="form-label small fw-bold">PayGrade *</label>
-                                            <select className="form-select" name="payGrade" value={formData.payGrade} onChange={handleInputChange}>
-                                                <option value="">Select PayGrade</option>
-                                                <option>Grade A</option>
-                                                <option>Grade B</option>
-                                            </select>
-                                        </div>
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">CTC (Annual)</label>
                                             <input type="number" className="form-control" name="ctc" value={formData.ctc} onChange={handleInputChange} placeholder="600000" />
@@ -471,29 +483,31 @@ export const EmployeesContent = () => {
                 </div>
             )}
 
-            {/* Delete Modal */}
-            {showDelete && selectedEmployee && (
+            {/* Deactivate/Activate Modal */}
+            {showStatusModal && selectedEmployee && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
                     <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title text-danger">Delete Employee</h5>
-                                <button className="btn-close" onClick={() => setShowDelete(false)}></button>
+                                <h5 className={`modal-title ${selectedEmployee.status === 'Active' ? 'text-danger' : 'text-success'}`}>
+                                    {selectedEmployee.status === 'Active' ? 'Deactivate' : 'Activate'} Employee
+                                </h5>
+                                <button className="btn-close" onClick={() => setShowStatusModal(false)}></button>
                             </div>
                             <div className="modal-body">
-                                <p>Are you sure you want to delete <strong>{selectedEmployee.name}</strong>?</p>
+                                <p>Are you sure you want to <strong>{selectedEmployee.status === 'Active' ? 'deactivate' : 'activate'}</strong> <strong>{selectedEmployee.name}</strong>?</p>
                             </div>
                             <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm" onClick={confirmDelete}>Delete</button>
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowStatusModal(false)}>Cancel</button>
+                                <button className={`btn ${selectedEmployee.status === 'Active' ? 'btn-danger' : 'btn-success'} btn-sm`} onClick={confirmStatusToggle}>
+                                    {selectedEmployee.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-
-
-        </>
+        </div>
     );
 };
 

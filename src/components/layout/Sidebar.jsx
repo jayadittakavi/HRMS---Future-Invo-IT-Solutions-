@@ -41,7 +41,9 @@ import {
     MdWindow, // Desk Management
     MdGridView, // Advanced
     MdExpandLess,
-    MdExpandMore
+    MdExpandMore,
+    MdChevronLeft,
+    MdChevronRight
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
@@ -104,7 +106,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     dashboardLink,
                     { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
                     { name: 'My Leave', icon: <MdEventBusy size={20} />, path: '/my-leaves' },
-                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
+                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
                     { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
@@ -134,10 +136,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employees' },
+                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
                     { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-                    { name: 'Pay Grade', icon: <MdAttachMoney size={20} />, path: '/pay-grade' },
-                    { name: 'Financial Year', icon: <MdEventNote size={20} />, path: '/financial-year' },
                     { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
                     {
                         name: 'Administration',
@@ -263,23 +263,24 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
         return (
             <div className="d-flex flex-column gap-1 pt-2">
+
                 {links.map((link) => {
                     if (link.children) {
-                        const isOpen = openDropdowns[link.name];
+                        const isDropdownOpen = openDropdowns[link.name];
                         return (
                             <div key={link.name}>
                                 <div
-                                    className={`sidebar-link d-flex justify-content-between align-items-center ${isOpen ? 'active-dropdown' : ''}`}
+                                    className={`sidebar-link d-flex justify-content-between align-items-center ${isDropdownOpen ? 'active-dropdown' : ''}`}
                                     onClick={() => toggleDropdown(link.name)}
                                     style={{ cursor: 'pointer' }}
                                 >
                                     <div className="d-flex align-items-center gap-3">
                                         <span className="sidebar-icon">{link.icon}</span>
-                                        <span>{link.name}</span>
+                                        {isOpen && <span>{link.name}</span>}
                                     </div>
-                                    {isOpen ? <MdExpandLess /> : <MdExpandMore />}
+                                    {isOpen && (isDropdownOpen ? <MdExpandLess /> : <MdExpandMore />)}
                                 </div>
-                                {isOpen && (
+                                {isDropdownOpen && isOpen && (
                                     <div className="bg-dark bg-opacity-10 py-1 rounded-bottom mb-1">
                                         {link.children.map(child => (
                                             <NavLink
@@ -298,7 +299,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                                                     }
                                                 }}
                                             >
-                                                <span>{child.name}</span>
+                                                {isOpen ? <span>{child.name}</span> : <span className="small text-center w-100">{child.name.charAt(0)}</span>}
                                             </NavLink>
                                         ))}
                                     </div>
@@ -323,7 +324,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                             }}
                         >
                             <span className="sidebar-icon">{link.icon}</span>
-                            <span>{link.name}</span>
+                            {isOpen && <span>{link.name}</span>}
                         </NavLink>
                     );
                 })}
@@ -337,39 +338,69 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             style={{ width: '100%', overflow: 'hidden' }}
         >
             {/* Logo Area */}
-            <div className="sidebar-header d-flex align-items-center mb-4 ps-2">
-                <div className="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', marginRight: '12px' }}>
+            <div className={`sidebar-header d-flex align-items-center mb-4 ps-2 ${!isOpen ? 'justify-content-center ps-0' : ''}`}>
+                <div className="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', marginRight: isOpen ? '12px' : '0', minWidth: '40px' }}>
                     <img src={logo} alt="HRMS Logo" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '50%' }} />
                 </div>
-                <div>
-                    <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
-                </div>
+                {isOpen && (
+                    <div>
+                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
+                    </div>
+                )}
             </div>
 
             {/* Role Info */}
-            <div className="sidebar-role-label">
-                Role : <span className="fw-bold text-main">{displayRole}</span>
-            </div>
+            {isOpen && (
+                <div className="sidebar-role-label text-white my-3">
+                    Role : <span className="fw-bold text-white">{displayRole}</span>
+                </div>
+            )}
 
             {/* Links */}
             <div className="flex-grow-1 overflow-auto">
+                <div className="d-flex flex-column gap-1 pt-2">
+                    {isOpen && role === 'superadmin' && <div className="sidebar-nav-label mt-1">Super Admin Controls</div>}
+                    {isOpen && role === 'admin' && <div className="sidebar-nav-label mt-1">Admin Controls</div>}
+                </div>
                 {renderLinks()}
             </div>
 
-            {/* Logout Section */}
-            <div className="p-3 border-top border-secondary border-opacity-25">
+            {/* Logout Section & Collapse Action */}
+            <div className="p-2 border-top border-secondary border-opacity-25 mt-auto">
                 <button
                     onClick={handleLogout}
-                    className="sidebar-link w-100 border-0 text-start d-flex align-items-center mb-0"
-                    style={{ cursor: 'pointer', color: '#ef4444 !important' }} // Red tint for logout often implies action
+                    className="sidebar-link w-100 border-0 text-start d-flex align-items-center mb-2"
+                    style={{ cursor: 'pointer', color: '#ef4444 !important', margin: isOpen ? '0 0.86rem' : '0 auto', justifyContent: isOpen ? 'flex-start' : 'center' }}
                 >
-                    <span className="sidebar-icon"><MdLogout size={20} /></span>
-                    <span>Logout</span>
+                    <span className="sidebar-icon m-0"><MdLogout size={20} /></span>
+                    {isOpen && <span className="ms-3">Logout</span>}
                 </button>
 
-                <div className="text-center text-white small opacity-50 mt-2">
-                    © 2026 Future Invo
+                {/* Sidebar Collapse Action */}
+                <div className={`d-flex ${isOpen ? 'justify-content-end pe-3' : 'justify-content-center'} py-2 mt-1`}>
+                    <button
+                        onClick={toggleSidebar}
+                        className="sidebar-collapse-btn d-none d-md-flex align-items-center justify-content-center border-0 bg-transparent text-white opacity-60 hover-opacity-100"
+                        style={{
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            outline: 'none',
+                            boxShadow: 'none'
+                        }}
+                        title={isOpen ? "Collapse" : "Expand"}
+                    >
+                        {isOpen ? <MdChevronLeft size={24} /> : <MdChevronRight size={24} />}
+                    </button>
                 </div>
+
+                {isOpen && (
+                    <div className="text-center text-white small opacity-50 mt-1">
+                        © 2026 Future Invo
+                    </div>
+                )}
             </div>
         </div>
     );

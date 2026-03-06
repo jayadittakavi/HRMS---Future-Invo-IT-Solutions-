@@ -11,7 +11,6 @@ import { PayrollContent } from '../pages/payroll/Payroll';
 import { FinancialYearContent } from '../pages/financial_year/FinancialYear';
 import { LeaveManagementContent } from '../pages/leave_management/LeaveManagement';
 import { UserManagementContent } from '../pages/user_management/UserManagement';
-import { PayGradeContent } from '../pages/pay_grade/PayGrade';
 import { useAuth } from '../context/AuthContext';
 import { FaUsers, FaMoneyBillWave, FaUserClock, FaTasks } from 'react-icons/fa';
 import BranchMap from '../components/BranchMap';
@@ -151,7 +150,6 @@ const AdminDashboard = () => {
                 {activeView === 'financial-year' && <FinancialYearContent />}
                 {activeView === 'leave-management' && <LeaveManagementContent />}
                 {activeView === 'users' && <UserManagementContent />}
-                {activeView === 'pay-grade' && <PayGradeContent />}
             </div>
         </DashboardLayout>
     );

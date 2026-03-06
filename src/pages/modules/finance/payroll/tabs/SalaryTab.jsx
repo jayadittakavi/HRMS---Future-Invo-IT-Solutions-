@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearch } from '../../../../../context/SearchContext';
 import SalaryStructureAssignment from './SalaryStructureAssignment';
 import SalarySlip from './SalarySlip';
 
@@ -83,6 +84,12 @@ const PlaceholderSection = ({ title, description, onBack }) => (
 /* ─── Main SalaryTab Component ────────────────────────── */
 const SalaryTab = ({ onTabChange }) => {
     const [activeSection, setActiveSection] = useState(null);
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     /* ── If a sub-section is selected, render it ──── */
     if (activeSection === 'salary-structure-assignment') {
@@ -218,7 +225,25 @@ const SalaryTab = ({ onTabChange }) => {
                         <h6 className="fw-bold mb-0" style={{ color: '#111827' }}>Salary Components Summary</h6>
                         <p className="text-secondary small mb-0 mt-1">Active components across all salary structures</p>
                     </div>
-                    <button className="btn btn-sm btn-outline-primary rounded-3 px-3" onClick={() => alert('Opening Bulk Update tool...')}>Bulk Update</button>
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="input-group input-group-sm" style={{ width: '220px' }}>
+                            <span className="input-group-text bg-white border-end-0">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                            </span>
+                            <input
+                                type="text"
+                                className="form-control border-start-0 ps-0"
+                                placeholder="Search components..."
+                                value={search}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setSearch(val);
+                                    setGlobalSearchTerm(val);
+                                }}
+                            />
+                        </div>
+                        <button className="btn btn-sm btn-outline-primary rounded-3 px-3" onClick={() => alert('Opening Bulk Update tool...')}>Bulk Update</button>
+                    </div>
                 </div>
                 <div className="card-body px-4 pb-4 pt-3">
                     <div className="table-responsive">
@@ -234,36 +259,40 @@ const SalaryTab = ({ onTabChange }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {[
-                                    { name: 'Basic Salary', type: 'Earning', calc: 'Fixed', freq: 'Monthly', status: 'Active' },
-                                    { name: 'HRA', type: 'Earning', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
-                                    { name: 'Special Allowance', type: 'Earning', calc: '% of CTC', freq: 'Monthly', status: 'Active' },
-                                    { name: 'PF (Employee)', type: 'Deduction', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
-                                    { name: 'Professional Tax', type: 'Deduction', calc: 'Fixed Slab', freq: 'Monthly', status: 'Active' },
-                                ].map((row, i) => (
-                                    <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name)}>
-                                        <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name}</td>
-                                        <td className="px-3">
-                                            <span className={`badge rounded-pill ${row.type === 'Earning' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`} style={{ fontSize: '0.72rem' }}>
-                                                {row.type}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 text-secondary">{row.calc}</td>
-                                        <td className="px-3 text-secondary">{row.freq}</td>
-                                        <td className="px-3">
-                                            <span className="badge rounded-pill bg-success bg-opacity-10 text-success" style={{ fontSize: '0.72rem' }}>● {row.status}</span>
-                                        </td>
-                                        <td className="px-3 text-end">
-                                            <button
-                                                className="btn btn-sm btn-light rounded-2 px-3 hover-primary-light"
-                                                style={{ fontSize: '0.75rem' }}
-                                                onClick={(e) => { e.stopPropagation(); handleEditComponent(row.name); }}
-                                            >
-                                                Edit
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {
+                                    [
+                                        { name: 'Basic Salary', type: 'Earning', calc: 'Fixed', freq: 'Monthly', status: 'Active' },
+                                        { name: 'HRA', type: 'Earning', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
+                                        { name: 'Special Allowance', type: 'Earning', calc: '% of CTC', freq: 'Monthly', status: 'Active' },
+                                        { name: 'PF (Employee)', type: 'Deduction', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
+                                        { name: 'Professional Tax', type: 'Deduction', calc: 'Fixed Slab', freq: 'Monthly', status: 'Active' },
+                                    ].filter(row =>
+                                        row.name.toLowerCase().includes(search.toLowerCase()) ||
+                                        row.type.toLowerCase().includes(search.toLowerCase())
+                                    ).map((row, i) => (
+                                        <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name)}>
+                                            <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name}</td>
+                                            <td className="px-3">
+                                                <span className={`badge rounded-pill ${row.type === 'Earning' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`} style={{ fontSize: '0.72rem' }}>
+                                                    {row.type}
+                                                </span>
+                                            </td>
+                                            <td className="px-3 text-secondary">{row.calc}</td>
+                                            <td className="px-3 text-secondary">{row.freq}</td>
+                                            <td className="px-3">
+                                                <span className="badge rounded-pill bg-success bg-opacity-10 text-success" style={{ fontSize: '0.72rem' }}>● {row.status}</span>
+                                            </td>
+                                            <td className="px-3 text-end">
+                                                <button
+                                                    className="btn btn-sm btn-light rounded-2 px-3 hover-primary-light"
+                                                    style={{ fontSize: '0.75rem' }}
+                                                    onClick={(e) => { e.stopPropagation(); handleEditComponent(row.name); }}
+                                                >
+                                                    Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
                             </tbody>
                         </table>
                     </div>

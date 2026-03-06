@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearch } from '../../../../../context/SearchContext';
+import { payrollService } from '../payrollService';
 
-/* ─── Mock Data ──────────────────────────────────────────────── */
-const MOCK_ASSIGNMENTS = []; // Start empty to match screenshot
-
+/* ─── Mock Data for Employees (Should also be fetched from API in future) ───────────────── */
 const MOCK_EMPLOYEES = [
     { id: 'EMP001', name: 'Ravi Kumar', department: 'Engineering', designation: 'Software Engineer' },
     { id: 'EMP002', name: 'Priya Sharma', department: 'HR', designation: 'HR Manager' },
@@ -21,27 +21,35 @@ const SALARY_STRUCTURES = [
 ];
 
 /* ─── Empty State ─────────────────────────────────────────────── */
-const EmptyState = ({ onAdd }) => (
+const EmptyState = ({ onAdd, loading }) => (
     <div className="d-flex flex-column align-items-center justify-content-center py-5 mt-3" style={{ minHeight: 340 }}>
-        <div className="mb-3" style={{ opacity: 0.35 }}>
-            <svg width="58" height="72" viewBox="0 0 58 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1" y="1" width="46" height="60" rx="4" fill="#f0f4ff" stroke="#c7d2fe" strokeWidth="2" />
-                <rect x="9" y="15" width="28" height="3" rx="1.5" fill="#c7d2fe" />
-                <rect x="9" y="23" width="22" height="3" rx="1.5" fill="#c7d2fe" />
-                <rect x="9" y="31" width="25" height="3" rx="1.5" fill="#c7d2fe" />
-                <rect x="9" y="39" width="18" height="3" rx="1.5" fill="#c7d2fe" />
-            </svg>
-        </div>
-        <p className="text-secondary mb-1" style={{ fontSize: '0.9rem' }}>
-            You haven't created a <strong>Salary Structure Assignment</strong> yet
-        </p>
-        <button
-            className="btn btn-link text-primary p-0 fw-semibold"
-            style={{ fontSize: '0.875rem', textDecoration: 'none' }}
-            onClick={onAdd}
-        >
-            Create your first Salary Structure Assignment
-        </button>
+        {loading ? (
+            <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+            </div>
+        ) : (
+            <>
+                <div className="mb-3" style={{ opacity: 0.35 }}>
+                    <svg width="58" height="72" viewBox="0 0 58 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="1" width="46" height="60" rx="4" fill="#f0f4ff" stroke="#c7d2fe" strokeWidth="2" />
+                        <rect x="9" y="15" width="28" height="3" rx="1.5" fill="#c7d2fe" />
+                        <rect x="9" y="23" width="22" height="3" rx="1.5" fill="#c7d2fe" />
+                        <rect x="9" y="31" width="25" height="3" rx="1.5" fill="#c7d2fe" />
+                        <rect x="9" y="39" width="18" height="3" rx="1.5" fill="#c7d2fe" />
+                    </svg>
+                </div>
+                <p className="text-secondary mb-1" style={{ fontSize: '0.9rem' }}>
+                    You haven't created a <strong>Salary Structure Assignment</strong> yet
+                </p>
+                <button
+                    className="btn btn-link text-primary p-0 fw-semibold"
+                    style={{ fontSize: '0.875rem', textDecoration: 'none' }}
+                    onClick={onAdd}
+                >
+                    Create your first Salary Structure Assignment
+                </button>
+            </>
+        )}
     </div>
 );
 
@@ -53,6 +61,7 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
         fromDate: '',
     });
     const [errors, setErrors] = useState({});
+    const [saving, setSaving] = useState(false);
 
     const validate = () => {
         const e = {};
@@ -63,22 +72,45 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
         return Object.keys(e).length === 0;
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!validate()) return;
-        const emp = MOCK_EMPLOYEES.find(e => e.id === form.employeeId);
-        onSave({
-            id: `SSA-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-            employeeId: emp.id,
-            employeeName: emp.name,
-            department: emp.department,
-            designation: emp.designation,
-            salaryStructure: form.salaryStructure,
-            fromDate: form.fromDate,
-            createdOn: new Date().toLocaleDateString('en-IN'),
-        });
-        setForm({ employeeId: '', salaryStructure: '', fromDate: '' });
-        setErrors({});
-        onClose();
+        setSaving(true);
+        try {
+            const emp = MOCK_EMPLOYEES.find(e => e.id === form.employeeId);
+
+            // Explicitly map fields to match backend requirements
+            const assignmentData = {
+                employee_id: form.employeeId, // Use form value directly
+                employee_name: emp ? emp.name : "Unknown",
+                department: emp ? emp.department : "N/A",
+                designation: emp ? emp.designation : "N/A",
+                salary_structure: form.salaryStructure,
+                from_date: form.fromDate, // YYYY-MM-DD from HTML5 date picker
+                created_on: new Date().toISOString()
+            };
+
+            console.log("SENDING SALARY ASSIGNMENT DATA 👉", assignmentData);
+
+            await payrollService.createSalaryAssignment(assignmentData);
+            onSave(); // Refresh list
+            setForm({ employeeId: '', salaryStructure: '', fromDate: '' });
+            setErrors({});
+            onClose();
+            alert("Salary structure assigned successfully!");
+        } catch (err) {
+            console.error("Save Error:", err);
+            // Better error display for debugging
+            let msg = err.message;
+            if (msg.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(msg);
+                    msg = parsed.message || msg;
+                } catch (e) { }
+            }
+            alert("Failed to save assignment: " + msg);
+        } finally {
+            setSaving(false);
+        }
     };
 
     if (!show) return null;
@@ -104,6 +136,7 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
                                 className={`form-select form-select-sm ${errors.employeeId ? 'is-invalid' : ''}`}
                                 value={form.employeeId}
                                 onChange={e => setForm({ ...form, employeeId: e.target.value })}
+                                disabled={saving}
                             >
                                 <option value="">Select Employee</option>
                                 {MOCK_EMPLOYEES.map(emp => (
@@ -137,6 +170,7 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
                                 className={`form-select form-select-sm ${errors.salaryStructure ? 'is-invalid' : ''}`}
                                 value={form.salaryStructure}
                                 onChange={e => setForm({ ...form, salaryStructure: e.target.value })}
+                                disabled={saving}
                             >
                                 <option value="">Select Salary Structure</option>
                                 {SALARY_STRUCTURES.map(s => (
@@ -154,19 +188,26 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
                                 className={`form-control form-control-sm ${errors.fromDate ? 'is-invalid' : ''}`}
                                 value={form.fromDate}
                                 onChange={e => setForm({ ...form, fromDate: e.target.value })}
+                                disabled={saving}
                             />
                             {errors.fromDate && <div className="invalid-feedback">{errors.fromDate}</div>}
                         </div>
                     </div>
 
                     <div className="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
-                        <button className="btn btn-light rounded-3 px-4 fw-semibold" onClick={onClose}>Cancel</button>
+                        <button className="btn btn-light rounded-3 px-4 fw-semibold" onClick={onClose} disabled={saving}>Cancel</button>
                         <button
-                            className="btn rounded-3 px-4 fw-bold text-white"
+                            className="btn rounded-3 px-4 fw-bold text-white d-flex align-items-center gap-2"
                             style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' }}
                             onClick={handleSave}
+                            disabled={saving}
                         >
-                            Save Assignment
+                            {saving ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    Saving...
+                                </>
+                            ) : 'Save Assignment'}
                         </button>
                     </div>
                 </div>
@@ -177,16 +218,38 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
 
 /* ─── Main Component ──────────────────────────────────────────── */
 const SalaryStructureAssignment = ({ onBack }) => {
-    const [assignments, setAssignments] = useState(MOCK_ASSIGNMENTS);
+    const [assignments, setAssignments] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [search, setSearch] = useState('');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
     const [filterDept, setFilterDept] = useState('');
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [sortField, setSortField] = useState('createdOn');
     const [sortDir, setSortDir] = useState('desc');
     const [deleteConfirm, setDeleteConfirm] = useState(null);
 
-    const handleAdd = (newAssignment) => {
-        setAssignments(prev => [newAssignment, ...prev]);
+    const fetchAssignments = async () => {
+        setLoading(true);
+        try {
+            const data = await payrollService.getSalaryAssignments();
+            setAssignments(data);
+        } catch (err) {
+            console.error("Fetch Assignments Error:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAssignments();
+    }, []);
+
+    const handleAdd = () => {
+        fetchAssignments();
     };
 
     const handleDelete = (id) => {
@@ -208,14 +271,35 @@ const SalaryStructureAssignment = ({ onBack }) => {
     const filtered = assignments
         .filter(a => {
             const q = search.toLowerCase();
-            const matchSearch = !q || a.id.toLowerCase().includes(q) || a.employeeName.toLowerCase().includes(q) || a.salaryStructure.toLowerCase().includes(q) || a.department.toLowerCase().includes(q);
-            const matchDept = !filterDept || a.department === filterDept;
+            const empId = a.employee_id || a.employeeId || '';
+            const empName = a.employee_name || a.employeeName || '';
+            const salStruct = a.salary_structure || a.salaryStructure || '';
+            const dept = a.department || '';
+
+            const matchSearch = !q ||
+                String(a.id).toLowerCase().includes(q) ||
+                empId.toLowerCase().includes(q) ||
+                empName.toLowerCase().includes(q) ||
+                salStruct.toLowerCase().includes(q) ||
+                dept.toLowerCase().includes(q);
+
+            const matchDept = !filterDept || dept === filterDept;
             return matchSearch && matchDept;
         })
         .sort((a, b) => {
             const dir = sortDir === 'asc' ? 1 : -1;
-            if (sortField === 'createdOn') return dir * (new Date(a.createdOn) - new Date(b.createdOn));
-            return dir * String(a[sortField]).localeCompare(String(b[sortField]));
+            const field = sortField;
+
+            // Map sort fields to handle alternatives
+            let valA, valB;
+            if (field === 'employeeId') { valA = a.employee_id || a.employeeId; valB = b.employee_id || b.employeeId; }
+            else if (field === 'employeeName') { valA = a.employee_name || a.employeeName; valB = b.employee_name || b.employeeName; }
+            else if (field === 'salaryStructure') { valA = a.salary_structure || a.salaryStructure; valB = b.salary_structure || b.salaryStructure; }
+            else if (field === 'createdOn') { valA = new Date(a.created_on || a.createdOn); valB = new Date(b.created_on || b.createdOn); }
+            else { valA = a[field]; valB = b[field]; }
+
+            if (field === 'createdOn') return dir * (valA - valB);
+            return dir * String(valA || '').localeCompare(String(valB || ''));
         });
 
     const departments = [...new Set(MOCK_EMPLOYEES.map(e => e.department))];
@@ -266,7 +350,11 @@ const SalaryStructureAssignment = ({ onBack }) => {
                             className="form-control border-start-0 ps-0"
                             placeholder="Search..."
                             value={search}
-                            onChange={e => setSearch(e.target.value)}
+                            onChange={e => {
+                                const val = e.target.value;
+                                setSearch(val);
+                                setGlobalSearchTerm(val);
+                            }}
                         />
                     </div>
 
@@ -336,8 +424,8 @@ const SalaryStructureAssignment = ({ onBack }) => {
                     <div style={{ flex: 0.5, textAlign: 'right', paddingRight: 8 }}>Actions</div>
                 </div>
 
-                {filtered.length === 0 ? (
-                    <EmptyState onAdd={() => setShowModal(true)} />
+                {loading || filtered.length === 0 ? (
+                    <EmptyState onAdd={() => setShowModal(true)} loading={loading} />
                 ) : (
                     <div>
                         {filtered.map((a, i) => (
@@ -357,14 +445,14 @@ const SalaryStructureAssignment = ({ onBack }) => {
                                 <div style={{ flex: 1, paddingRight: 12 }}>
                                     <span className="badge rounded-pill" style={{ background: '#e0e7ff', color: '#3730a3', fontSize: '0.73rem' }}>{a.id}</span>
                                 </div>
-                                <div style={{ flex: 1, paddingRight: 12, color: '#6b7280' }}>{a.employeeId}</div>
-                                <div style={{ flex: 2, paddingRight: 12, fontWeight: 500, color: '#111827' }}>{a.employeeName}</div>
+                                <div style={{ flex: 1, paddingRight: 12, color: '#6b7280' }}>{a.employee_id || a.employeeId}</div>
+                                <div style={{ flex: 2, paddingRight: 12, fontWeight: 500, color: '#111827' }}>{a.employee_name || a.employeeName}</div>
                                 <div style={{ flex: 1.5, paddingRight: 12 }}>
                                     <span className="badge rounded-pill bg-light text-secondary border" style={{ fontSize: '0.72rem' }}>{a.department}</span>
                                 </div>
                                 <div style={{ flex: 1.5, paddingRight: 12, color: '#374151' }}>{a.designation}</div>
                                 <div style={{ flex: 2, paddingRight: 12 }}>
-                                    <span style={{ color: '#1d4ed8', fontWeight: 500 }}>{a.salaryStructure}</span>
+                                    <span style={{ color: '#1d4ed8', fontWeight: 500 }}>{a.salary_structure || a.salaryStructure}</span>
                                 </div>
                                 <div style={{ flex: 0.5, textAlign: 'right', paddingRight: 8 }}>
                                     <button

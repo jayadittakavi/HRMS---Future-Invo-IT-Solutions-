@@ -34,40 +34,48 @@ const Signup = () => {
     try {
       setError('');
 
-      const userData = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        password: formData.password, // In a real app, never store plain text password
-        confirm_password: formData.confirmPassword,
-        role: 'superadmin', // Defaulting to superadmin for this signup flow as per request context usually
-        name: `${formData.firstName} ${formData.lastName} `
+      // Create a super-minimal payload to avoid 403 Forbidden triggers
+      const payload = {
+        first_name: formData.firstName.trim(),
+        last_name: formData.lastName.trim(),
+        email: formData.email.trim(),
+        password: formData.password
       };
 
-      const response = await fetch("http://192.168.1.5:5000/api/auth/super-admin/signup", {
+      console.log('Sending Signup Attempt:', payload);
+
+      const response = await fetch("/api/auth/super-admin/signup", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(payload),
       });
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (e) {
+        console.warn("Response not JSON:", responseText);
       }
 
-      // For this demo environment, save to localStorage so Login service can find it
-      localStorage.setItem('mock_registered_user', JSON.stringify(userData));
+      if (!response.ok) {
+        // If it's a 403, the server specifically rejected this request structure
+        const serverMsg = data.message || data.error || (responseText.trim() || `Forbidden (403): Check backend permissions`);
+        throw new Error(serverMsg);
+      }
 
-      // Success
-      // Success
       alert('Account created successfully! Please verify your email.');
-      navigate('/signup-otp', { state: { email: formData.email } });
+      navigate('/signup-otp', { state: { email: formData.email.trim() } });
 
     } catch (err) {
-      console.error('Signup Error:', err);
-      setError(err.message || 'Failed to connect to server');
+      console.error('Signup Error Detailed:', err);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Connection Error: Backend server unreachable.');
+      } else {
+        setError(`Signup Failed: ${err.message}`);
+      }
     }
   };
 

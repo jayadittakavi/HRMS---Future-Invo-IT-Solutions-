@@ -1,25 +1,86 @@
-/* Clean Sidebar Styles - Dark Glass Mode with Blue Gradient */
 .sidebar-container {
-    background: linear-gradient(135deg, rgba(30, 60, 114, 1) 0%, rgba(42, 82, 152, 1) 100%) !important;
-    /* Blue Gradient */
+    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%) !important;
+    /* Soft Deep Purple/Indigo Gradient */
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     height: 100%;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden !important;
+}
+
+/* Sparkle and Bubbles for Sidebar */
+.sidebar-container::before {
+    content: "✦";
+    position: absolute;
+    left: 20px;
+    top: 60px;
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sidebar-container::after {
+    content: "";
+    position: absolute;
+    right: -50px;
+    bottom: 100px;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Second Bubble */
+.sidebar-container .flex-grow-1::after {
+    content: "";
+    position: absolute;
+    right: 20px;
+    bottom: -30px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Bottom Area Bubble */
+.sidebar-container .p-2.border-top::after {
+    content: "";
+    position: absolute;
+    left: -30px;
+    bottom: -20px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar-role-label {
     font-size: 0.85rem;
-    font-weight: 600;
-    opacity: 0.9;
-    margin-bottom: 0.5rem;
-    padding-left: 1.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    margin: 1.5rem 0.8rem;
+    padding: 0.6rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(4px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
+    position: relative;
+    z-index: 1;
 }
 
 .sidebar-nav-label {
@@ -86,4 +147,64 @@
 .sidebar-link.active-dropdown {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff !important;
+}
+
+/* Collapse Button Styles */
+.sidebar-collapse-btn:hover {
+    opacity: 1 !important;
+    transform: scale(1.15);
+}
+
+.transition-all {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar refinement */
+.sidebar-container * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.sidebar-container ::-webkit-scrollbar {
+    width: 4px;
+    height: 0px;
+    /* Hide horizontal scrollbar */
+}
+
+.sidebar-container ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+}
+
+/* Collapsed State Optimization */
+.sidebar-closed .sidebar-link {
+    margin: 0 0.5rem 0.4rem 0.5rem;
+    padding: 0.75rem 0;
+    justify-content: center;
+}
+
+.sidebar-closed .sidebar-icon {
+    margin-right: 0;
+}
+
+.sidebar-closed .sidebar-header {
+    padding: 1.5rem 0.5rem;
+    justify-content: center;
+}
+
+.sidebar-closed .sidebar-link:hover {
+    transform: none;
+    /* Disable horizontal slide when collapsed */
+}
+
+.sidebar-closed .sidebar-collapse-btn {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+/* Remove any accidental overflow-x */
+.glass-sidebar-wrapper,
+.sidebar-container,
+.flex-grow-1.overflow-auto {
+    overflow-x: hidden !important;
 }

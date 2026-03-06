@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useSearch } from '../../../../context/SearchContext';
 import { FaPlus, FaSearch, FaBriefcase, FaUserTie, FaCheckCircle, FaFilter, FaEdit, FaTrash, FaEye, FaTimes } from 'react-icons/fa';
 
 export const RecruitmentContent = () => {
     const [activeTab, setActiveTab] = useState('jobs');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [search, setSearch] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearch(globalSearchTerm);
+    }, [globalSearchTerm]);
     const [showJobModal, setShowJobModal] = useState(false);
     const [showViewJobModal, setShowViewJobModal] = useState(false);
     const [showEditJobModal, setShowEditJobModal] = useState(false);
@@ -278,84 +285,107 @@ export const RecruitmentContent = () => {
 
             {/* Content */}
             {activeTab === 'jobs' && (
-                <div className="row g-4">
-                    {jobs.map(job => (
-                        <div className="col-md-6 col-lg-4" key={job.id}>
-                            <div
-                                className="card h-100 border-0 shadow-sm"
-                                style={{
-                                    transition: 'all 0.3s ease',
-                                    cursor: 'pointer'
+                <div>
+                    <div className="d-flex justify-content-end mb-3">
+                        <div className="input-group" style={{ width: '280px' }}>
+                            <span className="input-group-text bg-white border-end-0 border-light shadow-sm">
+                                <FaSearch className="text-muted" />
+                            </span>
+                            <input
+                                type="text"
+                                className="form-control border-start-0 border-light shadow-sm"
+                                placeholder="Search jobs..."
+                                value={search}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    setSearch(val);
+                                    setGlobalSearchTerm(val);
                                 }}
-                                onClick={() => handleViewApplicants(job)}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-8px)';
-                                    e.currentTarget.style.boxShadow = '0 0.75rem 1.5rem rgba(0,0,0,0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
-                                }}
-                            >
-                                <div className="card-body p-4">
-                                    <div className="d-flex justify-content-between align-items-start mb-3">
-                                        <FaBriefcase className="text-primary" size={32} />
-                                        <span className={`badge ${job.status === 'Open' ? 'bg-success' : 'bg-secondary'} px-3 py-2`}>
-                                            {job.status}
-                                        </span>
-                                    </div>
-                                    <h5 className="fw-bold mb-3 text-dark">{job.title}</h5>
-                                    <div className="text-muted small mb-3">
-                                        <div className="mb-2 d-flex align-items-center gap-2">
-                                            <span className="badge bg-light text-dark border">{job.department}</span>
-                                            <span className="badge bg-light text-dark border">{job.type}</span>
+                            />
+                        </div>
+                    </div>
+                    <div className="row g-4">
+                        {jobs.filter(j =>
+                            j.title.toLowerCase().includes(search.toLowerCase()) ||
+                            j.department.toLowerCase().includes(search.toLowerCase())
+                        ).map(job => (
+                            <div className="col-md-6 col-lg-4" key={job.id}>
+                                <div
+                                    className="card h-100 border-0 shadow-sm"
+                                    style={{
+                                        transition: 'all 0.3s ease',
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => handleViewApplicants(job)}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(-8px)';
+                                        e.currentTarget.style.boxShadow = '0 0.75rem 1.5rem rgba(0,0,0,0.15)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+                                    }}
+                                >
+                                    <div className="card-body p-4">
+                                        <div className="d-flex justify-content-between align-items-start mb-3">
+                                            <FaBriefcase className="text-primary" size={32} />
+                                            <span className={`badge ${job.status === 'Open' ? 'bg-success' : 'bg-secondary'} px-3 py-2`}>
+                                                {job.status}
+                                            </span>
                                         </div>
-                                        <div className="mb-2">📍 {job.location}</div>
-                                        <div className="text-secondary">📅 Posted: {job.postedDate}</div>
-                                    </div>
-                                    <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
-                                        <div className="d-flex align-items-center gap-2">
-                                            <FaUserTie className="text-primary" size={18} />
-                                            <span className="fw-bold text-primary">{job.applicants}</span>
-                                            <span className="small text-muted">Applicants</span>
+                                        <h5 className="fw-bold mb-3 text-dark">{job.title}</h5>
+                                        <div className="text-muted small mb-3">
+                                            <div className="mb-2 d-flex align-items-center gap-2">
+                                                <span className="badge bg-light text-dark border">{job.department}</span>
+                                                <span className="badge bg-light text-dark border">{job.type}</span>
+                                            </div>
+                                            <div className="mb-2">📍 {job.location}</div>
+                                            <div className="text-secondary">📅 Posted: {job.postedDate}</div>
                                         </div>
-                                        <div className="d-flex gap-2">
-                                            <button
-                                                className="btn btn-sm btn-outline-primary rounded-circle p-2"
-                                                title="View"
-                                                onClick={(e) => { e.stopPropagation(); handleViewJob(job); }}
-                                                style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
-                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                            >
-                                                <FaEye />
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-secondary rounded-circle p-2"
-                                                title="Edit"
-                                                onClick={(e) => { e.stopPropagation(); handleEditJob(job); }}
-                                                style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
-                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                className="btn btn-sm btn-outline-danger rounded-circle p-2"
-                                                title="Delete"
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteJob(job); }}
-                                                style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
-                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                            >
-                                                <FaTrash />
-                                            </button>
+                                        <div className="d-flex justify-content-between align-items-center border-top pt-3 mt-3">
+                                            <div className="d-flex align-items-center gap-2">
+                                                <FaUserTie className="text-primary" size={18} />
+                                                <span className="fw-bold text-primary">{job.applicants}</span>
+                                                <span className="small text-muted">Applicants</span>
+                                            </div>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    className="btn btn-sm btn-outline-primary rounded-circle p-2"
+                                                    title="View"
+                                                    onClick={(e) => { e.stopPropagation(); handleViewJob(job); }}
+                                                    style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                >
+                                                    <FaEye />
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-secondary rounded-circle p-2"
+                                                    title="Edit"
+                                                    onClick={(e) => { e.stopPropagation(); handleEditJob(job); }}
+                                                    style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    className="btn btn-sm btn-outline-danger rounded-circle p-2"
+                                                    title="Delete"
+                                                    onClick={(e) => { e.stopPropagation(); handleDeleteJob(job); }}
+                                                    style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
+                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                >
+                                                    <FaTrash />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
             )}
 
@@ -375,9 +405,15 @@ export const RecruitmentContent = () => {
                                     type="text"
                                     className="form-control border-start-0 bg-light"
                                     placeholder="Search candidates..."
+                                    value={search}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        setSearch(val);
+                                        setGlobalSearchTerm(val);
+                                    }}
                                 />
                             </div>
-                            <select className="form-select" style={{ width: '180px' }}>
+                            <select className="form-select shadow-sm" style={{ width: '180px' }}>
                                 <option value="">All Stages</option>
                                 <option>Applied</option>
                                 <option>Screening</option>
@@ -399,7 +435,11 @@ export const RecruitmentContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {candidates.map(c => (
+                                {candidates.filter(c =>
+                                    c.name.toLowerCase().includes(search.toLowerCase()) ||
+                                    c.email.toLowerCase().includes(search.toLowerCase()) ||
+                                    c.role.toLowerCase().includes(search.toLowerCase())
+                                ).map(c => (
                                     <tr key={c.id} style={{ transition: 'background-color 0.2s ease' }}>
                                         <td className="ps-4 py-3">
                                             <div className="d-flex align-items-center gap-3">

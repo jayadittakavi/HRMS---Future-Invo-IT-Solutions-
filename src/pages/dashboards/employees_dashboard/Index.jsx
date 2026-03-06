@@ -9,9 +9,9 @@ export const EmployeesContent = () => {
     const { user } = useAuth();
     // Mock Data
     const [employees] = useState([
-        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', pay: 'N/A', type: 'Admin' },
-        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', pay: 'N/A', type: 'Manager' },
-        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', pay: 'N/A', type: 'Employee' },
+        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', type: 'Admin' },
+        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', type: 'Manager' },
+        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', type: 'Employee' },
     ]);
 
     // Modal States
@@ -55,7 +55,6 @@ export const EmployeesContent = () => {
                                 <th>Email</th>
                                 <th>Department</th>
                                 <th>Designation</th>
-                                <th>Pay Grade</th>
                                 <th>Type</th>
                                 <th>Actions</th>
                             </tr>
@@ -68,7 +67,6 @@ export const EmployeesContent = () => {
                                     <td>{emp.email}</td>
                                     <td>{emp.dept}</td>
                                     <td>{emp.desig}</td>
-                                    <td>{emp.pay}</td>
                                     <td>
                                         <span className={`role-badge ${emp.type.toLowerCase()}`}>{emp.type}</span>
                                     </td>

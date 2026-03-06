@@ -20,13 +20,24 @@ const Login = () => {
     try {
       setError('');
 
-      const response = await fetch('http://192.168.1.5:5000/api/auth/login', {
+      const LOGIN_API_URL = "/api/auth/login";
+      console.log('Logging in at 👉', LOGIN_API_URL);
+
+      const response = await fetch(LOGIN_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      // Handle empty or invalid JSON response safely
+      const responseText = await response.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch (e) {
+        console.error("JSON Parse Error:", e);
+        throw new Error("Server returned invalid response format");
+      }
       console.log('LOGIN RESPONSE 👉', data);
 
       if (!response.ok) throw new Error(data.message || 'Login failed');
@@ -76,7 +87,12 @@ const Login = () => {
 
     } catch (err) {
       console.error('Login Error:', err);
-      setError('Failed to log in: ' + err.message);
+      // Detailed error for network issues
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Network Connection Error: Could not reach the server. Please check if the backend is running.');
+      } else {
+        setError(`Login failed: ${err.message}`);
+      }
     }
   };
 

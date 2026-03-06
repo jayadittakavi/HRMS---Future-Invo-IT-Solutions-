@@ -1,9 +1,9 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "http://192.168.1.13:5000/api";
-export const LOGIN_URL = "http://192.168.1.13:5000/api/auth/login";
+const BASE_URL = "/api";
+export const LOGIN_URL = `${BASE_URL}/auth/login`;
 
 export const loginService = {
     login: async (email, password) => {
-        const response = await fetch("http://192.168.1.13:5000/api/auth/login", {
+        const response = await fetch(LOGIN_URL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

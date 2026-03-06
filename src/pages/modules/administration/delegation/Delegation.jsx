@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
+import { useSearch } from '../../../../context/SearchContext';
 import {
     MdSecurity, MdAdd, MdHistory, MdCancel, MdCheckCircle,
     MdTimer, MdPerson, MdLayers, MdCalendarToday, MdFilterList
@@ -7,6 +8,13 @@ import {
 
 export const DelegationContent = () => {
     const { user } = useAuth();
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
+
     const [delegations, setDelegations] = useState([
         {
             id: 1,
@@ -39,7 +47,6 @@ export const DelegationContent = () => {
             status: 'Active'
         }
     ]);
-
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         delegated_to: '',
@@ -54,8 +61,14 @@ export const DelegationContent = () => {
     // SuperAdmin > Admin > Manager > HR > Employee
     const canCreateDelegation = ['superadmin', 'admin', 'manager', 'hr'].includes(userRole);
 
-    // Filtering delegations based on role visibility
+    // Filtering delegations based on role visibility and search
     const visibleDelegations = delegations.filter(d => {
+        const matchesSearch = d.delegated_by.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            d.delegated_to.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            d.module.toLowerCase().includes(searchTerm.toLowerCase());
+
+        if (!matchesSearch) return false;
+
         if (userRole === 'superadmin') return true;
         if (userRole === 'admin') return d.delegated_by_role !== 'superadmin';
         if (userRole === 'manager') return d.delegated_by_role === 'manager' || d.delegated_to.includes(user?.name);
@@ -163,9 +176,25 @@ export const DelegationContent = () => {
             <div className="card border-0 shadow-sm overflow-hidden" style={{ borderRadius: '15px' }}>
                 <div className="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
                     <h6 className="fw-bold mb-0">Recent Delegations</h6>
-                    <button className="btn btn-sm btn-light border d-flex align-items-center gap-1">
-                        <MdFilterList /> Filter
-                    </button>
+                    <div className="d-flex gap-2">
+                        <div className="input-group input-group-sm" style={{ width: '220px' }}>
+                            <span className="input-group-text bg-light border-0"><MdLayers size={14} /></span>
+                            <input
+                                type="text"
+                                className="form-control border-0 bg-light"
+                                placeholder="Search delegation..."
+                                value={searchTerm}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setSearchTerm(val);
+                                    setGlobalSearchTerm(val);
+                                }}
+                            />
+                        </div>
+                        <button className="btn btn-sm btn-light border d-flex align-items-center gap-1">
+                            <MdFilterList /> Filter
+                        </button>
+                    </div>
                 </div>
                 <div className="table-responsive">
                     <table className="table table-hover align-middle mb-0">

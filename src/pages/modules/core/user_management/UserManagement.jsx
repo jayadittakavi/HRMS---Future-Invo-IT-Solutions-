@@ -1,11 +1,19 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUserTie, FaCalculator, FaUser, FaCrown, FaBriefcase, FaMoneyBillWave } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUserTie, FaCalculator, FaUser, FaCrown, FaBriefcase, FaMoneyBillWave, FaSearch } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useSearch } from '../../../../context/SearchContext';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const UserManagementContent = () => {
     // Tab State
     const [activeTab, setActiveTab] = useState('users');
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    // Sync local search with global search
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     // --- USER MANAGEMENT STATE ---
     const [users, setUsers] = useState([
@@ -18,7 +26,22 @@ export const UserManagementContent = () => {
     const [showUserAdd, setShowUserAdd] = useState(false);
     const [showUserEdit, setShowUserEdit] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [userForm, setUserForm] = useState({ name: '', email: '', role: 'Employee', status: 'Active' });
+    const [userForm, setUserForm] = useState({
+        name: '',
+        email: '',
+        username: '',
+        password: '',
+        confirmPassword: '',
+        employeeId: '',
+        role: 'Employee',
+        status: 'Active',
+        permissions: []
+    });
+
+    const filteredUsers = users.filter(u =>
+        (u.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (u.email || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // --- ROLES & PERMISSIONS STATE ---
     const modules = ['Employees', 'Attendance', 'Leave', 'Payroll', 'Assets', 'Performance'];
@@ -86,7 +109,17 @@ export const UserManagementContent = () => {
     };
 
     const handleAddUserClick = () => {
-        setUserForm({ name: '', email: '', role: 'Employee', status: 'Active' });
+        setUserForm({
+            name: '',
+            email: '',
+            username: '',
+            password: '',
+            confirmPassword: '',
+            employeeId: '',
+            role: 'Employee',
+            status: 'Active',
+            permissions: []
+        });
         setShowUserAdd(true);
     };
 
@@ -183,6 +216,24 @@ export const UserManagementContent = () => {
                     <p className="text-secondary small mb-0">Manage users, roles, and granular permissions</p>
                 </div>
 
+                <div className="d-flex align-items-center gap-3">
+                    <div className="position-relative d-none d-md-block">
+                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            className="form-control form-control-sm rounded-pill ps-5 bg-white shadow-sm border"
+                            style={{ width: '250px' }}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchTerm(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
+                    </div>
+                </div>
+
                 <div className="d-flex bg-white p-1 rounded-pill border shadow-sm">
                     <button
                         className={`btn btn-sm rounded-pill px-4 fw-bold transition-all ${activeTab === 'users' ? 'btn-primary' : 'btn-light text-secondary'}`}
@@ -221,7 +272,7 @@ export const UserManagementContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map((user) => (
+                                {filteredUsers.map((user) => (
                                     <tr key={user.id} className={user.status === 'Inactive' ? 'opacity-50' : ''}>
                                         <td>
                                             <div className="d-flex flex-column">
@@ -346,51 +397,156 @@ export const UserManagementContent = () => {
 
             {/* Add User Modal */}
             {showUserAdd && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Add User</h5>
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', overflowY: 'auto' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+                        <div className="modal-content border-0 shadow-lg">
+                            <div className="modal-header border-0 pb-0">
+                                <div>
+                                    <h5 className="modal-title fw-bold">Add New User</h5>
+                                    <p className="text-muted small mb-0">Create a new user account</p>
+                                </div>
                                 <button className="btn-close" onClick={() => setShowUserAdd(false)}></button>
                             </div>
-                            <div className="modal-body">
+                            <div className="modal-body p-4">
                                 <form>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Full Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={userForm.name}
-                                            onChange={handleUserInputChange}
-                                        />
+                                    {/* User Credentials Section */}
+                                    <div className="card border-0 bg-primary bg-opacity-10 mb-3 rounded-4">
+                                        <div className="card-body p-3">
+                                            <div className="d-flex align-items-center gap-2 mb-3 text-primary">
+                                                <FaUserShield size={20} />
+                                                <h6 className="fw-bold mb-0">User Credentials</h6>
+                                            </div>
+                                            <div className="row g-3">
+                                                <div className="col-12">
+                                                    <label className="form-label small fw-bold text-primary">Username *</label>
+                                                    <input type="text" className="form-control border-white shadow-sm" name="username" value={userForm.username} onChange={handleUserInputChange} placeholder="user6088" />
+                                                    <div className="form-text xsmall text-primary opacity-75">This will be used for login</div>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-bold text-primary">Password *</label>
+                                                    <input type="password" name="password" className="form-control border-white shadow-sm" value={userForm.password} onChange={handleUserInputChange} placeholder="Enter secure password" />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-bold text-primary">Confirm Password *</label>
+                                                    <input type="password" name="confirmPassword" className="form-control border-white shadow-sm" value={userForm.confirmPassword} onChange={handleUserInputChange} placeholder="Confirm password" />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Email Address</label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            name="email"
-                                            value={userForm.email}
-                                            onChange={handleUserInputChange}
-                                        />
+
+                                    {/* Contact Information Section */}
+                                    <div className="card border p-3 mb-3 rounded-4 shadow-sm">
+                                        <div className="d-flex align-items-center gap-2 mb-3 text-secondary">
+                                            <FaBriefcase size={20} className="text-primary" />
+                                            <h6 className="fw-bold mb-0 text-dark">Contact Information</h6>
+                                        </div>
+                                        <div className="row g-3">
+                                            <div className="col-md-6">
+                                                <label className="form-label small fw-bold">Full Name</label>
+                                                <input type="text" className="form-control bg-light border-0" name="name" value={userForm.name} onChange={handleUserInputChange} placeholder="John Doe" />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <label className="form-label small fw-bold">Email Address</label>
+                                                <input type="email" className="form-control bg-light border-0" name="email" value={userForm.email} onChange={handleUserInputChange} placeholder="user@company.com" />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Assign Role</label>
-                                        <select
-                                            className="form-select"
-                                            name="role"
-                                            value={userForm.role}
-                                            onChange={handleUserInputChange}
-                                        >
-                                            {roles.map((r) => (<option key={r.id} value={r.name}>{r.name}</option>))}
-                                        </select>
+
+                                    {/* Role & Employment Details */}
+                                    <div className="card border-0 bg-success bg-opacity-10 mb-3 rounded-4">
+                                        <div className="card-body p-3">
+                                            <div className="d-flex align-items-center gap-2 mb-3 text-success">
+                                                <FaBriefcase size={20} />
+                                                <h6 className="fw-bold mb-0">Role & Employment Details</h6>
+                                            </div>
+                                            <div className="row g-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-bold text-success">User Role *</label>
+                                                    <select className="form-select border-white shadow-sm" name="role" value={userForm.role} onChange={handleUserInputChange}>
+                                                        {roles.map((r) => (<option key={r.id} value={r.name}>{r.name}</option>))}
+                                                    </select>
+                                                    <div className="form-text xsmall text-success opacity-75">Determines access level</div>
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-bold text-success">Employee ID</label>
+                                                    <input type="text" className="form-control border-white shadow-sm" name="employeeId" value={userForm.employeeId} onChange={handleUserInputChange} placeholder="EMP001 (optional)" />
+                                                    <div className="form-text xsmall text-success opacity-75">Link to employee record</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Account Settings */}
+                                    <div className="card border-0 bg-warning bg-opacity-10 mb-3 rounded-4">
+                                        <div className="card-body p-3">
+                                            <div className="d-flex align-items-center gap-2 mb-3 text-warning">
+                                                <FaCrown size={20} />
+                                                <h6 className="fw-bold mb-0 text-dark">Account Settings</h6>
+                                            </div>
+                                            <div className="row g-3">
+                                                <div className="col-12">
+                                                    <label className="form-label small fw-bold text-warning">Account Status</label>
+                                                    <div className="position-relative">
+                                                        <select className="form-select border-white shadow-sm ps-5" name="status" value={userForm.status} onChange={handleUserInputChange}>
+                                                            <option value="Active text-success">Active - User can login</option>
+                                                            <option value="Inactive text-danger">Inactive - Access disabled</option>
+                                                        </select>
+                                                        <div className={`position-absolute top-50 start-0 translate-middle-y ms-3 rounded-circle ${userForm.status.includes('Active') ? 'bg-success' : 'bg-danger'}`} style={{ width: '12px', height: '12px' }}></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* System Permissions Section */}
+                                    <div className="card border-0" style={{ backgroundColor: '#F9F5FF', borderRadius: '1rem' }}>
+                                        <div className="card-body p-3">
+                                            <div className="d-flex align-items-center gap-2 mb-3" style={{ color: '#7F56D9' }}>
+                                                <FaUserShield size={20} />
+                                                <h6 className="fw-bold mb-0">System Permissions</h6>
+                                            </div>
+                                            <p className="text-secondary xsmall mb-3" style={{ fontSize: '0.75rem' }}>
+                                                Select specific permissions for this user. Role-based permissions will also apply.
+                                            </p>
+                                            <div className="row g-3">
+                                                {[
+                                                    { id: 'view_dash', label: 'View Dashboard', desc: 'Access main dashboard' },
+                                                    { id: 'manage_emp', label: 'Manage Employees', desc: 'Add, edit, delete employees' },
+                                                    { id: 'manage_att', label: 'Manage Attendance', desc: 'Track and modify attendance' },
+                                                    { id: 'manage_leave', label: 'Manage Leave', desc: 'Handle leave requests' },
+                                                    { id: 'manage_pay', label: 'Manage Payroll', desc: 'Process salary and payslips' },
+                                                    { id: 'manage_assets', label: 'Manage Assets', desc: 'Allocate and track assets' },
+                                                    { id: 'manage_tasks', label: 'Manage Tasks', desc: 'Assign and monitor tasks' },
+                                                    { id: 'view_reports', label: 'View Reports', desc: 'Generate and view reports' },
+                                                    { id: 'manage_users', label: 'Manage Users', desc: 'Create and manage user accounts' }
+                                                ].map((perm) => (
+                                                    <div className="col-md-4" key={perm.id}>
+                                                        <div className="form-check">
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                id={perm.id}
+                                                                checked={userForm.permissions.includes(perm.id)}
+                                                                onChange={(e) => {
+                                                                    const newPerms = e.target.checked
+                                                                        ? [...userForm.permissions, perm.id]
+                                                                        : userForm.permissions.filter(p => p !== perm.id);
+                                                                    setUserForm({ ...userForm, permissions: newPerms });
+                                                                }}
+                                                            />
+                                                            <label className="form-check-label fw-bold small mb-0 ms-1" htmlFor={perm.id}>{perm.label}</label>
+                                                            <div className="text-muted xsmall ms-1" style={{ fontSize: '0.65rem' }}>{perm.desc}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowUserAdd(false)}>Cancel</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleSaveUser}>Create User</button>
+                            <div className="modal-footer border-0">
+                                <button className="btn btn-primary w-100 py-2 rounded-3 fw-bold" onClick={handleSaveUser}>Create User</button>
+                                <button className="btn btn-light w-100 py-2 rounded-3 border mt-1" onClick={() => setShowUserAdd(false)}>Cancel</button>
                             </div>
                         </div>
                     </div>

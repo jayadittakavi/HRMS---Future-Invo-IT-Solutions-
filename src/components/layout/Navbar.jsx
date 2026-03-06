@@ -58,26 +58,26 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                     <div className="collapse navbar-collapse" id="navbarNav">
                         <ul className="navbar-nav ms-auto align-items-center gap-3">
                             <li className="nav-item">
-                                <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to="/home">Home</Link>
+                                <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to="/home">Home</Link>
                             </li>
 
                             {user && (
                                 <li className="nav-item">
-                                    <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to={user.role === 'superadmin' ? "/dashboard/super-admin" : "/dashboard"}>My Space</Link>
+                                    <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to={user.role === 'superadmin' ? "/dashboard/super-admin" : "/dashboard"}>My Space</Link>
                                 </li>
                             )}
 
                             <li className="nav-item">
-                                <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to="/features">Features</Link>
+                                <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to="/features">Features</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to="/about">About</Link>
+                                <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to="/about">About</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to="/calendar">Calendar</Link>
+                                <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to="/calendar">Calendar</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className={`nav-link fw-medium ${isHome ? 'text-white' : 'text-main'} hover-primary`} to="/contact">Contact</Link>
+                                <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to="/contact">Contact</Link>
                             </li>
 
                             {/* Search Bar */}

@@ -1,6 +1,6 @@
 import React from 'react';
-import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
-import { FaUsers, FaBuilding, FaClipboardList, FaMoneyBillWave, FaUserTie, FaUserCog, FaUserShield } from 'react-icons/fa';
+import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, ModernTrendChart } from '../../../components/charts/CustomCharts';
+import { FaUsers, FaBuilding, FaClipboardList, FaMoneyBillWave, FaUserTie, FaUserCog, FaUserShield, FaMapMarkerAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 const OverallStats = () => {
@@ -9,7 +9,7 @@ const OverallStats = () => {
     // Mock Data for Overall Stats
     const stats = [
         { label: 'Total Companies', value: 12, icon: <FaBuilding />, color: 'bg-gradient-purple', path: '/companies' },
-        { label: 'Total Branches', value: 45, icon: <FaBuilding />, color: 'bg-gradient-blue', path: '/branches' },
+        { label: 'Total Branches', value: 45, icon: <FaMapMarkerAlt />, color: 'bg-gradient-blue', path: '/branches' },
         { label: 'Total Admins', value: 8, icon: <FaUserShield />, color: 'bg-gradient-green', path: '/users' },
         { label: 'Total HRs', value: 24, icon: <FaUserTie />, color: 'bg-gradient-orange', path: '/users' },
         { label: 'Total Managers', value: 56, icon: <FaUserCog />, color: 'bg-gradient-cyan', path: '/users' },
@@ -41,22 +41,27 @@ const OverallStats = () => {
 
     return (
         <div>
-            {/* Top Counters Row */}
+            {/* Top Stat Grid (Matching Settings UI) */}
             <div className="row g-4 mb-4">
                 {stats.map((stat, index) => (
-                    <div className="col-md-2 col-6" key={index}>
-                        <div
-                            className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm`}
-                            onClick={() => navigate(stat.path)}
-                            style={{ cursor: 'pointer' }}
-                        >
-                            <div className="d-flex align-items-center mb-2">
-                                <div className="rounded-circle bg-white bg-opacity-25 p-2 me-2 fs-5 d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>
-                                    {stat.icon}
-                                </div>
+                    <div className="col-md-4 col-lg-3" key={index}>
+                        <div className="config-card shadow-sm" onClick={() => navigate(stat.path)} style={{ cursor: 'pointer' }}>
+                            <div className={`config-icon-container ${stat.color.includes('purple') ? 'icon-bg-purple' :
+                                    stat.color.includes('blue') ? 'icon-bg-blue' :
+                                        stat.color.includes('green') ? 'icon-bg-green' :
+                                            stat.color.includes('orange') ? 'icon-bg-orange' :
+                                                stat.color.includes('cyan') ? 'icon-bg-cyan' : 'icon-bg-red'
+                                }`}>
+                                {stat.icon}
                             </div>
-                            <h6 className="dashboard-card-title text-white mb-1" style={{ fontSize: '0.7rem' }}>{stat.label}</h6>
-                            <h3 className="dashboard-value text-white mb-0 fs-4">{stat.value}</h3>
+                            <h3 className="config-card-title">{stat.label}</h3>
+                            <p className="config-card-desc">
+                                Track and manage {stat.label.toLowerCase()} across your entire workspace organizations.
+                            </p>
+                            <div className="config-card-footer">
+                                <span className="config-label">{stat.value} total</span>
+                                <span className="config-link">Manage →</span>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -89,13 +94,22 @@ const OverallStats = () => {
                             Pending Requests <span className="badge bg-danger rounded-pill">12</span>
                         </h6>
                         <div className="list-group list-group-flush small">
-                            {[1, 2, 3, 4, 5].map((i) => (
-                                <div key={i} className="list-group-item bg-transparent px-0 border-bottom d-flex align-items-center justify-content-between">
-                                    <div className="d-flex align-items-center gap-2">
-                                        <div className="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style={{ width: '32px', height: '32px', fontSize: '0.8rem' }}>JD</div>
+                            {[
+                                { id: 1, name: 'John Doe', initials: 'JD', type: 'Leave', color: '#6366f1' },
+                                { id: 2, name: 'Alice Smith', initials: 'AS', type: 'WFH', color: '#10b981' },
+                                { id: 3, name: 'Bob Johnson', initials: 'BJ', type: 'Expense', color: '#f59e0b' },
+                                { id: 4, name: 'Emma Wilson', initials: 'EW', type: 'Leave', color: '#ec4899' },
+                                { id: 5, name: 'Chris Brown', initials: 'CB', type: 'WFH', color: '#3b82f6' }
+                            ].map((item) => (
+                                <div key={item.id} className="list-group-item bg-transparent px-0 border-bottom d-flex align-items-center justify-content-between py-2 hover-bg-light transition-all rounded-3 mb-1" style={{ border: 'none' }}>
+                                    <div className="d-flex align-items-center gap-3">
+                                        <div className="avatar text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                            style={{ width: '38px', height: '38px', fontSize: '0.75rem', backgroundColor: item.color }}>
+                                            {item.initials}
+                                        </div>
                                         <div>
-                                            <div className="fw-bold text-dark">Employee {i}</div>
-                                            <div className="text-muted" style={{ fontSize: '0.75rem' }}>Leave Request - {i} Day(s)</div>
+                                            <div className="fw-bold text-dark mb-0" style={{ fontSize: '0.85rem' }}>{item.name}</div>
+                                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>{item.type} Request</div>
                                         </div>
                                     </div>
                                     <div className="d-flex gap-1">
@@ -113,7 +127,7 @@ const OverallStats = () => {
                 <div className="col-md-4">
                     <div className="dashboard-card h-100 shadow-sm">
                         <h6 className="dashboard-card-title">Revenue / Growth Trend</h6>
-                        <SimpleLineChart data={revenueTrend} height="200px" color="#3b82f6" />
+                        <ModernTrendChart data={revenueTrend} height="200px" color="#6366f1" />
                     </div>
                 </div>
             </div>

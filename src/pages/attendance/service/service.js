@@ -1,4 +1,4 @@
-const API_BASE = "http://192.168.1.13:5000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "/api";
 
 // Helper to get auth header with token
 const authHeader = () => {
@@ -14,7 +14,7 @@ const authHeader = () => {
 export const attendanceService = {
     // 🔹 Employee – view own attendance
     getMyAttendance: async () => {
-        const response = await fetch("http://192.168.1.5:5000/api/attendance/me", {
+        const response = await fetch(`${API_BASE}/attendance/me`, {
             method: "GET",
             ...authHeader()
         });

@@ -6,6 +6,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext"; // Added
 import { AutomationProvider } from "./context/AutomationContext";
+import { SearchProvider } from "./context/SearchContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 /* Public Pages */
@@ -29,7 +30,7 @@ import Signup from "./pages/auth/signup/Signup";
 import SignupOtp from "./pages/auth/signup/otp/SignupOtp";
 import Otp from "./pages/auth/otp/Otp";
 import ResetOtp from "./pages/auth/otp/ResetOtp";
-import ForgotPassword from "./pages/auth/forgetpassword/Forgetpassword";
+import ForgetPassword from "./pages/auth/forgetpassword/Forgetpassword";
 import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
 
 /* Dashboard Layout & Manager */
@@ -53,7 +54,7 @@ import NewUserDashboard from './pages/dashboards/NewUserDashboard';
 
 /* Module Pages */
 /* Core */
-import Companies from "./pages/modules/core/companies/Companies";
+import Companies from "./components/companies/Index";
 import Branches from "./pages/modules/core/branches/Branches";
 import Departments from "./pages/modules/core/departments/Departments";
 import SetupOrganization from "./pages/modules/core/setup_organization/SetupOrganization";
@@ -85,7 +86,6 @@ import DeskManagement from "./pages/modules/administration/desk/DeskManagement";
 import Payroll from "./pages/modules/finance/payroll/Payroll";
 import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
-import PayGrade from "./pages/modules/finance/pay_grade/PayGrade";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
@@ -98,8 +98,12 @@ import AutomationCenter from "./pages/modules/administration/automation/Automati
 
 function AppContent() {
   const location = useLocation();
-  // Show WhatsApp only on Home, Features, About, Contact, and Calendar pages
-  const allowedPaths = ['/home', '/features', '/about', '/contact', '/calendar'];
+  // Show WhatsApp only on specific public informational pages
+  const allowedPaths = [
+    '/home', '/features', '/about', '/contact', '/calendar',
+    '/docs', '/assets', '/feature/attendance', '/employees',
+    '/leaves', '/feature/onboarding', '/payroll', '/privacy-policy'
+  ];
   const showWhatsApp = allowedPaths.includes(location.pathname);
 
   return (
@@ -124,7 +128,7 @@ function AppContent() {
         <Route path="/signup-otp" element={<SignupOtp />} />
         <Route path="/otp" element={<Otp />} />
         <Route path="/reset-otp" element={<ResetOtp />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/setup-organization" element={<SetupOrganization />} />
         <Route path="/calendar" element={<Calendar />} />
@@ -183,6 +187,7 @@ function AppContent() {
         {/* Additional Dashboard Routes */}
         <Route path="/companies" element={<ProtectedRoute requiredRoles={['superadmin']}><Companies /></ProtectedRoute>} />
         <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin']}><Branches /></ProtectedRoute>} />
+        <Route path="/departments" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Departments /></ProtectedRoute>} />
         <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
 
         {/* HR Routes */}
@@ -216,7 +221,6 @@ function AppContent() {
         <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><Payroll /></ProtectedRoute>} />
         <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
         <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />
-        <Route path="/pay-grades" element={<ProtectedRoute requiredRoles={['superadmin', 'accountant']}><PayGrade /></ProtectedRoute>} />
         <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
         <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Financial Reports" /></ProtectedRoute>} />
 
@@ -256,9 +260,11 @@ export default function App() {
       <ThemeProvider>
         <NotificationProvider>
           <AutomationProvider>
-            <BrowserRouter>
-              <AppContent />
-            </BrowserRouter>
+            <SearchProvider>
+              <BrowserRouter>
+                <AppContent />
+              </BrowserRouter>
+            </SearchProvider>
           </AutomationProvider>
         </NotificationProvider>
       </ThemeProvider>

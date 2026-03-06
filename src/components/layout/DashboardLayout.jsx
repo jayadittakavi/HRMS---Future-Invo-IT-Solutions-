@@ -55,9 +55,12 @@ const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
                 ></div>
             )}
 
-            {/* Sidebar Wrapper (Fixed Width) */}
-            <div className={`glass-sidebar-wrapper transition-all ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`} style={{ width: '260px', minWidth: '260px', overflow: 'hidden' }}>
-                <Sidebar isOpen={true} toggleSidebar={toggleSidebar} activePath={activePath} onNavigate={(path) => {
+            {/* Sidebar Wrapper (Dynamic Width) */}
+            <div
+                className={`glass-sidebar-wrapper transition-all h-100 ${isSidebarOpen ? 'd-block' : 'd-none d-md-block'}`}
+                style={{ width: isSidebarOpen ? '260px' : '80px', minWidth: isSidebarOpen ? '260px' : '80px', overflow: 'hidden' }}
+            >
+                <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} activePath={activePath} onNavigate={(path) => {
                     if (window.innerWidth < 768) {
                         setIsSidebarOpen(false);
                     }
@@ -67,13 +70,15 @@ const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
 
             {/* Main Content Wrapper */}
             <div className="flex-grow-1 d-flex flex-column h-100 overflow-hidden">
-                <DashboardHeader title={title} toggleSidebar={toggleSidebar} onNavigate={handleNavigate} />
+                <div className="main-dashboard-container flex-grow-1 d-flex flex-column h-100 overflow-hidden shadow-sm">
+                    <DashboardHeader title={title} toggleSidebar={toggleSidebar} onNavigate={handleNavigate} />
 
-                {/* Scrollable Content Area */}
-                <div className="flex-grow-1 overflow-auto p-4">
-                    <div className="container-fluid">
-                        {/* This renders the child route elements OR passed children */}
-                        {children || <Outlet />}
+                    {/* Scrollable Content Area */}
+                    <div className="flex-grow-1 overflow-auto">
+                        <div className="container-fluid p-4">
+                            {/* This renders the child route elements OR passed children */}
+                            {children || <Outlet />}
+                        </div>
                     </div>
                 </div>
             </div>

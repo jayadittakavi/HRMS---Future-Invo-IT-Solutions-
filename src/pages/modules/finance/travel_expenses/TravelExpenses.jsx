@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearch } from '../../../../context/SearchContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { SimpleLineChart } from '../../../../components/charts/CustomCharts';
 import { FaPlaneDeparture, FaReceipt, FaWallet, FaArrowTrendUp, FaEllipsisVertical, FaPlus } from 'react-icons/fa6';
 import { MdOutlineHistory, MdFilterList, MdFileDownload } from 'react-icons/md';
 
 export const TravelExpensesContent = () => {
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
     // Mock Data
     const expenses = [
         { id: 'EXP-001', employee: 'John Doe', avatar: 'JD', project: 'Client Visit - NYC', amount: '$1,200', date: 'Oct 10, 2025', status: 'Approved', category: 'Flight' },
@@ -174,7 +181,17 @@ export const TravelExpensesContent = () => {
                         <div className="d-flex gap-2">
                             <div className="input-group input-group-sm bg-light rounded-pill px-2 border-0">
                                 <span className="input-group-text border-0 bg-transparent text-secondary"><MdFilterList /></span>
-                                <input type="text" className="form-control border-0 bg-transparent ps-0" placeholder="Filter claims..." />
+                                <input
+                                    type="text"
+                                    className="form-control border-0 bg-transparent ps-0"
+                                    placeholder="Filter claims..."
+                                    value={searchTerm}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSearchTerm(val);
+                                        setGlobalSearchTerm(val);
+                                    }}
+                                />
                             </div>
                         </div>
                     </div>
@@ -193,7 +210,12 @@ export const TravelExpensesContent = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {expenses.map((item, idx) => (
+                            {expenses.filter(item =>
+                                item.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                item.project.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                item.id.toLowerCase().includes(searchTerm.toLowerCase())
+                            ).map((item, idx) => (
                                 <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td className="ps-4 py-3">
                                         <div className="d-flex align-items-center gap-3">

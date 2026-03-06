@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaCheckCircle } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEdit, FaTrash, FaCheckCircle, FaBuilding, FaSearch } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { useSearch } from '../../../../context/SearchContext';
 import "../../../../components/layout/DashboardLayout.css";
+import { departmentService } from './departmentService';
 
 export const DepartmentsContent = () => {
-    // Mock Data
-    const initialDepartments = [
-        { id: 1, name: 'Administration', head: 'Praveen Kumar', location: 'Bangalore', employees: 12, status: 'Active' },
-        { id: 2, name: 'HR', head: 'Priyanka Sharma', location: 'Bangalore', employees: 5, status: 'Active' },
-        { id: 3, name: 'Engineering', head: 'Rajesh Gupta', location: 'Hyderabad', employees: 40, status: 'Active' },
-        { id: 4, name: 'Sales', head: 'Vikram Singh', location: 'Pune', employees: 25, status: 'Exited' },
-        { id: 5, name: 'Marketing', head: 'Ananya Roy', location: 'Mumbai', employees: 15, status: 'Active' },
-    ];
+    const [departments, setDepartments] = useState([]);
+    const [companiesList, setCompaniesList] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [reload, setReload] = useState(false);
+    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
 
-    const [departments, setDepartments] = useState(initialDepartments);
+    // Sync local search with global search
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
+
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
     const [selectedDept, setSelectedDept] = useState(null);
@@ -21,9 +25,37 @@ export const DepartmentsContent = () => {
         name: '',
         head: '',
         location: '',
-        employees: '', // Usually calculated, but editable for mock
+        employees: '',
+        company_id: '',
         status: 'Active'
     });
+
+    const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [deptRes, compRes] = await Promise.all([
+                    departmentService.getDepartments(),
+                    departmentService.getCompanies()
+                ]);
+
+                if (deptRes.success && deptRes.data) {
+                    setDepartments(deptRes.data);
+                }
+                if (compRes.success && compRes.data) {
+                    setCompaniesList(compRes.data);
+                }
+            } catch (error) {
+                console.error("Error fetching departments/companies:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [reload]);
 
     // Handlers
     const handleInputChange = (e) => {
@@ -32,56 +64,101 @@ export const DepartmentsContent = () => {
     };
 
     const handleAddClick = () => {
-        setFormData({ name: '', head: '', location: '', employees: '', status: 'Active' });
+        setFormData({ name: '', head: '', location: '', employees: '', company_id: '', status: 'Active' });
         setShowAdd(true);
     };
 
     const handleEditClick = (dept) => {
         setSelectedDept(dept);
-        setFormData(dept);
+        setFormData({
+            ...dept,
+            name: cleanText(dept.name || dept.department_name),
+            head: cleanText(dept.head || dept.dept_head),
+            location: cleanText(dept.location),
+            company_id: dept.company_id || ''
+        });
         setShowEdit(true);
     };
 
-    const handleSaveDept = () => {
-        if (!formData.name) return;
-        const newDept = {
-            id: departments.length + 1,
-            ...formData,
-            employees: Number(formData.employees) || 0
-        };
-        setDepartments([...departments, newDept]);
-        setShowAdd(false);
+    const handleSaveDept = async () => {
+        if (!formData.name || !formData.company_id) return;
+        try {
+            await departmentService.createDepartment({
+                department_name: formData.name,
+                dept_head: formData.head,
+                location: formData.location,
+                company_id: formData.company_id,
+                status: formData.status
+            });
+            setShowAdd(false);
+            setReload(!reload);
+        } catch (error) {
+            console.error("Failed to save department:", error);
+        }
     };
 
-    const handleUpdateDept = () => {
+    const handleUpdateDept = async () => {
         if (!selectedDept) return;
-        const updatedList = departments.map(d =>
-            d.id === selectedDept.id ? { ...formData, id: selectedDept.id } : d
-        );
-        setDepartments(updatedList);
-        setShowEdit(false);
+        try {
+            await departmentService.updateDepartment(selectedDept.id, {
+                department_name: formData.name,
+                dept_head: formData.head,
+                location: formData.location,
+                status: formData.status
+            });
+            setShowEdit(false);
+            setReload(!reload);
+        } catch (error) {
+            console.error("Failed to update department:", error);
+        }
     };
 
-    const toggleStatus = (id) => {
-        const updatedList = departments.map(d => {
-            if (d.id === id) {
-                return { ...d, status: d.status === 'Active' ? 'Inactive' : 'Active' };
-            }
-            return d;
-        });
-        setDepartments(updatedList);
+    const toggleStatus = async (id) => {
+        try {
+            await departmentService.toggleStatus(id);
+            setReload(!reload);
+        } catch (error) {
+            console.error("Failed to toggle status:", error);
+        }
     };
+
+    const filteredDepartments = departments.filter(dept => {
+        const query = searchTerm.toLowerCase();
+        return (
+            cleanText(dept.department_name || dept.name).toLowerCase().includes(query) ||
+            cleanText(dept.dept_head || dept.head).toLowerCase().includes(query) ||
+            cleanText(dept.location).toLowerCase().includes(query) ||
+            cleanText(dept.company_name).toLowerCase().includes(query)
+        );
+    });
 
     return (
         <>
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h5 className="fw-bold text-dark mb-1">Department Management</h5>
-                    <p className="text-secondary small mb-0">Manage company departments</p>
+                    <p className="text-secondary small mb-0">Manage departments across all companies</p>
                 </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
-                    + Add Department
-                </button>
+                <div className="d-flex gap-2 align-items-center">
+                    <div className="position-relative">
+                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
+                        <input
+                            type="text"
+                            placeholder="Search departments..."
+                            className="form-control form-control-sm rounded-pill ps-5"
+                            style={{ width: '250px' }}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchTerm(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
+                    </div>
+                    <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
+                        + Add Department
+                    </button>
+                </div>
             </div>
 
             <div className="table-card">
@@ -90,44 +167,54 @@ export const DepartmentsContent = () => {
                         <thead>
                             <tr>
                                 <th>Department Name</th>
+                                <th>Company</th>
                                 <th>Department Head</th>
                                 <th>Location</th>
-                                <th>Employees</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {departments.map((dept) => (
-                                <tr key={dept.id} className={dept.status === 'Inactive' ? 'opacity-50' : ''}>
-                                    <td>
-                                        <span className="fw-bold text-dark">{dept.name}</span>
-                                    </td>
-                                    <td>{dept.head}</td>
-                                    <td>{dept.location}</td>
-                                    <td>{dept.employees}</td>
-                                    <td>
-                                        <span className={`badge ${dept.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                                            {dept.status}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div className="d-flex gap-2">
-                                            <button className="action-btn edit" onClick={() => handleEditClick(dept)}>
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                className={`action-btn ${dept.status === 'Active' ? 'delete' : 'edit'}`}
-                                                onClick={() => toggleStatus(dept.id)}
-                                                title={dept.status === 'Active' ? "Deactivate" : "Activate"}
-                                            >
-                                                {dept.status === 'Active' ? <FaTrash /> : <FaCheckCircle className="text-success" />}
-                                                {/* Note: Using FaTrash for deactivate to match user request "all access", usually FaBan, but sticking to existing icon or user preference */}
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                            {loading ? (
+                                <tr><td colSpan="6" className="text-center py-4">Loading departments...</td></tr>
+                            ) : filteredDepartments.length === 0 ? (
+                                <tr><td colSpan="6" className="text-center py-4">No departments found.</td></tr>
+                            ) : (
+                                filteredDepartments.map((dept) => (
+                                    <tr key={dept.id} className={dept.status === 'Inactive' ? 'opacity-50' : ''}>
+                                        <td>
+                                            <span className="fw-bold text-dark">{cleanText(dept.department_name || dept.name)}</span>
+                                        </td>
+                                        <td>
+                                            <div className="d-flex align-items-center gap-1">
+                                                <FaBuilding className="text-muted small" />
+                                                <span>{cleanText(dept.company_name || dept.company)}</span>
+                                            </div>
+                                        </td>
+                                        <td>{cleanText(dept.dept_head || dept.head)}</td>
+                                        <td>{cleanText(dept.location)}</td>
+                                        <td>
+                                            <span className={`badge ${dept.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
+                                                {dept.status}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div className="d-flex gap-2">
+                                                <button className="action-btn edit" onClick={() => handleEditClick(dept)}>
+                                                    <FaEdit />
+                                                </button>
+                                                <button
+                                                    className={`action-btn ${dept.status === 'Active' ? 'delete' : 'edit'}`}
+                                                    onClick={() => toggleStatus(dept.id)}
+                                                    title={dept.status === 'Active' ? "Deactivate" : "Activate"}
+                                                >
+                                                    {dept.status === 'Active' ? <FaTrash /> : <FaCheckCircle className="text-success" />}
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -144,6 +231,20 @@ export const DepartmentsContent = () => {
                             </div>
                             <div className="modal-body">
                                 <form>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Company</label>
+                                        <select
+                                            className="form-select"
+                                            name="company_id"
+                                            value={formData.company_id}
+                                            onChange={handleInputChange}
+                                        >
+                                            <option value="">Select Company</option>
+                                            {companiesList.map(c => (
+                                                <option key={c.id} value={c.id}>{cleanText(c.company_name || c.name)}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                     <div className="mb-3">
                                         <label className="form-label small fw-bold">Department Name</label>
                                         <input
@@ -175,17 +276,6 @@ export const DepartmentsContent = () => {
                                             value={formData.location}
                                             onChange={handleInputChange}
                                             placeholder="e.g. Bangalore"
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Employee Count (Mock)</label>
-                                        <input
-                                            type="number"
-                                            className="form-control"
-                                            name="employees"
-                                            value={formData.employees}
-                                            onChange={handleInputChange}
-                                            placeholder="0"
                                         />
                                     </div>
                                 </form>

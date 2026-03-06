@@ -37,42 +37,43 @@ const HROverallStats = () => {
         <>
             {/* Top Stats Cards */}
             <div className="row g-4 mb-4">
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-purple" onClick={() => navigate('/employee-directory')} style={{ cursor: 'pointer' }}>
-                        <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                            <FaUsers /> Total Staff
-                        </h6>
-                        <h3 className="dashboard-value">1,234</h3>
-                        <p className="small mb-0 fw-bold">↑ 12 New this month</p>
+                {[
+                    { label: 'Total Staff', value: '1,234', icon: <FaUsers />, color: 'bg-gradient-purple', path: '/employee-directory', sub: '↑ 12 New' },
+                    { label: 'Open Positions', value: '8', icon: <FaUserPlus />, color: 'bg-gradient-orange', path: '/recruitment', sub: '3 Critical' },
+                    { label: 'Onboarding', value: '3', icon: <FaChalkboardTeacher />, color: 'bg-gradient-blue', path: '/onboarding', sub: 'In progress' },
+                    { label: 'Team Performance', value: '92%', icon: <FaChartLine />, color: 'bg-gradient-green', path: '/performance-reviews', sub: 'Highly Productive' },
+                    { label: 'Pending Leaves', value: '12', icon: <FaUmbrellaBeach />, color: 'bg-gradient-cyan', path: '/leave-requests', sub: 'Requires Review' },
+                    { label: 'Staff Wellbeing', value: '95%', icon: <FaSmile />, color: 'bg-gradient-pink', path: '/performance-reviews', sub: 'Engagement Score' },
+                ].map((stat, index) => (
+                    <div className="col-md-2 col-6" key={index}>
+                        <div
+                            className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm border-0`}
+                            onClick={() => navigate(stat.path)}
+                            style={{
+                                cursor: 'pointer',
+                                borderRadius: '24px',
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                            }}
+                        >
+                            <div className="d-flex align-items-center mb-3">
+                                <div className="rounded-circle d-flex align-items-center justify-content-center"
+                                    style={{
+                                        width: '52px',
+                                        height: '52px',
+                                        background: 'rgba(255, 255, 255, 0.15)',
+                                        backdropFilter: 'blur(8px)',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                                    }}>
+                                    <span style={{ fontSize: '1.4rem', color: '#ffffff' }}>{stat.icon}</span>
+                                </div>
+                            </div>
+                            <h6 className="dashboard-card-title text-white mb-1 opacity-90 fw-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>{stat.label}</h6>
+                            <h3 className="dashboard-value text-white mb-0 fw-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{stat.value}</h3>
+                            <p className="small mb-0 opacity-75 mt-1" style={{ fontSize: '0.6rem' }}>{stat.sub}</p>
+                        </div>
                     </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-orange" onClick={() => navigate('/recruitment')} style={{ cursor: 'pointer' }}>
-                        <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                            <FaUserPlus /> Open Positions
-                        </h6>
-                        <h3 className="dashboard-value">8</h3>
-                        <p className="small mb-0 fw-bold">3 Critical</p>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-blue" onClick={() => navigate('/onboarding')} style={{ cursor: 'pointer' }}>
-                        <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                            <FaChalkboardTeacher /> Onboarding
-                        </h6>
-                        <h3 className="dashboard-value">3</h3>
-                        <p className="small mb-0">Candidates in progress</p>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="dashboard-card bg-gradient-green" onClick={() => navigate('/performance-reviews')} style={{ cursor: 'pointer' }}>
-                        <h6 className="dashboard-card-title d-flex align-items-center gap-2">
-                            <FaChartLine /> Team Performance
-                        </h6>
-                        <h3 className="dashboard-value">92%</h3>
-                        <p className="small mb-0">Overall productivity</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Charts Section: Bar, Line */}

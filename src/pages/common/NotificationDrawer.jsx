@@ -9,6 +9,8 @@ const NotificationDrawer = () => {
         toggleNotificationDrawer,
         notifications,
         markAllAsRead,
+        markAsRead,
+        deleteNotification,
         clearNotifications
     } = useNotification();
 
@@ -75,26 +77,37 @@ const NotificationDrawer = () => {
                             {notifications.map((notif) => (
                                 <div
                                     key={notif.id}
-                                    className={`list-group-item list-group-item-action border-bottom p-3 ${!notif.read ? (theme === 'dark' ? 'bg-secondary bg-opacity-25' : 'bg-blue-light') : (theme === 'dark' ? 'bg-transparent text-light' : 'bg-white')}`}
+                                    className={`list-group-item list-group-item-action border-bottom p-3 position-relative ${!notif.read ? (theme === 'dark' ? 'bg-secondary bg-opacity-25' : 'bg-blue-light') : (theme === 'dark' ? 'bg-transparent text-light' : 'bg-white')}`}
                                     style={{
                                         cursor: 'pointer',
                                         backgroundColor: !notif.read ? (theme === 'dark' ? 'rgba(255,255,255,0.05)' : '#f0f9ff') : 'transparent',
                                         borderColor: theme === 'dark' ? '#334155' : '#e2e8f0'
                                     }}
+                                    onClick={() => markAsRead(notif.id)}
                                 >
-                                    <div className="d-flex w-100 justify-content-between align-items-start mb-1">
+                                    <div className="d-flex w-100 justify-content-between align-items-start mb-1 pe-4">
                                         <div className="d-flex gap-2">
                                             <div className="mt-1">{getIcon(notif.type)}</div>
                                             <div>
                                                 <small className={`fw-bold d-block ${notif.read ? 'text-secondary' : 'text-dark'} ${theme === 'dark' && !notif.read ? 'text-light' : ''}`}>
                                                     {notif.title}
                                                 </small>
-                                                <small className="text-muted d-block text-truncate" style={{ maxWidth: '200px' }}>{notif.message}</small>
+                                                <small className="text-muted d-block text-truncate" style={{ maxWidth: '180px' }}>{notif.message}</small>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="text-end">
+                                    <div className="d-flex justify-content-between align-items-center mt-2">
                                         <small className="text-secondary" style={{ fontSize: '0.7rem' }}>{notif.time}</small>
+                                        <button
+                                            className="btn btn-link text-danger p-0 border-0"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                deleteNotification(notif.id);
+                                            }}
+                                            title="Delete Notification"
+                                        >
+                                            <FaTrash size={12} />
+                                        </button>
                                     </div>
                                 </div>
                             ))}

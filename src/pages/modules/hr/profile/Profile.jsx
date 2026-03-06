@@ -81,24 +81,24 @@ const ProfileContent = () => {
     const { user, updateProfile } = useAuth();
     const navigate = useNavigate();
 
-    const [loading, setLoading] = useState(true);
+    const [fetchingData, setFetchingData] = useState(true);
     const [employeeData, setEmployeeData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
     const [pendingPic, setPendingPic] = useState(null);
 
     const [editForm, setEditForm] = useState({
-        name: '',
+        name: user?.name || '',
         phone: '',
         address: '',
         emergencyContact: '',
         bio: '',
     });
 
-    /* Fetch employee record */
+    /* Fetch employee record in background */
     useEffect(() => {
         const fetchProfileData = async () => {
-            if (!user?.email) { setLoading(false); return; }
+            if (!user?.email) { setFetchingData(false); return; }
             try {
                 const response = await attendanceService.getAllEmployees();
                 const employees = Array.isArray(response) ? response : (response.data || response.employees || []);
@@ -108,15 +108,16 @@ const ProfileContent = () => {
                 );
                 if (matched) {
                     setEmployeeData(matched);
-                    setEditForm(f => ({ ...f, name: matched.name || user.name || '', phone: matched.phone || '' }));
-                } else {
-                    setEditForm(f => ({ ...f, name: user.name || '' }));
+                    setEditForm(f => ({
+                        ...f,
+                        name: matched.name || user.name || '',
+                        phone: matched.phone || ''
+                    }));
                 }
             } catch (err) {
                 console.error('Profile fetch error:', err);
-                setEditForm(f => ({ ...f, name: user.name || '' }));
             } finally {
-                setLoading(false);
+                setFetchingData(false);
             }
         };
         fetchProfileData();
@@ -176,16 +177,6 @@ const ProfileContent = () => {
         { id: 'personal', label: '📋 Personal' },
         { id: 'security', label: '🔒 Security' },
     ];
-
-    if (loading) {
-        return (
-            <div style={{ padding: 40, textAlign: 'center' }}>
-                <div style={{ width: 40, height: 40, border: '3px solid #e5e7eb', borderTop: `3px solid ${meta.color}`, borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 12px' }} />
-                <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Loading your profile…</p>
-                <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-            </div>
-        );
-    }
 
     return (
         <div style={{ maxWidth: 960, padding: '24px 24px 48px' }}>
@@ -338,8 +329,8 @@ const ProfileContent = () => {
                             <div className="card-body p-4">
                                 <SectionTitle icon={<IcoMail />} title="Contact Information" desc="How to reach this person" />
                                 <InfoField label="Email Address" value={D.email} icon={<IcoMail />} />
-                                <InfoField label="Phone Number" value={D.phone || 'Not set'} icon={<IcoPhone />} editable={isEditing} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} />
-                                <InfoField label="Address / Location" value={D.address || 'Not set'} icon={<IcoPin />} editable={isEditing} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} />
+                                <InfoField label="Phone Number" value={D.phone || (fetchingData ? '...' : 'Not set')} icon={<IcoPhone />} editable={isEditing} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} />
+                                <InfoField label="Address / Location" value={D.address || (fetchingData ? '...' : 'Not set')} icon={<IcoPin />} editable={isEditing} onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))} />
                             </div>
                         </div>
                     </div>
@@ -368,7 +359,7 @@ const ProfileContent = () => {
                                     />
                                 ) : (
                                     <p style={{ color: editForm.bio ? '#374151' : '#9ca3af', fontSize: '0.88rem', lineHeight: 1.7, margin: 0, fontStyle: editForm.bio ? 'normal' : 'italic' }}>
-                                        {editForm.bio || 'No bio added yet. Click Edit Profile to add one.'}
+                                        {editForm.bio || (fetchingData ? 'Loading bio...' : 'No bio added yet. Click Edit Profile to add one.')}
                                     </p>
                                 )}
                             </div>

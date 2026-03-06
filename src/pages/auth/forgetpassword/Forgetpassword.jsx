@@ -17,7 +17,8 @@ const ForgotPassword = () => {
     if (email) {
       setIsLoading(true);
       try {
-        const response = await fetch("http://192.168.1.5:5000/api/auth/forgot-password", {
+        const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+        const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
