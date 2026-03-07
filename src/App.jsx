@@ -30,7 +30,7 @@ import Signup from "./pages/auth/signup/Signup";
 import SignupOtp from "./pages/auth/signup/otp/SignupOtp";
 import Otp from "./pages/auth/otp/Otp";
 import ResetOtp from "./pages/auth/otp/ResetOtp";
-import ForgetPassword from "./pages/auth/forgetpassword/Forgetpassword";
+import ForgetPassword from "./pages/auth/forgetpassword/ForgetPassword";
 import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
 
 /* Dashboard Layout & Manager */
@@ -90,11 +90,18 @@ import Calendar from "./pages/modules/operations/calendar/Calendar";
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
 import ChangePassword from "./pages/settings/ChangePassword";
+import Settings from "./pages/settings/Settings";
 import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
 import WhatsAppChat from "./components/common/WhatsAppChat";
 import Helpdesk from "./pages/modules/helpdesk/Helpdesk";
 import AutomationCenter from "./pages/modules/administration/automation/AutomationCenter";
+
+/* User Dropdown Pages */
+import SupportTicket from "./pages/user/SupportTicket";
+import KnowledgeBase from "./pages/user/KnowledgeBase";
+import Feedback from "./pages/user/Feedback";
+import UserPrivacy from "./pages/user/Privacy";
 
 function AppContent() {
   const location = useLocation();
@@ -186,7 +193,7 @@ function AppContent() {
 
         {/* Additional Dashboard Routes */}
         <Route path="/companies" element={<ProtectedRoute requiredRoles={['superadmin']}><Companies /></ProtectedRoute>} />
-        <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin']}><Branches /></ProtectedRoute>} />
+        <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee', 'accountant']}><Branches /></ProtectedRoute>} />
         <Route path="/departments" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Departments /></ProtectedRoute>} />
         <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
 
@@ -232,6 +239,7 @@ function AppContent() {
         <Route path="/my-performance" element={<ProtectedRoute><MyPerformance /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
         {/* Admin Routes */}
         <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
@@ -243,7 +251,10 @@ function AppContent() {
         <Route path="/complete-profile" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Complete Profile" /></ProtectedRoute>} />
         <Route path="/upload-documents" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Upload Documents" /></ProtectedRoute>} />
         <Route path="/policies" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="View Policies" /></ProtectedRoute>} />
-        <Route path="/support" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Help & Support" /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><SupportTicket /></ProtectedRoute>} />
+        <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
+        <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
+        <Route path="/privacy" element={<ProtectedRoute><UserPrivacy /></ProtectedRoute>} />
 
         <Route path="*" element={<Login />} />
       </Routes>

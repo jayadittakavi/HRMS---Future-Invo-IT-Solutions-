@@ -4,7 +4,7 @@ import { FaTimes, FaSun, FaMoon, FaCheck, FaUndo } from 'react-icons/fa';
 
 const SettingsDrawer = () => {
     const {
-        theme, toggleTheme,
+        theme,
         skin, changeSkin,
         sidebarType, changeSidebarType,
         settings, toggleSetting,
@@ -59,41 +59,8 @@ const SettingsDrawer = () => {
                 {/* Scrollable Body */}
                 <div className="p-4 flex-grow-1 overflow-auto">
 
-                    {/* ── Theme ── */}
+                    {/* Sidebar Color */}
                     <div className="mb-4">
-                        <h6 className="fw-bold text-uppercase mb-3" style={{ fontSize: '0.7rem', color: '#9ca3af', letterSpacing: '0.08em' }}>
-                            Theme Mode
-                        </h6>
-                        <div className="d-flex gap-2">
-                            <button
-                                onClick={() => theme !== 'light' && toggleTheme()}
-                                style={{
-                                    flex: 1, borderRadius: 10, padding: '8px 0', fontSize: '0.82rem', fontWeight: 600,
-                                    border: theme === 'light' ? '2px solid #0ea5e9' : '1.5px solid #e5e7eb',
-                                    background: theme === 'light' ? '#f0f9ff' : 'transparent',
-                                    color: theme === 'light' ? '#0ea5e9' : '#9ca3af',
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
-                                }}
-                            >
-                                <FaSun size={13} /> Light
-                            </button>
-                            <button
-                                onClick={() => theme !== 'dark' && toggleTheme()}
-                                style={{
-                                    flex: 1, borderRadius: 10, padding: '8px 0', fontSize: '0.82rem', fontWeight: 600,
-                                    border: theme === 'dark' ? '2px solid #8b5cf6' : '1.5px solid #e5e7eb',
-                                    background: theme === 'dark' ? '#f5f3ff' : 'transparent',
-                                    color: theme === 'dark' ? '#8b5cf6' : '#9ca3af',
-                                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
-                                }}
-                            >
-                                <FaMoon size={13} /> Dark
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* ── Sidebar Color ── */}
-                    <div className="mb-4 pt-3 border-top" style={{ borderColor: theme === 'dark' ? '#334155' : '#f0f4ff' }}>
                         <h6 className="fw-bold text-uppercase mb-3" style={{ fontSize: '0.7rem', color: '#9ca3af', letterSpacing: '0.08em' }}>
                             Sidebar Style
                         </h6>

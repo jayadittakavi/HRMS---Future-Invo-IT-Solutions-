@@ -1,7 +1,7 @@
 /* Signup Page CSS - Scholarly Inspired */
 
 .signup-container {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
     /* Fallback */
     min-height: calc(100vh - 70px);
     display: flex;
@@ -54,26 +54,27 @@
 }
 
 .password-toggle-btn:hover {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
     color: #475569;
 }
 
 .signup-btn {
-    background-color: #2563eb;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
     border: none;
     padding: 0.875rem;
     border-radius: 0.75rem;
     font-weight: 700;
     font-size: 1rem;
     width: 100%;
-    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2);
     transition: all 0.2s ease;
+    color: white !important;
 }
 
 .signup-btn:hover {
-    background-color: #1d4ed8;
+    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
     transform: translateY(-1px);
-    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    box-shadow: 0 10px 15px -3px rgba(109, 40, 217, 0.3);
 }
 
 .login-link {

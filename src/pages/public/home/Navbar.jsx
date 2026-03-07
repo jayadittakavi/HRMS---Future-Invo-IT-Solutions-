@@ -15,8 +15,8 @@ const Navbar = () => {
                 <Link className="navbar-brand d-flex align-items-center" to="/">
                     <img src={logo} alt="HRMS Logo" height="40" className="me-3 rounded-4 shadow-sm" style={{ borderRadius: '12px' }} />
                     <div className="d-flex flex-column ms-2">
-                        <span className="fw-bold fs-4 lh-1 text-white" style={{ color: 'white' }}>HRMS</span>
-                        <span className="text-white" style={{ fontSize: '0.7rem', fontWeight: '500', color: 'white' }}>Future Invo Solutions</span>
+                        <span className="fw-bold fs-4 lh-1 text-primary">HRMS</span>
+                        <span className="text-secondary" style={{ fontSize: '0.7rem', fontWeight: '500' }}>Future Invo Solutions</span>
                     </div>
                 </Link>
 

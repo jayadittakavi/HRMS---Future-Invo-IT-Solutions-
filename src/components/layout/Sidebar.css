@@ -208,3 +208,9 @@
 .flex-grow-1.overflow-auto {
     overflow-x: hidden !important;
 }
+
+.sidebar-divider {
+    height: 1px;
+    margin: 1rem 0.8rem;
+    opacity: 0.15;
+}

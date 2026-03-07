@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+const BASE_URL = "/api";
 export const VERIFY_RESET_OTP_URL = `${BASE_URL}/auth/verify-reset-otp`;
 
 export const otpService = {

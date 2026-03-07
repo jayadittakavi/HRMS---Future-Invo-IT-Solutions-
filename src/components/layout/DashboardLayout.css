@@ -5,12 +5,12 @@
 }
 
 .main-dashboard-container {
-    background: #ffffff;
-    /* Pure white panel */
-    margin: 0.75rem 0.75rem 0.75rem 0;
-    /* Reduced margin to increase panel size */
-    border-radius: 1.5rem;
-    /* Slightly reduced premium radius */
+    background: #f5f3ff;
+    /* Soft Lavender panel */
+    margin: 0.5rem 0.5rem 0.5rem 0;
+    /* Further reduced margin to increase panel size */
+    border-radius: 1.25rem;
+    /* Slightly reduced premium radius as requested */
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
@@ -27,15 +27,15 @@
 }
 
 .main-dashboard-container .glass-header {
-    background: #ffffff !important;
+    background: #f5f3ff !important;
     border-bottom: 1px solid #f1f5f9 !important;
     box-shadow: none !important;
 }
 
 /* Ensure the scrollable area inside the panel looks clean */
 .main-dashboard-container .overflow-auto {
-    background-color: #f8fafc;
-    /* Very subtle off-white for the main content area */
+    background-color: #f5f3ff;
+    /* Soft Lavender for the main content area */
 }
 
 /* Scrollbar refinement for the floating panel */
@@ -54,9 +54,9 @@
 
 /* Configuration Card Styles (Matching Settings UI) */
 .config-card {
-    background: #ffffff;
+    background: #f5f3ff;
     border: 1px solid #f1f5f9;
-    border-radius: 1.5rem;
+    border-radius: 1.25rem;
     padding: 1.5rem;
     height: 100%;
     transition: all 0.3s ease;
@@ -101,7 +101,7 @@
     justify-content: space-between;
     align-items: center;
     padding-top: 1rem;
-    border-top: 1px solid #f8fafc;
+    border-top: 1px solid #f5f3ff;
 }
 
 .config-label {
@@ -194,9 +194,9 @@
 /* Custom Card Styles to match Glass Design */
 .dashboard-card {
     border: 1px solid rgba(0, 0, 0, 0.05);
-    background: #ffffff;
+    background: #f5f3ff;
     box-shadow: 0 2px 40px rgba(0, 0, 0, 0.02);
-    border-radius: 1.5rem;
+    border-radius: 1.25rem;
     height: 100%;
     padding: 1.5rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -323,15 +323,15 @@
 
 /* Custom Table Styles */
 .table-card {
-    background: #ffffff;
-    border-radius: 1.5rem;
+    background: #f5f3ff;
+    border-radius: 1.25rem;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
     padding: 1.5rem;
     border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .custom-table th {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
     border-bottom: 1px solid #f1f5f9;
     color: #64748b;
     font-weight: 700;
@@ -350,7 +350,7 @@
 }
 
 .custom-table tr:hover td {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
 }
 
 .custom-table tr:last-child td {
@@ -359,17 +359,20 @@
 
 /* Badges & Buttons */
 .action-btn {
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+    color: white !important;
     padding: 0.4rem 0.6rem;
     font-size: 1.1rem;
     font-weight: 600;
     border-radius: 0.5rem;
     margin-right: 0.5rem;
     transition: all 0.2s;
-    border: 1px solid transparent;
+    border: none;
     line-height: 1;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 10px rgba(109, 40, 217, 0.2);
 }
 
 .action-btn.edit {
@@ -395,7 +398,7 @@
 
 /* Gradient Cards */
 .bg-gradient-purple {
-    background: linear-gradient(135deg, #7c3aed 0%, #d946ef 50%, #f43f5e 100%) !important;
+    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
 }
 
 .bg-gradient-blue {
@@ -426,7 +429,7 @@
 }
 
 .btn-white:hover {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
     color: #6d28d9;
 }
 
@@ -439,7 +442,7 @@
 }
 
 .settings-card {
-    background: #ffffff;
+    background: #f5f3ff;
     border: 1px solid #edf2f7;
     border-radius: 1.25rem;
     padding: 1.5rem;
@@ -601,7 +604,7 @@
 }
 
 .dropdown-item-custom:hover {
-    background-color: #f8fafc;
+    background-color: #f5f3ff;
     color: #4c1d95;
     text-decoration: none;
 }

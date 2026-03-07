@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useNotification } from '../../context/NotificationContext';
 import { useSearch } from '../../context/SearchContext';
-import { FaCog, FaUserAlt, FaSearch, FaRegCalendarAlt, FaBell, FaPhoneAlt, FaSignOutAlt, FaUserEdit, FaQuestionCircle, FaBook, FaShieldAlt, FaMapMarkerAlt, FaCommentAlt } from 'react-icons/fa';
+import { FaCog, FaUserAlt, FaSearch, FaRegCalendarAlt, FaBell, FaSignOutAlt, FaUserEdit, FaQuestionCircle, FaBook, FaShieldAlt, FaMapMarkerAlt, FaCommentAlt } from 'react-icons/fa';
 
 const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
     const { user, logout } = useAuth();
@@ -24,7 +24,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
             style={{
                 minHeight: '70px',
                 zIndex: 1020,
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                backgroundColor: 'rgba(245, 243, 255, 0.8)',
                 backdropFilter: 'blur(10px)'
             }}>
             {/* Left Side: Toggle & User Name */}
@@ -72,9 +72,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     <button className="header-icon-circle bg-pink-soft" title="Calendar" onClick={() => navigate('/calendar')}>
                         <FaRegCalendarAlt size={16} />
                     </button>
-                    <button className="header-icon-circle bg-blue-soft" title="Directory" onClick={() => navigate('/directory')}>
-                        <FaPhoneAlt size={15} />
-                    </button>
+
                     <button className="header-icon-circle bg-orange-soft position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
                         <FaBell size={16} />
                         {unreadCount > 0 && (
@@ -87,7 +85,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     {/* Profile Dropdown */}
                     <div className="position-relative ms-1">
                         <button
-                            className="header-icon-circle bg-green-soft"
+                            className="header-icon-circle bg-blue-soft"
                             onClick={() => setShowProfileMenu(!showProfileMenu)}
                             onBlur={() => setTimeout(() => setShowProfileMenu(false), 200)}
                         >

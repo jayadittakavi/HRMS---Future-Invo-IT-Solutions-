@@ -5,11 +5,11 @@ import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useNotification } from "../../context/NotificationContext"; // Added
 import logo from "../../assets/images/fislogo1.png";
-import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell, FaSun, FaMoon } from 'react-icons/fa';
+import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
 const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
     const { user, logout } = useAuth();
-    const { toggleSettingsDrawer, theme, toggleTheme } = useTheme();
+    const { toggleSettingsDrawer, theme } = useTheme();
     const { toggleNotificationDrawer, unreadCount } = useNotification(); // Added
     const navigate = useNavigate();
 
@@ -96,30 +96,33 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                             </li>
 
                             {/* Icons */}
-                            <li className="nav-item d-flex align-items-center gap-3 ms-2">
+                            <li className="nav-item d-flex align-items-center gap-2 ms-2">
                                 <div className="d-lg-none w-100 my-2 border-top"></div> {/* Divider for mobile */}
 
-                                <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0 position-relative`} title="Notifications" onClick={toggleNotificationDrawer}>
-                                    <FaBell size={20} />
-                                    {/* Optional: Notification Badge */}
+                                <button className="header-icon-circle bg-purple-soft" title="Settings" onClick={() => navigate('/settings')}>
+                                    <FaCog size={16} />
+                                </button>
+
+                                <button className="header-icon-circle bg-pink-soft" title="Calendar" onClick={() => navigate('/calendar')}>
+                                    <FaRegCalendarAlt size={16} />
+                                </button>
+
+
+                                <button className="header-icon-circle bg-orange-soft position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
+                                    <FaBell size={16} />
                                     {unreadCount > 0 && (
-                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.6rem' }}>
+                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light" style={{ fontSize: '0.55rem', padding: '0.2rem 0.4rem' }}>
                                             {unreadCount}
-                                            <span className="visually-hidden">New alerts</span>
                                         </span>
                                     )}
                                 </button>
 
-                                <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0`} title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} onClick={toggleTheme}>
-                                    {theme === 'dark' ? <FaSun size={20} /> : <FaMoon size={20} />}
-                                </button>
-
-                                <button className={`btn btn-link ${isHome ? 'text-white' : 'text-main'} p-0`} title="Settings" onClick={toggleSettingsDrawer}>
-                                    <FaCog size={20} />
-                                </button>
-
-                                <button className="btn btn-link p-0 text-primary" title="Profile" onClick={handleProfileClick}>
-                                    <FaUserCircle size={28} />
+                                <button className="header-icon-circle bg-blue-soft" title="Profile" onClick={handleProfileClick}>
+                                    {user?.profilePic ? (
+                                        <img src={user.profilePic} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} alt="profile" />
+                                    ) : (
+                                        <FaUserCircle size={15} />
+                                    )}
                                 </button>
                             </li>
                         </ul>

@@ -273,7 +273,10 @@ export const EmployeesContent = () => {
                                             <label className="form-label small fw-bold">Select User Account</label>
                                             <select className="form-select" name="userAccount" value={formData.userAccount} onChange={handleInputChange}>
                                                 <option value="">Select a user account</option>
-                                                <option value="new_user_1">New User 1</option>
+                                                <option value="admin">Admin</option>
+                                                <option value="hr">HR</option>
+                                                <option value="manager">Manager</option>
+                                                <option value="employee">Employee</option>
                                             </select>
                                             <div className="form-text small text-muted">Only unassigned user accounts are shown</div>
                                         </div>
@@ -312,6 +315,10 @@ export const EmployeesContent = () => {
                                                 <option>Administration</option>
                                                 <option>HR</option>
                                                 <option>Engineering</option>
+                                                <option>Sales HR</option>
+                                                <option>IT HR</option>
+                                                <option>Sales Manager</option>
+                                                <option>IT Manager</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -348,39 +355,12 @@ export const EmployeesContent = () => {
                                             </select>
                                         </div>
 
-                                        <div className="col-md-6">
-                                            <label className="form-label small fw-bold">CTC (Annual)</label>
-                                            <input type="number" className="form-control" name="ctc" value={formData.ctc} onChange={handleInputChange} placeholder="600000" />
-                                        </div>
-
-                                        <div className="col-12">
-                                            <label className="form-label small fw-bold">Manager (Optional)</label>
-                                            <select className="form-select" name="manager" value={formData.manager} onChange={handleInputChange}>
-                                                <option value="">Select Manager</option>
-                                                <option>Priyanka Sharma (HR Manager)</option>
-                                            </select>
-                                        </div>
-
-                                        <div className="col-12">
-                                            <div className="form-check">
-                                                <input
-                                                    className="form-check-input"
-                                                    type="checkbox"
-                                                    id="lockCheck"
-                                                    checked={formData.lock}
-                                                    onChange={(e) => setFormData({ ...formData, lock: e.target.checked })}
-                                                />
-                                                <label className="form-check-label small" htmlFor="lockCheck">
-                                                    Lock Form Editing
-                                                </label>
-                                            </div>
-                                        </div>
                                     </div>
                                 </form>
                             </div>
-                            <div className="modal-footer border-0">
-                                <button className="btn btn-primary w-100 mb-2" onClick={handleSaveEmployee}>Add Employee</button>
-                                <button className="btn btn-light w-100" onClick={() => setShowAdd(false)}>Cancel</button>
+                            <div className="modal-footer border-0 d-flex gap-2">
+                                <button className="btn btn-light flex-grow-1" onClick={() => setShowAdd(false)}>Cancel</button>
+                                <button className="btn btn-primary flex-grow-1" onClick={handleSaveEmployee}>Add Employee</button>
                             </div>
                         </div>
                     </div>
@@ -432,6 +412,10 @@ export const EmployeesContent = () => {
                                                 <option>Administration</option>
                                                 <option>HR</option>
                                                 <option>Engineering</option>
+                                                <option>Sales HR</option>
+                                                <option>IT HR</option>
+                                                <option>Sales Manager</option>
+                                                <option>IT Manager</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6 mb-3">

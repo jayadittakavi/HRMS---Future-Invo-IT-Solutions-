@@ -52,38 +52,36 @@ const TeamDashboard = ({ role }) => {
 
     return (
         <div className="team-dashboard p-1">
-            {/* Hero Section */}
-            <div className="team-hero d-flex flex-column flex-md-row align-items-center justify-content-between">
-                <div className="hero-content mb-4 mb-md-0">
-                    <h1 className="fw-bold mb-2">My Team <MdOutlineEmojiEvents className="ms-2" /></h1>
-                    <p className="opacity-75 mb-4">Empowering collaboration and driving excellence together.</p>
-                    <div className="d-flex gap-3">
-                        <button
-                            className="btn btn-white rounded-pill px-4 fw-bold shadow-sm d-flex align-items-center gap-2"
-                            onClick={() => navigate('/employee-directory')}
-                        >
-                            Manage Squad
-                        </button>
-                        <button
-                            className="btn border border-white border-opacity-50 text-white rounded-pill px-4 fw-bold d-flex align-items-center gap-2 bg-transparent"
-                            onClick={() => navigate('/recruitment')}
-                        >
-                            <FaUserPlus /> Hire Talent
-                        </button>
-                    </div>
+            {/* Simple Modern Header */}
+            <div className="team-header-modern">
+                <div className="team-header-info">
+                    <h1 className="fw-bold">My Team <MdOutlineEmojiEvents className="text-primary ms-1" /></h1>
+                    <p>Manage your squad and track performance metrics</p>
                 </div>
-                <div className="hero-search w-100 mw-300">
-                    <div className="input-group glass-panel overflow-hidden">
-                        <span className="input-group-text bg-transparent border-0 text-white"><FaSearch /></span>
+
+                <div className="d-flex align-items-center gap-3">
+                    <div className="team-search-modern d-none d-md-block">
+                        <FaSearch className="search-icon" />
                         <input
                             type="text"
-                            className="form-control bg-transparent border-0 text-white placeholder-white"
+                            className="form-control"
                             placeholder="Find a team member..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ boxShadow: 'none' }}
                         />
                     </div>
+                    <button
+                        className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
+                        onClick={() => navigate('/employee-directory')}
+                    >
+                        <FaUsers /> Manage Squad
+                    </button>
+                    <button
+                        className="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
+                        onClick={() => navigate('/recruitment')}
+                    >
+                        <FaUserPlus /> Hire Talent
+                    </button>
                 </div>
             </div>
 

@@ -8,7 +8,7 @@ export const useTheme = () => {
 
 export const ThemeProvider = ({ children }) => {
     // Core Theme State
-    const [theme, setTheme] = useState('light'); // 'light' or 'dark'
+    const [theme, setTheme] = useState('light'); // Always 'light'
     const [skin, setSkin] = useState('blue');
     const [sidebarType, setSidebarType] = useState('white'); // 'white' or 'dark' (mapped to sidebar styles)
 
@@ -26,11 +26,6 @@ export const ThemeProvider = ({ children }) => {
     // Toggle Settings Drawer
     const toggleSettingsDrawer = () => {
         setShowSettingsDrawer(prev => !prev);
-    };
-
-    // Toggle Theme (Light/Dark)
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
     };
 
     // Change Skin
@@ -53,18 +48,13 @@ export const ThemeProvider = ({ children }) => {
         }));
     };
 
-    // Effect to apply dark mode class
+    // Effect to apply dark mode class (always light now)
     useEffect(() => {
-        if (theme === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-        } else {
-            document.body.removeAttribute('data-theme');
-        }
-    }, [theme]);
+        document.body.removeAttribute('data-theme');
+    }, []);
 
     const value = {
         theme,
-        toggleTheme,
         skin,
         changeSkin,
         sidebarType,
