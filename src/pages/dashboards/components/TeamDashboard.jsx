@@ -72,7 +72,7 @@ const TeamDashboard = ({ role }) => {
                     </div>
                     <button
                         className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
-                        onClick={() => navigate('/employee-directory')}
+                        onClick={() => navigate('/dashboard/manage-squad')}
                     >
                         <FaUsers /> Manage Squad
                     </button>

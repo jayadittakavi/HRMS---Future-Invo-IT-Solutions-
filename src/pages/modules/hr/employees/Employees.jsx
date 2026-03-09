@@ -1,491 +1,466 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus, FaFileCsv, FaSearch } from 'react-icons/fa';
+import {
+    FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus,
+    FaFileCsv, FaSearch, FaUsers, FaUserPlus,
+    FaBuilding, FaFilter, FaEllipsisV, FaEnvelope, FaPhone
+} from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
 import { useAuth } from '../../../../context/AuthContext';
+import { employeeSuperAdminService } from './superadmin-service';
+import { companyService } from '../../core/companies/service';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const EmployeesContent = () => {
     const navigate = useNavigate();
     const { user: currentUser } = useAuth();
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
-    // Mock Data
-    const [employees, setEmployees] = useState([
-        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: '1', desig: 'System Administrator', type: 'Admin', company: 'N/A', status: 'Active' },
-        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: '2', desig: 'HR Manager', type: 'Manager', company: 'N/A', status: 'Active' },
-        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: '3', desig: 'Software Developer', type: 'Employee', company: 'N/A', status: 'Active' },
-        { id: 4, user: 'admin', name: 'System Admin', email: 'admin@trickuweb.com', dept: '1', desig: 'System Administrator', type: 'Admin', company: 'N/A', status: 'Active' },
-        { id: 5, user: 'manager', name: 'Department Manager', email: 'manager@trickuweb.com', dept: '2', desig: 'Department Manager', type: 'Manager', company: 'N/A', status: 'Active' },
-    ]);
+
+    const [employees, setEmployees] = useState([]);
+    const [companies, setCompanies] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
 
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showStatusModal, setShowStatusModal] = useState(false);
-
+    const [showDelete, setShowDelete] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
-    const [filterDept, setFilterDept] = useState('');
-    const [filterName, setFilterName] = useState(globalSearchTerm);
-    const [sortOrder, setSortOrder] = useState('asc'); // asc or desc
-    const [sortBy, setSortBy] = useState('id'); // id or name
 
-    // Sync local search with global search
-    React.useEffect(() => {
-        setFilterName(globalSearchTerm);
-    }, [globalSearchTerm]);
-
-
-    // Form Data State
+    // Form Data
     const [formData, setFormData] = useState({
-        userAccount: '',
+        user_account: '',
         name: '',
         email: '',
         phone: '',
-        dept: '',
-        desig: '',
-        type: 'Employee',
         username: '',
         password: '',
-        joiningDate: '',
-        company: '',
-        branch: '',
-        ctc: '',
-        manager: '',
-        status: 'Active',
-        lock: false
+        department: '',
+        designation: '',
+        role: 'employee',
+        joining_date: '',
+        company_id: '',
+        branch: ''
     });
 
-    // Handlers
-    // Handlers
-    const openAddModal = (type) => {
-        setFormData({
-            userAccount: '', name: '', email: '', phone: '',
-            dept: '', desig: '', type: type, joiningDate: '',
-            username: '', password: '',
-            company: '', branch: '', ctc: '',
-            manager: '', status: 'Active', lock: false
-        });
-        setShowAdd(true);
+    const isSuperAdmin = currentUser?.role?.toLowerCase() === 'superadmin' || currentUser?.role?.toUpperCase() === 'SUPER_ADMIN';
+    const isAdmin = currentUser?.role?.toLowerCase() === 'admin';
+    const isHR = currentUser?.role?.toLowerCase() === 'hr';
+    const isEmployee = currentUser?.role?.toLowerCase() === 'employee';
+
+    // Permissions
+    const canManageAll = isSuperAdmin;
+    const canManageCompany = isAdmin || isHR; // Admin and HR can manage their company
+    const canAddEmployee = isSuperAdmin || isAdmin || isHR;
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // Fetch all for SuperAdmin/Admin/HR to allow filtering
+            // Note: If backend supports restricted listing, we should use that
+            // For now, we fetch and filter in frontend to meet UI requirements
+            const empRes = await employeeSuperAdminService.getAllEmployees();
+            let empData = Array.isArray(empRes) ? empRes : (empRes.data || empRes.employees || []);
+
+            // Apply role-based filtering
+            if (isSuperAdmin) {
+                setEmployees(empData);
+            } else if (isAdmin || isHR) {
+                // Admin and HR see employees of their own company
+                const filtered = empData.filter(e => e.company_id === currentUser?.company_id || e.company_name === currentUser?.company_name);
+                setEmployees(filtered);
+            } else if (isEmployee) {
+                // Employee only sees themselves
+                const self = empData.filter(e => e.id === currentUser?.user_id || e.id === currentUser?.id || e.email === currentUser?.email);
+                setEmployees(self.length > 0 ? self : [currentUser]); // Fallback to current user context
+            }
+
+            // Fetch companies for dropdown if allowed to manage
+            if (canAddEmployee) {
+                const compRes = await companyService.getAllCompanies();
+                const compData = Array.isArray(compRes) ? compRes : (compRes.data || compRes.companies || []);
+                setCompanies(compData);
+            }
+        } catch (error) {
+            console.error("Error fetching employee data:", error);
+            // If API fails (e.g. Employee unauthorized for admin endpoint), fallback for Employee
+            if (isEmployee) {
+                setEmployees([currentUser]);
+            }
+        } finally {
+            setLoading(false);
+        }
     };
+
+    useEffect(() => {
+        if (currentUser) {
+            fetchData();
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-
-
-    const handleEdit = (emp) => {
-        setSelectedEmployee(emp);
-        setFormData(emp);
-        setShowEdit(true);
-    };
-
-    const handleUpdateEmployee = () => {
-        const updatedList = employees.map(emp =>
-            emp.id === selectedEmployee.id ? { ...formData, id: selectedEmployee.id } : emp
-        );
-        setEmployees(updatedList);
-        setShowEdit(false);
-    };
-
-    const handleDelete = (emp) => {
-        setSelectedEmployee(emp);
-        setShowStatusModal(true);
-    };
-
-    const confirmStatusToggle = () => {
-        toggleStatus(selectedEmployee.id);
-        setShowStatusModal(false);
-    };
-
-    const toggleStatus = (id) => {
-        const updatedList = employees.map(emp => {
-            if (emp.id === id) {
-                return { ...emp, status: emp.status === 'Active' ? 'Inactive' : 'Active' };
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        try {
+            if (canAddEmployee) {
+                // If not SuperAdmin, force company_id to current user's company
+                const payload = isSuperAdmin ? formData : { ...formData, company_id: currentUser.company_id };
+                await employeeSuperAdminService.createEmployee(payload);
+                setShowAdd(false);
+                fetchData();
+                alert("Employee created successfully!");
             }
-            return emp;
-        });
-        setEmployees(updatedList);
+        } catch (error) {
+            alert("Failed to create employee: " + (error.message || "Unknown error"));
+        }
     };
 
-    const handleSaveEmployee = () => {
-        const newEmp = {
-            id: employees.length + 1,
-            ...formData,
-            // Map form fields to table expected fields if necessary
-            user: formData.userAccount || formData.name.toLowerCase().replace(/\s/g, '').slice(0, 8),
-            // Ensure other fields are present or defaulted
-            pay: formData.ctc || 'N/A'
-        };
-        setEmployees([...employees, newEmp]);
-        setShowAdd(false);
-        // Reset form for next add
-        setFormData({
-            userAccount: '', name: '', email: '', phone: '',
-            dept: '', desig: '', type: 'Employee', joiningDate: '',
-            username: '', password: '',
-            company: '', branch: '', ctc: '',
-            manager: '', status: 'Active', lock: false
-        });
-    };
-
-    const handleExportCSV = () => {
-        const headers = ["ID,Username,Name,Email,Department,Designation,Phone,Status"];
-        const rows = employees.map(emp =>
-            `${emp.id},${emp.user},${emp.name},${emp.email},${emp.dept},${emp.desig},${emp.phone || ''},${emp.status}`
-        );
-        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "employees_list.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
-
-
-    // Derived State for Filtering
-    const filteredEmployees = employees
-        .filter(emp => {
-            if (filterDept && filterDept !== 'Select Department' && emp.dept !== filterDept) return false;
-            if (filterName && !emp.name.toLowerCase().includes(filterName.toLowerCase())) return false;
-            return true;
-        })
-        .sort((a, b) => {
-            if (sortBy === 'name') {
-                return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        try {
+            if ((isSuperAdmin || isAdmin || isHR) && selectedEmployee) {
+                await employeeSuperAdminService.updateEmployee(selectedEmployee.id, formData);
+                setShowEdit(false);
+                fetchData();
+                alert("Employee updated successfully!");
             }
-            return sortOrder === 'asc' ? a.id - b.id : b.id - a.id;
-        });
+        } catch (error) {
+            alert("Failed to update employee: " + (error.message || "Unknown error"));
+        }
+    };
 
+    const handleDelete = async () => {
+        try {
+            if ((isSuperAdmin || isAdmin) && selectedEmployee) {
+                await employeeSuperAdminService.deleteEmployee(selectedEmployee.id);
+                setShowDelete(false);
+                fetchData();
+                alert("Employee deleted successfully!");
+            }
+        } catch (error) {
+            alert("Failed to delete employee: " + (error.message || "Unknown error"));
+        }
+    };
+
+    const filteredEmployees = employees.filter(emp => {
+        const query = searchTerm.toLowerCase();
+        return (
+            (emp.name || emp.first_name || '').toLowerCase().includes(query) ||
+            (emp.email || '').toLowerCase().includes(query) ||
+            (emp.designation || '').toLowerCase().includes(query) ||
+            (emp.company_name || '').toLowerCase().includes(query)
+        );
+    });
+
+    const stats = [
+        { label: 'Total Employees', count: employees.length, icon: <FaUsers />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
+        { label: 'Active Now', count: employees.filter(e => e.status === 'Active' || !e.status).length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : 5, icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+    ];
 
     return (
-        <div className="fade-in">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 className="fw-bold text-dark mb-1">Employee Management</h4>
-                    <p className="text-secondary small mb-0">Manage employee records and information</p>
-                </div>
-                <button
-                    type="button"
-                    className="btn btn-primary px-4 fw-bold shadow-sm d-flex align-items-center gap-2"
-                    onClick={() => openAddModal('Employee')}
-                >
-                    <FaPlus /> ADD EMPLOYEE
-                </button>
+        <div style={{ padding: '0px', maxWidth: '100%', margin: '0 auto' }}>
+            {/* Stats Row */}
+            <div className="row g-4 mb-5">
+                {stats.map((stat, i) => (
+                    <div key={i} className="col-md-4">
+                        <div className="card h-100 border-0 shadow-sm rounded-4"
+                            style={{
+                                padding: '24px',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.5)'
+                            }}>
+                            <div className="d-flex align-items-center gap-4">
+                                <div style={{
+                                    width: 60, height: 60, borderRadius: '18px',
+                                    background: stat.bg, color: stat.color,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '1.5rem'
+                                }}>
+                                    {stat.icon}
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                                    <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>{stat.count}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            <div className="bg-white p-3 rounded shadow-sm mb-4 border-0 d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                <div className="d-flex gap-2 flex-grow-1 align-items-center">
-                    <div className="position-relative">
-                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
-                        <input
-                            type="text"
-                            className="form-control form-control-sm rounded ps-5 bg-light border-0"
-                            style={{ width: '300px' }}
-                            placeholder="Search by name or username..."
-                            value={filterName}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setFilterName(val);
-                                setGlobalSearchTerm(val);
-                            }}
-                        />
+            {/* Smart Action Bar */}
+            <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5"
+                style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.6)'
+                }}>
+                <div className="card-header bg-transparent border-0 p-4">
+                    <div className="row g-3 align-items-center">
+                        <div className="col-md-6">
+                            <div className="position-relative">
+                                <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50" />
+                                <input
+                                    type="text"
+                                    className="form-control rounded-pill ps-5 border-0 shadow-sm"
+                                    placeholder="Search by name, email, or role..."
+                                    style={{ background: 'rgba(255, 255, 255, 0.9)', padding: '12px 20px 12px 48px' }}
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setGlobalSearchTerm(e.target.value);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-6 text-end d-flex gap-3 justify-content-end">
+                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm border-0"
+                                style={{ background: 'white', color: '#64748b', fontWeight: 700 }}>
+                                <FaFilter /> Filters
+                            </button>
+                            {canAddEmployee && (
+                                <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
+                                    onClick={() => {
+                                        setFormData({
+                                            user_account: '', name: '', email: '', phone: '',
+                                            username: '', password: '',
+                                            department: '', designation: '',
+                                            role: 'employee', joining_date: '',
+                                            company_id: currentUser?.company_id || '', branch: ''
+                                        });
+                                        setShowAdd(true);
+                                    }}
+                                    style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', color: 'white', fontWeight: 700 }}>
+                                    <FaPlus /> Add Employee
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
-                <div className="d-flex gap-2">
-                    <button className="btn btn-light btn-sm border d-flex align-items-center gap-2" onClick={handleExportCSV}>
-                        <FaFileCsv className="text-success" /> EXPORT
-                    </button>
-                </div>
-            </div>
 
-            <div className="table-card">
-                <div className="table-responsive">
-                    <table className="table custom-table align-middle">
-                        <thead className="table-light">
-                            <tr>
-                                <th>Username</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Department</th>
-                                <th>Designation</th>
-                                <th>Type</th>
-                                <th>Company ID</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredEmployees.map((emp) => (
-                                <tr key={emp.id} className={emp.status === 'Inactive' ? 'opacity-50' : ''}>
-                                    <td className="fw-bold">{emp.user}</td>
-                                    <td>{emp.name}</td>
-                                    <td className="text-secondary small">{emp.email}</td>
-                                    <td>{emp.dept}</td>
-                                    <td>{emp.desig}</td>
-                                    <td>
-                                        <span className={`badge ${emp.type === 'Admin' ? 'bg-purple-role' : emp.type === 'Manager' ? 'bg-purple-soft-role' : 'bg-secondary'} rounded-pill px-3`}>
-                                            {emp.type}
-                                        </span>
-                                    </td>
-                                    <td>{emp.company || 'N/A'}</td>
-                                    <td>
-                                        <div className="d-flex gap-2">
-                                            <button className="btn btn-sm btn-light border p-2" onClick={() => handleEdit(emp)} title="Edit">
-                                                <FaEdit className="text-primary" />
-                                            </button>
-                                            <button
-                                                className={`btn btn-sm ${emp.status === 'Active' ? 'btn-danger' : 'btn-success'} p-2`}
-                                                onClick={() => handleDelete(emp)}
-                                                title={emp.status === 'Active' ? "Deactivate" : "Activate"}
-                                            >
-                                                {emp.status === 'Active' ? <FaBan /> : <FaCheckCircle />}
-                                            </button>
-                                        </div>
-                                    </td>
+                <div className="card-body p-0">
+                    <div className="table-responsive">
+                        <table className="table table-hover mb-0 align-middle">
+                            <thead style={{ background: 'rgba(129, 140, 248, 0.05)' }}>
+                                <tr>
+                                    <th className="px-4 py-3 border-0 text-muted small fw-bold">EMPLOYEE</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">CONTACT</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">ROLE & DEPT</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">COMPANY</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">STATUS</th>
+                                    {!isEmployee && <th className="pe-4 py-3 border-0 text-muted small fw-bold text-end">ACTIONS</th>}
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary"></div></td></tr>
+                                ) : filteredEmployees.length === 0 ? (
+                                    <tr><td colSpan="6" className="text-center py-5 text-muted">No employees found.</td></tr>
+                                ) : (
+                                    filteredEmployees.map((emp, i) => (
+                                        <tr key={i} className="border-bottom border-light" style={{ transition: 'all 0.2s' }}>
+                                            <td className="px-4 py-4">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
+                                                        style={{ width: 42, height: 42, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', fontSize: '0.9rem' }}>
+                                                        {(emp.name || 'E').charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="fw-bold text-dark">{emp.name}</div>
+                                                        <div className="small text-muted">ID: #{emp.id}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4">
+                                                <div className="d-flex flex-column gap-1">
+                                                    <div className="small text-dark d-flex align-items-center gap-2"><FaEnvelope className="text-muted" size={12} /> {emp.email}</div>
+                                                    <div className="small text-muted d-flex align-items-center gap-2"><FaPhone className="text-muted" size={12} /> {emp.phone || 'No phone'}</div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4">
+                                                <div className="fw-bold text-dark">{emp.designation || emp.role}</div>
+                                                <div className="small text-muted">{emp.department || 'N/A'}</div>
+                                            </td>
+                                            <td className="py-4">
+                                                <span className="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
+                                                    <FaBuilding className="me-2 opacity-50" /> {emp.company_name || emp.company || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4">
+                                                <span className={`badge rounded-pill px-3 py-2 ${emp.status === 'Inactive' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}`} style={{ fontSize: '0.75rem', fontWeight: 800 }}>
+                                                    {emp.status || 'Active'}
+                                                </span>
+                                            </td>
+                                            {!isEmployee && (
+                                                <td className="pe-4 py-4 text-end">
+                                                    <div className="d-flex gap-2 justify-content-end">
+                                                        <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
+                                                            onClick={() => {
+                                                                setSelectedEmployee(emp);
+                                                                setFormData({ ...emp, company_id: emp.company_id || '' });
+                                                                setShowEdit(true);
+                                                            }}
+                                                            style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
+                                                            <FaEdit size={14} />
+                                                        </button>
+                                                        {(isSuperAdmin || isAdmin) && (
+                                                            <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
+                                                                onClick={() => {
+                                                                    setSelectedEmployee(emp);
+                                                                    setShowDelete(true);
+                                                                }}
+                                                                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+                                                                <FaTrash size={14} />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            )}
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            {/* Add Employee Modal (New Design) */}
-            {showAdd && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            {/* Modals Implementation */}
+            {(showAdd || showEdit) && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' }}>
                     <div className="modal-dialog modal-dialog-centered modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header border-0 pb-0">
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style={{ background: '#fff' }}>
+                            <div className="p-4 border-bottom border-light d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h5 className="modal-title fw-bold">Add New {formData.type}</h5>
+                                    <h4 className="fw-bold mb-1" style={{ color: '#0f172a' }}>Add New Employee</h4>
                                     <p className="text-muted small mb-0">Enter employee information to add to the system</p>
                                 </div>
-                                <button className="btn-close" onClick={() => setShowAdd(false)}></button>
+                                <button onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn-close shadow-none"></button>
                             </div>
-                            <div className="modal-body pt-4">
-                                <form>
-                                    <div className="row g-3">
+                            <div className="modal-body p-4">
+                                <form onSubmit={showAdd ? handleAdd : handleUpdate}>
+                                    <div className="row g-4">
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Select User Account</label>
-                                            <select className="form-select" name="userAccount" value={formData.userAccount} onChange={handleInputChange}>
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Select User Account</label>
+                                            <select name="user_account" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.user_account} onChange={handleInputChange}>
                                                 <option value="">Select a user account</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="hr">HR</option>
-                                                <option value="manager">Manager</option>
-                                                <option value="employee">Employee</option>
+                                                <option value="1">Account 1</option>
+                                                <option value="2">Account 2</option>
                                             </select>
-                                            <div className="form-text small text-muted">Only unassigned user accounts are shown</div>
+                                            <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>Only unassigned user accounts are shown</div>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Full Name</label>
-                                            <input type="text" className="form-control" name="name" value={formData.name} onChange={handleInputChange} placeholder="John Doe" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Full Name</label>
+                                            <input type="text" name="name" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.name} onChange={handleInputChange} placeholder="John Doe" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Email</label>
+                                            <input type="email" name="email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.email} onChange={handleInputChange} placeholder="john.doe@company.com" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Phone</label>
+                                            <input type="tel" name="phone" className="form-control rounded-3 p-3 bg-light border-0" value={formData.phone} onChange={handleInputChange} placeholder="Phone number" />
+                                        </div>
+
+                                        <div className="col-12 mt-4 pt-2">
+                                            <div className="text-primary fw-bold small mb-3 border-bottom pb-2">Login Credentials</div>
                                         </div>
 
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Email</label>
-                                            <input type="email" className="form-control" name="email" value={formData.email} onChange={handleInputChange} placeholder="john.doe@company.com" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Username *</label>
+                                            <input type="text" name="username" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.username} onChange={handleInputChange} placeholder="dittakavijaya@gmail.com" />
+                                            <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>The user will use these credentials to access their account.</div>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Phone</label>
-                                            <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Phone number" />
-                                        </div>
-
-                                        {/* Credentials Section */}
-                                        <div className="col-12"><h6 className="text-primary small fw-bold border-bottom pb-1 mt-2">Login Credentials</h6></div>
-                                        <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Username <span className="text-danger">*</span></label>
-                                            <input type="text" className="form-control form-control-sm" name="username" value={formData.username} onChange={handleInputChange} placeholder="Create username" required />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Password <span className="text-danger">*</span></label>
-                                            <input type="password" name="password" className="form-control form-control-sm" value={formData.password} onChange={handleInputChange} placeholder="Set password" required />
-                                        </div>
-                                        <div className="col-12 text-muted xsmall" style={{ fontSize: '0.7rem' }}>
-                                            The user will use these credentials to access their account.
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Password *</label>
+                                            <input type="password" name="password" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.password} onChange={handleInputChange} placeholder="........" />
                                         </div>
 
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Department</label>
-                                            <select className="form-select" name="dept" value={formData.dept} onChange={handleInputChange}>
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Department</label>
+                                            <select name="department" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.department} onChange={handleInputChange}>
                                                 <option value="">Select Department</option>
-                                                <option>Administration</option>
-                                                <option>HR</option>
-                                                <option>Engineering</option>
-                                                <option>Sales HR</option>
-                                                <option>IT HR</option>
-                                                <option>Sales Manager</option>
-                                                <option>IT Manager</option>
+                                                <option value="IT">IT</option>
+                                                <option value="HR">HR</option>
+                                                <option value="Finance">Finance</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Designation</label>
-                                            <input type="text" className="form-control" name="desig" value={formData.desig} onChange={handleInputChange} placeholder="Software Engineer" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Designation</label>
+                                            <input type="text" name="designation" className="form-control rounded-3 p-3 bg-light border-0" value={formData.designation} onChange={handleInputChange} placeholder="Software Engineer" />
                                         </div>
 
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Employee Type</label>
-                                            <select className="form-select" name="type" value={formData.type} onChange={handleInputChange}>
-                                                <option>Employee</option>
-                                                <option>Manager</option>
-                                                <option>Admin</option>
-                                                <option>HR</option>
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
+                                            <select name="role" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.role} onChange={handleInputChange}>
+                                                <option value="employee">Employee</option>
+                                                <option value="manager">Manager</option>
+                                                <option value="hr">HR</option>
+                                                <option value="admin">Admin</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Joining Date</label>
-                                            <input type="date" className="form-control" name="joiningDate" value={formData.joiningDate} onChange={handleInputChange} />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Joining Date</label>
+                                            <input type="date" name="joining_date" className="form-control rounded-3 p-3 bg-light border-0" value={formData.joining_date} onChange={handleInputChange} />
                                         </div>
 
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Company</label>
-                                            <select className="form-select" name="company" value={formData.company} onChange={handleInputChange}>
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Company</label>
+                                            <select name="company_id" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" required value={formData.company_id} onChange={handleInputChange}>
                                                 <option value="">Select Company</option>
-                                                <option>Future Invo</option>
+                                                {companies.map((c, idx) => (
+                                                    <option key={idx} value={c.id}>{c.name || c.company_name}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label small fw-bold">Branch</label>
-                                            <select className="form-select" name="branch" value={formData.branch} onChange={handleInputChange}>
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Branch</label>
+                                            <select name="branch" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.branch} onChange={handleInputChange}>
                                                 <option value="">Select Branch</option>
-                                                <option>Main Branch</option>
+                                                <option value="Main">Main Branch</option>
+                                                <option value="Regional">Regional Branch</option>
                                             </select>
                                         </div>
-
+                                    </div>
+                                    <div className="mt-5 d-flex gap-3 pt-3 border-top">
+                                        <button type="button" onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn btn-light rounded-pill px-4 py-3 fw-bold w-100 border-0" style={{ background: '#f8fafc' }}>Cancel</button>
+                                        <button type="submit" className="btn btn-primary rounded-pill px-4 py-3 fw-bold w-100 border-0 shadow-lg" style={{ background: '#6366f1' }}>
+                                            {showAdd ? 'Add Employee' : 'Save Changes'}
+                                        </button>
                                     </div>
                                 </form>
-                            </div>
-                            <div className="modal-footer border-0 d-flex gap-2">
-                                <button className="btn btn-light flex-grow-1" onClick={() => setShowAdd(false)}>Cancel</button>
-                                <button className="btn btn-primary flex-grow-1" onClick={handleSaveEmployee}>Add Employee</button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {showEdit && selectedEmployee && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Edit Employee</h5>
-                                <button className="btn-close" onClick={() => setShowEdit(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <form>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Name</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="name"
-                                                value={formData.name}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Email</label>
-                                            <input
-                                                type="email"
-                                                className="form-control"
-                                                name="email"
-                                                value={formData.email}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Department</label>
-                                            <select
-                                                className="form-select"
-                                                name="dept"
-                                                value={formData.dept}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option>Administration</option>
-                                                <option>HR</option>
-                                                <option>Engineering</option>
-                                                <option>Sales HR</option>
-                                                <option>IT HR</option>
-                                                <option>Sales Manager</option>
-                                                <option>IT Manager</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Designation</label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="desig"
-                                                value={formData.desig}
-                                                onChange={handleInputChange}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">User Type</label>
-                                            <select
-                                                className="form-select"
-                                                name="type"
-                                                value={formData.type}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option>Employee</option>
-                                                <option>Admin</option>
-                                                <option>Manager</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold">Status</label>
-                                            <select
-                                                className="form-select"
-                                                name="status"
-                                                value={formData.status}
-                                                onChange={handleInputChange}
-                                            >
-                                                <option value="Active">Active</option>
-                                                <option value="Inactive">Inactive</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleUpdateEmployee}>Update Employee</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Deactivate/Activate Modal */}
-            {showStatusModal && selectedEmployee && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+            {showDelete && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}>
                     <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className={`modal-title ${selectedEmployee.status === 'Active' ? 'text-danger' : 'text-success'}`}>
-                                    {selectedEmployee.status === 'Active' ? 'Deactivate' : 'Activate'} Employee
-                                </h5>
-                                <button className="btn-close" onClick={() => setShowStatusModal(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to <strong>{selectedEmployee.status === 'Active' ? 'deactivate' : 'activate'}</strong> <strong>{selectedEmployee.name}</strong>?</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowStatusModal(false)}>Cancel</button>
-                                <button className={`btn ${selectedEmployee.status === 'Active' ? 'btn-danger' : 'btn-success'} btn-sm`} onClick={confirmStatusToggle}>
-                                    {selectedEmployee.status === 'Active' ? 'Deactivate' : 'Activate'}
-                                </button>
+                        <div className="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
+                            <div className="modal-body p-5 text-center">
+                                <div className="rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
+                                    style={{ width: 80, height: 80, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
+                                    <FaTrash size={32} />
+                                </div>
+                                <h4 className="fw-bold mb-3">Delete Employee?</h4>
+                                <p className="text-muted mb-4">You are about to remove <strong>{selectedEmployee?.name}</strong> from the system. This action is irreversible.</p>
+                                <div className="d-flex gap-3">
+                                    <button className="btn btn-light rounded-pill px-4 py-3 fw-bold flex-grow-1 border-0" onClick={() => setShowDelete(false)}>Wait, Cancel</button>
+                                    <button className="btn btn-danger rounded-pill px-4 py-3 fw-bold flex-grow-1 border-0 shadow-lg" onClick={handleDelete}>Delete Anyway</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -497,7 +472,7 @@ export const EmployeesContent = () => {
 
 const Employees = () => {
     return (
-        <DashboardLayout title="">
+        <DashboardLayout title="Member Directory">
             <EmployeesContent />
         </DashboardLayout>
     );

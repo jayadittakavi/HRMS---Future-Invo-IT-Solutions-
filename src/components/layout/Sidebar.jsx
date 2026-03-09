@@ -120,7 +120,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     dashboardLink,
                     myTeamLink,
                     { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
-                    { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
                     { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
                     { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
                     { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
@@ -235,18 +234,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 links = [dashboardLink];
         }
 
-        // Add Common Links to all roles at the end
-        const commonLinks = [
-            { name: 'divider', type: 'divider' },
-            { name: 'Personal Settings', icon: <MdPerson size={20} />, path: '/profile' },
-            { name: 'Branches', icon: <MdBusiness size={20} />, path: '/branches' },
-            { name: 'Support Ticket', icon: <MdHelp size={20} />, path: '/support' },
-            { name: 'Knowledge Base', icon: <MdDescription size={20} />, path: '/knowledge-base' },
-            { name: 'Privacy Policy', icon: <MdPolicy size={20} />, path: '/privacy' },
-            { name: 'Give Feedback', icon: <MdRateReview size={20} />, path: '/feedback' },
-        ];
-
-        links = [...links, ...commonLinks];
+        links = [...links];
 
         return (
             <div className="d-flex flex-column gap-1 pt-2">

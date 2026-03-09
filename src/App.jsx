@@ -38,6 +38,7 @@ import DashboardManager from "./pages/dashboards/DashboardManager";
 import DashboardLayout from "./components/layout/DashboardLayout";
 import MySpace from "./pages/dashboards/components/MySpace";
 import MyTeam from "./pages/dashboards/components/MyTeam";
+import SquadManagement from "./pages/dashboards/components/SquadManagement";
 
 /* Audit Logs */
 import SuperAdminAuditLogs from "./pages/superadmin/AuditLogs";
@@ -151,6 +152,7 @@ function AppContent() {
           {/* Shared Views */}
           <Route path="my-space" element={<MySpace />} />
           <Route path="my-team" element={<MyTeam />} />
+          <Route path="manage-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadManagement /></ProtectedRoute>} />
 
           {/* Role Specific Dashboards */}
           <Route path="super-admin" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />
@@ -198,7 +200,7 @@ function AppContent() {
         <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
 
         {/* HR Routes */}
-        <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><Employees /></ProtectedRoute>} />
+        <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'employee']}><Employees /></ProtectedRoute>} />
         <Route path="/add-member" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><AddMember /></ProtectedRoute>} />
         <Route path="/create-username" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><CreateUsername /></ProtectedRoute>} />
         <Route path="/wfh-requests" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'manager']}><WFHRequests /></ProtectedRoute>} />

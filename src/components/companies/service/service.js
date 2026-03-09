@@ -3,7 +3,7 @@ const API_BASE = "/api";
 // Helper to get auth header with token
 const authHeader = () => {
     // Priority token provided by user for testing/dev
-    const hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzI3ODU3NzB9.v_BgdU5Xi4p6imxFD75VeEj33b5sx4curQSxbFGXknA";
+    const hardcodedToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMxNDc1MTl9.7J_oXF-kVaocvXyM40KQuqZMiAGxvntF-n8OzRdaAHs";
 
     // Fallback to local storage
     const token = hardcodedToken || localStorage.getItem("authToken") || localStorage.getItem("token");
@@ -19,7 +19,7 @@ const authHeader = () => {
 export const companyService = {
     // 🔹 Get All Companies
     getAllCompanies: async () => {
-        const response = await fetch(`${API_BASE}/superadmin/companies`, {
+        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
             method: "GET",
             ...authHeader()
         });
@@ -33,7 +33,7 @@ export const companyService = {
 
     // 🔹 Create New Company
     createCompany: async (data) => {
-        const response = await fetch(`${API_BASE}/superadmin/create-company`, {
+        const response = await fetch(`http://192.168.1.6:5000/superadmin/create-company`, {
             method: "POST",
             body: JSON.stringify(data),
             ...authHeader()
@@ -44,7 +44,7 @@ export const companyService = {
 
     // 🔹 Update Company
     updateCompany: async (id, data) => {
-        const response = await fetch(`${API_BASE}/superadmin/companies`, {
+        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
             method: "PUT",
             body: JSON.stringify(data),
             ...authHeader()
@@ -55,7 +55,7 @@ export const companyService = {
 
     // 🔹 Delete Company
     deleteCompany: async (id) => {
-        const response = await fetch(`${API_BASE}/superadmin/companies`, {
+        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
             method: "DELETE",
             ...authHeader()
         });

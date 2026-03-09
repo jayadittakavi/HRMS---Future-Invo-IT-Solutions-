@@ -1,32 +1,52 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaBan, FaCheckCircle, FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import {
+    FaEdit, FaTrash, FaBan, FaCheckCircle, FaSearch,
+    FaMapMarkerAlt, FaBuilding, FaPlus, FaFilter, FaLayerGroup
+} from 'react-icons/fa';
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { useSearch } from "../../../../context/SearchContext";
-import "../../../../components/layout/DashboardLayout.css";
 import BranchMap from "../../../../components/BranchMap";
+import "../../../../components/layout/DashboardLayout.css";
 
 export const BranchesContent = () => {
     const [branches, setBranches] = useState([]);
     const [companiesList, setCompaniesList] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [reload, setReload] = useState(false);
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
 
-    React.useEffect(() => {
-        setSearchTerm(globalSearchTerm);
-    }, [globalSearchTerm]);
+    // Modal States
+    const [showAdd, setShowAdd] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
+    const [selectedBranch, setSelectedBranch] = useState(null);
+
+    const [formData, setFormData] = useState({
+        name: '',
+        company: '',
+        address: '',
+        location: '',
+        status: 'Active'
+    });
 
     const SUPERADMIN_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzI3ODU3NzB9.v_BgdU5Xi4p6imxFD75VeEj33b5sx4curQSxbFGXknA";
     const API_BASE = "/api/superadmin";
 
-    React.useEffect(() => {
-        const fetchBranches = async () => {
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await fetch(`${API_BASE}/branches`, {
-                    headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
-                });
-                if (response.ok) {
-                    const result = await response.json();
+                const [branchRes, compRes] = await Promise.all([
+                    fetch(`${API_BASE}/branches`, { headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` } }),
+                    fetch(`${API_BASE}/companies`, { headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` } })
+                ]);
+
+                if (branchRes.ok) {
+                    const result = await branchRes.json();
                     if (result.success && result.data) {
                         const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
                         const mappedData = result.data.map(b => ({
@@ -44,67 +64,30 @@ export const BranchesContent = () => {
                         setBranches(mappedData);
                     }
                 }
-            } catch (error) {
-                console.error("Error fetching branches:", error);
-            }
-        };
 
-        const fetchCompanies = async () => {
-            try {
-                const response = await fetch(`${API_BASE}/companies`, {
-                    headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` }
-                });
-                if (response.ok) {
-                    const result = await response.json();
+                if (compRes.ok) {
+                    const result = await compRes.json();
                     if (result.success && result.data) {
                         setCompaniesList(result.data);
                     }
                 }
             } catch (error) {
-                console.error("Error fetching companies:", error);
+                console.error("Error fetching data:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchBranches();
-        fetchCompanies();
+        fetchData();
     }, [reload]);
 
-    // Modal States
-    const [showAdd, setShowAdd] = useState(false);
-    const [showEdit, setShowEdit] = useState(false);
-    const [selectedBranch, setSelectedBranch] = useState(null);
-
-    const [formData, setFormData] = useState({
-        name: '',
-        company: '',
-        address: '',
-        location: '',
-        status: 'Active'
-    });
-
-    // Handlers
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    const handleAddClick = () => {
-        setFormData({ name: '', company: '', address: '', location: '', status: 'Active' });
-        setShowAdd(true);
-    };
-
-    const handleEdit = (branch) => {
-        setSelectedBranch(branch);
-        setFormData({
-            ...branch,
-            company: branch.company_id || ''
-        });
-        setShowEdit(true);
-    };
-
-    const handleSaveBranch = async () => {
-        if (!formData.name || !formData.company) return; // Need both for API
-
+    const handleSaveBranch = async (e) => {
+        e.preventDefault();
         let lat = null, lng = null;
         if (formData.location) {
             const parts = formData.location.split(',');
@@ -122,7 +105,7 @@ export const BranchesContent = () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    company_id: formData.company, // Storing ID in formData.company from select
+                    company_id: formData.company,
                     branch_name: formData.name,
                     address: formData.address,
                     latitude: lat,
@@ -132,19 +115,17 @@ export const BranchesContent = () => {
             });
 
             if (response.ok) {
-                setReload(!reload); // Refetch
+                setReload(!reload);
                 setShowAdd(false);
-            } else {
-                console.error("Failed to save branch");
+                alert("Branch added successfully!");
             }
         } catch (error) {
             console.error("Error saving branch:", error);
         }
     };
 
-    const handleUpdateBranch = async () => {
-        if (!selectedBranch) return;
-
+    const handleUpdateBranch = async (e) => {
+        e.preventDefault();
         let lat = null, lng = null;
         if (formData.location) {
             const parts = formData.location.split(',');
@@ -173,6 +154,7 @@ export const BranchesContent = () => {
             if (response.ok) {
                 setReload(!reload);
                 setShowEdit(false);
+                alert("Branch updated successfully!");
             }
         } catch (error) {
             console.error("Error updating branch:", error);
@@ -187,12 +169,9 @@ export const BranchesContent = () => {
                     'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
                 }
             });
-
-            if (response.ok) {
-                setReload(!reload); // Refetch list
-            }
+            if (response.ok) setReload(!reload);
         } catch (error) {
-            console.error("Error toggling branch status:", error);
+            console.error("Error toggling status:", error);
         }
     };
 
@@ -201,246 +180,242 @@ export const BranchesContent = () => {
         return (
             (branch.name || '').toLowerCase().includes(query) ||
             (branch.company || '').toLowerCase().includes(query) ||
-            (branch.address || '').toLowerCase().includes(query) ||
-            (branch.state || '').toLowerCase().includes(query)
+            (branch.address || '').toLowerCase().includes(query)
         );
     });
 
+    const stats = [
+        { label: 'Total Branches', count: branches.length, icon: <FaMapMarkerAlt />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
+        { label: 'Active Locations', count: branches.filter(b => b.status === 'Active').length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { label: 'Involved Companies', count: companiesList.length, icon: <FaBuilding />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+    ];
+
     return (
-        <>
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 className="fw-bold text-dark mb-1">Branch Management</h5>
-                    <p className="text-secondary small mb-0">Manage company branches</p>
-                </div>
-                <div className="d-flex gap-2 align-items-center">
-                    <div className="position-relative">
-                        <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" />
-                        <input
-                            type="text"
-                            placeholder="Search branches..."
-                            className="form-control form-control-sm rounded-pill ps-5"
-                            style={{ width: '250px' }}
-                            value={searchTerm}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                setSearchTerm(val);
-                                setGlobalSearchTerm(val);
-                            }}
-                        />
-                    </div>
-                    <button className="btn btn-primary btn-sm px-3 rounded-pill" onClick={handleAddClick}>
-                        + Add Branch
-                    </button>
-                </div>
-            </div>
-
-            <div className="table-card">
-                <div className="table-responsive">
-                    <table className="table custom-table">
-                        <thead>
-                            <tr>
-                                <th>Branch Name</th>
-                                <th>Company</th>
-                                <th>Address</th>
-                                <th>State</th>
-                                <th>Location</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredBranches.length === 0 ? (
-                                <tr><td colSpan="7" className="text-center py-4 text-muted">No branches found.</td></tr>
-                            ) : (
-                                filteredBranches.map((branch) => (
-                                    <tr key={branch.id} className={branch.status === 'Inactive' ? 'opacity-50' : ''}>
-                                        <td><span className="fw-bold text-dark">{branch.name}</span></td>
-                                        <td>{branch.company}</td>
-                                        <td>{branch.address}</td>
-                                        <td>{branch.state}</td>
-                                        <td>{branch.location}</td>
-                                        <td>
-                                            <span className={`badge ${branch.status === 'Active' ? 'bg-success' : 'bg-secondary'}`}>
-                                                {branch.status}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button className="action-btn edit" onClick={() => handleEdit(branch)}><FaEdit /></button>
-                                            <button
-                                                className={`action-btn ${branch.status === 'Active' ? 'delete' : 'edit'}`}
-                                                title={branch.status === 'Active' ? "Deactivate Branch" : "Activate Branch"}
-                                                onClick={() => toggleStatus(branch.id)}
-                                            >
-                                                {branch.status === 'Active' ? <FaBan /> : <FaCheckCircle className="text-success" />}
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            {/* Map Section */}
-            <div className="mt-4">
-                <BranchMap branches={filteredBranches} />
-            </div>
-
-            {/* Add Modal */}
-            {showAdd && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Add Branch</h5>
-                                <button className="btn-close" onClick={() => setShowAdd(false)}></button>
+        <div style={{ padding: '0px', maxWidth: '100%', margin: '0 auto' }}>
+            {/* Stats Summary */}
+            <div className="row g-4 mb-5">
+                {stats.map((stat, i) => (
+                    <div key={i} className="col-md-4">
+                        <div className="card h-100 border-0 shadow-sm rounded-4"
+                            style={{
+                                padding: '24px',
+                                background: 'rgba(255, 255, 255, 0.7)',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255, 255, 255, 0.5)'
+                            }}>
+                            <div className="d-flex align-items-center gap-4">
+                                <div style={{
+                                    width: 60, height: 60, borderRadius: '18px',
+                                    background: stat.bg, color: stat.color,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    fontSize: '1.5rem'
+                                }}>
+                                    {stat.icon}
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                                    <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>{stat.count}</div>
+                                </div>
                             </div>
-                            <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Branch Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            placeholder="Enter branch name"
-                                        />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Main Content Card */}
+            <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5"
+                style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255, 255, 255, 0.6)'
+                }}>
+                <div className="card-header bg-transparent border-0 p-4">
+                    <div className="row g-3 align-items-center">
+                        <div className="col-md-6">
+                            <div className="position-relative">
+                                <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50" />
+                                <input
+                                    type="text"
+                                    className="form-control rounded-pill ps-5 border-0 shadow-sm"
+                                    placeholder="Search branches by name, city, or company..."
+                                    style={{ background: 'rgba(255, 255, 255, 0.9)', padding: '12px 20px 12px 48px' }}
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setGlobalSearchTerm(e.target.value);
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className="col-md-6 text-end d-flex gap-3 justify-content-end">
+                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm border-0"
+                                style={{ background: 'white', color: '#64748b', fontWeight: 700 }}>
+                                <FaFilter /> Filters
+                            </button>
+                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
+                                onClick={() => {
+                                    setFormData({ name: '', company: '', address: '', location: '', status: 'Active' });
+                                    setShowAdd(true);
+                                }}
+                                style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', color: 'white', fontWeight: 700 }}>
+                                <FaPlus /> Add New Branch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card-body p-0">
+                    <div className="table-responsive">
+                        <table className="table table-hover mb-0 align-middle">
+                            <thead style={{ background: 'rgba(129, 140, 248, 0.05)' }}>
+                                <tr>
+                                    <th className="px-4 py-3 border-0 text-muted small fw-bold">BRANCH NAME</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">LOCATION & ADDRESS</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">PARENT COMPANY</th>
+                                    <th className="py-3 border-0 text-muted small fw-bold">STATUS</th>
+                                    <th className="pe-4 py-3 border-0 text-muted small fw-bold text-end">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr><td colSpan="5" className="text-center py-5"><div className="spinner-border text-primary border-0" style={{ '--bs-spinner-color': '#818cf8' }}></div></td></tr>
+                                ) : filteredBranches.length === 0 ? (
+                                    <tr><td colSpan="5" className="text-center py-5 text-muted">No branches matching your criteria.</td></tr>
+                                ) : (
+                                    filteredBranches.map((branch, i) => (
+                                        <tr key={i} className="border-bottom border-light">
+                                            <td className="px-4 py-4">
+                                                <div className="d-flex align-items-center gap-3">
+                                                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
+                                                        style={{ width: 42, height: 42, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', fontSize: '0.9rem' }}>
+                                                        <FaBuilding />
+                                                    </div>
+                                                    <div className="fw-bold text-dark">{branch.name}</div>
+                                                </div>
+                                            </td>
+                                            <td className="py-4">
+                                                <div className="small text-dark fw-600 mb-1"><FaMapMarkerAlt className="text-muted me-2" />{branch.state || 'Main Office'}</div>
+                                                <div className="small text-muted" style={{ maxWidth: '250px' }}>{branch.address}</div>
+                                            </td>
+                                            <td className="py-4">
+                                                <span className="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
+                                                    {branch.company || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="py-4">
+                                                <span className={`badge rounded-pill px-3 py-2 ${branch.status === 'Inactive' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}`} style={{ fontSize: '0.75rem', fontWeight: 800 }}>
+                                                    {branch.status}
+                                                </span>
+                                            </td>
+                                            <td className="pe-4 py-4 text-end">
+                                                <div className="d-flex gap-2 justify-content-end">
+                                                    <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
+                                                        onClick={() => {
+                                                            setSelectedBranch(branch);
+                                                            setFormData({ ...branch, company: branch.company_id || '' });
+                                                            setShowEdit(true);
+                                                        }}
+                                                        style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
+                                                        <FaEdit size={14} />
+                                                    </button>
+                                                    <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
+                                                        onClick={() => toggleStatus(branch.id)}
+                                                        style={{ background: branch.status === 'Active' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: branch.status === 'Active' ? '#ef4444' : '#10b981' }}>
+                                                        {branch.status === 'Active' ? <FaBan size={14} /> : <FaCheckCircle size={14} />}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* Map View Section */}
+            {!loading && filteredBranches.length > 0 && (
+                <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5"
+                    style={{
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        backdropFilter: 'blur(12px)',
+                        border: '1px solid rgba(255, 255, 255, 0.6)'
+                    }}>
+                    <div className="card-header bg-transparent border-0 p-4">
+                        <h5 className="fw-bold m-0 d-flex align-items-center gap-2">
+                            <FaLayerGroup className="text-primary-soft" /> Global Presence Matrix
+                        </h5>
+                    </div>
+                    <div className="card-body p-0" style={{ height: '400px' }}>
+                        <BranchMap branches={filteredBranches} />
+                    </div>
+                </div>
+            )}
+
+            {/* Modals Implementation */}
+            {(showAdd || showEdit) && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}>
+                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                        <div className="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
+                            <div style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', padding: '32px', color: 'white' }}>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="modal-title fw-bold fs-4 m-0">{showAdd ? 'Establish New Branch' : 'Modify Branch Location'}</h5>
+                                    <button onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn-close btn-close-white shadow-none"></button>
+                                </div>
+                                <p className="opacity-75 m-0 mt-2">Configure operational hubs and geographical data.</p>
+                            </div>
+                            <div className="modal-body p-4">
+                                <form onSubmit={showAdd ? handleSaveBranch : handleUpdateBranch}>
+                                    <div className="row g-4">
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Branch Name</label>
+                                            <input type="text" name="name" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.name} onChange={handleInputChange} placeholder="e.g. Hyderabad Hitech City" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Associated Company</label>
+                                            <select name="company" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" required value={formData.company} onChange={handleInputChange}>
+                                                <option value="">Select Company</option>
+                                                {companiesList.map((c, idx) => (
+                                                    <option key={idx} value={c.id}>{c.company_name || c.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="col-12">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Physical Address</label>
+                                            <textarea name="address" className="form-control rounded-3 p-3 bg-light border-0" rows="3" required value={formData.address} onChange={handleInputChange} placeholder="Full street address and city details..."></textarea>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Geographic Location (Lat, Lng)</label>
+                                            <input type="text" name="location" className="form-control rounded-3 p-3 bg-light border-0" value={formData.location} onChange={handleInputChange} placeholder="17.4483, 78.3915" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Initial Status</label>
+                                            <select name="status" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.status} onChange={handleInputChange}>
+                                                <option value="Active">Operational (Active)</option>
+                                                <option value="Inactive">Paused (Inactive)</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Company</label>
-                                        <select
-                                            className="form-select"
-                                            name="company"
-                                            value={formData.company}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="">Select Company</option>
-                                            {companiesList.map((comp, idx) => (
-                                                <option key={idx} value={comp.id}>{comp.company_name || comp.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea
-                                            className="form-control"
-                                            rows="2"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                            placeholder="Enter address"
-                                        ></textarea>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Location (Lat, Lng)</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="location"
-                                            value={formData.location}
-                                            onChange={handleInputChange}
-                                            placeholder="e.g. 12.9716, 77.5946"
-                                        />
+                                    <div className="mt-5 d-flex gap-3">
+                                        <button type="button" onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn btn-light rounded-pill px-4 py-3 fw-bold w-100 border-0">Cancel</button>
+                                        <button type="submit" className="btn btn-primary rounded-pill px-4 py-3 fw-bold w-100 border-0 shadow-lg" style={{ background: '#818cf8' }}>
+                                            {showAdd ? 'Add Hub' : 'Save Changes'}
+                                        </button>
                                     </div>
                                 </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowAdd(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleSaveBranch}>Save Branch</button>
                             </div>
                         </div>
                     </div>
                 </div>
             )}
-
-            {/* Edit Modal */}
-            {showEdit && selectedBranch && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Edit Branch</h5>
-                                <button className="btn-close" onClick={() => setShowEdit(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Branch Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Company</label>
-                                        <select
-                                            className="form-select"
-                                            name="company"
-                                            value={formData.company}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="">Select Company</option>
-                                            {companiesList.map((comp, idx) => (
-                                                <option key={idx} value={comp.id}>{comp.company_name || comp.name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Address</label>
-                                        <textarea
-                                            className="form-control"
-                                            rows="2"
-                                            name="address"
-                                            value={formData.address}
-                                            onChange={handleInputChange}
-                                        ></textarea>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Location</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="location"
-                                            value={formData.location}
-                                            onChange={handleInputChange}
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <label className="form-label small fw-bold">Status</label>
-                                        <select
-                                            className="form-select"
-                                            name="status"
-                                            value={formData.status}
-                                            onChange={handleInputChange}
-                                        >
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
-                                        </select>
-                                    </div>
-                                </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
-                                <button className="btn btn-primary btn-sm" onClick={handleUpdateBranch}>Update Branch</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </>
+        </div>
     );
 };
 
 const Branches = () => {
     return (
-        <DashboardLayout title="">
+        <DashboardLayout title="Presence Matrix">
             <BranchesContent />
         </DashboardLayout>
     );

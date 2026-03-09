@@ -181,47 +181,60 @@ const Home = () => {
 
       {/* PRICING SECTION */}
       <section className="pricing-section container">
-        <span className="section-tag reveal">Transparent Pricing</span>
-        <h2 className="section-title reveal">Plan for Every Scale</h2>
+        <div className="text-center mb-5 reveal">
+          <span className="section-tag">Transparent Pricing</span>
+          <h2 className="section-title">Plans built for your scale</h2>
+        </div>
         <div className="row g-4 justify-content-center">
+          {/* Starter Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card">
-              <h4 className="fw-bold">Starter</h4>
+              <h4>Starter</h4>
               <div className="price">₹0 <span>/ month</span></div>
               <ul className="price-features">
-                <li><FaCheckCircle className="text-indigo" /> Up to 10 Employees</li>
-                <li><FaCheckCircle className="text-indigo" /> Basic Employee Database</li>
-                <li><FaCheckCircle className="text-indigo" /> Manual Attendance</li>
-                <li className="opacity-50"><FaCheckCircle className="text-muted" /> Priority Support</li>
+                <li><FaCheckCircle /> Up to 10 Employees</li>
+                <li><FaCheckCircle /> Basic Employee Database</li>
+                <li><FaCheckCircle /> Manual Attendance</li>
+                <li className="opacity-50"><FaCheckCircle /> Priority Support</li>
               </ul>
-              <Link to="/signup" className="btn-premium btn-glass w-100 justify-content-center">Begin Free</Link>
+              <Link to="/signup" className="btn-premium btn-glass w-100 justify-content-center">
+                Begin Free
+              </Link>
             </div>
           </div>
+
+          {/* Business Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card featured">
               <span className="popular-chip">Most Popular</span>
-              <h4 className="fw-bold">Business</h4>
+              <h4>Business</h4>
               <div className="price">₹999 <span>/ month</span></div>
               <ul className="price-features">
-                <li><FaCheckCircle className="text-indigo" /> Up to 200 Employees</li>
-                <li><FaCheckCircle className="text-indigo" /> Automated Payroll</li>
-                <li><FaCheckCircle className="text-indigo" /> Expense Management</li>
-                <li><FaCheckCircle className="text-indigo" /> Priority Support</li>
+                <li><FaCheckCircle /> Up to 200 Employees</li>
+                <li><FaCheckCircle /> Automated Payroll</li>
+                <li><FaCheckCircle /> Expense Management</li>
+                <li><FaCheckCircle /> Priority Support</li>
               </ul>
-              <Link to="/signup" className="btn-premium btn-indigo w-100 justify-content-center">Go Professional</Link>
+              <Link to="/signup" className="btn-premium btn-indigo w-100 justify-content-center">
+                Go Professional
+              </Link>
             </div>
           </div>
+
+          {/* Enterprise Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card">
-              <h4 className="fw-bold">Enterprise</h4>
+              <h4>Enterprise</h4>
               <div className="price">Custom</div>
               <ul className="price-features">
-                <li><FaCheckCircle className="text-indigo" /> Unlimited Scale</li>
-                <li><FaCheckCircle className="text-indigo" /> Dedicated Support</li>
-                <li><FaCheckCircle className="text-indigo" /> Custom API Access</li>
-                <li><FaCheckCircle className="text-indigo" /> White-label Branding</li>
+                <li><FaCheckCircle /> Unlimited Scale</li>
+                <li><FaCheckCircle /> Dedicated Support</li>
+                <li><FaCheckCircle /> Custom API Access</li>
+                <li><FaCheckCircle /> White-label Branding</li>
               </ul>
-              <Link to="/contact" className="btn-premium btn-glass w-100 justify-content-center">Contact Sales</Link>
+              <Link to="/contact" className="btn-premium btn-glass w-100 justify-content-center">
+                Contact Sales
+              </Link>
             </div>
           </div>
         </div>

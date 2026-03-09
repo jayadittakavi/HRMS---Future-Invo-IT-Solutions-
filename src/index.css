@@ -13,14 +13,15 @@
     --bg-card: #f5f3ff;
     --bg-sidebar: #ffffff;
 
-    --text-main: #0f172a;
-    /* Slate 900 - Almost Black */
+    --text-main: #1e293b;
+    /* Slate 800 - Clear Dark Text */
     --text-secondary: #475569;
     /* Slate 600 */
-    --text-muted: #94a3b8;
-    /* Slate 400 */
+    --text-muted: #64748b;
+    /* Slate 500 */
     --text-on-primary: #ffffff;
     --text-white: #ffffff;
+    --text-purple: #7c3aed;
 
     /* ALIASES */
     --bg-color: var(--bg-body);
@@ -95,6 +96,23 @@ select,
 textarea,
 div {
     color: inherit;
+}
+
+.text-main {
+    color: var(--text-main) !important;
+}
+
+.text-purple {
+    color: var(--text-purple) !important;
+}
+
+.text-slate {
+    color: #334155 !important;
+}
+
+/* Dashboard Panel Text Correction */
+.main-dashboard-container {
+    color: var(--text-main) !important;
 }
 
 /* Standard Utility Classes */

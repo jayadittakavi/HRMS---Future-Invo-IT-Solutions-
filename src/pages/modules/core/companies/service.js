@@ -5,7 +5,7 @@ const authHeader = () => {
     const token = localStorage.getItem("token") || localStorage.getItem("authToken");
 
     // Fallback token for development (Valid until March 7, 2026)
-    const fallbackToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzI2ODk2MjN9.noTzyE3sf-rjlFglNyv5pN-C6G2JlSlmJDlDJ14ve8E";
+    const fallbackToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMxNDc1MTl9.7J_oXF-kVaocvXyM40KQuqZMiAGxvntF-n8OzRdaAHs";
     const finalToken = token || fallbackToken;
 
     return {
@@ -28,7 +28,7 @@ export const companyService = {
 
             // If not found or error, try the creation endpoint as fallback (some backends share)
             if (!response.ok) {
-                console.warn(`Endpoint /superadmin/companies returned ${response.status}, trying fallback...`);
+                console.warn(`Endpoint ${API_BASE}/superadmin/companies returned ${response.status}, trying fallback...`);
                 response = await fetch(`${API_BASE}/superadmin/create-company`, {
                     method: "GET",
                     ...authHeader()
