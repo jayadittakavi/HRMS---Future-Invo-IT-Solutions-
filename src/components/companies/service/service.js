@@ -19,47 +19,67 @@ const authHeader = () => {
 export const companyService = {
     // 🔹 Get All Companies
     getAllCompanies: async () => {
-        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
-            method: "GET",
-            ...authHeader()
-        });
-        // Handle non-ok responses but try to return empty array if 404
-        if (!response.ok) {
-            if (response.status === 404) return [];
-            throw new Error(await response.text());
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/companies`, {
+                method: "GET",
+                ...authHeader()
+            });
+            // Handle non-ok responses but try to return empty array if 404
+            if (!response.ok) {
+                if (response.status === 404) return [];
+                throw new Error(await response.text());
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getAllCompanies):", error);
+            throw error;
         }
-        return response.json();
     },
 
     // 🔹 Create New Company
     createCompany: async (data) => {
-        const response = await fetch(`http://192.168.1.6:5000/superadmin/create-company`, {
-            method: "POST",
-            body: JSON.stringify(data),
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/create-company`, {
+                method: "POST",
+                body: JSON.stringify(data),
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (createCompany):", error);
+            throw error;
+        }
     },
 
     // 🔹 Update Company
     updateCompany: async (id, data) => {
-        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
-            method: "PUT",
-            body: JSON.stringify(data),
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/companies/${id}`, {
+                method: "PUT",
+                body: JSON.stringify(data),
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (updateCompany ${id}):`, error);
+            throw error;
+        }
     },
 
     // 🔹 Delete Company
     deleteCompany: async (id) => {
-        const response = await fetch(`http://192.168.1.6:5000/superadmin/companies`, {
-            method: "DELETE",
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/companies/${id}`, {
+                method: "DELETE",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (deleteCompany ${id}):`, error);
+            throw error;
+        }
     }
 };
