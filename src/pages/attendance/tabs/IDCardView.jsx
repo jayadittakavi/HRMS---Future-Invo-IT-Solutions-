@@ -25,7 +25,9 @@ const IDCardView = () => {
         blood_group: '',
         joining_date: '',
         emergency_contact: '',
-        photo: ''
+        photo: '',
+        company_name: '',
+        company_logo: ''
     });
 
     useEffect(() => {
@@ -63,7 +65,9 @@ const IDCardView = () => {
             blood_group: '',
             joining_date: '',
             emergency_contact: '',
-            photo: ''
+            photo: '',
+            company_name: '',
+            company_logo: ''
         });
         setIsEditing(false);
         setShowModal(true);
@@ -101,13 +105,34 @@ const IDCardView = () => {
         }
     };
 
-    // Use simulated file upload for demo (would be real file upload in prod)
     const handlePhotoUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setFormData({ ...formData, photo: reader.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // Use simulated file upload for demo (would be real file upload in prod)
+    const handleLogoUpdate = async (id, newLogo) => {
+        if (!isAdmin) return;
+        try {
+            await idCardService.updateIDCard(id, { company_logo: newLogo });
+            loadCards();
+        } catch (err) {
+            console.error("Failed to update logo", err);
+        }
+    };
+
+    const handleCompanyLogoUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setFormData({ ...formData, company_logo: reader.result });
             };
             reader.readAsDataURL(file);
         }
@@ -145,7 +170,11 @@ const IDCardView = () => {
                         <div key={card.id} className="col-auto d-flex flex-column align-items-center mb-5">
                             <div className="position-relative">
                                 {/* The Component */}
-                                <IDCard employee={card} />
+                                <IDCard
+                                    employee={card}
+                                    canEditLogo={isAdmin}
+                                    onLogoUpdate={handleLogoUpdate}
+                                />
 
                                 {/* Admin Actions Overlay */}
                                 {isAdmin && (
@@ -197,7 +226,18 @@ const IDCardView = () => {
                                                     <span className="text-muted">No Photo</span>
                                                 )}
                                             </div>
-                                            <input type="file" className="form-control form-control-sm" onChange={handlePhotoUpload} accept="image/*" />
+                                            <div className="mb-3">
+                                                <label className="form-label small text-muted d-block text-start">Profile Photo</label>
+                                                <input type="file" className="form-control form-control-sm" onChange={handlePhotoUpload} accept="image/*" />
+                                            </div>
+                                            {formData.company_logo && (
+                                                <div className="mt-3 text-start">
+                                                    <label className="form-label small text-muted">Company Logo Preview</label>
+                                                    <div className="bg-white rounded p-2 border d-flex align-items-center justify-content-center" style={{ height: '60px' }}>
+                                                        <img src={formData.company_logo} alt="Company Logo" className="h-100 object-fit-contain" />
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Right Col: Fields */}
@@ -210,6 +250,14 @@ const IDCardView = () => {
                                                 <div className="col-md-6">
                                                     <label className="form-label small text-muted">Employee Code</label>
                                                     <input type="text" className="form-control" value={formData.employee_code} onChange={e => setFormData({ ...formData, employee_code: e.target.value })} required />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label small text-muted">Company Name</label>
+                                                    <input type="text" className="form-control" value={formData.company_name} onChange={e => setFormData({ ...formData, company_name: e.target.value })} placeholder="Future Invo" />
+                                                </div>
+                                                <div className="col-md-6">
+                                                    <label className="form-label small text-muted">Company Logo</label>
+                                                    <input type="file" className="form-control" onChange={handleCompanyLogoUpload} accept="image/*" />
                                                 </div>
                                                 <div className="col-md-6">
                                                     <label className="form-label small text-muted">Designation</label>

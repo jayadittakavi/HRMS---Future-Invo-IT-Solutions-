@@ -6,7 +6,8 @@ import {
     MdAddTask,
     MdPlaylistAddCheck,
     MdSchedule,
-    MdBadge
+    MdBadge,
+    MdPolicy
 } from 'react-icons/md';
 import { FaDesktop, FaFileAlt, FaSync, FaClipboardList, FaMobileAlt } from 'react-icons/fa';
 
@@ -21,6 +22,7 @@ import Regularization from './tabs/Regularization';
 import SyncUI from './tabs/SyncUI';
 import SyncLogs from './tabs/SyncLogs';
 import MobileAttendance from './tabs/MobileAttendance';
+import AttendancePolicy from './tabs/AttendancePolicy';
 
 export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }) => {
     const { user } = useAuth();
@@ -47,6 +49,7 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
             { id: 'sync', label: 'Sync', icon: <FaSync /> },
             { id: 'sync-logs', label: 'Sync Logs', icon: <FaClipboardList /> },
             { id: 'mobile', label: 'Mobile Attendance', icon: <FaMobileAlt /> },
+            { id: 'policy', label: 'Attendance Policy', icon: <MdPolicy /> },
         ] : [])
     ];
 
@@ -63,6 +66,7 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
             case 'sync': return <SyncUI />;
             case 'sync-logs': return <SyncLogs />;
             case 'mobile': return <MobileAttendance />;
+            case 'policy': return <AttendancePolicy />;
             default: return <AttendanceDashboard />;
         }
     };

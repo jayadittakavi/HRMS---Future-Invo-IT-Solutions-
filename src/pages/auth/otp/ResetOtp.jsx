@@ -10,7 +10,7 @@ const ResetOtp = () => {
     const [canResend, setCanResend] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const email = location.state?.email || 'your email';
+    const email = location.state?.email || localStorage.getItem('resetEmail') || 'your email';
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -104,11 +104,10 @@ const ResetOtp = () => {
                 throw new Error(data.message || 'Reset verification failed');
             }
 
-            // Logic based on Role (assuming response contains role)
-            const role = data.role; // Verify backend returns this!
-
             // Direct reset for ALL users (as requested)
-            navigate('/reset-password', { state: { email, otp: otpValue } });
+            const resetToken = data.token || otpValue;
+            console.log("NAVIGATING TO RESET WITH:", { email, token: resetToken });
+            navigate('/reset-password', { state: { email, token: resetToken } });
 
         } catch (err) {
             console.error(err);

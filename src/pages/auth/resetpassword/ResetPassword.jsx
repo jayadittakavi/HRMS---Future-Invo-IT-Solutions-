@@ -17,8 +17,16 @@ const ResetPassword = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const email = location.state?.email;
-    const otp = location.state?.otp;
+    const token = location.state?.token || location.state?.otp;
+    const email = location.state?.email || localStorage.getItem('resetEmail');
+
+    React.useEffect(() => {
+        console.log("ResetPassword State Debug:", {
+            hasState: !!location.state,
+            email: email,
+            hasToken: !!token
+        });
+    }, [location.state, email, token]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,8 +36,10 @@ const ResetPassword = () => {
         e.preventDefault();
         setError('');
 
-        if (!email || !otp) {
-            setError('Missing session data (Email or OTP). Please restart the process.');
+        if (!email || !token) {
+            const missing = !email && !token ? "Email and Token" : (!email ? "Email" : "Token");
+            setError(`Missing session data (${missing}). Please restart the reset process from the Forgot Password page.`);
+            console.warn("Reset Missing Session Data:", { email: !!email, token: !!token, state: location.state });
             return;
         }
 
@@ -40,17 +50,20 @@ const ResetPassword = () => {
 
         setIsLoading(true);
 
+        const payload = {
+            email: email,
+            token: token,
+            new_password: formData.password
+        };
+        console.log("SENDING RESET DATA 👉", payload);
+
         try {
             const response = await fetch('/api/auth/reset-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    email: email,
-                    otp: otp,
-                    password: formData.password
-                }),
+                body: JSON.stringify(payload),
             });
 
             const data = await response.json();

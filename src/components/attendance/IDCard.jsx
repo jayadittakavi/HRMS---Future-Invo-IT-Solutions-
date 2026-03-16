@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { FaBuilding, FaUserCircle, FaTint, FaCalendarAlt, FaPhoneAlt, FaIdBadge } from 'react-icons/fa';
+import React, { useState, useRef } from 'react';
+import { FaBuilding, FaUserCircle, FaTint, FaCalendarAlt, FaPhoneAlt, FaIdBadge, FaImage, FaUndoAlt } from 'react-icons/fa';
 import fisLogo from '../../assets/images/fislogo1.png';
 
-const IDCard = ({ employee }) => {
+const IDCard = ({ employee, canEditLogo = false, onLogoUpdate }) => {
     const [isFlipped, setIsFlipped] = useState(false);
+    const logoInputRef = useRef(null);
 
     if (!employee) return null;
 
@@ -39,6 +40,24 @@ const IDCard = ({ employee }) => {
     // Placeholder QR Code (could be real if generated)
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${employee.employee_code}`;
 
+    const handleLogoClick = (e) => {
+        if (canEditLogo && logoInputRef.current) {
+            e.stopPropagation();
+            logoInputRef.current.click();
+        }
+    };
+
+    const handleLogoChange = (e) => {
+        const file = e.target.files[0];
+        if (file && onLogoUpdate) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                onLogoUpdate(employee.id, reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <div
             className="id-card-container position-relative"
@@ -61,9 +80,34 @@ const IDCard = ({ employee }) => {
                         style={{ clipPath: 'polygon(0 0, 100% 0, 100% 80%, 0 100%)' }}></div>
 
                     {/* Logo Area */}
-                    <div className="mb-4 mt-2 bg-white rounded-pill px-3 py-1 shadow-sm d-flex align-items-center gap-2">
-                        <img src={fisLogo} alt="Logo" style={{ height: '30px' }} />
-                        <span className="fw-bold text-dark small text-uppercase spacing-1">Future Invo</span>
+                    <div
+                        className={`mb-4 mt-1 bg-white rounded-pill px-2 py-1 shadow-sm d-flex align-items-center gap-2 position-relative ${canEditLogo ? 'hover-shadow transition-all' : ''}`}
+                        onClick={handleLogoClick}
+                        title={canEditLogo ? "Click to change company logo" : ""}
+                        style={{ minWidth: '100px', alignSelf: 'flex-start' }}
+                    >
+                        {employee.company_logo ? (
+                            <img src={employee.company_logo} alt="Logo" style={{ height: '24px', maxWidth: '30px', objectFit: 'contain' }} />
+                        ) : (
+                            <img src={fisLogo} alt="Logo" style={{ height: '24px' }} />
+                        )}
+                        <span className="fw-bold text-dark small text-uppercase spacing-1" style={{ fontSize: '0.65rem' }}>
+                            {employee.company_name || 'Future Invo'}
+                        </span>
+
+                        {canEditLogo && (
+                            <div className="position-absolute translate-middle-y end-0 me-n2 bg-primary rounded-circle p-1 text-white shadow" style={{ top: '50%', fontSize: '0.6rem' }}>
+                                <FaImage />
+                            </div>
+                        )}
+
+                        <input
+                            type="file"
+                            ref={logoInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleLogoChange}
+                            accept="image/*"
+                        />
                     </div>
 
                     {/* Photo */}
@@ -142,7 +186,7 @@ const IDCard = ({ employee }) => {
 
                     <div className="w-100 text-center border-top pt-2">
                         <small className="text-muted" style={{ fontSize: '0.65rem' }}>
-                            Future Invo IT Solutions<br />
+                            {employee.company_name || 'Future Invo IT Solutions'}<br />
                             Property of the company. If found, please return.
                         </small>
                     </div>

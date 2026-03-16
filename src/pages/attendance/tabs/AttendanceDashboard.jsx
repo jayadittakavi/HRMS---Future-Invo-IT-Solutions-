@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCheck, FaUserTimes, FaHome, FaClock, FaCalendarDay, FaEye } from 'react-icons/fa';
-import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import { FaUserCheck, FaUserTimes, FaHome, FaClock, FaCalendarDay } from 'react-icons/fa';
+import { Bar, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -10,10 +10,10 @@ import {
     Title,
     Tooltip,
     Legend,
-    ArcElement,
     PointElement,
     LineElement
 } from 'chart.js';
+import { attendanceService } from '../service/service';
 
 ChartJS.register(
     CategoryScale,
@@ -22,40 +22,59 @@ ChartJS.register(
     Title,
     Tooltip,
     Legend,
-    ArcElement,
     PointElement,
     LineElement
 );
 
 const AttendanceDashboard = ({ onTabChange }) => {
     const navigate = useNavigate();
+    const [loading, setLoading] = React.useState(true);
+    const [stats, setStats] = React.useState(null);
 
-    // Mock Data for Dashboard Cards
+    React.useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const response = await attendanceService.getDashboardStats();
+                console.log('ATTENDANCE DASHBOARD RAW DATA:', response);
+                // Handle cases where data is nested in a 'data' property
+                const data = response?.data || response;
+                setStats(data);
+            } catch (err) {
+                console.error('Failed to fetch dashboard stats:', err);
+                setStats(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Helper to map stats to summary cards
     const summaryCards = [
-        { title: 'Present', value: 45, icon: <FaUserCheck />, color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', tab: 'bulk' },
-        { title: 'Absent', value: 3, icon: <FaUserTimes />, color: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', tab: 'bulk' },
-        { title: 'Half Day', value: 2, icon: <FaClock />, color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', tab: 'bulk' },
-        { title: 'Late', value: 5, icon: <FaCalendarDay />, color: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', tab: 'bulk' },
-        { title: 'WFH', value: 8, icon: <FaHome />, color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', tab: 'bulk' },
+        { title: 'Present', value: stats?.summary?.present || 0, icon: <FaUserCheck />, color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', tab: 'bulk' },
+        { title: 'Absent', value: stats?.summary?.absent || 0, icon: <FaUserTimes />, color: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', tab: 'bulk' },
+        { title: 'Half Day', value: stats?.summary?.halfDay || 0, icon: <FaClock />, color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', tab: 'bulk' },
+        { title: 'Late', value: stats?.summary?.late || 0, icon: <FaCalendarDay />, color: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', tab: 'bulk' },
+        { title: 'WFH', value: stats?.summary?.wfh || 0, icon: <FaHome />, color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', tab: 'bulk' },
     ];
 
-    // Mock Data for Charts
+    // Map shift distribution data
     const shiftData = {
-        labels: ['General Shift', 'Morning Shift', 'Night Shift'],
+        labels: stats?.shiftDistribution?.map(s => s.name) || ['General Shift', 'Morning Shift', 'Night Shift'],
         datasets: [{
             label: 'Employees Present',
-            data: [25, 12, 8],
+            data: stats?.shiftDistribution?.map(s => s.count) || [0, 0, 0],
             backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
             borderRadius: 8,
         }]
     };
 
     const dailyTrendData = {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        labels: stats?.trendData?.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         datasets: [
             {
                 label: 'Present',
-                data: [42, 44, 45, 43, 45],
+                data: stats?.trendData?.present || [0, 0, 0, 0, 0],
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
@@ -63,7 +82,7 @@ const AttendanceDashboard = ({ onTabChange }) => {
             },
             {
                 label: 'Absent',
-                data: [2, 1, 3, 2, 3],
+                data: stats?.trendData?.absent || [0, 0, 0, 0, 0],
                 borderColor: '#ef4444',
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 tension: 0.4,
@@ -82,19 +101,49 @@ const AttendanceDashboard = ({ onTabChange }) => {
         },
         onClick: (e, elements) => {
             if (elements.length > 0) {
-                if (onTabChange) onTabChange('bulk');
+                if (onTabChange) onTabChange('my-attendance');
                 else navigate('/attendance');
             }
         }
     };
 
+    const [expanded, setExpanded] = React.useState(false);
+
+    if (loading) {
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        );
+    }
+
     const handleViewDetails = (name) => {
-        alert(`Redirecting to attendance logs for ${name}...`);
-        // navigate('/attendance/logs'); // Real navigation would go here
+        alert(`Details for ${name}`);
+    };
+
+    const recentRecords = Array.isArray(stats) ? stats : (stats?.recentAttendance || stats?.activities || stats?.today_attendance || stats?.data || []);
+    const displayRecords = expanded ? recentRecords : recentRecords.slice(0, 5);
+
+    const getStatusBadgeClass = (status) => {
+        const s = (status || '').toString().toLowerCase();
+        if (s.startsWith('p') || s === 'present') return 'success';
+        if (s.startsWith('a') || s === 'absent') return 'danger';
+        if (s.startsWith('h') || s === 'half') return 'warning';
+        if (s.startsWith('l') || s === 'late') return 'info';
+        return 'secondary';
     };
 
     return (
         <div className="container-fluid p-0 animate__animated animate__fadeIn">
+            {/* API Connection Indicator (Optional debug info) */}
+            {!stats && !loading && (
+                <div className="alert alert-warning py-2 small mb-3">
+                    Using mock data. Please check if the API at <code>{attendanceService.getDashboardStatsUrl ? attendanceService.getDashboardStatsUrl() : '/api/attendance/dashboard-stats'}</code> is active.
+                </div>
+            )}
+
             {/* Summary Cards */}
             <div className="row g-4 mb-4">
                 {summaryCards.map((card, index) => (
@@ -156,37 +205,41 @@ const AttendanceDashboard = ({ onTabChange }) => {
                                 <th className="border-0 text-secondary small text-uppercase">Shift</th>
                                 <th className="border-0 text-secondary small text-uppercase">Punch In</th>
                                 <th className="border-0 text-secondary small text-uppercase">Punch Out</th>
-                                <th className="pe-4 border-0 text-secondary small text-uppercase text-end">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {[
-                                { name: 'John Doe', status: 'Present', badge: 'success', shift: 'General Shift', in: '09:00 AM', out: '06:00 PM' },
-                                { name: 'Jane Smith', status: 'Absent', badge: 'danger', shift: 'Morning Shift', in: '-', out: '-' },
-                                { name: 'Mike Ross', status: 'Late', badge: 'warning', shift: 'General Shift', in: '10:15 AM', out: '-' },
-                            ].map((row, i) => (
-                                <tr key={i} onClick={() => handleViewDetails(row.name)} style={{ cursor: 'pointer' }}>
-                                    <td className="ps-4">
-                                        <div className="fw-bold text-dark">{row.name}</div>
-                                        <div className="text-muted small">EMP-00{i + 1}</div>
-                                    </td>
-                                    <td><span className={`badge bg-${row.badge} bg-opacity-10 text-${row.badge === 'warning' ? 'dark' : row.badge} px-3 py-2 rounded-pill`}>{row.status}</span></td>
-                                    <td className="text-secondary small">{row.shift}</td>
-                                    <td className="text-secondary fw-bold small text-primary">{row.in}</td>
-                                    <td className="text-secondary fw-bold small text-primary">{row.out}</td>
-                                    <td className="pe-4 text-end">
-                                        <button className="btn btn-sm btn-light text-primary fw-bold d-flex align-items-center gap-1 ms-auto" onClick={(e) => { e.stopPropagation(); handleViewDetails(row.name); }}>
-                                            <FaEye /> View
-                                        </button>
+                            {displayRecords.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-4 text-muted small">
+                                        No attendance activities recorded for today.
                                     </td>
                                 </tr>
-                            ))}
+                            ) : (
+                                displayRecords.map((row, i) => (
+                                    <tr key={i} onClick={() => handleViewDetails(row.name)} style={{ cursor: 'pointer' }}>
+                                        <td className="ps-4">
+                                            <div className="fw-bold text-dark">{row.name || row.full_name}</div>
+                                            <div className="text-muted small">EMP-00{i + 1}</div>
+                                        </td>
+                                        <td>
+                                            <span className={`badge bg-${getStatusBadgeClass(row.status)} bg-opacity-10 text-${getStatusBadgeClass(row.status)} px-3 py-2 rounded-pill`}>
+                                                {row.status === 'P' ? 'Present' : (row.status === 'A' ? 'Absent' : row.status)}
+                                            </span>
+                                        </td>                                        <td className="text-secondary small">{row.shift || row.shift_name || 'General Shift'}</td>
+                                        <td className="text-secondary fw-bold small text-primary">{row.in || row.punch_in || row.in_time || '-'}</td>
+                                        <td className="text-secondary fw-bold small text-primary pe-4">{row.out || row.punch_out || row.out_time || '-'}</td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
                 <div className="card-footer bg-white border-0 py-3 text-center border-top">
-                    <button className="btn btn-link text-primary text-decoration-none small fw-bold" onClick={() => onTabChange ? onTabChange('bulk') : null}>
-                        View All Records
+                    <button
+                        className="btn btn-link text-primary text-decoration-none small fw-bold"
+                        onClick={() => setExpanded(!expanded)}
+                    >
+                        {expanded ? 'Show Less' : 'View All Records'}
                     </button>
                 </div>
             </div>

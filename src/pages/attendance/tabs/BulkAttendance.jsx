@@ -1,8 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
     MdCloudUpload, MdDownload, MdTableChart, MdArrowBack,
-    MdAdd, MdDelete, MdSave, MdCheckCircle
+    MdAdd, MdDelete, MdSave, MdCheckCircle, MdSync
 } from 'react-icons/md';
+import { attendanceService } from '../service/service';
 
 const BulkAttendance = () => {
     const [isExcelMode, setIsExcelMode] = useState(false);
@@ -10,16 +11,40 @@ const BulkAttendance = () => {
     const [selectedEmployees, setSelectedEmployees] = useState([]);
     const fileInputRef = useRef(null);
 
-    // Mock Employee List for standard view
-    const employees = [
-        { id: 1, name: 'John Doe', dept: 'IT', status: 'Present' },
-        { id: 2, name: 'Jane Smith', dept: 'HR', status: 'Present' },
-        { id: 3, name: 'Mike Ross', dept: 'Sales', status: 'Present' },
-        { id: 4, name: 'Rachel Green', dept: 'Marketing', status: 'Present' },
-        { id: 5, name: 'Harvey Specter', dept: 'Legal', status: 'Present' },
-    ];
+    // Standard View States
+    const [employees, setEmployees] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0]);
+    const [globalStatus, setGlobalStatus] = useState('Present');
+    const [globalShift, setGlobalShift] = useState(1);
 
-    // --- Standard View Handlers ---
+    // Fetch Bulk Attendance List
+    const fetchBulkList = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getBulkAttendanceList(currentDate);
+            setEmployees(data.employees || []);
+            setSelectedEmployees([]); // Reset selection on date change
+        } catch (err) {
+            console.error("Fetch bulk list failed:", err);
+            alert("Failed to load employee list: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchBulkList();
+    }, [currentDate]);
+
+    // Handle updates locally before saving
+    const handleEmployeeUpdate = (id, field, value) => {
+        setEmployees(prev => prev.map(emp =>
+            emp.employee_id === id ? { ...emp, [field]: value } : emp
+        ));
+    };
+
     const toggleEmployee = (id) => {
         setSelectedEmployees(prev =>
             prev.includes(id) ? prev.filter(empId => empId !== id) : [...prev, id]
@@ -27,7 +52,47 @@ const BulkAttendance = () => {
     };
 
     const toggleAll = () => {
-        setSelectedEmployees(selectedEmployees.length === employees.length ? [] : employees.map(e => e.id));
+        setSelectedEmployees(selectedEmployees.length === employees.length ? [] : employees.map(e => e.employee_id));
+    };
+
+    const applyGlobalSettings = () => {
+        if (selectedEmployees.length === 0) {
+            alert("Please select at least one employee first.");
+            return;
+        }
+        setEmployees(prev => prev.map(emp =>
+            selectedEmployees.includes(emp.employee_id)
+                ? { ...emp, current_status: globalStatus, shift_id: globalShift }
+                : emp
+        ));
+    };
+
+    const handleSaveAll = async () => {
+        setSaving(true);
+        try {
+            const updates = employees.map(emp => ({
+                employee_id: emp.employee_id,
+                status: emp.current_status,
+                reason: emp.reason || '',
+                shift_id: emp.shift_id || 1,
+                // These can be extended if needed by the UI
+                in_time: emp.in_time || null,
+                out_time: emp.out_time || null
+            }));
+
+            await attendanceService.saveBulkAttendance({
+                date: currentDate,
+                updates: updates
+            });
+
+            alert("Bulk attendance saved successfully!");
+            fetchBulkList(); // Refresh data
+        } catch (err) {
+            console.error("Save bulk failed:", err);
+            alert("Failed to save: " + err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     // --- CSV Import & Excel Handlers ---
@@ -80,11 +145,33 @@ const BulkAttendance = () => {
         setExcelData(excelData.filter((_, i) => i !== index));
     };
 
-    const saveExcelData = () => {
+    const saveExcelData = async () => {
         const validData = excelData.filter(row => row.id || row.name);
-        console.log('Saving Excel Data:', validData);
-        alert('Attendance processed and saved successfully!');
-        setIsExcelMode(false);
+        setSaving(true);
+        try {
+            // Map excel data to API format
+            const updates = validData.map(row => ({
+                employee_id: row.id,
+                status: row.status || 'Present',
+                reason: 'Imported from CSV',
+                shift_id: 1, // Default or parsed
+                in_time: row.inTime,
+                out_time: row.outTime
+            }));
+
+            await attendanceService.saveBulkAttendance({
+                date: currentDate,
+                updates: updates
+            });
+
+            alert('Imported data saved successfully!');
+            setIsExcelMode(false);
+            fetchBulkList();
+        } catch (err) {
+            alert("Failed to save imported data: " + err.message);
+        } finally {
+            setSaving(false);
+        }
     };
 
     // --- Render Excel View ---
@@ -104,8 +191,9 @@ const BulkAttendance = () => {
                         </div>
                     </div>
                     <div className="d-flex gap-2">
-                        <button className="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4" onClick={saveExcelData}>
-                            <MdSave /> Process & Save
+                        <button className="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4" onClick={saveExcelData} disabled={saving}>
+                            {saving ? <div className="spinner-border spinner-border-sm" role="status"></div> : <MdSave />}
+                            {saving ? 'Saving...' : 'Process & Save'}
                         </button>
                     </div>
                 </div>
@@ -164,11 +252,14 @@ const BulkAttendance = () => {
 
     // --- Render Standard View ---
     return (
-        <div className="card border-0 shadow-sm" style={{ borderRadius: '15px' }}>
+        <div className="card border-0 shadow-sm animate__animated animate__fadeIn" style={{ borderRadius: '15px' }}>
             <div className="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                 <h5 className="mb-0 fw-bold text-dark">Bulk Attendance Management</h5>
                 <div className="d-flex align-items-center gap-2">
-                    <button className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 rounded-2">
+                    <button className="btn btn-outline-primary btn-sm d-flex align-items-center gap-2 rounded-2" onClick={fetchBulkList}>
+                        <MdSync /> Refresh List
+                    </button>
+                    <button className="btn btn-outline-success btn-sm d-flex align-items-center gap-2 rounded-2">
                         <MdDownload /> Download Template
                     </button>
                     <button
@@ -192,39 +283,48 @@ const BulkAttendance = () => {
                 <div className="row g-3 mb-4 bg-light p-3 rounded-4 border">
                     <div className="col-md-3">
                         <label className="form-label small fw-bold text-secondary">Select Date</label>
-                        <input type="date" className="form-control border-0 shadow-sm" defaultValue={new Date().toISOString().split('T')[0]} />
+                        <input
+                            type="date"
+                            className="form-control border-0 shadow-sm"
+                            value={currentDate}
+                            onChange={(e) => setCurrentDate(e.target.value)}
+                        />
                     </div>
                     <div className="col-md-3">
                         <label className="form-label small fw-bold text-secondary">Select Shift</label>
-                        <select className="form-select border-0 shadow-sm">
-                            <option>General Shift</option>
-                            <option>Morning Shift</option>
-                            <option>Night Shift</option>
+                        <select className="form-select border-0 shadow-sm" value={globalShift} onChange={(e) => setGlobalShift(parseInt(e.target.value))}>
+                            <option value={1}>General Shift</option>
+                            <option value={2}>Morning Shift</option>
+                            <option value={3}>Night Shift</option>
                         </select>
                     </div>
                     <div className="col-md-3">
                         <label className="form-label small fw-bold text-secondary">Set Status For All</label>
-                        <select className="form-select border-0 shadow-sm">
-                            <option>Present</option>
-                            <option>Absent</option>
-                            <option>WFH</option>
-                            <option>WeekOff</option>
+                        <select className="form-select border-0 shadow-sm" value={globalStatus} onChange={(e) => setGlobalStatus(e.target.value)}>
+                            <option value="Present">Present</option>
+                            <option value="Absent">Absent</option>
+                            <option value="WFH">WFH</option>
+                            <option value="WeekOff">WeekOff</option>
                         </select>
                     </div>
                     <div className="col-md-3 d-flex align-items-end">
-                        <button className="btn btn-warning w-100 fw-bold border-0 shadow-sm" style={{ background: '#f59e0b', color: '#fff' }}>
+                        <button
+                            className="btn btn-warning w-100 fw-bold border-0 shadow-sm"
+                            style={{ background: '#f59e0b', color: '#fff' }}
+                            onClick={applyGlobalSettings}
+                        >
                             APPLY TO SELECTED
                         </button>
                     </div>
                 </div>
 
                 {/* Table */}
-                <div className="table-responsive border rounded-4 overflow-hidden">
+                <div className="table-responsive border rounded-4 overflow-hidden shadow-sm bg-white">
                     <table className="table table-hover align-middle mb-0">
                         <thead className="bg-light">
                             <tr>
                                 <th className="ps-4" style={{ width: '60px' }}>
-                                    <input type="checkbox" className="form-check-input" checked={selectedEmployees.length === employees.length} onChange={toggleAll} />
+                                    <input type="checkbox" className="form-check-input shadow-none" checked={employees.length > 0 && selectedEmployees.length === employees.length} onChange={toggleAll} />
                                 </th>
                                 <th className="text-secondary small fw-bold">EMPLOYEE NAME</th>
                                 <th className="text-secondary small fw-bold">DEPARTMENT</th>
@@ -233,35 +333,86 @@ const BulkAttendance = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {employees.map(emp => (
-                                <tr key={emp.id} className={selectedEmployees.includes(emp.id) ? 'table-primary bg-opacity-10' : ''}>
-                                    <td className="ps-4">
-                                        <input type="checkbox" className="form-check-input" checked={selectedEmployees.includes(emp.id)} onChange={() => toggleEmployee(emp.id)} />
-                                    </td>
-                                    <td>
-                                        <div className="fw-bold text-dark">{emp.name}</div>
-                                        <div className="text-muted small">EMP-00{emp.id}</div>
-                                    </td>
-                                    <td className="text-secondary small">{emp.dept}</td>
-                                    <td>
-                                        <select className="form-select form-select-sm border-0 bg-transparent fw-bold text-primary w-auto" disabled={!selectedEmployees.includes(emp.id)}>
-                                            <option>Present</option>
-                                            <option>Absent</option>
-                                            <option>WFH</option>
-                                        </select>
-                                    </td>
-                                    <td className="pe-4">
-                                        <input type="text" className="form-control form-control-sm border-0 bg-transparent" placeholder="Add reason..." disabled={!selectedEmployees.includes(emp.id)} />
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-5">
+                                        <div className="spinner-border text-primary" role="status"></div>
+                                        <div className="mt-2 text-muted">Loading employee list...</div>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : employees.length === 0 ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-5 text-muted">
+                                        No employees found for this date.
+                                    </td>
+                                </tr>
+                            ) : (
+                                employees.map(emp => (
+                                    <tr key={emp.employee_id} className={selectedEmployees.includes(emp.employee_id) ? 'table-primary bg-opacity-10' : ''}>
+                                        <td className="ps-4">
+                                            <input
+                                                type="checkbox"
+                                                className="form-check-input shadow-none"
+                                                checked={selectedEmployees.includes(emp.employee_id)}
+                                                onChange={() => toggleEmployee(emp.employee_id)}
+                                            />
+                                        </td>
+                                        <td>
+                                            <div className="fw-bold text-dark">{emp.full_name || emp.name}</div>
+                                            <div className="text-muted small">{emp.employee_code || `EMP-${emp.employee_id}`}</div>
+                                        </td>
+                                        <td className="text-secondary small">{emp.department || 'N/A'}</td>
+                                        <td>
+                                            <select
+                                                className="form-select form-select-sm border border-light rounded-pill px-3 fw-bold text-primary w-auto shadow-none"
+                                                value={emp.current_status || 'Present'}
+                                                onChange={(e) => handleEmployeeUpdate(emp.employee_id, 'current_status', e.target.value)}
+                                                disabled={!selectedEmployees.includes(emp.employee_id)}
+                                            >
+                                                <option value="Present">Present</option>
+                                                <option value="Absent">Absent</option>
+                                                <option value="Half Day">Half Day</option>
+                                                <option value="Late">Late</option>
+                                                <option value="WFH">WFH</option>
+                                                <option value="WeekOff">WeekOff</option>
+                                            </select>
+                                        </td>
+                                        <td className="pe-4">
+                                            <input
+                                                type="text"
+                                                className="form-control form-control-sm border-0 bg-transparent shadow-none"
+                                                placeholder="Add reason..."
+                                                value={emp.reason || ''}
+                                                onChange={(e) => handleEmployeeUpdate(emp.employee_id, 'reason', e.target.value)}
+                                                disabled={!selectedEmployees.includes(emp.employee_id)}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
 
                 <div className="d-flex justify-content-end mt-4 gap-2">
-                    <button className="btn btn-outline-secondary px-4 rounded-3">Cancel</button>
-                    <button className="btn btn-success px-4 rounded-3 fw-bold shadow-sm">Save All Changes</button>
+                    <button className="btn btn-outline-secondary px-4 rounded-3 border-0" onClick={() => fetchBulkList()}>Discard Changes</button>
+                    <button
+                        className="btn btn-primary px-5 rounded-pill fw-bold shadow-lg border-0"
+                        style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}
+                        onClick={handleSaveAll}
+                        disabled={saving || loading}
+                    >
+                        {saving ? (
+                            <span className="d-flex align-items-center gap-2">
+                                <div className="spinner-border spinner-border-sm" role="status"></div>
+                                Saving Changes...
+                            </span>
+                        ) : (
+                            <span className="d-flex align-items-center gap-2">
+                                <MdCheckCircle /> Save All Changes
+                            </span>
+                        )}
+                    </button>
                 </div>
             </div>
         </div>

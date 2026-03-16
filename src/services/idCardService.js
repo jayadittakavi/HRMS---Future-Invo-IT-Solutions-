@@ -11,7 +11,9 @@ let MOCK_ID_CARDS = [
         department: 'Administration',
         blood_group: 'O+',
         joining_date: '2023-01-01',
-        photo: null, // Base64 or URL
+        photo: null,
+        company_name: 'Future Invo',
+        company_logo: null, // Base64 or URL
         emergency_contact: '9876543210',
         role: 'superadmin'
     },
@@ -25,6 +27,8 @@ let MOCK_ID_CARDS = [
         blood_group: 'A+',
         joining_date: '2023-03-15',
         photo: null,
+        company_name: 'Tech Corp',
+        company_logo: null,
         emergency_contact: '1234567890',
         role: 'hr'
     },
@@ -38,6 +42,8 @@ let MOCK_ID_CARDS = [
         blood_group: 'B-',
         joining_date: '2023-06-01',
         photo: null,
+        company_name: 'Innovate Ltd',
+        company_logo: null,
         emergency_contact: '5556667777',
         role: 'employee'
     }

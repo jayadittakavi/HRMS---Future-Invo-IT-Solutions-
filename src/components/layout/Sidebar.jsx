@@ -195,6 +195,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             case 'employee':
                 links = [
                     dashboardLink,
+                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
                     { name: 'My Payslips', icon: <MdReceiptLong size={20} />, path: '/my-payslips' },
                     {
                         name: 'Administration',
@@ -207,6 +208,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'My Performance', icon: <MdRateReview size={20} />, path: '/my-performance' },
                     { name: 'Documents', icon: <MdDescription size={20} />, path: '/my-documents' },
                     { name: 'Change Password', icon: <MdVpnKey size={20} />, path: '/change-password' },
+                    { name: 'Settings', icon: <MdPolicy size={20} />, path: '/settings' },
                 ];
                 break;
 

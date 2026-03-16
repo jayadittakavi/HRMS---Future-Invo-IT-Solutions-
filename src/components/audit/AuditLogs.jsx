@@ -48,11 +48,12 @@ const AuditLogs = ({ role }) => {
             } else if (role === 'admin') {
                 data = await auditService.getAdminLogs(params);
             } else {
-                // Default or fallback
                 data = await auditService.getAuditLogs(params);
             }
 
-            setLogs(Array.isArray(data) ? data : []); // Ensure array
+            console.log('AUDIT LOGS API RESPONSE:', data);
+            const logsArray = Array.isArray(data) ? data : (data.logs || data.data || []);
+            setLogs(logsArray);
         } catch (err) {
             console.error("Failed to fetch audit logs:", err);
             // Fallback to mock data for demonstration if API fails (optional, remove for production)

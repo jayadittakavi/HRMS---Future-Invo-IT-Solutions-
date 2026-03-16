@@ -7,10 +7,10 @@ import featuresBg from "../../assets/images/features-bg.png";
 
 const Features = () => {
     return (
-        <div className="min-vh-100 d-flex flex-column">
-            <Navbar />
+        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f5f3ff' }}>
+            <Navbar isHome={true} />
 
-            <main className="flex-grow-1">
+            <main className="flex-grow-1 pt-4">
                 <div
                     className="text-white py-5"
                     style={{

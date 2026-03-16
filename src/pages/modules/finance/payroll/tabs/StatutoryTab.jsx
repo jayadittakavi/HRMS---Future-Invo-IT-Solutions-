@@ -229,6 +229,32 @@ const STATUTORY_ACTS = [
             'Annual bonus applicable to employees earning ≤ ₹21,000/month',
         ],
     },
+    {
+        id: 'bonus',
+        label: 'Statutory Bonus',
+        shortName: 'Payment of Bonus Act, 1965',
+        icon: '🎁',
+        color: '#8b5cf6',
+        bg: '#f5f3ff',
+        border: '#ddd6fe',
+        authority: 'Ministry of Labour & Employment, Govt. of India',
+        applicability: 'Establishments with 20+ employees; Salary ≤ ₹21,000/month',
+        lastUpdated: 'FY 2024-25',
+        rules: [
+            { label: 'Minimum Bonus', value: '8.33% of Salary (Basic + DA)', tag: 'Mandatory', tagColor: '#dc2626' },
+            { label: 'Maximum Bonus', value: '20% of Salary (Basic + DA)', tag: 'Ceiling', tagColor: '#7c3aed' },
+            { label: 'Eligibility Limit', value: 'Gross Salary ≤ ₹21,000/month', tag: 'Limit', tagColor: '#d97706' },
+            { label: 'Calculation Ceiling', value: 'Calculated on ₹7,000 or Min. Wage (whichever is higher)', tag: 'Rule', tagColor: '#2563eb' },
+            { label: 'Payment Deadline', value: 'Within 8 months of close of Financial Year', tag: 'Due Date', tagColor: '#0891b2' },
+            { label: 'Min. Service for Eligibility', value: '30 working days in a Financial Year', tag: 'Rule', tagColor: '#059669' },
+        ],
+        keyFacts: [
+            'Bonus is mandatory even if the company incurs a loss (at min 8.33%)',
+            'New establishments exempt for first 5 years unless they make profit',
+            'Employee disqualified if dismissed for fraud or violent conduct',
+            'Bonus must be paid in cash (or bank transfer)',
+        ],
+    },
 ];
 
 /* ─── Key Compliance Calendar ─────────────────────────────── */

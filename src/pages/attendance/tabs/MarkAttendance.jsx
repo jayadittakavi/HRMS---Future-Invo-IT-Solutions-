@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MdSave } from 'react-icons/md';
 import { useAutomation } from '../../../context/AutomationContext';
+import { attendanceService } from '../service/service';
 
 const MarkAttendance = () => {
     const { triggerEvent } = useAutomation();
+    const [loadingDetails, setLoadingDetails] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
     const [formData, setFormData] = useState({
         employeeId: '',
-        name: '', // Auto-populate this based on API fetch ideally
+        name: '',
         date: new Date().toISOString().split('T')[0],
-        status: 'Head', // Default or select
+        status: 'Present',
         shift: 'General Shift',
         punchIn: '',
         punchOut: '',
@@ -16,21 +20,64 @@ const MarkAttendance = () => {
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Auto-fetch if employeeId changes and reaches a reasonable length (e.g. 3 chars)
+        if (name === 'employeeId' && value.length >= 3) {
+            fetchEmployeeDetails(value);
+        }
     };
 
-    const handleSubmit = (e) => {
+    const fetchEmployeeDetails = async (id) => {
+        setLoadingDetails(true);
+        try {
+            const result = await attendanceService.getEmployeeDetails(id);
+            if (result) {
+                setFormData(prev => ({
+                    ...prev,
+                    name: result.full_name || result.name || '',
+                    shift: result.current_shift ? result.current_shift.shift_name : prev.shift
+                }));
+            }
+        } catch (err) {
+            console.error("Employee details fetch failed:", err);
+            // Don't clear name yet to allow manual correction if necessary
+        } finally {
+            setLoadingDetails(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setSubmitting(true);
 
-        // Trigger Automation
-        triggerEvent('onMark', {
-            module: 'Attendance',
-            employeeName: formData.name || 'Unknown',
-            status: formData.status
-        });
+        try {
+            await attendanceService.submitAttendance(formData);
 
-        alert('Attendance Marked Successfully (Mock)!');
-        // Implement save logic via props or service
+            // Trigger Automation
+            triggerEvent('onMark', {
+                module: 'Attendance',
+                employeeName: formData.name || 'Unknown',
+                status: formData.status
+            });
+
+            alert('Attendance Marked Successfully!');
+            // Reset some fields
+            setFormData(prev => ({
+                ...prev,
+                employeeId: '',
+                name: '',
+                punchIn: '',
+                punchOut: '',
+                reason: ''
+            }));
+        } catch (err) {
+            console.error("Submit failed:", err);
+            alert(`Failed to mark attendance: ${err.message}`);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -43,19 +90,22 @@ const MarkAttendance = () => {
                     <div className="row g-3">
                         <div className="col-md-6">
                             <label className="form-label text-secondary small fw-bold">Employee ID / Name</label>
-                            <input
-                                type="text"
-                                className="form-control"
-                                name="employeeId"
-                                value={formData.employeeId}
-                                onChange={(e) => {
-                                    handleChange(e);
-                                    // Simulate auto-populate name
-                                    if (e.target.value === '123') setFormData(prev => ({ ...prev, name: 'John Doe' }));
-                                }}
-                                placeholder="Enter Employee ID"
-                                required
-                            />
+                            <div className="input-group">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    name="employeeId"
+                                    value={formData.employeeId}
+                                    onChange={handleChange}
+                                    placeholder="Enter Employee ID"
+                                    required
+                                />
+                                {loadingDetails && (
+                                    <span className="input-group-text bg-white">
+                                        <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="col-md-6">
                             <label className="form-label text-secondary small fw-bold">Employee Name</label>
@@ -94,9 +144,9 @@ const MarkAttendance = () => {
                         <div className="col-md-4">
                             <label className="form-label text-secondary small fw-bold">Shift</label>
                             <select className="form-select" name="shift" value={formData.shift} onChange={handleChange}>
-                                <option>General Shift (09:00 - 18:00)</option>
-                                <option>Morning Shift (06:00 - 15:00)</option>
-                                <option>Night Shift (20:00 - 05:00)</option>
+                                <option value="General Shift">General Shift (09:00 - 18:00)</option>
+                                <option value="Morning Shift">Morning Shift (06:00 - 15:00)</option>
+                                <option value="Night Shift">Night Shift (20:00 - 05:00)</option>
                             </select>
                         </div>
 
@@ -134,8 +184,15 @@ const MarkAttendance = () => {
                         </div>
 
                         <div className="col-12 text-end mt-4">
-                            <button type="submit" className="btn btn-primary px-5 fw-bold d-inline-flex align-items-center gap-2">
-                                <MdSave /> Save Attendance
+                            <button
+                                type="submit"
+                                className="btn btn-primary px-5 fw-bold d-inline-flex align-items-center gap-2"
+                                disabled={submitting}
+                            >
+                                {submitting ? (
+                                    <div className="spinner-border spinner-border-sm" role="status"></div>
+                                ) : <MdSave />}
+                                {submitting ? 'Saving...' : 'Save Attendance'}
                             </button>
                         </div>
                     </div>

@@ -12,8 +12,10 @@ import {
     MdComputer,
     MdKeyboardArrowDown
 } from 'react-icons/md';
+import SalarySlipModal from './SalarySlipModal';
 
 const SalarySlip = ({ onBack }) => {
+    const [showModal, setShowModal] = useState(false);
     const [filters, setFilters] = useState({
         id: '',
         employee: '',
@@ -59,7 +61,7 @@ const SalarySlip = ({ onBack }) => {
                     <button className="btn btn-light btn-sm bg-white border p-1 rounded-2 text-secondary">
                         <MdMoreHoriz size={20} />
                     </button>
-                    <button className="btn btn-dark btn-sm d-flex align-items-center gap-2 rounded-2 px-3 py-1 fw-bold border-0" style={{ background: '#111' }}>
+                    <button className="btn btn-dark btn-sm d-flex align-items-center gap-2 rounded-2 px-3 py-1 fw-bold border-0" style={{ background: '#111' }} onClick={() => setShowModal(true)}>
                         <MdAdd size={18} /> Add Salary Slip
                     </button>
                 </div>
@@ -149,10 +151,12 @@ const SalarySlip = ({ onBack }) => {
                     <MdDescription size={80} />
                 </div>
                 <p className="text-secondary fw-medium mb-3">You haven't created a Salary Slip yet</p>
-                <button className="btn btn-light bg-white border rounded-2 px-4 shadow-sm fw-bold text-dark">
+                <button className="btn btn-light bg-white border rounded-2 px-4 shadow-sm fw-bold text-dark" onClick={() => setShowModal(true)}>
                     Create your first Salary Slip
                 </button>
             </div>
+
+            <SalarySlipModal show={showModal} onClose={() => setShowModal(false)} />
 
             <style>{`
                 .salary-slip-view {

@@ -154,8 +154,8 @@ const Calendar = () => {
                                 <div
                                     key={ev.id}
                                     className={`badge text-start text-truncate fw-normal px-2 ${ev.type === 'work' ? 'bg-purple-subtle text-purple' :
-                                            ev.type === 'important' ? 'bg-danger-subtle text-danger' :
-                                                'bg-success-subtle text-success'
+                                        ev.type === 'important' ? 'bg-danger-subtle text-danger' :
+                                            'bg-success-subtle text-success'
                                         }`}
                                     style={{ fontSize: '0.7rem', cursor: 'pointer' }}
                                     onClick={(e) => handleEditEventClick(e, ev)}
@@ -275,9 +275,9 @@ const Calendar = () => {
     };
 
     return (
-        <div className="d-flex flex-column min-vh-100 bg-light">
-            <Navbar />
-            <div className="container-fluid py-4" style={{ marginTop: '20px' }}>
+        <div className="d-flex flex-column min-vh-100" style={{ background: '#f5f3ff' }}>
+            <Navbar isHome={true} />
+            <div className="container-fluid py-4 pt-5">
                 <div className="row g-4 d-flex align-items-start">
                     {/* Left Sidebar */}
                     <div className="col-lg-3 col-md-4">

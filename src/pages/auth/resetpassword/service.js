@@ -1,14 +1,14 @@
 const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
 const API_URL = `${BASE_URL}/auth/reset-password`;
 
-export const resetPassword = async (email, newPassword) => {
+export const resetPassword = async (email, token, new_password) => {
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, newPassword }),
+            body: JSON.stringify({ email, token, new_password }),
         });
 
         const data = await response.json();

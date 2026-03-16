@@ -5,11 +5,11 @@ import Footer from "../../components/layout/Footer";
 
 const Contact = () => {
     return (
-        <div className="min-vh-100 d-flex flex-column">
-            <Navbar />
+        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f5f3ff' }}>
+            <Navbar isHome={true} />
 
-            <main className="flex-grow-1">
-                <div className="container py-5 my-5">
+            <main className="flex-grow-1 pt-5">
+                <div className="container py-5">
                     <div className="row justify-content-center">
                         <div className="col-lg-8 text-center mb-5">
                             <h1 className="display-4 fw-bold text-main mb-3">Get in Touch</h1>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import sideImage from '../../../assets/images/loginimage.png';
+import sideImage from '../../../assets/images/forgot1.jpg';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -33,6 +33,7 @@ const ForgotPassword = () => {
         }
 
         // Redirect to OTP verification page instead of showing success message
+        localStorage.setItem('resetEmail', email);
         navigate('/reset-otp', { state: { email } });
       } catch (err) {
         setError(err.message || 'Failed to send reset link');

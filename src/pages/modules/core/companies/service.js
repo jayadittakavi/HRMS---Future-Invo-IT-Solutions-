@@ -4,9 +4,14 @@ const API_BASE = "/api";
 const authHeader = () => {
     const token = localStorage.getItem("token") || localStorage.getItem("authToken");
 
-    // Fallback token for development (Valid until March 7, 2026)
-    const fallbackToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMxNDc1MTl9.7J_oXF-kVaocvXyM40KQuqZMiAGxvntF-n8OzRdaAHs";
-    const finalToken = token || fallbackToken;
+    // Provided Tokens for Development/Testing
+    const tokens = {
+        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMyMDk1Mzl9.oUwenpQMpiEZjblb_4f4yN4Olnl9d4918X1TjY-fVU4",
+        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk1Nzh9.3KPXmEizQSI1qxuRVivDYCy2daOC4GBTBzLM17bdHco",
+        hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
+    };
+
+    const finalToken = token || tokens.superadmin;
 
     return {
         headers: {
@@ -28,8 +33,8 @@ export const companyService = {
 
             // If not found or error, try the creation endpoint as fallback (some backends share)
             if (!response.ok) {
-                console.warn(`Endpoint ${API_BASE}/superadmin/companies returned ${response.status}, trying fallback...`);
-                response = await fetch(`${API_BASE}/superadmin/create-company`, {
+                console.warn(`Endpoint http://192.168.1.6:5000/api/superadmin/companies returned ${response.status}, trying fallback...`);
+                response = await fetch(`http://192.168.1.6:5000/api/superadmin/companies`, {
                     method: "GET",
                     ...authHeader()
                 });
@@ -46,7 +51,7 @@ export const companyService = {
     // 🔹 Get Single Company
     getCompanyById: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/companies/${id}`, {
+            const response = await fetch(`http://192.168.1.6:5000/superadmin/companies/${id}`, {
                 method: "GET",
                 ...authHeader()
             });
@@ -61,7 +66,7 @@ export const companyService = {
     // 🔹 Create New Company
     createCompany: async (data) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/create-company`, {
+            const response = await fetch(`http://192.168.1.6:5000/superadmin/create-company`, {
                 method: "POST",
                 headers: authHeader().headers,
                 body: JSON.stringify(data),
@@ -77,7 +82,7 @@ export const companyService = {
     // 🔹 Update Company
     updateCompany: async (id, data) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/companies/${id}`, {
+            const response = await fetch(`http://192.168.1.6:5000/superadmin/companies/${id}`, {
                 method: "PUT",
                 headers: authHeader().headers,
                 body: JSON.stringify(data),
@@ -93,7 +98,7 @@ export const companyService = {
     // 🔹 Delete Company
     deleteCompany: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/companies/${id}`, {
+            const response = await fetch(`http://192.168.1.6:5000/superadmin/companies/${id}`, {
                 method: "DELETE",
                 ...authHeader()
             });
