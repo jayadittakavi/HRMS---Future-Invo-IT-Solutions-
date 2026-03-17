@@ -10,7 +10,7 @@ const ROLE_META = {
     admin: { label: 'Admin', color: '#2563eb', bg: '#eff6ff', gradient: 'linear-gradient(135deg,#2563eb,#1e40af)' },
     hr: { label: 'HR Manager', color: '#0891b2', bg: '#ecfeff', gradient: 'linear-gradient(135deg,#0891b2,#0e7490)' },
     manager: { label: 'Manager', color: '#059669', bg: '#ecfdf5', gradient: 'linear-gradient(135deg,#059669,#047857)' },
-    employee: { label: 'Employee', color: '#d97706', bg: '#fffbeb', gradient: 'linear-gradient(135deg,#d97706,#b45309)' },
+    employee: { label: 'Employee', color: '#a855f7', bg: '#faf5ff', gradient: 'linear-gradient(135deg,#c084fc,#a855f7)' },
     accountant: { label: 'Accountant', color: '#dc2626', bg: '#fff1f2', gradient: 'linear-gradient(135deg,#dc2626,#b91c1c)' },
 };
 const getRoleMeta = (role) => ROLE_META[role?.toLowerCase()] || ROLE_META.employee;

@@ -39,7 +39,7 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                     {!hideLogo && (
                         <Link className="navbar-brand d-flex align-items-center" to="/">
                             <img src={logo} alt="HRMS Logo" height="35" className="me-2 rounded-3" />
-                            <span className="fw-bold d-none d-sm-block" style={{ color: theme === 'dark' ? '#fff' : '#818cf8', fontWeight: '800' }}>Future Invo HRMS</span>
+                            <span className="fw-bold d-none d-sm-block" style={{ color: theme === 'dark' ? '#fff' : '#7b61ff', fontWeight: '800' }}>Future Invo HRMS</span>
                         </Link>
                     )}
 

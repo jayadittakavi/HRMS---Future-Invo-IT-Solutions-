@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Features.css';
 import Navbar from '../home/Navbar';
-import featuresBg from '../../assets/images/features-bg.png';
+import featuresBg from '../../assets/images/features.jpg';
 import { FaCheckCircle, FaTimesCircle, FaCrown, FaClock } from 'react-icons/fa';
 
 const Features = () => {

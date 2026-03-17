@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaGooglePlay, FaWhatsapp } from 'react-icons/fa';
 
 const Footer = () => {
     return (
@@ -58,10 +59,10 @@ const Footer = () => {
                         {/* App Store Buttons Placeholder */}
                         <div className="d-flex flex-column gap-2 mt-4">
                             <button className="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" style={{ width: '140px', opacity: 0.8 }}>
-                                <i className="fab fa-google-play me-2"></i> Google Play
+                                <FaGooglePlay className="me-2" /> Google Play
                             </button>
                             <button className="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" style={{ width: '140px', opacity: 0.8 }}>
-                                <i className="fab fa-apple me-2"></i> App Store
+                                <FaWhatsapp className="me-2" /> WhatsApp
                             </button>
                         </div>
                     </div>
