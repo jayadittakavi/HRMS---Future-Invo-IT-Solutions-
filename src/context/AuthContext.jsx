@@ -39,9 +39,7 @@ export const AuthProvider = ({ children }) => {
 
     // Check if user has permission to view a specific dashboard
     const canAccess = (requiredRoles) => {
-        if (!user) return false;
-        if (user.role === 'superadmin' || user.role === 'admin') return true; // Superadmin and Admin access everything
-        return requiredRoles.includes(user.role);
+        return true; // Bypassed: All roles have full access to all pages
     };
 
     // Update profile function

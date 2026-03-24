@@ -31,21 +31,25 @@ export const EmployeesContent = () => {
     // Form Data
     const [formData, setFormData] = useState({
         user_account: '',
-        name: '',
-        email: '',
-        phone: '',
+        full_name: '',
+        personal_email: '',
+        company_email: '',
+        phone_number: '',
         username: '',
         password: '',
+        confirm_password: '',
         department: '',
         designation: '',
         role: 'employee',
         joining_date: '',
         company_id: '',
-        branch: ''
+        branch: '',
+        pay_grade: '',
+        ctc: ''
     });
 
-    const isSuperAdmin = currentUser?.role?.toLowerCase() === 'superadmin' || currentUser?.role?.toUpperCase() === 'SUPER_ADMIN';
     const isAdmin = currentUser?.role?.toLowerCase() === 'admin';
+    const isSuperAdmin = currentUser?.role?.toLowerCase() === 'superadmin' || currentUser?.role?.toUpperCase() === 'SUPER_ADMIN' || isAdmin;
     const isHR = currentUser?.role?.toLowerCase() === 'hr';
     const isEmployee = currentUser?.role?.toLowerCase() === 'employee';
 
@@ -110,10 +114,16 @@ export const EmployeesContent = () => {
 
     const handleAdd = async (e) => {
         e.preventDefault();
+        if (formData.password !== formData.confirm_password) {
+            alert("Passwords do not match. Please ensure both password fields are identical.");
+            return;
+        }
         try {
             if (canAddEmployee) {
                 // If not SuperAdmin, force company_id to current user's company
-                const payload = isSuperAdmin ? formData : { ...formData, company_id: currentUser.company_id };
+                const payload = isSuperAdmin ? { ...formData } : { ...formData, company_id: currentUser.company_id };
+                payload.ctc = payload.ctc ? Number(payload.ctc) : 0;
+                payload.pay_grade = payload.pay_grade || "N/A";
                 await employeeSuperAdminService.createEmployee(payload);
                 setShowAdd(false);
                 fetchData();
@@ -126,9 +136,18 @@ export const EmployeesContent = () => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        if (formData.password || formData.confirm_password) {
+            if (formData.password !== formData.confirm_password) {
+                alert("Passwords do not match. Please ensure both password fields are identical.");
+                return;
+            }
+        }
         try {
             if ((isSuperAdmin || isAdmin || isHR) && selectedEmployee) {
-                await employeeSuperAdminService.updateEmployee(selectedEmployee.id, formData);
+                const payload = { ...formData };
+                payload.ctc = payload.ctc ? Number(payload.ctc) : 0;
+                payload.pay_grade = payload.pay_grade || "N/A";
+                await employeeSuperAdminService.updateEmployee(selectedEmployee.id, payload);
                 setShowEdit(false);
                 fetchData();
                 alert("Employee updated successfully!");
@@ -154,17 +173,28 @@ export const EmployeesContent = () => {
     const filteredEmployees = employees.filter(emp => {
         const query = searchTerm.toLowerCase();
         return (
-            (emp.name || emp.first_name || '').toLowerCase().includes(query) ||
-            (emp.email || '').toLowerCase().includes(query) ||
+            (emp.full_name || emp.name || emp.first_name || '').toLowerCase().includes(query) ||
+            (emp.personal_email || emp.company_email || emp.email || '').toLowerCase().includes(query) ||
             (emp.designation || '').toLowerCase().includes(query) ||
             (emp.company_name || '').toLowerCase().includes(query)
         );
     });
 
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const newThisMonthCount = employees.filter(e => {
+        const dateStr = e.joining_date || e.created_at || e.createdAt;
+        if (!dateStr) return false;
+        const date = new Date(dateStr);
+        // Ensure valid date parsing before comparison
+        if (isNaN(date.getTime())) return false;
+        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    }).length;
+
     const stats = [
         { label: 'Total Employees', count: employees.length, icon: <FaUsers />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
         { label: 'Active Now', count: employees.filter(e => e.status === 'Active' || !e.status).length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : 5, icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : newThisMonthCount, icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
     ];
 
     return (
@@ -233,11 +263,12 @@ export const EmployeesContent = () => {
                                 <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
                                     onClick={() => {
                                         setFormData({
-                                            user_account: '', name: '', email: '', phone: '',
-                                            username: '', password: '',
+                                            user_account: '', full_name: '', personal_email: '', company_email: '', phone_number: '',
+                                            username: '', password: '', confirm_password: '',
                                             department: '', designation: '',
                                             role: 'employee', joining_date: '',
-                                            company_id: currentUser?.company_id || '', branch: ''
+                                            company_id: currentUser?.company_id || '', branch: '',
+                                            pay_grade: '', ctc: ''
                                         });
                                         setShowAdd(true);
                                     }}
@@ -274,18 +305,18 @@ export const EmployeesContent = () => {
                                                 <div className="d-flex align-items-center gap-3">
                                                     <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
                                                         style={{ width: 42, height: 42, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', fontSize: '0.9rem' }}>
-                                                        {(emp.name || 'E').charAt(0).toUpperCase()}
+                                                        {(emp.full_name || emp.name || 'E').charAt(0).toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <div className="fw-bold text-dark">{emp.name}</div>
+                                                        <div className="fw-bold text-dark">{emp.full_name || emp.name}</div>
                                                         <div className="small text-muted">ID: #{emp.id}</div>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="py-4">
                                                 <div className="d-flex flex-column gap-1">
-                                                    <div className="small text-dark d-flex align-items-center gap-2"><FaEnvelope className="text-muted" size={12} /> {emp.email}</div>
-                                                    <div className="small text-muted d-flex align-items-center gap-2"><FaPhone className="text-muted" size={12} /> {emp.phone || 'No phone'}</div>
+                                                    <div className="small text-dark d-flex align-items-center gap-2"><FaEnvelope className="text-muted" size={12} /> {emp.personal_email || emp.company_email || emp.email}</div>
+                                                    <div className="small text-muted d-flex align-items-center gap-2"><FaPhone className="text-muted" size={12} /> {emp.phone_number || emp.phone || 'No phone'}</div>
                                                 </div>
                                             </td>
                                             <td className="py-4">
@@ -308,7 +339,18 @@ export const EmployeesContent = () => {
                                                         <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
                                                             onClick={() => {
                                                                 setSelectedEmployee(emp);
-                                                                setFormData({ ...emp, company_id: emp.company_id || '' });
+                                                                setFormData({ 
+                                                                    ...emp, 
+                                                                    company_id: emp.company_id || '',
+                                                                    full_name: emp.full_name || emp.name || '',
+                                                                    personal_email: emp.personal_email || emp.email || '',
+                                                                    company_email: emp.company_email || '',
+                                                                    phone_number: emp.phone_number || emp.phone || '',
+                                                                    password: '',
+                                                                    confirm_password: '',
+                                                                    pay_grade: emp.pay_grade || '',
+                                                                    ctc: emp.ctc || ''
+                                                                });
                                                                 setShowEdit(true);
                                                             }}
                                                             style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
@@ -361,16 +403,20 @@ export const EmployeesContent = () => {
                                             <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>Only unassigned user accounts are shown</div>
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Full Name</label>
-                                            <input type="text" name="name" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.name} onChange={handleInputChange} placeholder="John Doe" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Full Name *</label>
+                                            <input type="text" name="full_name" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.full_name} onChange={handleInputChange} placeholder="John Doe" />
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Email</label>
-                                            <input type="email" name="email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.email} onChange={handleInputChange} placeholder="john.doe@company.com" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Personal Email *</label>
+                                            <input type="email" name="personal_email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.personal_email} onChange={handleInputChange} placeholder="john.doe@gmail.com" />
                                         </div>
                                         <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Phone</label>
-                                            <input type="tel" name="phone" className="form-control rounded-3 p-3 bg-light border-0" value={formData.phone} onChange={handleInputChange} placeholder="Phone number" />
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Company Email *</label>
+                                            <input type="email" name="company_email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.company_email} onChange={handleInputChange} placeholder="john.doe@company.com" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Phone *</label>
+                                            <input type="tel" name="phone_number" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.phone_number} onChange={handleInputChange} placeholder="Phone number" />
                                         </div>
 
                                         <div className="col-12 mt-4 pt-2">
@@ -384,7 +430,11 @@ export const EmployeesContent = () => {
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label fw-bold small text-muted text-uppercase">Password *</label>
-                                            <input type="password" name="password" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.password} onChange={handleInputChange} placeholder="........" />
+                                            <input type="password" name="password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.password} onChange={handleInputChange} placeholder="........" />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Confirm Password *</label>
+                                            <input type="password" name="confirm_password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.confirm_password} onChange={handleInputChange} placeholder="........" />
                                         </div>
 
                                         <div className="col-md-6">

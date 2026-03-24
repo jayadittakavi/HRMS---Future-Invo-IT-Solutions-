@@ -91,150 +91,41 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         const dashboardLink = getDashboardLink(role);
         const myTeamLink = { name: 'My Team', icon: <MdGroups size={20} />, path: '/dashboard/my-team' };
 
-        switch (role) {
-            case 'admin':
-                links = [
-                    dashboardLink,
-                    myTeamLink,
-                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
-                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
-                    { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-                    { name: 'Payslip', icon: <MdReceiptLong size={20} />, path: '/payslips' },
-                    {
-                        name: 'Administration',
-                        icon: <MdGridView size={20} />,
-                        children: [
-                            { name: 'Delegation', path: '/delegation' },
-                            { name: 'Visitor Management', path: '/visitors' },
-                            { name: 'Desk Management', path: '/desk-management' }
-                        ]
-                    },
-                    { name: 'Manage Leave', icon: <MdEventNote size={20} />, path: '/leave-management' },
-                ];
-                break;
-
-            case 'superadmin':
-                links = [
-                    dashboardLink,
-                    myTeamLink,
-                    { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
-                    { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
-                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-                    { name: 'Leave Mgmt', icon: <MdEventBusy size={20} />, path: '/leave-management' },
-                    {
-                        name: 'Administration',
-                        icon: <MdGridView size={20} />,
-                        children: [
-                            { name: 'Delegation', path: '/delegation' },
-                            { name: 'Visitor Management', path: '/visitors' },
-                            { name: 'Desk Management', path: '/desk-management' }
-                        ]
-                    }
-                ];
-                break;
-
-            case 'hr':
-                links = [
-                    dashboardLink,
-                    myTeamLink,
-                    { name: 'Employee Directory', icon: <MdPeople size={20} />, path: '/employee-directory' },
-                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    {
-                        name: 'Request',
-                        icon: <MdEventBusy size={20} />,
-                        children: [
-                            { name: 'Leave', path: '/leave-requests' },
-                            { name: 'WFH', path: '/wfh-requests' },
-                            { name: 'Other Requests', path: '/other-requests' }
-                        ]
-                    },
-                    { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
-                    { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
-                    { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
-                    { name: 'Loans', icon: <MdMoney size={20} />, path: '/loans' },
-                    { name: 'Transit & Travel', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-                    {
-                        name: 'Administration',
-                        icon: <MdGridView size={20} />,
-                        children: [
-                            { name: 'Delegation', path: '/delegation' },
-                            { name: 'Visitor Management', path: '/visitors' },
-                            { name: 'Desk Management', path: '/desk-management' }
-                        ]
-                    },
-                    { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
-                ];
-                break;
-
-            case 'manager':
-                links = [
-                    dashboardLink,
-                    myTeamLink,
-                    { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-                    { name: 'Asset Allocation', icon: <MdLaptopMac size={20} />, path: '/asset-allocation' },
-                    { name: 'Travel Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-                    { name: 'Payroll', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-                    {
-                        name: 'Administration',
-                        icon: <MdGridView size={20} />,
-                        children: [
-                            { name: 'Delegation', path: '/delegation' },
-                            { name: 'Visitor Management', path: '/visitors' },
-                            { name: 'Desk Management', path: '/desk-management' }
-                        ]
-                    },
-                    { name: 'Leave Management', icon: <MdEventBusy size={20} />, path: '/leave-management' },
-                ];
-                break;
-
-            case 'employee':
-                links = [
-                    dashboardLink,
-                    { name: 'My Attendance', icon: <MdFactCheck size={20} />, path: '/my-attendance' },
-                    { name: 'My Payslips', icon: <MdReceiptLong size={20} />, path: '/my-payslips' },
-                    {
-                        name: 'Administration',
-                        icon: <MdGridView size={20} />,
-                        children: [
-                            { name: 'Visitor Request', path: '/visitors' },
-                            { name: 'Desk Management', path: '/desk-management' }
-                        ]
-                    },
-                    { name: 'My Performance', icon: <MdRateReview size={20} />, path: '/my-performance' },
-                    { name: 'Documents', icon: <MdDescription size={20} />, path: '/my-documents' },
-                    { name: 'Change Password', icon: <MdVpnKey size={20} />, path: '/change-password' },
-                    { name: 'Settings', icon: <MdPolicy size={20} />, path: '/settings' },
-                ];
-                break;
-
-            case 'accountant':
-                links = [
-                    dashboardLink,
-                    { name: 'Payroll Processing', icon: <MdAttachMoney size={20} />, path: '/payroll-processing' },
-                    { name: 'Salary Structure', icon: <MdAccountBalanceWallet size={20} />, path: '/salary-structure' },
-                    { name: 'Payslips', icon: <MdReceiptLong size={20} />, path: '/payslips' },
-                    { name: 'Tax & Deductions', icon: <MdCalculate size={20} />, path: '/tax-deductions' },
-                    { name: 'Financial Reports', icon: <MdBarChart size={20} />, path: '/financial-reports' },
-                ];
-                break;
-
-            case 'new_user':
-                links = [
-                    dashboardLink,
-                    { name: 'Complete Profile', icon: <MdPerson size={20} />, path: '/complete-profile' },
-                    { name: 'Upload Documents', icon: <MdFileUpload size={20} />, path: '/upload-documents' },
-                    { name: 'View Policies', icon: <MdPolicy size={20} />, path: '/policies' },
-                ];
-                break;
-
-            default:
-                links = [dashboardLink];
-        }
+        // Global Access: Give all roles access to all modules
+        links = [
+            dashboardLink,
+            myTeamLink,
+            { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
+            { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
+            { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
+            { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
+            {
+                name: 'Requests',
+                icon: <MdEventBusy size={20} />,
+                children: [
+                    { name: 'Leave Mgmt', path: '/leave-management' },
+                    { name: 'WFH', path: '/wfh-requests' }
+                ]
+            },
+            { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
+            { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
+            { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
+            { name: 'Payroll & Salary', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
+            { name: 'Loans & Advances', icon: <MdMoney size={20} />, path: '/loans' },
+            { name: 'Travel & Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
+            { name: 'Payslips & Tax', icon: <MdReceiptLong size={20} />, path: '/payslips' },
+            { name: 'Financial Reports', icon: <MdBarChart size={20} />, path: '/financial-reports' },
+            {
+                name: 'Administration',
+                icon: <MdGridView size={20} />,
+                children: [
+                    { name: 'Delegation', path: '/delegation' },
+                    { name: 'Visitor Mgmt', path: '/visitors' },
+                    { name: 'Desk Mgmt', path: '/desk-management' }
+                ]
+            },
+            { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
+        ];
 
         links = [...links];
 

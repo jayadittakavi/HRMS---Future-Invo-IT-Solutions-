@@ -53,7 +53,9 @@ const ResetPassword = () => {
         const payload = {
             email: email,
             token: token,
-            new_password: formData.password
+            reset_token: token,
+            new_password: formData.password.trim(),
+            confirm_password: formData.confirmPassword.trim()
         };
         console.log("SENDING RESET DATA 👉", payload);
 

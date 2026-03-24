@@ -26,7 +26,7 @@ const ResetOtp = () => {
         setError('');
 
         try {
-            const response = await fetch("/api/auth/forgot-password", {
+            const response = await fetch("/api/auth/resend-reset-otp", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -105,8 +105,8 @@ const ResetOtp = () => {
             }
 
             // Direct reset for ALL users (as requested)
-            const resetToken = data.token || otpValue;
-            console.log("NAVIGATING TO RESET WITH:", { email, token: resetToken });
+            const resetToken = data.reset_token || data.token || data.access_token || data.temporary_token || otpValue;
+            console.log("NAVIGATING TO RESET WITH:", { email, token: resetToken, full_data: data });
             navigate('/reset-password', { state: { email, token: resetToken } });
 
         } catch (err) {

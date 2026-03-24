@@ -17,7 +17,7 @@ const ForgotPassword = () => {
     if (email) {
       setIsLoading(true);
       try {
-        const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+        const BASE_URL = "/api";
         const response = await fetch(`${BASE_URL}/auth/forgot-password`, {
           method: "POST",
           headers: {

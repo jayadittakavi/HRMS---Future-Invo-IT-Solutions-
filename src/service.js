@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
+const BASE_URL = "/api";
 
 export const authService = {
     login: async (email, password) => {

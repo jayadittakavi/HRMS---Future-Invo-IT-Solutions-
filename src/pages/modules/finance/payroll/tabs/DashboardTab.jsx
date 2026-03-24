@@ -1,13 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaMoneyBillWave, FaUserTie, FaChartLine, FaCalendarAlt, FaDownload, FaFileUpload, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import { useAutomation } from '../../../../../context/AutomationContext';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../../../components/charts/CustomCharts';
+import { payrollService } from '../payrollService';
 
 const DashboardTab = ({ onTabChange }) => {
     const { triggerEvent } = useAutomation();
-    // Mock Data
-    const monthlyPayoutData = [4.2, 4.5, 4.8, 5.2, 5.4, 5.6]; // In Lakhs
-    const deptPayoutData = [
+    const [dashboardData, setDashboardData] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                setLoading(true);
+                const data = await payrollService.getDashboardStats();
+                setDashboardData(data);
+            } catch (error) {
+                console.error("Failed to load dashboard data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDashboardData();
+    }, []);
+    // Use fetched data with graceful fallbacks
+    const deptPayoutData = dashboardData?.dept_distribution || [
         { label: 'Engineering', value: 2.8, color: '#4f46e5', tab: 'salary' },
         { label: 'Sales', value: 1.2, color: '#f59e0b', tab: 'salary' },
         { label: 'Marketing', value: 0.8, color: '#10b981', tab: 'salary' },
@@ -15,12 +32,35 @@ const DashboardTab = ({ onTabChange }) => {
         { label: 'Admin', value: 0.4, color: '#6366f1', tab: 'salary' },
     ];
 
-    const recentPayouts = [
+    const recentPayouts = dashboardData?.recent_payouts || [
         { id: 'PAY-206', period: 'May 2026', total: '₹5.60L', count: 124, status: 'Completed', date: 'May 28' },
         { id: 'PAY-205', period: 'Apr 2026', total: '₹5.45L', count: 121, status: 'Completed', date: 'Apr 28' },
         { id: 'PAY-204', period: 'Mar 2026', total: '₹5.20L', count: 118, status: 'Completed', date: 'Mar 28' },
         { id: 'PAY-203', period: 'Feb 2026', total: '₹4.85L', count: 115, status: 'Completed', date: 'Feb 27' },
     ];
+
+    const statsOverview = dashboardData?.stats || {
+        totalPayout: '₹5.6L',
+        processedCount: 124,
+        avgSalary: '₹45k',
+        pending: 12
+    };
+
+    const componentStats = dashboardData?.component_analysis || {
+        earnings: [
+            { label: 'Basic Salary', val: '₹3,20,000', per: '57%' },
+            { label: 'HRA', val: '₹1,10,000', per: '20%' },
+            { label: 'Special Allowance', val: '₹80,000', per: '14%' },
+            { label: 'Performance Bonus', val: '₹50,000', per: '9%' },
+        ],
+        deductions: [
+            { label: 'Income Tax (TDS)', val: '₹60,000', per: '75%' },
+            { label: 'Provident Fund (PF)', val: '₹15,000', per: '19%' },
+            { label: 'Professional Tax', val: '₹3,500', per: '4%' },
+            { label: 'LWF & Other', val: '₹1,500', per: '2%' },
+        ],
+        netDisbursement: '₹5,60,000.00'
+    };
 
     const cardStyle = { background: '#fff', borderRadius: '12px', border: 'none', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' };
 
@@ -70,10 +110,10 @@ const DashboardTab = ({ onTabChange }) => {
             {/* Quick Stats */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Total Payout', val: '₹5.6L', icon: <FaMoneyBillWave size={22} />, bg: 'primary', trend: '+8.4%', trendUp: true, tab: 'salary' },
-                    { label: 'Processed', val: '124', icon: <FaUserTie size={22} />, bg: 'success', trend: '+3', trendUp: true, tab: 'payslip' },
-                    { label: 'Avg Salary', val: '₹45k', icon: <FaChartLine size={22} />, bg: 'info', trend: '-1.2%', trendUp: false, tab: 'reports' },
-                    { label: 'Pending', val: '12', icon: <FaCalendarAlt size={22} />, bg: 'warning', trend: 'Monthly', trendUp: null, tab: 'statutory' },
+                    { label: 'Total Payout', val: statsOverview.totalPayout || '₹5.6L', icon: <FaMoneyBillWave size={22} />, bg: 'primary', trend: '+8.4%', trendUp: true, tab: 'salary' },
+                    { label: 'Processed', val: statsOverview.processedCount || '124', icon: <FaUserTie size={22} />, bg: 'success', trend: '+3', trendUp: true, tab: 'payslip' },
+                    { label: 'Avg Salary', val: statsOverview.avgSalary || '₹45k', icon: <FaChartLine size={22} />, bg: 'info', trend: '-1.2%', trendUp: false, tab: 'reports' },
+                    { label: 'Pending', val: statsOverview.pending || '12', icon: <FaCalendarAlt size={22} />, bg: 'warning', trend: 'Monthly', trendUp: null, tab: 'statutory' },
                 ].map((stat, i) => (
                     <div key={i} className="col-md-3">
                         <div
@@ -117,12 +157,7 @@ const DashboardTab = ({ onTabChange }) => {
                                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981' }}></div>
                                     <h6 className="small fw-bold text-dark mb-0 text-uppercase" style={{ letterSpacing: '0.05em' }}>Total Earnings</h6>
                                 </div>
-                                {[
-                                    { label: 'Basic Salary', val: '₹3,20,000', per: '57%' },
-                                    { label: 'HRA', val: '₹1,10,000', per: '20%' },
-                                    { label: 'Special Allowance', val: '₹80,000', per: '14%' },
-                                    { label: 'Performance Bonus', val: '₹50,000', per: '9%' },
-                                ].map((e, i) => (
+                                {componentStats.earnings.map((e, i) => (
                                     <div key={i} className="mb-3">
                                         <div className="d-flex justify-content-between mb-1">
                                             <span className="text-secondary small">{e.label}</span>
@@ -141,12 +176,7 @@ const DashboardTab = ({ onTabChange }) => {
                                     <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444' }}></div>
                                     <h6 className="small fw-bold text-dark mb-0 text-uppercase" style={{ letterSpacing: '0.05em' }}>Total Deductions</h6>
                                 </div>
-                                {[
-                                    { label: 'Income Tax (TDS)', val: '₹60,000', per: '75%' },
-                                    { label: 'Provident Fund (PF)', val: '₹15,000', per: '19%' },
-                                    { label: 'Professional Tax', val: '₹3,500', per: '4%' },
-                                    { label: 'LWF & Other', val: '₹1,500', per: '2%' },
-                                ].map((d, i) => (
+                                {componentStats.deductions.map((d, i) => (
                                     <div key={i} className="mb-3">
                                         <div className="d-flex justify-content-between mb-1">
                                             <span className="text-secondary small">{d.label}</span>
@@ -163,7 +193,7 @@ const DashboardTab = ({ onTabChange }) => {
                         <div className="mt-auto pt-3 border-top d-flex justify-content-between align-items-center" style={{ marginTop: '20px !important' }}>
                             <div>
                                 <small className="text-muted d-block">Est. Net Disbursement</small>
-                                <h4 className="fw-bold text-primary mb-0">₹5,60,000.00</h4>
+                                <h4 className="fw-bold text-primary mb-0">{componentStats.netDisbursement}</h4>
                             </div>
                             <button className="btn btn-sm btn-light border fw-bold text-dark px-3 mt-2" onClick={(e) => { e.stopPropagation(); onTabChange('salary'); }}>View Full Breakdown</button>
                         </div>

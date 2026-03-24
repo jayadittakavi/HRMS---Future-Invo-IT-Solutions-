@@ -29,5 +29,20 @@ export const signupService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    verifySuperAdminOtp: async (data) => {
+        try {
+            const response = await fetch(`${BASE_URL}/auth/super-admin/verify-otp`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+            return response;
+        } catch (error) {
+            throw error;
+        }
     }
 };

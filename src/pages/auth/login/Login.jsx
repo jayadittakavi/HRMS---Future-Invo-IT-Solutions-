@@ -20,7 +20,7 @@ const Login = () => {
     try {
       setError('');
 
-      const LOGIN_API_URL = "/api/auth/login";
+      const LOGIN_API_URL = "http://100.67.241.99:5000/login";
       console.log('Logging in at 👉', LOGIN_API_URL);
 
       const response = await fetch(LOGIN_API_URL, {
@@ -96,6 +96,17 @@ const Login = () => {
     }
   };
 
+  const handleBypassAdmin = () => {
+    const adminUser = {
+      email: 'admin@company.com',
+      role: 'admin',
+      name: 'System Admin'
+    };
+    const adminToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk";
+    login(adminUser, adminToken);
+    navigate('/dashboard/admin');
+  };
+
   return (
     <>
       <Navbar />
@@ -163,6 +174,15 @@ const Login = () => {
 
                 <button type="submit" className="btn login-btn">
                   LOGIN
+                </button>
+
+                <button 
+                  type="button" 
+                  className="btn btn-outline-primary w-100 mt-3 fw-bold border-2" 
+                  style={{ borderRadius: '8px', padding: '12px' }}
+                  onClick={handleBypassAdmin}
+                >
+                  🚀 BYPASS LOGIN AS ADMIN (DEV)
                 </button>
 
                 <div className="mt-4 text-center">

@@ -1,5 +1,5 @@
-const BASE_URL = import.meta.env.VITE_API_BASE || "/api";
-export const FORGOT_PASSWORD_URL = `${BASE_URL}/auth/forgot-password`;
+const BASE_URL = "/api/auth";
+export const FORGOT_PASSWORD_URL = `${BASE_URL}/forgot-password`;
 
 export const forgotPasswordService = {
     forgotPassword: async (email) => {

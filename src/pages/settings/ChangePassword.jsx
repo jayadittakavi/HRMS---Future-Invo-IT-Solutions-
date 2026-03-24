@@ -14,13 +14,27 @@ const ChangePassword = () => {
             setStatus('error');
             return;
         }
-        // Mock API Call
-        setTimeout(() => {
+        // API Call
+        const token = localStorage.getItem('token');
+        fetch("/api/auth/change-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        })
+        .then(async (res) => {
+            if (!res.ok) throw new Error('Password change failed');
             setStatus('success');
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        }, 1000);
+        })
+        .catch(err => {
+            console.error(err);
+            setStatus('error');
+        });
     };
 
     return (

@@ -40,59 +40,62 @@ export const TravelExpensesContent = () => {
                 </div>
             </div>
 
-            {/* Overview Cards */}
+    {/* Overview Cards */}
             <div className="row g-4 mb-4">
+                {/* BLUE CARD */}
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-blue-trans h-100">
+                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-blue-solid h-100">
                         <div className="card-body p-4 position-relative">
-                            <div className="d-flex justify-content-between align-items-start mb-3">
-                                <div className="icon-box bg-primary-subtle text-primary rounded-4 p-3">
-                                    <FaWallet size={24} />
+                            <div className="d-flex justify-content-between align-items-start mb-4">
+                                <div className="icon-box-solid text-primary">
+                                    <FaWallet size={20} />
                                 </div>
-                                <span className="badge bg-success-subtle text-success rounded-pill px-2 py-1 small d-flex align-items-center gap-1">
+                                <span className="badge bg-white text-success rounded-pill px-3 py-2 small d-flex align-items-center gap-1 shadow-sm border border-success border-opacity-25" style={{ fontSize: '0.75rem' }}>
                                     <FaArrowTrendUp size={10} /> +12%
                                 </span>
                             </div>
-                            <h6 className="text-secondary small fw-bold text-uppercase mb-1 ls-1">Total Expenses (YTD)</h6>
-                            <h2 className="fw-bold text-dark mb-0 ls-tight">$45,200</h2>
-                            <p className="text-muted smaller mt-2 mb-0">Updated 2h ago</p>
-                            <div className="card-bg-icon"><FaWallet /></div>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#475569' }}>Total Expenses (YTD)</h6>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#0f172a' }}>$45,200</h2>
+                            <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#64748b' }}>Updated 2h ago</p>
+                            <div className="card-bg-icon text-primary"><FaWallet /></div>
                         </div>
                     </div>
                 </div>
+                {/* AMBER CARD */}
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-amber-trans h-100">
+                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-amber-solid h-100">
                         <div className="card-body p-4 position-relative">
-                            <div className="d-flex justify-content-between mb-3">
-                                <div className="icon-box bg-warning-subtle text-warning rounded-4 p-3">
-                                    <FaReceipt size={24} />
+                            <div className="d-flex justify-content-between align-items-start mb-4">
+                                <div className="icon-box-solid text-warning" style={{ background: '#fef3c7' }}>
+                                    <FaReceipt size={20} />
                                 </div>
-                                <div className="bg-light rounded-circle p-2 text-secondary cursor-pointer hover-bg-primary hover-text-white transition-all">
-                                    <FaEllipsisVertical size={12} />
+                                <div className="tall-pill-icon text-secondary cursor-pointer hover-shadow transition-all">
+                                    <FaEllipsisVertical size={14} />
                                 </div>
                             </div>
-                            <h6 className="text-secondary small fw-bold text-uppercase mb-1 ls-1">Pending Claims</h6>
-                            <h2 className="fw-bold text-dark mb-0 ls-tight">08</h2>
-                            <p className="text-warning smaller mt-2 mb-0 fw-medium">Requires approval action</p>
-                            <div className="card-bg-icon"><FaReceipt /></div>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#78350f' }}>Pending Claims</h6>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>08</h2>
+                            <p className="smaller mt-2 mb-0 fw-bold" style={{ color: '#d97706' }}>Requires approval action</p>
+                            <div className="card-bg-icon text-warning"><FaReceipt /></div>
                         </div>
                     </div>
                 </div>
+                {/* GREEN CARD */}
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-green-trans h-100">
+                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-green-solid h-100">
                         <div className="card-body p-4 position-relative">
-                            <div className="d-flex justify-content-between mb-3">
-                                <div className="icon-box bg-success-subtle text-success rounded-4 p-3">
-                                    <FaPlaneDeparture size={24} />
+                            <div className="d-flex justify-content-between align-items-start mb-4">
+                                <div className="icon-box-solid text-success" style={{ background: '#dcfce7' }}>
+                                    <FaPlaneDeparture size={20} />
                                 </div>
-                                <div className="bg-light rounded-circle p-2 text-secondary cursor-pointer transition-all">
+                                <div className="tall-pill-icon text-secondary cursor-pointer hover-shadow transition-all">
                                     <MdOutlineHistory size={16} />
                                 </div>
                             </div>
-                            <h6 className="text-secondary small fw-bold text-uppercase mb-1 ls-1">Approved Trips</h6>
-                            <h2 className="fw-bold text-dark mb-0 ls-tight">15</h2>
-                            <p className="text-muted smaller mt-2 mb-0">Next: NYC Client Meeting (Tomorrow)</p>
-                            <div className="card-bg-icon"><FaPlaneDeparture /></div>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#064e3b' }}>Approved Trips</h6>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>15</h2>
+                            <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#047857' }}>Next: NYC Client Meeting (Tomorrow)</p>
+                            <div className="card-bg-icon text-success"><FaPlaneDeparture /></div>
                         </div>
                     </div>
                 </div>
@@ -291,14 +294,21 @@ export const TravelExpensesContent = () => {
                 .premium-card:hover::after {
                     transform: rotate(-45deg) translate(20%, 20%);
                 }
-                .premium-card-blue-trans { 
-                    background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(37, 99, 235, 0.15) 100%) !important;
+                .premium-card-blue-solid { background-color: #dbeafe !important; }
+                .premium-card-amber-solid { background-color: #ffedd5 !important; }
+                .premium-card-green-solid { background-color: #d1fae5 !important; }
+                
+                .icon-box-solid {
+                    background: white; border-radius: 14px; padding: 14px;
+                    display: inline-flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
                 }
-                .premium-card-amber-trans { 
-                    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(180, 83, 9, 0.15) 100%) !important;
-                }
-                .premium-card-green-trans { 
-                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.15) 100%) !important;
+                
+                .tall-pill-icon {
+                    background: white; border-radius: 50px;
+                    width: 32px; height: 60px;
+                    display: flex; align-items: center; justify-content: center;
+                    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
                 }
                 
                 .premium-card:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(0,0,0,0.06) !important; }

@@ -40,13 +40,13 @@ export const CompaniesContent = () => {
     });
 
     const tokens = {
-        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMyMDk1Mzl9.oUwenpQMpiEZjblb_4f4yN4Olnl9d4918X1TjY-fVU4",
-        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk1Nzh9.3KPXmEizQSI1qxuRVivDYCy2daOC4GBTBzLM17bdHco",
+        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k",
+        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk",
         hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
     };
 
     const getAuthHeaders = () => {
-        const token = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
+        const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
 
         return {
             "Content-Type": "application/json",
@@ -107,7 +107,7 @@ export const CompaniesContent = () => {
 
     const fetchBranches = async () => {
         try {
-            const token = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
+            const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
             let response = await fetch(`/api/superadmin/branches`, {
                 method: "GET",
                 headers: {
@@ -165,7 +165,7 @@ export const CompaniesContent = () => {
             if (formData.name && formData.city_branch) {
                 try {
                     console.log("Automatically creating branch for new company...");
-                    const token = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
+                    const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
 
                     await fetch('/api/superadmin/branches', {
                         method: 'POST',
@@ -624,28 +624,41 @@ export const CompaniesContent = () => {
             {showPostModal && (
                 <div className="modern-modal-overlay">
                     <div className="modern-modal-card">
-                        <div className="modal-top-bar">
-                            <h4 className="m-0">Create Company Post</h4>
-                            <button className="modal-close-btn" onClick={() => setShowPostModal(false)}>&times;</button>
+                        <div className="modal-header-premium">
+                            <div className="d-flex align-items-center gap-3">
+                                <div className="modal-icon-circle">
+                                    <FaGlobe />
+                                </div>
+                                <div>
+                                    <h3 className="m-0 fw-bold">Company Broadcast</h3>
+                                    <p className="text-muted small m-0">Publish an announcement to the entire organization</p>
+                                </div>
+                            </div>
+                            <button type="button" className="modal-close-btn" onClick={() => setShowPostModal(false)}>&times;</button>
                         </div>
-                        <form onSubmit={handlePostSubmit} className="modal-body-content">
+                        <form onSubmit={handlePostSubmit} className="modal-body-premium">
                             <div className="row g-4">
                                 <div className="col-12">
-                                    <div className="input-field-group">
+                                    <div className="premium-input-group">
                                         <label>Announcement Title</label>
-                                        <input required placeholder="Enter Title" value={postData.title} onChange={(e) => setPostData({ ...postData, title: e.target.value })} className="ps-3" />
+                                        <div className="input-relative">
+                                            <FaEdit className="input-icon-left" />
+                                            <input required placeholder="E.g., System Update, New Policy..." value={postData.title} onChange={(e) => setPostData({ ...postData, title: e.target.value })} className="premium-input" />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-12">
-                                    <div className="input-field-group">
-                                        <label>Content</label>
-                                        <textarea required placeholder="Write your announcement here..." value={postData.content} onChange={(e) => setPostData({ ...postData, content: e.target.value })} className="ps-3 pt-3" style={{ height: '150px', borderRadius: '12px', border: '2px solid #f1f5f9' }} />
+                                    <div className="premium-input-group">
+                                        <label>Detailed Content</label>
+                                        <div className="input-relative">
+                                            <textarea required placeholder="Write the complete details of your announcement here..." value={postData.content} onChange={(e) => setPostData({ ...postData, content: e.target.value })} className="premium-input ps-3 pt-3" style={{ height: '160px', resize: 'none', lineHeight: '1.6' }} />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div className="modal-footer-actions mt-5">
-                                <button type="button" className="btn-cancel" onClick={() => setShowPostModal(false)}>Discard</button>
-                                <button type="submit" className="btn-submit">Post Now</button>
+                            <div className="modal-footer-premium mt-5">
+                                <button type="button" className="btn-discard" onClick={() => setShowPostModal(false)}>Discard</button>
+                                <button type="submit" className="btn-confirm">Broadcast Post</button>
                             </div>
                         </form>
                     </div>

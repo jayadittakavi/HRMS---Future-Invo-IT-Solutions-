@@ -5,13 +5,13 @@ const authHeader = () => {
 
     // Provided Tokens for Development/Testing
     const tokens = {
-        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzMyMDk1Mzl9.oUwenpQMpiEZjblb_4f4yN4Olnl9d4918X1TjY-fVU4",
-        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk1Nzh9.3KPXmEizQSI1qxuRVivDYCy2daOC4GBTBzLM17bdHco",
+        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k",
+        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk",
         hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
     };
 
     // Priority token from local storage, then fallback to Super Admin
-    const finalToken = token || tokens.superadmin;
+    const finalToken = tokens.superadmin || token;
 
     return {
         headers: {
@@ -29,7 +29,15 @@ export const employeeSuperAdminService = {
                 method: "GET",
                 ...authHeader()
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch (e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
             return await response.json();
         } catch (error) {
             console.error("API Error (getAllEmployees):", error);
@@ -44,7 +52,15 @@ export const employeeSuperAdminService = {
                 method: "GET",
                 ...authHeader()
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch (e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
             return await response.json();
         } catch (error) {
             console.error(`API Error (getEmployeeById ${id}):`, error);
@@ -55,12 +71,20 @@ export const employeeSuperAdminService = {
     // 🔹 Add New Employee (to any company)
     createEmployee: async (data) => {
         try {
-            const response = await fetch(`${API_BASE}/admin/create-employee`, {
+            const response = await fetch(`${API_BASE}/superadmin/users`, {
                 method: "POST",
                 headers: authHeader().headers,
                 body: JSON.stringify(data),
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch (e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
             return await response.json();
         } catch (error) {
             console.error("API Error (createEmployee):", error);
@@ -76,7 +100,15 @@ export const employeeSuperAdminService = {
                 headers: authHeader().headers,
                 body: JSON.stringify(data),
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch (e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
             return await response.json();
         } catch (error) {
             console.error(`API Error (updateEmployee ${id}):`, error);
@@ -91,7 +123,15 @@ export const employeeSuperAdminService = {
                 method: "DELETE",
                 ...authHeader()
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch (e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
             return await response.json();
         } catch (error) {
             console.error(`API Error (deleteEmployee ${id}):`, error);
