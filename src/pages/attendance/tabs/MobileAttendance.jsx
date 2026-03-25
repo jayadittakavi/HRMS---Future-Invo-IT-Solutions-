@@ -1,91 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaMobileAlt, FaMapMarkerAlt, FaClock, FaCheckCircle, FaTimesCircle, FaQrcode, FaCamera } from 'react-icons/fa';
+import { attendanceService } from '../service/service';
 
 const MobileAttendance = () => {
-    const [attendanceRecords, setAttendanceRecords] = useState([
-        {
-            id: 1,
-            employeeName: 'Rajesh Kumar',
-            employeeId: 'EMP001',
-            date: '2026-02-18',
-            punchIn: '09:05 AM',
-            punchOut: '06:15 PM',
-            location: 'Client Office, Mumbai',
-            latitude: '19.0760',
-            longitude: '72.8777',
-            method: 'GPS + Selfie',
-            status: 'Verified',
-            workingHours: '9h 10m',
-            deviceInfo: 'iPhone 13, iOS 16.2'
-        },
-        {
-            id: 2,
-            employeeName: 'Priya Sharma',
-            employeeId: 'EMP002',
-            date: '2026-02-18',
-            punchIn: '08:58 AM',
-            punchOut: '05:45 PM',
-            location: 'Home Office',
-            latitude: '18.5204',
-            longitude: '73.8567',
-            method: 'QR Code',
-            status: 'Verified',
-            workingHours: '8h 47m',
-            deviceInfo: 'Samsung Galaxy S21'
-        },
-        {
-            id: 3,
-            employeeName: 'Amit Patel',
-            employeeId: 'EMP003',
-            date: '2026-02-18',
-            punchIn: '09:30 AM',
-            punchOut: null,
-            location: 'Field Location, Pune',
-            latitude: '18.5204',
-            longitude: '73.8567',
-            method: 'GPS + Selfie',
-            status: 'Pending Verification',
-            workingHours: 'In Progress',
-            deviceInfo: 'OnePlus 9 Pro'
-        },
-        {
-            id: 4,
-            employeeName: 'Sneha Reddy',
-            employeeId: 'EMP004',
-            date: '2026-02-18',
-            punchIn: '10:15 AM',
-            punchOut: '06:30 PM',
-            location: 'Outside Geofence',
-            latitude: '12.9716',
-            longitude: '77.5946',
-            method: 'GPS',
-            status: 'Flagged',
-            workingHours: '8h 15m',
-            deviceInfo: 'iPhone 14 Pro'
-        }
-    ]);
-
+    const [attendanceRecords, setAttendanceRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [filterStatus, setFilterStatus] = useState('All');
     const [filterMethod, setFilterMethod] = useState('All');
+
+    const fetchRecords = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getMobilePunches();
+            setAttendanceRecords(data || []);
+        } catch (err) {
+            console.error("Fetch mobile punches failed:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRecords();
+    }, []);
 
     const handleViewDetails = (record) => {
         setSelectedRecord(record);
         setShowDetailsModal(true);
     };
 
-    const handleVerify = (id) => {
-        setAttendanceRecords(attendanceRecords.map(r =>
-            r.id === id ? { ...r, status: 'Verified' } : r
-        ));
+    const handleVerify = async (id) => {
+        try {
+            // Assuming verification uses a similar review endpoint or we update via mobilePunch
+            // await attendanceService.verifyMobilePunch(id, { status: 'Verified' });
+            setAttendanceRecords(attendanceRecords.map(r =>
+                r.id === id ? { ...r, status: 'Verified' } : r
+            ));
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        }
     };
 
-    const handleFlag = (id) => {
-        setAttendanceRecords(attendanceRecords.map(r =>
-            r.id === id ? { ...r, status: 'Flagged' } : r
-        ));
+    const handleFlag = async (id) => {
+        try {
+            setAttendanceRecords(attendanceRecords.map(r =>
+                r.id === id ? { ...r, status: 'Flagged' } : r
+            ));
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        }
     };
+
 
     const filteredRecords = attendanceRecords.filter(record => {
         if (filterStatus !== 'All' && record.status !== filterStatus) return false;

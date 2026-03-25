@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearch } from '../../../../../context/SearchContext';
 import { payrollService } from '../payrollService';
-
-/* ─── Mock Data for Employees (Should also be fetched from API in future) ───────────────── */
-const MOCK_EMPLOYEES = [
-    { id: 'EMP001', name: 'Ravi Kumar', department: 'Engineering', designation: 'Software Engineer' },
-    { id: 'EMP002', name: 'Priya Sharma', department: 'HR', designation: 'HR Manager' },
-    { id: 'EMP003', name: 'Amit Singh', department: 'Finance', designation: 'Accountant' },
-    { id: 'EMP004', name: 'Neha Gupta', department: 'Marketing', designation: 'Marketing Lead' },
-    { id: 'EMP005', name: 'Suresh Patel', department: 'Operations', designation: 'Operations Manager' },
-];
-
-const SALARY_STRUCTURES = [
-    'Grade A - Senior Level',
-    'Grade B - Mid Level',
-    'Grade C - Junior Level',
-    'Executive Pay Structure',
-    'Intern Stipend Structure',
-    'Contract Pay Structure',
-];
+import { employeeSuperAdminService } from '../../../hr/employees/superadmin-service';
 
 /* ─── Empty State ─────────────────────────────────────────────── */
 const EmptyState = ({ onAdd, loading }) => (
@@ -60,8 +43,32 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
         salaryStructure: '',
         fromDate: '',
     });
+    const [employees, setEmployees] = useState([]);
+    const [structures, setStructures] = useState([]);
     const [errors, setErrors] = useState({});
     const [saving, setSaving] = useState(false);
+    const [loadingData, setLoadingData] = useState(false);
+
+    useEffect(() => {
+        if (show) {
+            const fetchData = async () => {
+                setLoadingData(true);
+                try {
+                    const [empData, structData] = await Promise.all([
+                        employeeSuperAdminService.getAllEmployees(),
+                        payrollService.getSalaryStructures()
+                    ]);
+                    setEmployees(empData?.data || empData || []);
+                    setStructures(structData || []);
+                } catch (err) {
+                    console.error("Failed to load modal data", err);
+                } finally {
+                    setLoadingData(false);
+                }
+            };
+            fetchData();
+        }
+    }, [show]);
 
     const validate = () => {
         const e = {};
@@ -76,38 +83,22 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
         if (!validate()) return;
         setSaving(true);
         try {
-            const emp = MOCK_EMPLOYEES.find(e => e.id === form.employeeId);
+            const emp = employees.find(e => e.id === form.employeeId || e.employee_id === form.employeeId);
 
-            // Explicitly map fields to match backend requirements
             const assignmentData = {
-                employee_id: form.employeeId, // Use form value directly
-                employee_name: emp ? emp.name : "Unknown",
-                department: emp ? emp.department : "N/A",
-                designation: emp ? emp.designation : "N/A",
+                employee_id: form.employeeId,
                 salary_structure: form.salaryStructure,
-                from_date: form.fromDate, // YYYY-MM-DD from HTML5 date picker
-                created_on: new Date().toISOString()
+                from_date: form.fromDate,
             };
 
-            console.log("SENDING SALARY ASSIGNMENT DATA 👉", assignmentData);
-
-            await payrollService.createSalaryAssignment(assignmentData);
-            onSave(); // Refresh list
+            await payrollService.assignSalaryStructure(assignmentData);
+            onSave();
             setForm({ employeeId: '', salaryStructure: '', fromDate: '' });
             setErrors({});
             onClose();
             alert("Salary structure assigned successfully!");
         } catch (err) {
-            console.error("Save Error:", err);
-            // Better error display for debugging
-            let msg = err.message;
-            if (msg.startsWith('{')) {
-                try {
-                    const parsed = JSON.parse(msg);
-                    msg = parsed.message || msg;
-                } catch (e) { }
-            }
-            alert("Failed to save assignment: " + msg);
+            alert("Failed to save assignment: " + err.message);
         } finally {
             setSaving(false);
         }
@@ -119,7 +110,6 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
         <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}>
             <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 520 }}>
                 <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                    {/* Header */}
                     <div className="modal-header border-0 px-4 pt-4 pb-2" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)' }}>
                         <div>
                             <h5 className="modal-title fw-bold text-white mb-0">New Salary Structure Assignment</h5>
@@ -129,69 +119,77 @@ const AddAssignmentModal = ({ show, onClose, onSave }) => {
                     </div>
 
                     <div className="modal-body px-4 py-4">
-                        {/* Employee */}
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold small text-secondary mb-1">Employee <span className="text-danger">*</span></label>
-                            <select
-                                className={`form-select form-select-sm ${errors.employeeId ? 'is-invalid' : ''}`}
-                                value={form.employeeId}
-                                onChange={e => setForm({ ...form, employeeId: e.target.value })}
-                                disabled={saving}
-                            >
-                                <option value="">Select Employee</option>
-                                {MOCK_EMPLOYEES.map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.id} – {emp.name}</option>
-                                ))}
-                            </select>
-                            {errors.employeeId && <div className="invalid-feedback">{errors.employeeId}</div>}
-                        </div>
-
-                        {/* Show auto-filled fields when employee selected */}
-                        {form.employeeId && (() => {
-                            const emp = MOCK_EMPLOYEES.find(e => e.id === form.employeeId);
-                            return (
-                                <div className="row g-2 mb-3">
-                                    <div className="col-6">
-                                        <label className="form-label fw-semibold small text-secondary mb-1">Department</label>
-                                        <input className="form-control form-control-sm bg-light" readOnly value={emp.department} />
-                                    </div>
-                                    <div className="col-6">
-                                        <label className="form-label fw-semibold small text-secondary mb-1">Designation</label>
-                                        <input className="form-control form-control-sm bg-light" readOnly value={emp.designation} />
-                                    </div>
+                        {loadingData ? (
+                            <div className="text-center py-4">
+                                <div className="spinner-border text-primary" role="status"></div>
+                                <p className="text-muted small mt-2">Loading data...</p>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold small text-secondary mb-1">Employee <span className="text-danger">*</span></label>
+                                    <select
+                                        className={`form-select form-select-sm ${errors.employeeId ? 'is-invalid' : ''}`}
+                                        value={form.employeeId}
+                                        onChange={e => setForm({ ...form, employeeId: e.target.value })}
+                                        disabled={saving}
+                                    >
+                                        <option value="">Select Employee</option>
+                                        {employees.map(emp => (
+                                            <option key={emp.id} value={emp.id}>{emp.employee_id || emp.id} – {emp.first_name} {emp.last_name}</option>
+                                        ))}
+                                    </select>
+                                    {errors.employeeId && <div className="invalid-feedback">{errors.employeeId}</div>}
                                 </div>
-                            );
-                        })()}
 
-                        {/* Salary Structure */}
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold small text-secondary mb-1">Salary Structure <span className="text-danger">*</span></label>
-                            <select
-                                className={`form-select form-select-sm ${errors.salaryStructure ? 'is-invalid' : ''}`}
-                                value={form.salaryStructure}
-                                onChange={e => setForm({ ...form, salaryStructure: e.target.value })}
-                                disabled={saving}
-                            >
-                                <option value="">Select Salary Structure</option>
-                                {SALARY_STRUCTURES.map(s => (
-                                    <option key={s} value={s}>{s}</option>
-                                ))}
-                            </select>
-                            {errors.salaryStructure && <div className="invalid-feedback">{errors.salaryStructure}</div>}
-                        </div>
+                                {form.employeeId && (() => {
+                                    const emp = employees.find(e => e.id === parseInt(form.employeeId) || e.id === form.employeeId);
+                                    if (!emp) return null;
+                                    return (
+                                        <div className="row g-2 mb-3">
+                                            <div className="col-6">
+                                                <label className="form-label fw-semibold small text-secondary mb-1">Department</label>
+                                                <input className="form-control form-control-sm bg-light" readOnly value={emp.department_name || emp.department || 'N/A'} />
+                                            </div>
+                                            <div className="col-6">
+                                                <label className="form-label fw-semibold small text-secondary mb-1">Designation</label>
+                                                <input className="form-control form-control-sm bg-light" readOnly value={emp.designation_name || emp.designation || 'N/A'} />
+                                            </div>
+                                        </div>
+                                    );
+                                })()}
 
-                        {/* From Date */}
-                        <div className="mb-3">
-                            <label className="form-label fw-semibold small text-secondary mb-1">From Date <span className="text-danger">*</span></label>
-                            <input
-                                type="date"
-                                className={`form-control form-control-sm ${errors.fromDate ? 'is-invalid' : ''}`}
-                                value={form.fromDate}
-                                onChange={e => setForm({ ...form, fromDate: e.target.value })}
-                                disabled={saving}
-                            />
-                            {errors.fromDate && <div className="invalid-feedback">{errors.fromDate}</div>}
-                        </div>
+                                {/* Salary Structure */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold small text-secondary mb-1">Salary Structure <span className="text-danger">*</span></label>
+                                    <select
+                                        className={`form-select form-select-sm ${errors.salaryStructure ? 'is-invalid' : ''}`}
+                                        value={form.salaryStructure}
+                                        onChange={e => setForm({ ...form, salaryStructure: e.target.value })}
+                                        disabled={saving}
+                                    >
+                                        <option value="">Select Salary Structure</option>
+                                        {structures.map(s => (
+                                            <option key={s.id || s.name} value={s.id || s.name}>{s.name || s}</option>
+                                        ))}
+                                    </select>
+                                    {errors.salaryStructure && <div className="invalid-feedback">{errors.salaryStructure}</div>}
+                                </div>
+
+                                {/* From Date */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-semibold small text-secondary mb-1">From Date <span className="text-danger">*</span></label>
+                                    <input
+                                        type="date"
+                                        className={`form-control form-control-sm ${errors.fromDate ? 'is-invalid' : ''}`}
+                                        value={form.fromDate}
+                                        onChange={e => setForm({ ...form, fromDate: e.target.value })}
+                                        disabled={saving}
+                                    />
+                                    {errors.fromDate && <div className="invalid-feedback">{errors.fromDate}</div>}
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <div className="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
@@ -253,6 +251,7 @@ const SalaryStructureAssignment = ({ onBack }) => {
     };
 
     const handleDelete = (id) => {
+        // Implementation for real delete if API exists
         setAssignments(prev => prev.filter(a => a.id !== id));
         setDeleteConfirm(null);
     };
@@ -267,6 +266,7 @@ const SalaryStructureAssignment = ({ onBack }) => {
             {sortField === field ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}
         </span>
     );
+
 
     const filtered = assignments
         .filter(a => {

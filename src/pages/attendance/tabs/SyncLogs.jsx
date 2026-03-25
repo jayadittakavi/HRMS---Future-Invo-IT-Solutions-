@@ -1,85 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaExclamationTriangle, FaInfoCircle, FaDesktop, FaFilter, FaDownload } from 'react-icons/fa';
+import { attendanceService } from '../service/service';
 
 const SyncLogs = () => {
-    const [logs, setLogs] = useState([
-        {
-            id: 1,
-            timestamp: '2026-02-18 10:30:25 AM',
-            deviceName: 'Main Office Biometric',
-            deviceId: 'BIO-001',
-            action: 'Auto Sync',
-            status: 'Success',
-            recordsSynced: 45,
-            duration: '2.3s',
-            message: 'Successfully synced 45 attendance records',
-            syncedBy: 'System'
-        },
-        {
-            id: 2,
-            timestamp: '2026-02-18 09:15:42 AM',
-            deviceName: 'Branch Office Scanner',
-            deviceId: 'BIO-002',
-            action: 'Manual Sync',
-            status: 'Success',
-            recordsSynced: 12,
-            duration: '1.1s',
-            message: 'Successfully synced 12 attendance records',
-            syncedBy: 'Admin User'
-        },
-        {
-            id: 3,
-            timestamp: '2026-02-18 08:00:15 AM',
-            deviceName: 'Warehouse Entry',
-            deviceId: 'BIO-003',
-            action: 'Auto Sync',
-            status: 'Failed',
-            recordsSynced: 0,
-            duration: '5.0s',
-            message: 'Connection timeout - Device not reachable',
-            syncedBy: 'System'
-        },
-        {
-            id: 4,
-            timestamp: '2026-02-17 06:30:10 PM',
-            deviceName: 'Main Office Biometric',
-            deviceId: 'BIO-001',
-            action: 'Manual Sync',
-            status: 'Success',
-            recordsSynced: 89,
-            duration: '3.8s',
-            message: 'Successfully synced 89 attendance records',
-            syncedBy: 'HR Manager'
-        },
-        {
-            id: 5,
-            timestamp: '2026-02-17 05:00:33 PM',
-            deviceName: 'Warehouse Entry',
-            deviceId: 'BIO-003',
-            action: 'Auto Sync',
-            status: 'Warning',
-            recordsSynced: 156,
-            duration: '8.2s',
-            message: 'Synced with warnings - 3 duplicate records skipped',
-            syncedBy: 'System'
-        },
-        {
-            id: 6,
-            timestamp: '2026-02-17 03:15:20 PM',
-            deviceName: 'Branch Office Scanner',
-            deviceId: 'BIO-002',
-            action: 'Manual Sync',
-            status: 'Success',
-            recordsSynced: 34,
-            duration: '1.9s',
-            message: 'Successfully synced 34 attendance records',
-            syncedBy: 'Admin User'
-        }
-    ]);
-
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('All');
     const [filterDevice, setFilterDevice] = useState('All');
     const [dateRange, setDateRange] = useState({ from: '', to: '' });
+
+    const fetchLogs = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getSyncLogs();
+            setLogs(data || []);
+        } catch (err) {
+            console.error("Fetch sync logs failed:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchLogs();
+    }, []);
+
 
     const devices = [...new Set(logs.map(log => log.deviceName))];
 

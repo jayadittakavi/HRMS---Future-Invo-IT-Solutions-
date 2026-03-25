@@ -1,50 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
+import { leaveService } from '../../../../../services/leaveService';
 
 const LeavePolicies = () => {
-    const [policies, setPolicies] = useState([
-        {
-            id: 1,
-            name: 'Sick Leave',
-            days: 12,
-            carryForward: true,
-            maxCarryForward: 5,
-            description: 'For medical emergencies and health issues'
-        },
-        {
-            id: 2,
-            name: 'Casual Leave',
-            days: 10,
-            carryForward: false,
-            maxCarryForward: 0,
-            description: 'For personal matters and short breaks'
-        },
-        {
-            id: 3,
-            name: 'Privilege Leave',
-            days: 15,
-            carryForward: true,
-            maxCarryForward: 10,
-            description: 'Earned leave for long service'
-        },
-        {
-            id: 4,
-            name: 'Maternity Leave',
-            days: 180,
-            carryForward: false,
-            maxCarryForward: 0,
-            description: 'For expecting mothers'
-        },
-        {
-            id: 5,
-            name: 'Paternity Leave',
-            days: 15,
-            carryForward: false,
-            maxCarryForward: 0,
-            description: 'For new fathers'
-        }
-    ]);
-
+    const [policies, setPolicies] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingPolicy, setEditingPolicy] = useState(null);
     const [formData, setFormData] = useState({
@@ -54,6 +14,25 @@ const LeavePolicies = () => {
         maxCarryForward: 0,
         description: ''
     });
+
+    useEffect(() => {
+        fetchPolicies();
+    }, []);
+
+    const fetchPolicies = async () => {
+        try {
+            setLoading(true);
+            const response = await leaveService.getUiPolicies();
+            if (response.ok) {
+                const data = await response.json();
+                setPolicies(data);
+            }
+        } catch (error) {
+            console.error("Error fetching policies:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleAdd = () => {
         setFormData({
@@ -73,21 +52,39 @@ const LeavePolicies = () => {
         setShowModal(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this leave policy?')) {
-            setPolicies(policies.filter(p => p.id !== id));
+            try {
+                const response = await leaveService.deleteUiPolicy(id);
+                if (response.ok) {
+                    fetchPolicies();
+                }
+            } catch (error) {
+                console.error("Error deleting policy:", error);
+            }
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingPolicy) {
-            setPolicies(policies.map(p => p.id === editingPolicy ? { ...formData, id: editingPolicy } : p));
-        } else {
-            setPolicies([...policies, { ...formData, id: Date.now() }]);
+        try {
+            let response;
+            if (editingPolicy) {
+                response = await leaveService.updateUiPolicy(editingPolicy, formData);
+            } else {
+                response = await leaveService.createUiPolicy(formData);
+            }
+
+            if (response.ok) {
+                setShowModal(false);
+                fetchPolicies();
+            }
+        } catch (error) {
+            console.error("Error saving policy:", error);
         }
-        setShowModal(false);
     };
+
+    if (loading) return <div className="p-4 text-center">Loading policies...</div>;
 
     return (
         <div className="container-fluid p-0">

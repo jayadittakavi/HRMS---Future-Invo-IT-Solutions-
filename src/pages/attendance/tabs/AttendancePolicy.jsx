@@ -38,8 +38,20 @@ const AttendancePolicy = () => {
     });
 
     // Mock fetch - can be replaced with real API later
+    const fetchPolicy = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getAttendancePolicy();
+            if (data) setPolicy(data);
+        } catch (err) {
+            console.error('Fetch policy failed:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        // fetchPolicy();
+        fetchPolicy();
     }, []);
 
     const handleChange = (section, field, value) => {
@@ -55,17 +67,16 @@ const AttendancePolicy = () => {
     const handleSave = async () => {
         setSaving(true);
         try {
-            // await attendanceService.savePolicy(policy);
-            setTimeout(() => {
-                alert('Attendance Policy updated successfully!');
-                setSaving(false);
-            }, 1000);
+            await attendanceService.updateAttendancePolicy(policy);
+            alert('Attendance Policy updated successfully!');
         } catch (err) {
             console.error('Save policy failed:', err);
             alert('Failed to save policy: ' + err.message);
+        } finally {
             setSaving(false);
         }
     };
+
 
     return (
         <div className="policy-container animate__animated animate__fadeIn">

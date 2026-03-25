@@ -1,19 +1,9 @@
-import React, { useState } from 'react';
-import { FaSearch, FaDownload, FaFilter } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaSearch, FaDownload } from 'react-icons/fa';
 import { MdHistory } from 'react-icons/md';
+import { leaveService } from '../../../../../services/leaveService';
 
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
-
-const allHistory = [
-    { id: 1, name: 'You', type: 'Sick Leave', from: 'Feb 10', to: 'Feb 11', days: 2, reason: 'Fever', status: 'Approved', approver: 'Riya M.', applied: 'Feb 09, 2026', avatar: 'ME' },
-    { id: 2, name: 'You', type: 'Casual Leave', from: 'Jan 25', to: 'Jan 25', days: 1, reason: 'Personal work', status: 'Approved', approver: 'Riya M.', applied: 'Jan 23, 2026', avatar: 'ME' },
-    { id: 3, name: 'You', type: 'Privilege', from: 'Dec 24', to: 'Dec 28', days: 5, reason: 'Christmas break', status: 'Rejected', approver: 'HR Team', applied: 'Dec 21, 2025', avatar: 'ME' },
-    // management records
-    { id: 4, name: 'John Doe', type: 'Sick Leave', from: 'Feb 15', to: 'Feb 17', days: 3, reason: 'Medical', status: 'Approved', approver: 'You', applied: 'Feb 14, 2026', avatar: 'JD' },
-    { id: 5, name: 'Jane Smith', type: 'Casual Leave', from: 'Feb 05', to: 'Feb 05', days: 1, reason: 'Personal', status: 'Rejected', approver: 'You', applied: 'Feb 04, 2026', avatar: 'JS' },
-    { id: 6, name: 'Alice Roy', type: 'Privilege', from: 'Jan 15', to: 'Jan 18', days: 4, reason: 'Vacation', status: 'Approved', approver: 'You', applied: 'Jan 13, 2026', avatar: 'AR' },
-    { id: 7, name: 'Bob Kumar', type: 'Maternity', from: 'Dec 01', to: 'Mar 31', days: 120, reason: 'Maternity', status: 'Approved', approver: 'Admin', applied: 'Nov 25, 2025', avatar: 'BK' },
-];
 
 const statusStyle = (s) => ({
     Approved: { bg: '#d1fae5', color: '#065f46' },
@@ -24,20 +14,44 @@ const statusStyle = (s) => ({
 const avatarBg = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#3b82f6', '#ec4899'][i % 7];
 
 const LeaveHistory = ({ personal = false }) => {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('All');
     const [typeFilter, setTypeFilter] = useState('All');
 
-    const data = personal ? allHistory.filter(h => h.name === 'You') : allHistory;
+    useEffect(() => {
+        fetchHistory();
+    }, [statusFilter, typeFilter, personal]);
 
-    const filtered = data.filter(h => {
-        const matchSearch = h.name.toLowerCase().includes(search.toLowerCase()) || h.type.toLowerCase().includes(search.toLowerCase());
-        const matchStatus = statusFilter === 'All' || h.status === statusFilter;
-        const matchType = typeFilter === 'All' || h.type === typeFilter;
-        return matchSearch && matchStatus && matchType;
-    });
+    const fetchHistory = async () => {
+        try {
+            setLoading(true);
+            const filters = {
+                status: statusFilter !== 'All' ? statusFilter : undefined,
+                type: typeFilter !== 'All' ? typeFilter : undefined,
+                personal: personal || undefined
+            };
+            const response = await leaveService.getHistory(filters);
+            if (response.ok) {
+                const data = await response.json();
+                setHistory(data);
+            }
+        } catch (error) {
+            console.error("Error fetching history:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const types = ['All', ...Array.from(new Set(data.map(h => h.type)))];
+    const filtered = history.filter(h => 
+        h.name.toLowerCase().includes(search.toLowerCase()) || 
+        h.type.toLowerCase().includes(search.toLowerCase())
+    );
+
+    const types = ['All', ...Array.from(new Set(history.map(h => h.type)))];
+
+    if (loading) return <div className="p-4 text-center">Loading history...</div>;
 
     return (
         <div style={card}>

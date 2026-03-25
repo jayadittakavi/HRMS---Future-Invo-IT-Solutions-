@@ -1,16 +1,81 @@
-import React, { useState } from 'react';
-import { FaEnvelopeOpenText, FaTimes } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaEnvelopeOpenText, FaTimes, FaSpinner, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { payrollService } from '../payrollService';
+import { employeeSuperAdminService } from '../../../hr/employees/superadmin-service';
 
 const LettersTab = () => {
     const [modalConfig, setModalConfig] = useState(null); // { type, title }
+    const [employees, setEmployees] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [status, setStatus] = useState({ type: '', msg: '' });
+    
+    // Form state
+    const [formData, setFormData] = useState({
+        employee_id: '',
+        effectDate: '',
+        newSalary: '',
+        newDesignation: '',
+        letterType: '',
+        extraContent: ''
+    });
 
-    const handleOpenModal = (type, title) => setModalConfig({ type, title });
+    useEffect(() => {
+        fetchEmployees();
+    }, []);
+
+    const fetchEmployees = async () => {
+        try {
+            setLoading(true);
+            const data = await employeeSuperAdminService.getAllEmployees();
+            setEmployees(data || []);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleOpenModal = (type, title) => {
+        setFormData({
+            employee_id: '',
+            effectDate: '',
+            newSalary: '',
+            newDesignation: '',
+            letterType: type === 'new' ? '' : type,
+            extraContent: ''
+        });
+        setModalConfig({ type, title });
+        setStatus({ type: '', msg: '' });
+    };
+
     const handleCloseModal = () => setModalConfig(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert(`${modalConfig.title} has been generated and queued for dispatch!`);
-        handleCloseModal();
+        try {
+            setSubmitting(true);
+            setStatus({ type: '', msg: '' });
+            
+            const payload = {
+                employee_id: formData.employee_id,
+                letter_type: formData.letterType || modalConfig.type,
+                effective_date: formData.effectDate,
+                meta: {
+                    new_salary: formData.newSalary,
+                    new_designation: formData.newDesignation,
+                    message: formData.extraContent
+                }
+            };
+            
+            await payrollService.createPayoutLetter(payload);
+            setStatus({ type: 'success', msg: `${modalConfig.title} has been generated successfully!` });
+            setTimeout(() => handleCloseModal(), 2000);
+        } catch (error) {
+            setStatus({ type: 'error', msg: "Generation failed: " + error.message });
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
@@ -75,74 +140,135 @@ const LettersTab = () => {
                             </button>
                         </div>
                         <div className="card-body p-4">
-                            <form onSubmit={handleSubmit}>
-                                <div className="mb-3">
-                                    <label className="form-label small fw-bold text-secondary">Select Employee <span className="text-danger">*</span></label>
-                                    <select className="form-select" required>
-                                        <option value="">Choose Employee...</option>
-                                        <option value="1">John Doe (DEV-001)</option>
-                                        <option value="2">Jane Smith (HR-002)</option>
-                                        <option value="3">Mike Ross (MGR-004)</option>
-                                    </select>
+                            {status.msg && (
+                                <div className={`alert d-flex align-items-center gap-2 border-0 shadow-sm mb-4 ${status.type === 'success' ? 'alert-success text-success bg-success bg-opacity-10' : 'alert-danger text-danger bg-danger bg-opacity-10'}`} style={{ fontSize: '0.85rem' }}>
+                                    {status.type === 'success' ? <FaCheckCircle /> : <FaExclamationTriangle />}
+                                    {status.msg}
                                 </div>
-                                
-                                <div className="mb-3">
-                                    <label className="form-label small fw-bold text-secondary">Effective Date <span className="text-danger">*</span></label>
-                                    <input type="date" className="form-control" required />
-                                </div>
+                            )}
 
-                                {modalConfig.type === 'increment' && (
-                                    <div className="row g-3">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold text-secondary">Current Salary</label>
-                                            <input type="text" className="form-control bg-light" value="$80,000" readOnly />
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold text-primary">New Salary <span className="text-danger">*</span></label>
-                                            <input type="number" className="form-control" placeholder="Enter new salary" required />
-                                        </div>
+                            {loading ? (
+                                <div className="text-center py-4">
+                                    <FaSpinner className="spinner-border text-primary border-0" size={16} />
+                                    <p className="mt-2 text-muted small">Loading employee list...</p>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSubmit}>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold text-secondary">Select Employee <span className="text-danger">*</span></label>
+                                        <select 
+                                            className="form-select border-0 bg-light rounded-3" 
+                                            required
+                                            style={{ fontSize: '0.88rem' }}
+                                            value={formData.employee_id}
+                                            onChange={e => setFormData({...formData, employee_id: e.target.value})}
+                                        >
+                                            <option value="">Choose Employee...</option>
+                                            {employees.map(emp => (
+                                                <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.employee_id})</option>
+                                            ))}
+                                        </select>
                                     </div>
-                                )}
-                                
-                                {modalConfig.type === 'promotion' && (
-                                    <div className="row g-3">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold text-secondary">Current Role</label>
-                                            <input type="text" className="form-control bg-light" value="Software Engineer" readOnly />
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="form-label small fw-bold text-success">New Designation <span className="text-danger">*</span></label>
-                                            <input type="text" className="form-control" placeholder="e.g. Senior Engineer" required />
-                                        </div>
+                                    
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold text-secondary">Effective Date <span className="text-danger">*</span></label>
+                                        <input 
+                                            type="date" 
+                                            className="form-control border-0 bg-light rounded-3" 
+                                            required 
+                                            style={{ fontSize: '0.88rem' }}
+                                            value={formData.effectDate}
+                                            onChange={e => setFormData({...formData, effectDate: e.target.value})}
+                                        />
                                     </div>
-                                )}
 
-                                {modalConfig.type === 'new' && (
-                                    <>
-                                        <div className="mb-3">
-                                            <label className="form-label small fw-bold text-secondary">Letter Type <span className="text-danger">*</span></label>
-                                            <select className="form-select" required>
-                                                <option value="">Select type...</option>
-                                                <option value="warning">Warning Letter</option>
-                                                <option value="experience">Experience Letter</option>
-                                                <option value="noc">No Objection Certificate (NOC)</option>
-                                                <option value="custom">Custom Letter</option>
-                                            </select>
+                                    {modalConfig.type === 'increment' && (
+                                        <div className="row g-3">
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label small fw-bold text-secondary">Current Salary</label>
+                                                <input type="text" className="form-control border-0 bg-white" placeholder="Auto-fetched" readOnly />
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label small fw-bold text-primary">New Salary <span className="text-danger">*</span></label>
+                                                <input 
+                                                    type="number" 
+                                                    className="form-control border-0 bg-light rounded-3 shadow-none" 
+                                                    placeholder="Enter new salary" 
+                                                    required 
+                                                    value={formData.newSalary}
+                                                    onChange={e => setFormData({...formData, newSalary: e.target.value})}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="mb-3">
-                                            <label className="form-label small fw-bold text-secondary">Message / Content</label>
-                                            <textarea className="form-control" rows="4" placeholder="Additional details or custom message content to include in the letter." required></textarea>
+                                    )}
+                                    
+                                    {modalConfig.type === 'promotion' && (
+                                        <div className="row g-3">
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label small fw-bold text-secondary">Current Role</label>
+                                                <input type="text" className="form-control border-0 bg-white" placeholder="Auto-fetched" readOnly />
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="form-label small fw-bold text-success">New Designation <span className="text-danger">*</span></label>
+                                                <input 
+                                                    type="text" 
+                                                    className="form-control border-0 bg-light rounded-3 shadow-none" 
+                                                    placeholder="e.g. Senior Engineer" 
+                                                    required 
+                                                    value={formData.newDesignation}
+                                                    onChange={e => setFormData({...formData, newDesignation: e.target.value})}
+                                                />
+                                            </div>
                                         </div>
-                                    </>
-                                )}
+                                    )}
 
-                                <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                                    <button type="button" className="btn btn-light fw-bold px-4" onClick={handleCloseModal}>Cancel</button>
-                                    <button type="submit" className={`btn fw-bold px-4 ${modalConfig.type === 'promotion' ? 'btn-success' : 'btn-primary'}`}>
-                                        Generate Draft
-                                    </button>
-                                </div>
-                            </form>
+                                    {modalConfig.type === 'new' && (
+                                        <>
+                                            <div className="mb-3">
+                                                <label className="form-label small fw-bold text-secondary">Letter Type <span className="text-danger">*</span></label>
+                                                <select 
+                                                    className="form-select border-0 bg-light rounded-3" 
+                                                    required
+                                                    value={formData.letterType}
+                                                    onChange={e => setFormData({...formData, letterType: e.target.value})}
+                                                >
+                                                    <option value="">Select type...</option>
+                                                    <option value="warning">Warning Letter</option>
+                                                    <option value="experience">Experience Letter</option>
+                                                    <option value="noc">No Objection Certificate (NOC)</option>
+                                                    <option value="custom">Custom Letter</option>
+                                                </select>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="form-label small fw-bold text-secondary">Message / Content</label>
+                                                <textarea 
+                                                    className="form-control border-0 bg-light rounded-3" 
+                                                    rows="4" 
+                                                    placeholder="Additional details or custom message content to include in the letter." 
+                                                    required
+                                                    value={formData.extraContent}
+                                                    onChange={e => setFormData({...formData, extraContent: e.target.value})}
+                                                ></textarea>
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" className="btn btn-light rounded-3 fw-bold px-4" onClick={handleCloseModal}>Cancel</button>
+                                        <button 
+                                            type="submit" 
+                                            disabled={submitting}
+                                            className={`btn rounded-3 fw-bold px-4 d-flex align-items-center gap-2 ${modalConfig.type === 'promotion' ? 'btn-success' : 'btn-primary'}`}
+                                        >
+                                            {submitting ? (
+                                                <><FaSpinner className="spinner-border border-0" size={14} /> Generating...</>
+                                            ) : (
+                                                'Generate Draft'
+                                            )}
+                                        </button>
+                                    </div>
+                                </form>
+                            )}
                         </div>
                     </div>
                 </div>

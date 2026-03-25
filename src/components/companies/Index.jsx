@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch } from "react-icons/fa";
 import DashboardLayout from "../layout/DashboardLayout";
 import { useSearch } from "../../context/SearchContext";
+import { coreService } from "../../services/coreService";
 import "./Companies.css";
 
 export const CompaniesContent = () => {
@@ -46,7 +47,7 @@ export const CompaniesContent = () => {
     };
 
     const getAuthHeaders = () => {
-        const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
+        const token = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
 
         return {
             "Content-Type": "application/json",
@@ -57,48 +58,11 @@ export const CompaniesContent = () => {
     const fetchCompanies = async () => {
         setLoading(true);
         try {
-            // Using relative path for proxy support and GET for listing
-            const response = await fetch(`/api/superadmin/create-company`, {
-                method: "GET",
-                headers: getAuthHeaders()
-            });
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    setCompanies([]);
-                    return;
-                }
-                const errorText = await response.text();
-                console.error("Fetch companies failed:", errorText);
-                throw new Error(errorText || `Server returned ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log("Fetched companies raw data:", data);
-
-            // Handle multiple possible response structures
-            let companiesData = [];
-            if (Array.isArray(data)) {
-                companiesData = data;
-            } else if (data && typeof data === 'object') {
-                if (Array.isArray(data.data)) companiesData = data.data;
-                else if (Array.isArray(data.companies)) companiesData = data.companies;
-                else if (Array.isArray(data.result)) companiesData = data.result;
-                else if (Array.isArray(data.items)) companiesData = data.items;
-                // Deeper check
-                else if (data.data && Array.isArray(data.data.companies)) companiesData = data.data.companies;
-                else if (data.data && Array.isArray(data.data.result)) companiesData = data.data.result;
-                // Last resort: find any array
-                else {
-                    const firstArrayKey = Object.keys(data).find(key => Array.isArray(data[key]));
-                    if (firstArrayKey) companiesData = data[firstArrayKey];
-                }
-            }
-
-            console.log("Processed companies data:", companiesData);
-            setCompanies(companiesData);
+            const data = await coreService.getCompanies();
+            console.log("Fetched companies:", data);
+            setCompanies(data);
         } catch (err) {
-            console.error("Error fetching companies:", err);
+            console.error("Fetch companies failed:", err);
             setCompanies([]);
         } finally {
             setLoading(false);
@@ -107,30 +71,8 @@ export const CompaniesContent = () => {
 
     const fetchBranches = async () => {
         try {
-            const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
-            let response = await fetch(`/api/superadmin/branches`, {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
-
-            if (!response.ok) {
-                response = await fetch(`/api/superadmin/create-branch`, {
-                    method: "GET",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-            }
-
-            if (response.ok) {
-                const data = await response.json();
-                let branchData = Array.isArray(data) ? data : (data.data || data.branches || []);
-                setBranches(branchData);
-            }
+            const data = await coreService.getBranches();
+            setBranches(data);
         } catch (err) {
             console.error("Error fetching branches:", err);
         }
@@ -145,41 +87,35 @@ export const CompaniesContent = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleCreate = async (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
         try {
-            console.log("Creating company with data:", formData);
-            const response = await fetch(`/api/superadmin/create-company`, {
-                method: "POST",
-                headers: getAuthHeaders(),
-                body: JSON.stringify(formData)
+            console.log("Saving company with data:", formData);
+            const res = await coreService.createCompany({
+                company_name: formData.name,
+                company_Id: formData.company_id,
+                industry: formData.industry,
+                company_prefix: formData.company_id?.substring(0, 3)?.toUpperCase() || "CMP",
+                company_size: formData.company_size,
+                country: formData.country,
+                state: formData.state,
+                city_branch: formData.city_branch,
+                timezone: formData.timezone || "UTC+0",
+                address: `${formData.city_branch}, ${formData.state || ''}`,
+                latitude: "0",
+                longitude: "0"
             });
 
-            if (!response.ok) {
-                const errorData = await response.text();
-                console.error("Server error response:", errorData);
-                throw new Error(errorData || `Server returned ${response.status}`);
-            }
-
-            // Automate Branch Creation when Company is Created
-            if (formData.name && formData.city_branch) {
+            // Auto-create initial branch if backend doesn't
+            if (res) {
                 try {
-                    console.log("Automatically creating branch for new company...");
-                    const token = tokens.superadmin || localStorage.getItem("token") || localStorage.getItem("authToken");
-
-                    await fetch('/api/superadmin/branches', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            name: `${formData.name} - Head Office`,
-                            company: formData.name,
-                            address: `${formData.city_branch}, ${formData.state || ''}, ${formData.country || ''}`,
-                            location: formData.city_branch,
-                            status: 'Active'
-                        })
+                    await coreService.createBranch({
+                        company_id: res.id || res.company?.id,
+                        branch_name: `${formData.name} - Head Office`,
+                        address: `${formData.city_branch}, ${formData.state || ''}`,
+                        latitude: "0",
+                        longitude: "0",
+                        status: 'Active'
                     });
                 } catch (branchErr) {
                     console.error("Auto-branch creation failed:", branchErr);
@@ -189,7 +125,7 @@ export const CompaniesContent = () => {
             setShowAdd(false);
             resetForm();
             fetchCompanies();
-            alert("Company and Initial Branch created successfully!");
+            alert("Company created successfully!");
         } catch (err) {
             console.error("Create company error:", err);
             alert("Failed to create company: " + (err.message || "Unknown error"));
@@ -199,19 +135,14 @@ export const CompaniesContent = () => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            console.log("Updating company with data:", formData);
-            // Updated to relative path for proxy support
-            const response = await fetch(`/api/superadmin/create-company`, {
-                method: "POST",
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ ...formData, id: selectedCompany.id, action: "update" })
+            await coreService.updateCompany(selectedCompany.id, {
+                company_name: formData.name,
+                industry: formData.industry,
+                company_size: formData.company_size,
+                country: formData.country,
+                state: formData.state,
+                city_branch: formData.city_branch
             });
-
-            if (!response.ok) {
-                const errorData = await response.text();
-                console.error("Server error response:", errorData);
-                throw new Error(errorData || `Server returned ${response.status}`);
-            }
 
             setShowEdit(false);
             fetchCompanies();
@@ -223,19 +154,14 @@ export const CompaniesContent = () => {
     };
 
     const handleDelete = async () => {
+        if (!selectedCompany) return;
         try {
-            // Using relative path for proxy support
-            const response = await fetch(`/api/superadmin/create-company`, {
-                method: "POST",
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ id: selectedCompany.id, action: "delete" })
-            });
-
-            if (!response.ok) throw new Error(await response.text());
-
+            await coreService.deleteCompany(selectedCompany.id);
             setShowDelete(false);
             fetchCompanies();
+            alert("Company deleted successfully!");
         } catch (err) {
+            console.error("Delete company error:", err);
             alert("Failed to delete company: " + (err.message || "Unknown error"));
         }
     };
@@ -522,7 +448,7 @@ export const CompaniesContent = () => {
                             <button className="modal-close-btn" onClick={() => { setShowAdd(false); setShowEdit(false); }}>&times;</button>
                         </div>
 
-                        <form onSubmit={showAdd ? handleCreate : handleUpdate} className="modal-body-premium">
+                        <form onSubmit={showAdd ? handleSave : handleUpdate} className="modal-body-premium">
                             <div className="row g-4">
                                 <div className="col-md-6">
                                     <div className="premium-input-group">

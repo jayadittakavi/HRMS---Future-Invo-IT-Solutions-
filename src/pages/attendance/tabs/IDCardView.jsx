@@ -37,10 +37,13 @@ const IDCardView = () => {
     const loadCards = async () => {
         setLoading(true);
         try {
-            const data = await idCardService.getAllIDCards();
+            const response = await idCardService.getAllIDCards();
+            // Handle both direct array and { data: [] } structures
+            const data = Array.isArray(response) ? response : (response?.data || response?.cards || []);
             setCards(data);
         } catch (err) {
             console.error("Failed to load ID cards", err);
+            setCards([]);
         } finally {
             setLoading(false);
         }
@@ -50,10 +53,10 @@ const IDCardView = () => {
         setSearchTerm(e.target.value);
     };
 
-    const filteredCards = cards.filter(card =>
-        card.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        card.employee_code?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredCards = Array.isArray(cards) ? cards.filter(card =>
+        (card.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (card.employee_code || '').toLowerCase().includes(searchTerm.toLowerCase())
+    ) : [];
 
     // --- CRUD Operations (Admin Only) ---
     const handleAddNew = () => {

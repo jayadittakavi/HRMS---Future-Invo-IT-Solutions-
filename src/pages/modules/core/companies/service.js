@@ -12,7 +12,7 @@ const authHeader = () => {
     };
 
     // Force SuperAdmin token for company modules locally so testing avoids "Permission denied"
-    const finalToken = tokens.superadmin || localStorage.getItem("token");
+    const finalToken = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
 
     return {
         headers: {

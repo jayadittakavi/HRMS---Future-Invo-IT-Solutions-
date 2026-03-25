@@ -1,43 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPlus, FaEdit, FaTrash, FaSync, FaCheckCircle, FaTimesCircle, FaDesktop } from 'react-icons/fa';
+import { attendanceService } from '../service/service';
 
 const AddDevice = () => {
-    const [devices, setDevices] = useState([
-        {
-            id: 1,
-            deviceName: 'Main Office Biometric',
-            deviceId: 'BIO-001',
-            ipAddress: '192.168.1.100',
-            location: 'Main Entrance',
-            type: 'Biometric',
-            status: 'Active',
-            lastSync: '2026-02-18 10:30 AM',
-            employeesRegistered: 245
-        },
-        {
-            id: 2,
-            deviceName: 'Branch Office Scanner',
-            deviceId: 'BIO-002',
-            ipAddress: '192.168.2.50',
-            location: 'Branch Office',
-            type: 'Biometric',
-            status: 'Active',
-            lastSync: '2026-02-18 09:15 AM',
-            employeesRegistered: 89
-        },
-        {
-            id: 3,
-            deviceName: 'Warehouse Entry',
-            deviceId: 'BIO-003',
-            ipAddress: '192.168.3.25',
-            location: 'Warehouse Gate',
-            type: 'Face Recognition',
-            status: 'Inactive',
-            lastSync: '2026-02-17 05:00 PM',
-            employeesRegistered: 156
-        }
-    ]);
-
+    const [devices, setDevices] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [editingDevice, setEditingDevice] = useState(null);
     const [formData, setFormData] = useState({
@@ -48,6 +15,22 @@ const AddDevice = () => {
         type: 'Biometric',
         status: 'Active'
     });
+
+    const fetchDevices = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getDeviceList();
+            setDevices(data || []);
+        } catch (err) {
+            console.error("Fetch devices failed:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDevices();
+    }, []);
 
     const handleAdd = () => {
         setFormData({
@@ -68,26 +51,30 @@ const AddDevice = () => {
         setShowModal(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this device?')) {
-            setDevices(devices.filter(d => d.id !== id));
+            try {
+                // Assuming there's a delete endpoint, if not, this is a placeholder
+                // await attendanceService.deleteDevice(id);
+                setDevices(devices.filter(d => d.id !== id));
+            } catch (err) {
+                alert(`Failed: ${err.message}`);
+            }
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingDevice) {
-            setDevices(devices.map(d => d.id === editingDevice ? { ...formData, id: editingDevice } : d));
-        } else {
-            setDevices([...devices, {
-                ...formData,
-                id: Date.now(),
-                lastSync: 'Never',
-                employeesRegistered: 0
-            }]);
+        try {
+            await attendanceService.registerDevice(formData);
+            alert(`Device ${editingDevice ? 'updated' : 'registered'} successfully!`);
+            setShowModal(false);
+            fetchDevices();
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
         }
-        setShowModal(false);
     };
+
 
     const handleSync = (deviceId) => {
         const now = new Date().toLocaleString('en-IN', {

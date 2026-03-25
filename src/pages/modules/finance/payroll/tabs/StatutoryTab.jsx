@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { payrollService } from '../payrollService';
+import { FaCog, FaSave, FaTimes } from 'react-icons/fa';
+
 
 /* ─── Statutory Acts Data ──────────────────────────────────── */
 const STATUTORY_ACTS = [
@@ -378,6 +381,35 @@ const StatutoryTab = () => {
     const [activeAct, setActiveAct] = useState(null);
     const [activeCategory, setActiveCategory] = useState('all');
     const [showCalendar, setShowCalendar] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [settings, setSettings] = useState({ epf_rate: 12, esi_rate: 0.75, tds_threshold: 300000 });
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            setLoading(true);
+            try {
+                const data = await payrollService.getStatutorySettings();
+                if (data) setSettings(data);
+            } catch (err) {
+                console.error("Failed to fetch settings", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
+
+    const handleUpdateSettings = async (e) => {
+        e.preventDefault();
+        try {
+            await payrollService.updateStatutorySettings(settings);
+            alert("Settings updated successfully!");
+            setShowSettingsModal(false);
+        } catch (err) {
+            alert("Failed to update: " + err.message);
+        }
+    };
 
     const act = STATUTORY_ACTS.find(a => a.id === activeAct);
 
@@ -395,13 +427,22 @@ const StatutoryTab = () => {
                         Government rules & regulations governing payroll — PF, ESI, PT, Gratuity, Income Tax, LWF & more
                     </p>
                 </div>
-                <button
-                    className="btn btn-sm fw-semibold rounded-3 px-3 d-flex align-items-center gap-2"
-                    style={{ background: showCalendar ? '#1e3a8a' : '#eff6ff', color: showCalendar ? '#fff' : '#1e3a8a', fontSize: '0.82rem', border: '1px solid #bfdbfe' }}
-                    onClick={() => setShowCalendar(v => !v)}
-                >
-                    <span>📅</span> Compliance Calendar
-                </button>
+                <div className="d-flex gap-2">
+                    <button
+                        className="btn btn-sm fw-semibold rounded-3 px-3 d-flex align-items-center gap-2"
+                        style={{ background: '#fff', color: '#4b5563', fontSize: '0.82rem', border: '1px solid #d1d5db' }}
+                        onClick={() => setShowSettingsModal(true)}
+                    >
+                        <FaCog /> Manage Rates
+                    </button>
+                    <button
+                        className="btn btn-sm fw-semibold rounded-3 px-3 d-flex align-items-center gap-2"
+                        style={{ background: showCalendar ? '#1e3a8a' : '#eff6ff', color: showCalendar ? '#fff' : '#1e3a8a', fontSize: '0.82rem', border: '1px solid #bfdbfe' }}
+                        onClick={() => setShowCalendar(v => !v)}
+                    >
+                        <span>📅</span> Compliance Calendar
+                    </button>
+                </div>
             </div>
 
             {/* Compliance Calendar (collapsible) */}
@@ -580,6 +621,57 @@ const StatutoryTab = () => {
                     background-color: #f8faff !important;
                 }
             `}</style>
+            
+            {showSettingsModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1055 }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow-lg rounded-4">
+                            <form onSubmit={handleUpdateSettings}>
+                                <div className="modal-header border-bottom-0 pb-0">
+                                    <h5 className="modal-title fw-bold">Manage Statutory Rates</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowSettingsModal(false)}></button>
+                                </div>
+                                <div className="modal-body p-4">
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">EPF Contribution Rate (%)</label>
+                                        <input 
+                                            type="number" 
+                                            className="form-control" 
+                                            value={settings.epf_rate} 
+                                            onChange={e => setSettings({...settings, epf_rate: e.target.value})} 
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">ESI Contribution Rate (%)</label>
+                                        <input 
+                                            type="number" 
+                                            step="0.01"
+                                            className="form-control" 
+                                            value={settings.esi_rate} 
+                                            onChange={e => setSettings({...settings, esi_rate: e.target.value})} 
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Income Tax Threshold (Standard)</label>
+                                        <input 
+                                            type="number" 
+                                            className="form-control" 
+                                            value={settings.tds_threshold} 
+                                            onChange={e => setSettings({...settings, tds_threshold: e.target.value})} 
+                                        />
+                                    </div>
+                                </div>
+                                <div className="modal-footer border-top-0 pt-0">
+                                    <button type="button" className="btn btn-light rounded-3" onClick={() => setShowSettingsModal(false)}>Cancel</button>
+                                    <button type="submit" className="btn btn-primary rounded-3 px-4 shadow-sm">
+                                        <FaSave className="me-2" /> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

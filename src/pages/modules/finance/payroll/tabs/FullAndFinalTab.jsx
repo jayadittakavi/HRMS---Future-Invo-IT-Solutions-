@@ -1,4 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { payrollService } from '../payrollService';
+import { employeeSuperAdminService } from '../../../hr/employees/superadmin-service';
+import { FaUserTimes, FaCheckCircle, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
+
 
 /* ─── Mock F&F Data ───────────────────────────────────────── */
 const FNF_EMPLOYEES = [
@@ -518,14 +522,62 @@ const EmployeeDetail = ({ emp, onBack }) => {
 const FullAndFinalTab = () => {
     const [selected, setSelected] = useState(null);
     const [filterStatus, setFilterStatus] = useState('');
+    const [settlements, setSettlements] = useState([]);
+    const [employees, setEmployees] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [showInitiateModal, setShowInitiateModal] = useState(false);
+    const [newInitiate, setNewInitiate] = useState({
+        employee_id: '',
+        resignation_date: '',
+        last_working_day: '',
+        reason: ''
+    });
 
-    const emp = FNF_EMPLOYEES.find(e => e.id === selected);
+    useEffect(() => {
+        fetchSettlements();
+        fetchEmployees();
+    }, []);
+
+    const fetchSettlements = async () => {
+        setLoading(true);
+        try {
+            const data = await payrollService.getSettlements();
+            setSettlements(data || []);
+        } catch (error) {
+            console.error("Failed to fetch settlements", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchEmployees = async () => {
+        try {
+            const data = await employeeSuperAdminService.getAllEmployees();
+            setEmployees(data || []);
+        } catch (error) {
+            console.error("Failed to fetch employees", error);
+        }
+    };
+
+    const handleInitiate = async (e) => {
+        e.preventDefault();
+        try {
+            await payrollService.initiateSettlement(newInitiate);
+            alert("Settlement initiated successfully!");
+            setShowInitiateModal(false);
+            fetchSettlements();
+        } catch (error) {
+            alert("Failed to initiate: " + error.message);
+        }
+    };
+
+    const emp = settlements.find(e => e.id === selected);
 
     if (selected && emp) {
         return <EmployeeDetail emp={emp} onBack={() => setSelected(null)} />;
     }
 
-    const filtered = FNF_EMPLOYEES.filter(e => !filterStatus || e.status === filterStatus);
+    const filtered = settlements.filter(e => !filterStatus || e.status === filterStatus);
 
     return (
         <div className="container-fluid p-0">
@@ -546,7 +598,9 @@ const FullAndFinalTab = () => {
                         <option>Settled</option>
                     </select>
                     <button className="btn btn-sm fw-semibold rounded-3 px-3 text-white"
-                        style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', fontSize: '0.82rem' }}>
+                        style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', fontSize: '0.82rem' }}
+                        onClick={() => setShowInitiateModal(true)}
+                    >
                         + Initiate F&F
                     </button>
                 </div>
@@ -555,10 +609,10 @@ const FullAndFinalTab = () => {
             {/* Summary Stats */}
             <div className="row g-3 mb-4">
                 {[
-                    { label: 'Total Cases', value: FNF_EMPLOYEES.length, color: '#2563eb', bg: '#eff6ff' },
-                    { label: 'Pending', value: FNF_EMPLOYEES.filter(e => e.status === 'Pending').length, color: '#dc2626', bg: '#fff5f5' },
-                    { label: 'Processing', value: FNF_EMPLOYEES.filter(e => e.status === 'Processing').length, color: '#d97706', bg: '#fffbeb' },
-                    { label: 'Settled', value: FNF_EMPLOYEES.filter(e => e.status === 'Settled').length, color: '#059669', bg: '#f0fdf4' },
+                    { label: 'Total Cases', value: settlements.length, color: '#2563eb', bg: '#eff6ff' },
+                    { label: 'Pending', value: settlements.filter(e => e.status === 'Pending').length, color: '#dc2626', bg: '#fff5f5' },
+                    { label: 'Processing', value: settlements.filter(e => e.status === 'Processing').length, color: '#d97706', bg: '#fffbeb' },
+                    { label: 'Settled', value: settlements.filter(e => e.status === 'Settled').length, color: '#059669', bg: '#f0fdf4' },
                 ].map(stat => (
                     <div key={stat.label} className="col-lg-3 col-6">
                         <div className="card border-0 rounded-4 p-3 text-center" style={{ background: stat.bg, border: `1px solid ${stat.color}22` }}>
@@ -621,8 +675,8 @@ const FullAndFinalTab = () => {
                                                 {ns.icon} {e.noticeStatus} ({e.noticePeriodServed}/{e.noticePeriodRequired}d)
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 fw-semibold" style={{ color: '#d97706' }}>{fmt(s.gratuity)}</td>
-                                        <td className="px-4 py-3 fw-semibold" style={{ color: '#059669' }}>{fmt(s.pfTotal)}</td>
+                                        <td className="px-4 py-3 fw-semibold" style={{ color: '#d97706' }}>{fmt(s?.gratuity || 0)}</td>
+                                        <td className="px-4 py-3 fw-semibold" style={{ color: '#059669' }}>{fmt(s?.pfTotal || 0)}</td>
                                         <td className="px-4 py-3 fw-bold" style={{ color: '#1e3a8a' }}>{fmt(net)}</td>
                                         <td className="px-4 py-3">
                                             <span className="badge rounded-pill px-3" style={{
@@ -654,6 +708,80 @@ const FullAndFinalTab = () => {
                     </table>
                 </div>
             </div>
+
+            {/* Initiate Modal */}
+            {showInitiateModal && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1055 }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <form onSubmit={handleInitiate}>
+                                <div className="modal-header border-0 pb-0 pt-4 px-4">
+                                    <h5 className="modal-title fw-bold">Initiate F&F Settlement</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowInitiateModal(false)}></button>
+                                </div>
+                                <div className="modal-body p-4">
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold text-secondary">SELECT EMPLOYEE</label>
+                                        <select 
+                                            className="form-select border-0 bg-light rounded-3" 
+                                            required
+                                            style={{ fontSize: '0.85rem', padding: '10px 15px' }}
+                                            value={newInitiate.employee_id}
+                                            onChange={e => setNewInitiate({...newInitiate, employee_id: e.target.value})}
+                                        >
+                                            <option value="">Choose Employee...</option>
+                                            {employees.map(emp => (
+                                                <option key={emp.id} value={emp.id}>{emp.full_name} ({emp.employee_id})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="row g-3 mb-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold text-secondary">RESIGNATION DATE</label>
+                                            <input 
+                                                type="date" 
+                                                className="form-control border-0 bg-light rounded-3" 
+                                                required
+                                                style={{ fontSize: '0.85rem', padding: '10px 15px' }}
+                                                value={newInitiate.resignation_date}
+                                                onChange={e => setNewInitiate({...newInitiate, resignation_date: e.target.value})}
+                                            />
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold text-secondary">LAST WORKING DAY</label>
+                                            <input 
+                                                type="date" 
+                                                className="form-control border-0 bg-light rounded-3" 
+                                                required
+                                                style={{ fontSize: '0.85rem', padding: '10px 15px' }}
+                                                value={newInitiate.last_working_day}
+                                                onChange={e => setNewInitiate({...newInitiate, last_working_day: e.target.value})}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mb-0">
+                                        <label className="form-label small fw-bold text-secondary">REASON FOR DEPARTURE</label>
+                                        <textarea 
+                                            className="form-control border-0 bg-light rounded-3" 
+                                            rows="3"
+                                            style={{ fontSize: '0.85rem', padding: '10px 15px' }}
+                                            placeholder="e.g. Resignation, Retirement, etc."
+                                            value={newInitiate.reason}
+                                            onChange={e => setNewInitiate({...newInitiate, reason: e.target.value})}
+                                        ></textarea>
+                                    </div>
+                                </div>
+                                <div className="modal-footer border-0 pb-4 px-4 pt-0">
+                                    <button type="button" className="btn btn-light rounded-3 fw-semibold px-4" onClick={() => setShowInitiateModal(false)}>Cancel</button>
+                                    <button type="submit" className="btn btn-primary rounded-3 px-4 shadow-sm fw-bold">
+                                        Initiate Process
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

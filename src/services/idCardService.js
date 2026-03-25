@@ -1,104 +1,70 @@
-// src/services/idCardService.js
+const API_BASE = "/api";
 
-// Mock data to simulate Backend Database
-let MOCK_ID_CARDS = [
-    {
-        id: '1',
-        user_id: '101',
-        employee_code: 'FIS001',
-        name: 'Seelamaparnatulasi',
-        designation: 'Super Admin',
-        department: 'Administration',
-        blood_group: 'O+',
-        joining_date: '2023-01-01',
-        photo: null,
-        company_name: 'Future Invo',
-        company_logo: null, // Base64 or URL
-        emergency_contact: '9876543210',
-        role: 'superadmin'
-    },
-    {
-        id: '2',
-        user_id: '102',
-        employee_code: 'FIS002',
-        name: 'John Doe',
-        designation: 'HR Manager',
-        department: 'Human Resources',
-        blood_group: 'A+',
-        joining_date: '2023-03-15',
-        photo: null,
-        company_name: 'Tech Corp',
-        company_logo: null,
-        emergency_contact: '1234567890',
-        role: 'hr'
-    },
-    {
-        id: '3',
-        user_id: '103',
-        employee_code: 'FIS003',
-        name: 'Jane Smith',
-        designation: 'Software Engineer',
-        department: 'Engineering',
-        blood_group: 'B-',
-        joining_date: '2023-06-01',
-        photo: null,
-        company_name: 'Innovate Ltd',
-        company_logo: null,
-        emergency_contact: '5556667777',
-        role: 'employee'
-    }
-];
+const authHeader = () => {
+    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
+    // Using superadmin token for testing if local token is not available
+    const testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k";
+    const finalToken = token || testToken;
+
+    return {
+        headers: {
+            "Content-Type": "application/json",
+            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {}),
+        },
+    };
+};
 
 export const idCardService = {
     getAllIDCards: async () => {
-        // Simulate API delay
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve([...MOCK_ID_CARDS]);
-            }, 500);
+        const response = await fetch(`${API_BASE}/id-card/list`, {
+            method: "GET",
+            ...authHeader()
         });
+        if (!response.ok) throw new Error(await response.text());
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || result.cards || []);
     },
 
     getIDCardByUserId: async (userId) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const card = MOCK_ID_CARDS.find(c => c.user_id === userId || c.id === userId); // Flexible match
-                resolve(card || null);
-            }, 300);
+        const response = await fetch(`${API_BASE}/id-card/list`, {
+            method: "GET",
+            ...authHeader()
         });
+        if (!response.ok) throw new Error(await response.text());
+        const result = await response.json();
+        const cards = Array.isArray(result) ? result : (result.data || result.cards || []);
+        return cards.find(c => c.user_id === userId || c.id === userId) || null;
     },
 
     createIDCard: async (cardData) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                const newCard = {
-                    ...cardData,
-                    id: String(MOCK_ID_CARDS.length + 1),
-                    created_at: new Date().toISOString()
-                };
-                MOCK_ID_CARDS.push(newCard);
-                resolve(newCard);
-            }, 500);
+        const response = await fetch(`${API_BASE}/id-card/create`, {
+            method: "POST",
+            body: JSON.stringify(cardData),
+            ...authHeader()
         });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     updateIDCard: async (id, updates) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                MOCK_ID_CARDS = MOCK_ID_CARDS.map(card =>
-                    card.id === id ? { ...card, ...updates, updated_at: new Date().toISOString() } : card
-                );
-                resolve(MOCK_ID_CARDS.find(c => c.id === id));
-            }, 500);
+        // Assuming there's an update endpoint, or using create if it handles updates
+        const response = await fetch(`${API_BASE}/id-card/create`, {
+            method: "POST",
+            body: JSON.stringify({ ...updates, id }),
+            ...authHeader()
         });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
     },
 
     deleteIDCard: async (id) => {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                MOCK_ID_CARDS = MOCK_ID_CARDS.filter(c => c.id !== id);
-                resolve(true);
-            }, 500);
+        // Assuming there might be a delete endpoint, if not, this is a placeholder
+        const response = await fetch(`${API_BASE}/id-card/${id}`, {
+            method: "DELETE",
+            ...authHeader()
         });
+        if (!response.ok) throw new Error(await response.text());
+        return true;
     }
 };
+

@@ -5,6 +5,7 @@ import {
 } from 'react-icons/fa';
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { useSearch } from "../../../../context/SearchContext";
+import { coreService } from "../../../../services/coreService";
 import BranchMap from "../../../../components/BranchMap";
 import "../../../../components/layout/DashboardLayout.css";
 
@@ -29,61 +30,51 @@ export const BranchesContent = () => {
         status: 'Active'
     });
 
-    const tokens = {
-        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k",
-        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk",
-        hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [branchData, compData] = await Promise.all([
+                coreService.getBranches(),
+                coreService.getCompanies()
+            ]);
+
+            const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
+            const mappedData = branchData.map(b => ({
+                id: b.id,
+                company_id: b.company_id || null,
+                name: cleanText(b.branch_name || b.name),
+                company: cleanText(b.company_name || b.company),
+                address: cleanText(b.address),
+                state: cleanText(b.state),
+                location: b.latitude && b.longitude ? `${b.latitude}, ${b.longitude}` : (b.location || ''),
+                lat: b.latitude,
+                lng: b.longitude,
+                status: b.status || 'Active'
+            }));
+            setBranches(mappedData);
+            setCompaniesList(compData);
+
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        } finally {
+            setLoading(false);
+        }
     };
-    const SUPERADMIN_TOKEN = tokens.superadmin;
-    const API_BASE = "/api/superadmin";
+
+    const [branchStats, setBranchStats] = useState({ total_active: 0, pending_action: 0 });
+
+    const fetchStats = async () => {
+        try {
+            const data = await coreService.getBranchStats();
+            setBranchStats(data);
+        } catch (err) {
+            console.error("Error fetching branch stats:", err);
+        }
+    };
 
     useEffect(() => {
-        setSearchTerm(globalSearchTerm);
-    }, [globalSearchTerm]);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [branchRes, compRes] = await Promise.all([
-                    fetch(`${API_BASE}/branches`, { headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` } }),
-                    fetch(`${API_BASE}/companies`, { headers: { 'Authorization': `Bearer ${SUPERADMIN_TOKEN}` } })
-                ]);
-
-                if (branchRes.ok) {
-                    const result = await branchRes.json();
-                    if (result.success && result.data) {
-                        const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
-                        const mappedData = result.data.map(b => ({
-                            id: b.id,
-                            company_id: b.company_id || null,
-                            name: cleanText(b.branch_name),
-                            company: cleanText(b.company_name),
-                            address: cleanText(b.address),
-                            state: cleanText(b.state),
-                            location: b.latitude && b.longitude ? `${b.latitude}, ${b.longitude}` : '',
-                            lat: b.latitude,
-                            lng: b.longitude,
-                            status: b.status || 'Active'
-                        }));
-                        setBranches(mappedData);
-                    }
-                }
-
-                if (compRes.ok) {
-                    const result = await compRes.json();
-                    if (result.success && result.data) {
-                        setCompaniesList(result.data);
-                    }
-                }
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
+        fetchStats();
     }, [reload]);
 
     const handleInputChange = (e) => {
@@ -93,76 +84,53 @@ export const BranchesContent = () => {
 
     const handleSaveBranch = async (e) => {
         e.preventDefault();
-        let lat = null, lng = null;
-        if (formData.location) {
-            const parts = formData.location.split(',');
-            if (parts.length === 2) {
-                lat = parts[0].trim();
-                lng = parts[1].trim();
-            }
-        }
-
         try {
-            const response = await fetch(`${API_BASE}/branches`, {
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    company_id: formData.company,
-                    branch_name: formData.name,
-                    address: formData.address,
-                    latitude: lat,
-                    longitude: lng,
-                    status: formData.status
-                })
-            });
-
-            if (response.ok) {
-                setReload(!reload);
-                setShowAdd(false);
-                alert("Branch added successfully!");
-            }
+            const payload = {
+                company_id: formData.company,
+                branch_name: formData.name,
+                address: formData.address,
+                latitude: formData.location?.split(',')[0]?.trim() || "0",
+                longitude: formData.location?.split(',')[1]?.trim() || "0",
+                status: formData.status || "Active"
+            };
+            await coreService.createBranch(payload);
+            setReload(!reload);
+            setShowAdd(false);
+            alert("Branch added successfully!");
         } catch (error) {
             console.error("Error saving branch:", error);
+            alert("Failed to save branch: " + error.message);
         }
     };
 
     const handleUpdateBranch = async (e) => {
         e.preventDefault();
-        let lat = null, lng = null;
-        if (formData.location) {
-            const parts = formData.location.split(',');
-            if (parts.length === 2) {
-                lat = parts[0].trim();
-                lng = parts[1].trim();
-            }
-        }
-
         try {
-            const response = await fetch(`${API_BASE}/branches/${selectedBranch.id}`, {
-                method: "PUT",
-                headers: {
-                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    branch_name: formData.name,
-                    address: formData.address,
-                    latitude: lat,
-                    longitude: lng,
-                    status: formData.status
-                })
+            await coreService.updateBranch(selectedBranch.id, {
+                branch_name: formData.name,
+                address: formData.address,
+                latitude: formData.location?.split(',')[0]?.trim() || "0",
+                longitude: formData.location?.split(',')[1]?.trim() || "0",
+                status: formData.status
             });
-
-            if (response.ok) {
-                setReload(!reload);
-                setShowEdit(false);
-                alert("Branch updated successfully!");
-            }
+            setReload(!reload);
+            setShowEdit(false);
+            alert("Branch updated successfully!");
         } catch (error) {
             console.error("Error updating branch:", error);
+            alert("Failed to update branch: " + error.message);
+        }
+    };
+
+    const handleDeleteBranch = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this branch?")) return;
+        try {
+            await coreService.deleteBranch(id);
+            setReload(!reload);
+            alert("Branch deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting branch:", error);
+            alert("Failed to delete branch: " + error.message);
         }
     };
 
@@ -171,7 +139,7 @@ export const BranchesContent = () => {
             const response = await fetch(`${API_BASE}/branches/${id}/toggle-status`, {
                 method: "PUT",
                 headers: {
-                    'Authorization': `Bearer ${SUPERADMIN_TOKEN}`,
+                    'Authorization': `Bearer ${getToken()}`,
                 }
             });
             if (response.ok) setReload(!reload);
@@ -180,14 +148,14 @@ export const BranchesContent = () => {
         }
     };
 
-    const filteredBranches = branches.filter(branch => {
+    const filteredBranches = Array.isArray(branches) ? branches.filter(branch => {
         const query = searchTerm.toLowerCase();
         return (
-            (branch.name || '').toLowerCase().includes(query) ||
-            (branch.company || '').toLowerCase().includes(query) ||
-            (branch.address || '').toLowerCase().includes(query)
+            (branch.branch_name || '').toLowerCase().includes(query) ||
+            (branch.state || '').toLowerCase().includes(query) || // Changed from branch.city to branch.state based on data structure
+            (branch.company_name || '').toLowerCase().includes(query)
         );
-    });
+    }) : [];
 
     const stats = [
         { label: 'Total Branches', count: branches.length, icon: <FaMapMarkerAlt />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },

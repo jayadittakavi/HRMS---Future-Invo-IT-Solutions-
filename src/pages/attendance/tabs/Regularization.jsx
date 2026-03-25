@@ -1,54 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaCheckCircle, FaExclamationTriangle, FaClock, FaCalendarAlt, FaUserClock, FaFileAlt } from 'react-icons/fa';
+import { attendanceService } from '../service/service';
 
 const Regularization = () => {
-    const [requests, setRequests] = useState([
-        {
-            id: 1,
-            employeeName: 'Rajesh Kumar',
-            employeeId: 'EMP001',
-            date: '2026-02-15',
-            requestType: 'Missing Punch',
-            punchType: 'Punch Out',
-            requestedTime: '06:30 PM',
-            actualTime: 'Not Punched',
-            reason: 'Forgot to punch out due to emergency meeting',
-            status: 'Pending',
-            submittedOn: '2026-02-16 09:00 AM',
-            approvedBy: null
-        },
-        {
-            id: 2,
-            employeeName: 'Priya Sharma',
-            employeeId: 'EMP002',
-            date: '2026-02-14',
-            requestType: 'Wrong Punch',
-            punchType: 'Punch In',
-            requestedTime: '09:00 AM',
-            actualTime: '11:00 AM',
-            reason: 'System error - punched late by mistake',
-            status: 'Approved',
-            submittedOn: '2026-02-14 02:00 PM',
-            approvedBy: 'Manager A'
-        },
-        {
-            id: 3,
-            employeeName: 'Amit Patel',
-            employeeId: 'EMP003',
-            date: '2026-02-13',
-            requestType: 'Missing Punch',
-            punchType: 'Both',
-            requestedTime: '09:00 AM - 06:00 PM',
-            actualTime: 'Not Punched',
-            reason: 'Was on field visit, forgot device',
-            status: 'Rejected',
-            submittedOn: '2026-02-14 10:30 AM',
-            approvedBy: 'Manager B'
-        }
-    ]);
-
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [selectedRequest, setSelectedRequest] = useState(null);
     const [filterStatus, setFilterStatus] = useState('All');
     const [formData, setFormData] = useState({
         date: '',
@@ -57,6 +14,22 @@ const Regularization = () => {
         requestedTime: '',
         reason: ''
     });
+
+    const fetchRequests = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getRegularizationRequests();
+            setRequests(data || []);
+        } catch (err) {
+            console.error("Fetch regularization failed:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchRequests();
+    }, []);
 
     const handleNewRequest = () => {
         setFormData({
@@ -69,37 +42,36 @@ const Regularization = () => {
         setShowModal(true);
     };
 
-    const handleSubmitRequest = (e) => {
+    const handleSubmitRequest = async (e) => {
         e.preventDefault();
-        const newRequest = {
-            id: Date.now(),
-            employeeName: 'Current User',
-            employeeId: 'EMP999',
-            date: formData.date,
-            requestType: formData.requestType,
-            punchType: formData.punchType,
-            requestedTime: formData.requestedTime,
-            actualTime: 'Not Punched',
-            reason: formData.reason,
-            status: 'Pending',
-            submittedOn: new Date().toLocaleString('en-IN'),
-            approvedBy: null
-        };
-        setRequests([newRequest, ...requests]);
-        setShowModal(false);
+        try {
+            await attendanceService.submitRegularization(formData);
+            alert("Request submitted successfully!");
+            setShowModal(false);
+            fetchRequests();
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        }
     };
 
-    const handleApprove = (id) => {
-        setRequests(requests.map(r =>
-            r.id === id ? { ...r, status: 'Approved', approvedBy: 'Current Manager' } : r
-        ));
+    const handleApprove = async (id) => {
+        try {
+            await attendanceService.reviewRegularization(id, { status: 'Approved' });
+            fetchRequests();
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        }
     };
 
-    const handleReject = (id) => {
-        setRequests(requests.map(r =>
-            r.id === id ? { ...r, status: 'Rejected', approvedBy: 'Current Manager' } : r
-        ));
+    const handleReject = async (id) => {
+        try {
+            await attendanceService.reviewRegularization(id, { status: 'Rejected' });
+            fetchRequests();
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        }
     };
+
 
     const filteredRequests = filterStatus === 'All'
         ? requests

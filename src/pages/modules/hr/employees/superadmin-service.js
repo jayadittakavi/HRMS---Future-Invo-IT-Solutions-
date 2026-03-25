@@ -11,7 +11,7 @@ const authHeader = () => {
     };
 
     // Priority token from local storage, then fallback to Super Admin
-    const finalToken = tokens.superadmin || token;
+    const finalToken = token || tokens.superadmin;
 
     return {
         headers: {

@@ -11,7 +11,7 @@ const authHeader = () => {
         hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
     };
 
-    const finalToken = tokens.superadmin || token;
+    const finalToken = token || tokens.superadmin;
 
     return {
         headers: {
@@ -80,7 +80,7 @@ export const attendanceService = {
         const token = localStorage.getItem("token") || localStorage.getItem("authToken");
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-        const response = await fetch(`${API_BASE}/attendance/import`, { // Assuming /import endpoint or POST /attendance handles file
+        const response = await fetch(`${API_BASE}/attendance/import`, {
             method: "POST",
             headers: headers,
             body: formData
@@ -168,15 +168,123 @@ export const attendanceService = {
 
     // 🔹 Shift Details/List
     getShifts: async () => {
-        const response = await fetch(`${API_BASE}/attendance/shifts`, { // New endpoint for shifts
+        const response = await fetch(`${API_BASE}/attendance/shifts`, {
             method: "GET",
             ...authHeader()
         });
-        if (!response.ok) {
-            // If shifts endpoint doesn't exist yet, return a graceful blank array or mock fallback
-            console.warn("Shifts endpoint returned error, check backend. Status:", response.status);
-            return [];
-        }
+        if (!response.ok) return [];
+        return response.json();
+    },
+
+    // 🔸 Devices
+    getDeviceList: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/device/list`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    registerDevice: async (data) => {
+        const response = await fetch(`${API_BASE}/attendance/features/device/register`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+
+    // 🔸 Regularization
+    getRegularizationRequests: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/regularization/request`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    submitRegularization: async (data) => {
+        const response = await fetch(`${API_BASE}/attendance/features/regularization/request`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    reviewRegularization: async (id, data) => {
+        const response = await fetch(`${API_BASE}/attendance/features/regularization/request/${id}/review`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+
+    // 🔸 Sync & Sync Logs
+    getSyncStatus: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/sync/status`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    triggerSync: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/sync/trigger`, {
+            method: "POST",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    getSyncLogs: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/sync/logs`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+
+    // 🔸 Mobile Attendance
+    getMobilePunches: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/punch/mobile`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    mobilePunch: async (data) => {
+        const response = await fetch(`${API_BASE}/attendance/features/punch/mobile`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+
+    // 🔸 Attendance Policy
+    getAttendancePolicy: async () => {
+        const response = await fetch(`${API_BASE}/attendance/features/policy`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    updateAttendancePolicy: async (data) => {
+        const response = await fetch(`${API_BASE}/attendance/features/policy`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
         return response.json();
     }
 };
+

@@ -96,10 +96,10 @@ import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
 import WhatsAppChat from "./components/common/WhatsAppChat";
 import Helpdesk from "./pages/modules/helpdesk/Helpdesk";
+import SupportTicket from "./pages/user/SupportTicket";
 import AutomationCenter from "./pages/modules/administration/automation/AutomationCenter";
 
 /* User Dropdown Pages */
-import SupportTicket from "./pages/user/SupportTicket";
 import KnowledgeBase from "./pages/user/KnowledgeBase";
 import Feedback from "./pages/user/Feedback";
 import UserPrivacy from "./pages/user/Privacy";
@@ -187,6 +187,8 @@ function AppContent() {
 
         {/* Helpdesk & Automation */}
         <Route path="/helpdesk" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee', 'accountant']}><Helpdesk /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><SupportTicket /></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><Calendar /></ProtectedRoute>} />
         <Route path="/automation-center" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><AutomationCenter /></ProtectedRoute>} />
 
         {/* Audit Logs */}
@@ -253,7 +255,6 @@ function AppContent() {
         <Route path="/complete-profile" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Complete Profile" /></ProtectedRoute>} />
         <Route path="/upload-documents" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="Upload Documents" /></ProtectedRoute>} />
         <Route path="/policies" element={<ProtectedRoute requiredRoles={['newuser']}><PlaceholderPage title="View Policies" /></ProtectedRoute>} />
-        <Route path="/support" element={<ProtectedRoute><SupportTicket /></ProtectedRoute>} />
         <Route path="/knowledge-base" element={<ProtectedRoute><KnowledgeBase /></ProtectedRoute>} />
         <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
         <Route path="/privacy" element={<ProtectedRoute><UserPrivacy /></ProtectedRoute>} />

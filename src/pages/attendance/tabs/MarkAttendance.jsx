@@ -53,7 +53,7 @@ const MarkAttendance = () => {
         setSubmitting(true);
 
         try {
-            await attendanceService.submitAttendance(formData);
+            await attendanceService.addManualAttendance(formData);
 
             // Trigger Automation
             triggerEvent('onMark', {

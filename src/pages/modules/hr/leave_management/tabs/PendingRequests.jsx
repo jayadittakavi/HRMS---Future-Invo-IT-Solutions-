@@ -1,27 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { FaCheck, FaTimes, FaEye, FaSearch, FaFilter } from 'react-icons/fa';
+import { FaCheck, FaTimes, FaEye, FaSearch } from 'react-icons/fa';
 import { MdPendingActions } from 'react-icons/md';
 import { useSearch } from '../../../../../context/SearchContext';
+import { leaveService } from '../../../../../services/leaveService';
 
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
-
-const initRequests = [
-    { id: 1, name: 'John Doe', dept: 'Engineering', type: 'Sick Leave', from: 'Feb 20', to: 'Feb 21', days: 2, reason: 'Viral Fever', avatar: 'JD', applied: '2 days ago' },
-    { id: 2, name: 'Jane Smith', dept: 'Sales', type: 'Casual Leave', from: 'Feb 25', to: 'Feb 25', days: 1, reason: 'Personal work', avatar: 'JS', applied: '1 day ago' },
-    { id: 3, name: 'Riya Gupta', dept: 'HR', type: 'Privilege', from: 'Mar 02', to: 'Mar 04', days: 3, reason: 'Family function', avatar: 'RG', applied: '5 hrs ago' },
-    { id: 4, name: 'Arjun Mehta', dept: 'Marketing', type: 'Sick Leave', from: 'Feb 19', to: 'Feb 20', days: 2, reason: 'Dengue treatment', avatar: 'AM', applied: '3 days ago' },
-];
 
 const avatarColor = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5];
 
 const PendingRequests = () => {
-    const [requests, setRequests] = useState(initRequests);
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [search, setSearch] = useState(globalSearchTerm);
 
     useEffect(() => {
         setSearch(globalSearchTerm);
     }, [globalSearchTerm]);
+
+    useEffect(() => {
+        fetchPendingRequests();
+    }, []);
+
+    const fetchPendingRequests = async () => {
+        try {
+            setLoading(true);
+            const response = await leaveService.getPendingApprovals();
+            if (response.ok) {
+                const data = await response.json();
+                setRequests(data);
+            }
+        } catch (error) {
+            console.error("Error fetching pending requests:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const [viewId, setViewId] = useState(null);
     const [rejectModal, setRejectModal] = useState(null);
     const [rejectReason, setRejectReason] = useState('');
@@ -34,20 +49,36 @@ const PendingRequests = () => {
 
     const notify = (msg) => { setActionMsg(msg); setTimeout(() => setActionMsg(''), 3000); };
 
-    const approve = (id) => {
-        setRequests(prev => prev.filter(r => r.id !== id));
-        notify('✅ Leave approved successfully.');
+    const approve = async (id) => {
+        try {
+            const response = await leaveService.approveLeave(id);
+            if (response.ok) {
+                setRequests(prev => prev.filter(r => r.id !== id));
+                notify('✅ Leave approved successfully.');
+            }
+        } catch (error) {
+            console.error("Error approving leave:", error);
+        }
     };
 
-    const rejectConfirm = () => {
+    const rejectConfirm = async () => {
         if (!rejectReason.trim()) return;
-        setRequests(prev => prev.filter(r => r.id !== rejectModal));
-        setRejectModal(null);
-        setRejectReason('');
-        notify('❌ Leave rejected.');
+        try {
+            const response = await leaveService.rejectLeave(rejectModal);
+            if (response.ok) {
+                setRequests(prev => prev.filter(r => r.id !== rejectModal));
+                setRejectModal(null);
+                setRejectReason('');
+                notify('❌ Leave rejected.');
+            }
+        } catch (error) {
+            console.error("Error rejecting leave:", error);
+        }
     };
 
     const viewing = requests.find(r => r.id === viewId);
+
+    if (loading) return <div className="p-4 text-center">Loading pending requests...</div>;
 
     return (
         <div>

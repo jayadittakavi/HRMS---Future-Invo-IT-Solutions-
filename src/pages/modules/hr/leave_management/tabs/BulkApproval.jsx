@@ -1,25 +1,39 @@
-import React, { useState } from 'react';
-import { FaCheck, FaTimes, FaSearch } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaSearch } from 'react-icons/fa';
 import { MdPlaylistAddCheck, MdCheckCircle, MdCancel } from 'react-icons/md';
+import { leaveService } from '../../../../../services/leaveService';
 
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
-
-const initRequests = [
-    { id: 1, name: 'John Doe', dept: 'Engineering', type: 'Sick Leave', from: 'Feb 20', to: 'Feb 21', days: 2, reason: 'Viral Fever', avatar: 'JD' },
-    { id: 2, name: 'Alice Wonder', dept: 'Marketing', type: 'Sick Leave', from: 'Feb 20', to: 'Feb 20', days: 1, reason: 'Viral Fever', avatar: 'AW' },
-    { id: 3, name: 'Bob Builder', dept: 'Sales', type: 'Sick Leave', from: 'Feb 20', to: 'Feb 20', days: 1, reason: 'Viral Fever', avatar: 'BB' },
-    { id: 4, name: 'Charlie Ray', dept: 'Engineering', type: 'Casual Leave', from: 'Feb 22', to: 'Feb 22', days: 1, reason: 'Family function', avatar: 'CR' },
-];
 
 const avatarColor = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444'][i % 4];
 
 const BulkApproval = () => {
-    const [requests, setRequests] = useState(initRequests);
+    const [requests, setRequests] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState([]);
     const [search, setSearch] = useState('');
     const [rejectModal, setRejectModal] = useState(false);
     const [rejectReason, setRejectReason] = useState('');
     const [toast, setToast] = useState('');
+
+    useEffect(() => {
+        fetchPendingRequests();
+    }, []);
+
+    const fetchPendingRequests = async () => {
+        try {
+            setLoading(true);
+            const response = await leaveService.getPendingApprovals();
+            if (response.ok) {
+                const data = await response.json();
+                setRequests(data);
+            }
+        } catch (error) {
+            console.error("Error fetching pending requests:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const notify = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
@@ -31,20 +45,37 @@ const BulkApproval = () => {
     const toggle = (id) => setSelectedIds(p => p.includes(id) ? p.filter(s => s !== id) : [...p, id]);
     const toggleAll = () => setSelectedIds(p => p.length === filtered.length ? [] : filtered.map(r => r.id));
 
-    const bulkApprove = () => {
-        setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
-        notify(`✅ ${selectedIds.length} request(s) approved.`);
-        setSelectedIds([]);
+    const bulkApprove = async () => {
+        try {
+            const response = await leaveService.bulkAction(selectedIds, "APPROVE");
+            if (response.ok) {
+                setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
+                notify(`✅ ${selectedIds.length} request(s) approved.`);
+                setSelectedIds([]);
+            }
+        } catch (error) {
+            console.error("Error in bulk approve:", error);
+        }
     };
 
-    const bulkReject = () => {
+    const bulkReject = async () => {
         if (!rejectReason.trim()) return;
-        setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
-        notify(`❌ ${selectedIds.length} request(s) rejected.`);
-        setSelectedIds([]);
-        setRejectModal(false);
-        setRejectReason('');
+        try {
+            // Reusing bulkAction with REJECT action
+            const response = await leaveService.bulkAction(selectedIds, "REJECT");
+            if (response.ok) {
+                setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
+                notify(`❌ ${selectedIds.length} request(s) rejected.`);
+                setSelectedIds([]);
+                setRejectModal(false);
+                setRejectReason('');
+            }
+        } catch (error) {
+            console.error("Error in bulk reject:", error);
+        }
     };
+
+    if (loading) return <div className="p-4 text-center">Loading pending requests...</div>;
 
     return (
         <div>

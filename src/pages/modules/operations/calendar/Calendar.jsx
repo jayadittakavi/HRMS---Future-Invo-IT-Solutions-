@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, subMonths, isSameMonth, isSameDay, addDays, isToday } from 'date-fns';
 import { FaChevronLeft, FaChevronRight, FaPlus } from 'react-icons/fa';
 import Navbar from '../../../../components/layout/Navbar';
 import '../../../../components/layout/DashboardLayout.css'; // Keep for dashboard-card styles
+import { calendarService } from '../../../../services/calendarService';
+import { useAuth } from '../../../../context/AuthContext';
 
 const Calendar = () => {
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase() || 'employee';
+    const canManageEvents = ['superadmin', 'admin', 'hr'].includes(role);
+
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState(new Date());
 
     // Event State
-    const [events, setEvents] = useState([
-        { id: 1, title: 'Dentist Appointment', time: '09:30 - 10:30', date: new Date(), type: 'personal', description: 'Regular checkup' },
-        { id: 2, title: 'Team Meeting', time: '11:00 - 12:00', date: new Date(), type: 'work', description: 'Weekly sync' },
-        { id: 3, title: 'Project Review', time: '14:00 - 15:00', date: addDays(new Date(), 2), type: 'important', description: 'Critical milestone review' },
-    ]);
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     // Modal State
     const [showModal, setShowModal] = useState(false);
@@ -27,6 +30,27 @@ const Calendar = () => {
         type: 'work',
         description: ''
     });
+
+    const fetchEvents = async () => {
+        setLoading(true);
+        try {
+            const data = await calendarService.getEvents();
+            const formatted = data.map(ev => ({
+                ...ev,
+                date: new Date(ev.date),
+                time: ev.time || `${ev.startTime} - ${ev.endTime}`
+            }));
+            setEvents(formatted);
+        } catch (err) {
+            console.error("Failed to load events", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchEvents();
+    }, []);
 
     const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
     const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
@@ -64,27 +88,44 @@ const Calendar = () => {
         setShowModal(true);
     };
 
-    const handleSaveEvent = () => {
-        if (isEditing) {
-            setEvents(events.map(ev => ev.id === currentEvent.id ? {
-                ...currentEvent,
-                date: new Date(currentEvent.date),
-                time: `${currentEvent.startTime} - ${currentEvent.endTime}`
-            } : ev));
-        } else {
-            setEvents([...events, {
-                ...currentEvent,
-                id: Date.now(),
-                date: new Date(currentEvent.date),
-                time: `${currentEvent.startTime} - ${currentEvent.endTime}`
-            }]);
+    const handleSaveEvent = async () => {
+        if (!canManageEvents) {
+            alert("Permission denied: Only Super Admin, Admin, and HR can create or edit events.");
+            return;
         }
-        setShowModal(false);
+
+        try {
+            if (isEditing) {
+                await calendarService.updateEvent(currentEvent.id, {
+                    ...currentEvent,
+                    time: `${currentEvent.startTime} - ${currentEvent.endTime}`
+                });
+            } else {
+                await calendarService.createEvent({
+                    ...currentEvent,
+                    time: `${currentEvent.startTime} - ${currentEvent.endTime}`
+                });
+            }
+            fetchEvents();
+            setShowModal(false);
+        } catch (err) {
+            alert("Failed to save event: " + err.message);
+        }
     };
 
-    const handleDeleteEvent = () => {
-        setEvents(events.filter(ev => ev.id !== currentEvent.id));
-        setShowModal(false);
+    const handleDeleteEvent = async () => {
+        if (!canManageEvents) {
+            alert("Permission denied");
+            return;
+        }
+
+        try {
+            await calendarService.deleteEvent(currentEvent.id);
+            fetchEvents();
+            setShowModal(false);
+        } catch (err) {
+            alert("Failed to delete event: " + err.message);
+        }
     };
 
     const renderHeader = () => {

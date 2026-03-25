@@ -1,78 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSync, FaCheckCircle, FaExclamationCircle, FaClock, FaDesktop, FaPlay, FaStop } from 'react-icons/fa';
+import { attendanceService } from '../service/service';
 
 const SyncUI = () => {
-    const [devices, setDevices] = useState([
-        {
-            id: 1,
-            deviceName: 'Main Office Biometric',
-            deviceId: 'BIO-001',
-            location: 'Main Entrance',
-            status: 'Connected',
-            lastSync: '2026-02-18 10:30 AM',
-            pendingRecords: 45,
-            syncStatus: 'Idle'
-        },
-        {
-            id: 2,
-            deviceName: 'Branch Office Scanner',
-            deviceId: 'BIO-002',
-            location: 'Branch Office',
-            status: 'Connected',
-            lastSync: '2026-02-18 09:15 AM',
-            pendingRecords: 12,
-            syncStatus: 'Idle'
-        },
-        {
-            id: 3,
-            deviceName: 'Warehouse Entry',
-            deviceId: 'BIO-003',
-            location: 'Warehouse Gate',
-            status: 'Disconnected',
-            lastSync: '2026-02-17 05:00 PM',
-            pendingRecords: 156,
-            syncStatus: 'Error'
-        }
-    ]);
-
+    const [devices, setDevices] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [autoSync, setAutoSync] = useState(true);
     const [syncInterval, setSyncInterval] = useState(30);
     const [syncing, setSyncing] = useState({});
 
-    const handleSyncDevice = (deviceId) => {
-        setSyncing({ ...syncing, [deviceId]: true });
-
-        // Simulate sync process
-        setTimeout(() => {
-            setDevices(devices.map(d => {
-                if (d.id === deviceId) {
-                    return {
-                        ...d,
-                        lastSync: new Date().toLocaleString('en-IN', {
-                            year: 'numeric',
-                            month: '2-digit',
-                            day: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                        }),
-                        pendingRecords: 0,
-                        syncStatus: 'Success'
-                    };
-                }
-                return d;
-            }));
-            setSyncing({ ...syncing, [deviceId]: false });
-        }, 2000);
+    const fetchSyncStatus = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getSyncStatus();
+            setDevices(data || []);
+        } catch (err) {
+            console.error("Fetch sync status failed:", err);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleSyncAll = () => {
-        devices.forEach(device => {
-            if (device.status === 'Connected') {
-                handleSyncDevice(device.id);
-            }
-        });
+    useEffect(() => {
+        fetchSyncStatus();
+    }, []);
+
+    const handleSyncDevice = async (deviceId) => {
+        setSyncing(prev => ({ ...prev, [deviceId]: true }));
+        try {
+            await attendanceService.triggerSync({ deviceId });
+            alert("Sync triggered successfully!");
+            fetchSyncStatus();
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
+        } finally {
+            setSyncing(prev => ({ ...prev, [deviceId]: false }));
+        }
     };
+
+    const handleSyncAll = async () => {
+        const allIds = devices.filter(d => d.status === 'Connected' || d.status === 'Active').map(d => d.id || d.deviceId);
+        for (const id of allIds) {
+            await handleSyncDevice(id);
+        }
+    };
+
 
     const stats = {
         totalDevices: devices.length,

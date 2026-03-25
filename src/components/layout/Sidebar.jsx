@@ -9,6 +9,7 @@ import {
     MdBusiness, // Departments
     MdBadge, // Designations
     MdFactCheck, // Attendance
+    MdEvent, // Calendar
     MdEventBusy, // Leave
     MdAttachMoney, // Payroll
     MdRateReview, // Performance
@@ -43,13 +44,14 @@ import {
     MdExpandLess,
     MdExpandMore,
     MdChevronLeft,
+    MdSupportAgent,
     MdChevronRight
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     const { user, logout } = useAuth(); // Assuming logout function exists in context
     const navigate = useNavigate();
-    const role = user?.role?.toLowerCase() || 'new_user'; // Default to new_user if undefined
+    const role = user?.role?.toLowerCase().replace(/\s/g, '') || 'new_user'; // Default to new_user if undefined
     const [openDropdowns, setOpenDropdowns] = useState({});
 
     const toggleDropdown = (name) => {
@@ -99,6 +101,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
             { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
             { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
+            { name: 'Calendar', icon: <MdEvent size={20} />, path: '/calendar' },
+            { name: 'Concierge & Support', icon: <MdSupportAgent size={20} />, path: '/support' },
             {
                 name: 'Requests',
                 icon: <MdEventBusy size={20} />,
@@ -125,7 +129,21 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 ]
             },
             { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
+            { name: 'Feedback', icon: <MdRateReview size={20} />, path: '/feedback' },
         ];
+
+        // Filter out specific modules for Super Admin role
+        if (role === 'superadmin') {
+            const forbiddenPaths = [
+                '/support',
+                '/recruitment',
+                '/onboarding',
+                '/training',
+                '/payslips',
+                '/feedback'
+            ];
+            links = links.filter(link => !forbiddenPaths.includes(link.path));
+        }
 
         links = [...links];
 

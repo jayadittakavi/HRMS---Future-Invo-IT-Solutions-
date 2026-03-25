@@ -51,30 +51,30 @@ const AttendanceDashboard = ({ onTabChange }) => {
 
     // Helper to map stats to summary cards
     const summaryCards = [
-        { title: 'Present', value: stats?.summary?.present || 0, icon: <FaUserCheck />, color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', tab: 'bulk' },
-        { title: 'Absent', value: stats?.summary?.absent || 0, icon: <FaUserTimes />, color: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', tab: 'bulk' },
-        { title: 'Half Day', value: stats?.summary?.halfDay || 0, icon: <FaClock />, color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', tab: 'bulk' },
-        { title: 'Late', value: stats?.summary?.late || 0, icon: <FaCalendarDay />, color: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', tab: 'bulk' },
-        { title: 'WFH', value: stats?.summary?.wfh || 0, icon: <FaHome />, color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', tab: 'bulk' },
+        { title: 'Present', value: stats?.summary?.present || stats?.present || 0, icon: <FaUserCheck />, color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', tab: 'bulk' },
+        { title: 'Absent', value: stats?.summary?.absent || stats?.absent || 0, icon: <FaUserTimes />, color: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', tab: 'bulk' },
+        { title: 'Half Day', value: stats?.summary?.halfDay || stats?.halfDay || 0, icon: <FaClock />, color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', tab: 'bulk' },
+        { title: 'Late', value: stats?.summary?.late || stats?.late || 0, icon: <FaCalendarDay />, color: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', tab: 'bulk' },
+        { title: 'WFH', value: stats?.summary?.wfh || stats?.wfh || 0, icon: <FaHome />, color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', tab: 'bulk' },
     ];
 
     // Map shift distribution data
     const shiftData = {
-        labels: stats?.shiftDistribution?.map(s => s.name) || ['General Shift', 'Morning Shift', 'Night Shift'],
+        labels: Array.isArray(stats?.shiftDistribution) ? stats.shiftDistribution.map(s => s.name) : ['General Shift', 'Morning Shift', 'Night Shift'],
         datasets: [{
             label: 'Employees Present',
-            data: stats?.shiftDistribution?.map(s => s.count) || [0, 0, 0],
+            data: Array.isArray(stats?.shiftDistribution) ? stats.shiftDistribution.map(s => s.count) : [0, 0, 0],
             backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
             borderRadius: 8,
         }]
     };
 
     const dailyTrendData = {
-        labels: stats?.trendData?.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        labels: stats?.trendData?.labels || stats?.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
         datasets: [
             {
                 label: 'Present',
-                data: stats?.trendData?.present || [0, 0, 0, 0, 0],
+                data: stats?.trendData?.present || stats?.weeklyTrend?.present || [0, 0, 0, 0, 0],
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16, 185, 129, 0.1)',
                 tension: 0.4,
@@ -82,7 +82,7 @@ const AttendanceDashboard = ({ onTabChange }) => {
             },
             {
                 label: 'Absent',
-                data: stats?.trendData?.absent || [0, 0, 0, 0, 0],
+                data: stats?.trendData?.absent || stats?.weeklyTrend?.absent || [0, 0, 0, 0, 0],
                 borderColor: '#ef4444',
                 backgroundColor: 'rgba(239, 68, 68, 0.1)',
                 tension: 0.4,

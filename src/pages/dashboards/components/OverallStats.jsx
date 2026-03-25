@@ -113,8 +113,8 @@ const OverallStats = () => {
                                         </div>
                                     </div>
                                     <div className="d-flex gap-1">
-                                        <button className="btn btn-sm btn-success py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Approve', i)}>✓</button>
-                                        <button className="btn btn-sm btn-danger py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Reject', i)}>✕</button>
+                                        <button className="btn btn-sm btn-success py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Approve', item)}>✓</button>
+                                        <button className="btn btn-sm btn-danger py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Reject', item)}>✕</button>
                                     </div>
                                 </div>
                             ))}

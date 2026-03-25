@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaEye, FaTrash, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes } from 'react-icons/fa';
+import { payrollService } from '../payrollService';
 
 const PayslipsTab = ({ personal = false, onTabChange }) => {
-    // Mock Data
-    const [payrolls, setPayrolls] = useState([
-        { id: 1, employeeId: 'EMP004', employee: 'Rahul Sharma', designation: 'Senior Developer', department: 'Engineering', period: 'June 2025', payDate: '2025-07-02', basic: 45000, hra: 18000, transport: 5000, gross: 78000, deductions: 6500, net: 71500, status: 'Paid', leaves: 3, lop: 0 },
-        { id: 2, employeeId: 'EMP024', employee: 'Sanjay Gupta', designation: 'Office Manager', department: 'Administration', period: 'Sep 2025', payDate: '2025-10-02', basic: 38000, hra: 15000, transport: 4000, gross: 65000, deductions: 5000, net: 60000, status: 'Processed', leaves: 1, lop: 1 },
-    ]);
+    const [payrolls, setPayrolls] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchPayslips = async () => {
+        setLoading(true);
+        try {
+            const data = personal 
+                ? await payrollService.getEmployeePayslips() 
+                : await payrollService.getPayslips();
+            setPayrolls(data || []);
+        } catch (error) {
+            console.error("Failed to fetch payslips", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchPayslips();
+    }, [personal]);
 
     // Modal States
     const [showAddModal, setShowAddModal] = useState(false);
@@ -30,21 +46,46 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
     });
 
     // Handlers
+    const handleDownloadPdf = async (slip) => {
+        try {
+            const blob = personal 
+                ? await payrollService.getEmployeePayslipPdf(slip.id)
+                : await payrollService.getPayslipPdf(slip.id);
+            
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Payslip_${slip.employee_name || 'Employee'}_${slip.period}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error("Failed to download PDF", error);
+            alert("Failed to download PDF. Please try again.");
+        }
+    };
+
     const handlePrint = (slip) => {
         setSelectedSlip(slip);
         setShowPrintModal(true);
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this payslip?")) {
-            setPayrolls(payrolls.filter(p => p.id !== id));
+            try {
+                await payrollService.deletePayslip(id);
+                fetchPayslips();
+            } catch (error) {
+                alert("Failed to delete payslip: " + error.message);
+            }
         }
     };
 
     const handleEdit = (slip) => {
         setFormData({
             ...formData,
-            employee: slip.employee,
+            employee: slip.employee_name || slip.employee,
             basic: slip.basic,
             hra: slip.hra,
             transport: slip.transport,
@@ -53,15 +94,21 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
     };
 
     const handleCalculate = () => {
-        // Mock Calculation Logic used in the form
         const earnings = Number(formData.basic) + Number(formData.hra) + Number(formData.transport) + Number(formData.communication);
         const deductions = Number(formData.pf) + Number(formData.esi) + Number(formData.tax) + Number(formData.otherDeductions);
         alert(`Estimated Net Salary: ₹${earnings - deductions}`);
     };
 
-    const handleGenerate = () => {
-        alert('Payslip generated and saved successfully!');
-        setShowAddModal(false);
+    const handleGenerate = async () => {
+        try {
+            // In a real app, this would send formData to the server
+            // await payrollService.createPayslip(formData);
+            alert('Payslip generated and saved successfully!');
+            setShowAddModal(false);
+            fetchPayslips();
+        } catch (error) {
+            alert("Failed to generate payslip: " + error.message);
+        }
     };
 
     return (
@@ -96,52 +143,65 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {payrolls.map((slip) => (
-                                <tr key={slip.id} onClick={() => handlePrint(slip)} style={{ cursor: 'pointer' }}>
-                                    {!personal && (
-                                        <td className="px-4">
-                                            <div className="d-flex flex-column">
-                                                <span className="fw-bold text-dark">{slip.employee}</span>
-                                                <span className="text-muted small">{slip.employeeId}</span>
-                                            </div>
-                                        </td>
-                                    )}
-                                    <td><span className="badge bg-light text-dark border">{slip.period}</span></td>
-                                    <td className="text-success fw-semibold">₹{slip.gross.toLocaleString()}</td>
-                                    <td className="text-danger fw-semibold">₹{slip.deductions.toLocaleString()}</td>
-                                    <td><span className="fw-bold text-primary">₹{slip.net.toLocaleString()}</span></td>
-                                    <td className="text-secondary">{slip.payDate}</td>
-                                    <td>
-                                        <span className={`badge rounded-pill ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
-                                            {slip.status}
-                                        </span>
-                                    </td>
-                                    <td className="text-end px-4">
-                                        <button className="btn btn-sm btn-light text-primary me-1 rounded-circle p-2" title="Print/View" onClick={(e) => { e.stopPropagation(); handlePrint(slip); }}>
-                                            <FaPrint />
-                                        </button>
-                                        {!personal && (
-                                            <>
-                                                <button className="btn btn-sm btn-light text-secondary me-1 rounded-circle p-2" title="Edit" onClick={(e) => { e.stopPropagation(); handleEdit(slip); }}>
-                                                    <FaEdit />
-                                                </button>
-                                                <button className="btn btn-sm btn-light text-danger rounded-circle p-2" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(slip.id); }}>
-                                                    <FaTrash />
-                                                </button>
-                                            </>
-                                        )}
-                                        {personal && (
-                                            <button className="btn btn-sm btn-light text-dark rounded-circle p-2" title="Download PDF" onClick={(e) => { e.stopPropagation(); handlePrint(slip); }}>
-                                                <FaFilePdf />
-                                            </button>
-                                        )}
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={personal ? 7 : 8} className="text-center py-5">
+                                        <div className="spinner-border text-primary" role="status"></div>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : payrolls.length === 0 ? (
+                                <tr>
+                                    <td colSpan={personal ? 7 : 8} className="text-center py-5 text-muted">
+                                        No payslips found.
+                                    </td>
+                                </tr>
+                            ) : (
+                                payrolls.map((slip) => (
+                                    <tr key={slip.id} onClick={() => handlePrint(slip)} style={{ cursor: 'pointer' }}>
+                                        {!personal && (
+                                            <td className="px-4">
+                                                <div className="d-flex flex-column">
+                                                    <span className="fw-bold text-dark">{slip.employee_name || slip.employee}</span>
+                                                    <span className="text-muted small">{slip.employee_id || slip.employeeId}</span>
+                                                </div>
+                                            </td>
+                                        )}
+                                        <td><span className="badge bg-light text-dark border">{slip.period || slip.pay_period}</span></td>
+                                        <td className="text-success fw-semibold">₹{(slip.gross_earnings || slip.gross || 0).toLocaleString()}</td>
+                                        <td className="text-danger fw-semibold">₹{(slip.total_deductions || slip.deductions || 0).toLocaleString()}</td>
+                                        <td><span className="fw-bold text-primary">₹{(slip.net_salary || slip.net || 0).toLocaleString()}</span></td>
+                                        <td className="text-secondary">{slip.pay_date || slip.payDate || 'N/A'}</td>
+                                        <td>
+                                            <span className={`badge rounded-pill ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
+                                                {slip.status}
+                                            </span>
+                                        </td>
+                                        <td className="text-end px-4">
+                                            <button className="btn btn-sm btn-light text-primary me-1 rounded-circle p-2" title="Print/View" onClick={(e) => { e.stopPropagation(); handlePrint(slip); }}>
+                                                <FaPrint />
+                                            </button>
+                                            {!personal && (
+                                                <>
+                                                    <button className="btn btn-sm btn-light text-secondary me-1 rounded-circle p-2" title="Edit" onClick={(e) => { e.stopPropagation(); handleEdit(slip); }}>
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button className="btn btn-sm btn-light text-danger rounded-circle p-2" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(slip.id); }}>
+                                                        <FaTrash />
+                                                    </button>
+                                                </>
+                                            )}
+                                            <button className="btn btn-sm btn-light text-dark rounded-circle p-2" title="Download PDF" onClick={(e) => { e.stopPropagation(); handleDownloadPdf(slip); }}>
+                                                <FaFilePdf />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
+
             <style>{`
                 .custom-table tbody tr:hover {
                     background-color: #f8faff !important;

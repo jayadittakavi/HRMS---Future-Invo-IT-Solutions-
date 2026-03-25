@@ -5,32 +5,53 @@ import {
     FaCheckCircle, FaExclamationCircle, FaUserTag,
     FaArrowRight, FaEllipsisV, FaEnvelopeOpenText
 } from 'react-icons/fa';
+import { supportService } from '../../services/supportService';
+import { useAuth } from '../../context/AuthContext';
 
 const SupportTicket = () => {
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase() || 'employee';
+    const isAdminRole = ['superadmin', 'admin', 'hr'].includes(role);
+
     const [showModal, setShowModal] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-
-    const [tickets, setTickets] = useState([
-        { id: '#TKT-782', subject: 'Login issue on payroll module', category: 'Technical', status: 'Open', priority: 'High', date: '2026-03-09', description: 'Unable to login via the Android application since the last update. The screen just spins.' },
-        { id: '#TKT-741', subject: 'Tax calculation query', category: 'Finance', status: 'In Progress', priority: 'Medium', date: '2026-03-07', description: 'The tax deduction for February seems higher than expected.' },
-        { id: '#TKT-692', subject: 'Missing employee document', category: 'HR', status: 'Closed', priority: 'Low', date: '2026-03-01', description: 'Confirmed my degree certificate was uploaded.' },
-    ]);
-
+    const [tickets, setTickets] = useState([]);
+    const [statsData, setStatsData] = useState({ total_active: 0, pending_action: 0, resolution_rate: '0%' });
+    const [loading, setLoading] = useState(false);
     const [newTicket, setNewTicket] = useState({ subject: '', category: 'Technical', priority: 'Medium', description: '' });
 
-    const handleRaiseTicket = (e) => {
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [statsRes, ticketsRes] = await Promise.all([
+                supportService.getDashboardStats(),
+                supportService.getTickets()
+            ]);
+            setStatsData(statsRes);
+            setTickets(ticketsRes);
+        } catch (err) {
+            console.error("Failed to load support data", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleRaiseTicket = async (e) => {
         e.preventDefault();
-        const ticket = {
-            id: `#TKT-${Math.floor(Math.random() * 900) + 100}`,
-            ...newTicket,
-            status: 'Open',
-            date: new Date().toISOString().split('T')[0]
-        };
-        setTickets([ticket, ...tickets]);
-        setShowModal(false);
-        setNewTicket({ subject: '', category: 'Technical', priority: 'Medium', description: '' });
-        alert("Support Ticket raised successfully!");
+        try {
+            await supportService.createTicket(newTicket);
+            setShowModal(false);
+            setNewTicket({ subject: '', category: 'Technical', priority: 'Medium', description: '' });
+            fetchData();
+            alert("Support Ticket raised successfully!");
+        } catch (err) {
+            alert("Failed to raise ticket: " + err.message);
+        }
     };
 
     const getStatusStyle = (status) => {
@@ -43,9 +64,9 @@ const SupportTicket = () => {
     };
 
     const stats = [
-        { label: 'Total Active', count: tickets.length, icon: <FaEnvelopeOpenText />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
-        { label: 'Pending Action', count: tickets.filter(t => t.status === 'Open').length, icon: <FaExclamationCircle />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
-        { label: 'Resolution Rate', count: '84%', icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { label: 'Total Active', count: statsData.total_active || 0, icon: <FaEnvelopeOpenText />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
+        { label: 'Pending Action', count: statsData.pending_action || 0, icon: <FaExclamationCircle />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)' },
+        { label: 'Resolution Rate', count: statsData.resolution_rate || '0%', icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
     ];
 
     const filteredTickets = tickets.filter(t =>
@@ -280,13 +301,34 @@ const SupportTicket = () => {
                                         <div className="col-6">
                                             <label className="small fw-bold text-muted text-uppercase opacity-75">Current Status</label>
                                             <div className="mt-2">
-                                                <span style={{
-                                                    padding: '6px 16px', borderRadius: '50px',
-                                                    fontSize: '0.7rem', fontWeight: 800,
-                                                    background: getStatusStyle(selectedTicket.status).bg,
-                                                    color: getStatusStyle(selectedTicket.status).color,
-                                                    textTransform: 'uppercase'
-                                                }}>{selectedTicket.status}</span>
+                                                {isAdminRole ? (
+                                                    <select 
+                                                        className="form-select form-select-sm rounded-pill"
+                                                        value={selectedTicket.status}
+                                                        onChange={async (e) => {
+                                                            try {
+                                                                await supportService.updateTicket(selectedTicket.id, { status: e.target.value });
+                                                                setSelectedTicket({ ...selectedTicket, status: e.target.value });
+                                                                fetchData();
+                                                            } catch (err) {
+                                                                alert("Update failed: " + err.message);
+                                                            }
+                                                        }}
+                                                        style={{ width: '130px', fontWeight: 700 }}
+                                                    >
+                                                        <option value="Open">Open</option>
+                                                        <option value="In Progress">In Progress</option>
+                                                        <option value="Closed">Closed</option>
+                                                    </select>
+                                                ) : (
+                                                    <span style={{
+                                                        padding: '6px 16px', borderRadius: '50px',
+                                                        fontSize: '0.7rem', fontWeight: 800,
+                                                        background: getStatusStyle(selectedTicket.status).bg,
+                                                        color: getStatusStyle(selectedTicket.status).color,
+                                                        textTransform: 'uppercase'
+                                                    }}>{selectedTicket.status}</span>
+                                                )}
                                             </div>
                                         </div>
                                         <div className="col-6">

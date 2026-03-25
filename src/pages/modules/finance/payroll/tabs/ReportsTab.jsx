@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { payrollService } from '../payrollService';
 
 /* ─── Report Definitions ───────────────────────────────────────────── */
 const REPORTS = [
@@ -11,13 +12,6 @@ const REPORTS = [
         bg: '#eff6ff',
         border: '#bfdbfe',
         columns: ['Employee ID', 'Employee Name', 'Department', 'Basic', 'HRA', 'Allowances', 'Gross', 'Deductions', 'Net Pay'],
-        data: [
-            { eid: 'EMP001', name: 'Ravi Kumar', dept: 'Engineering', basic: '₹40,000', hra: '₹16,000', allow: '₹8,000', gross: '₹64,000', ded: '₹6,200', net: '₹57,800' },
-            { eid: 'EMP002', name: 'Priya Sharma', dept: 'HR', basic: '₹35,000', hra: '₹14,000', allow: '₹6,500', gross: '₹55,500', ded: '₹5,400', net: '₹50,100' },
-            { eid: 'EMP003', name: 'Amit Singh', dept: 'Finance', basic: '₹42,000', hra: '₹16,800', allow: '₹9,000', gross: '₹67,800', ded: '₹6,600', net: '₹61,200' },
-            { eid: 'EMP004', name: 'Neha Gupta', dept: 'Marketing', basic: '₹30,000', hra: '₹12,000', allow: '₹5,000', gross: '₹47,000', ded: '₹4,600', net: '₹42,400' },
-            { eid: 'EMP005', name: 'Suresh Patel', dept: 'Operations', basic: '₹38,000', hra: '₹15,200', allow: '₹7,500', gross: '₹60,700', ded: '₹5,900', net: '₹54,800' },
-        ],
     },
     {
         id: 'income-tax-deductions',
@@ -28,13 +22,6 @@ const REPORTS = [
         bg: '#f5f3ff',
         border: '#ddd6fe',
         columns: ['Employee ID', 'Employee Name', 'PAN', 'Taxable Income', 'TDS This Month', 'TDS YTD', 'Tax Regime'],
-        data: [
-            { eid: 'EMP001', name: 'Ravi Kumar', pan: 'ABCDE1234F', taxable: '₹6,93,600', tds: '₹4,820', ytd: '₹57,840', regime: 'New' },
-            { eid: 'EMP002', name: 'Priya Sharma', pan: 'PQRST5678G', taxable: '₹6,01,200', tds: '₹3,760', ytd: '₹45,120', regime: 'Old' },
-            { eid: 'EMP003', name: 'Amit Singh', pan: 'LMNOP9012H', taxable: '₹7,34,400', tds: '₹5,390', ytd: '₹64,680', regime: 'New' },
-            { eid: 'EMP004', name: 'Neha Gupta', pan: 'UVWXY3456I', taxable: '₹5,08,800', tds: '₹2,040', ytd: '₹24,480', regime: 'Old' },
-            { eid: 'EMP005', name: 'Suresh Patel', pan: 'EFGHI7890J', taxable: '₹6,57,600', tds: '₹4,380', ytd: '₹52,560', regime: 'New' },
-        ],
     },
     {
         id: 'professional-tax-deductions',
@@ -45,13 +32,6 @@ const REPORTS = [
         bg: '#ecfeff',
         border: '#a5f3fc',
         columns: ['Employee ID', 'Employee Name', 'State', 'Gross Salary', 'PT Slab', 'PT Amount', 'Status'],
-        data: [
-            { eid: 'EMP001', name: 'Ravi Kumar', state: 'Karnataka', gross: '₹57,800', slab: '> ₹15,000', pt: '₹200', status: 'Remitted' },
-            { eid: 'EMP002', name: 'Priya Sharma', state: 'Maharashtra', gross: '₹50,100', slab: '> ₹10,000', pt: '₹200', status: 'Remitted' },
-            { eid: 'EMP003', name: 'Amit Singh', state: 'Karnataka', gross: '₹61,200', slab: '> ₹15,000', pt: '₹200', status: 'Pending' },
-            { eid: 'EMP004', name: 'Neha Gupta', state: 'Delhi', gross: '₹42,400', slab: 'Exempt', pt: '₹0', status: 'NA' },
-            { eid: 'EMP005', name: 'Suresh Patel', state: 'Gujarat', gross: '₹54,800', slab: 'Exempt', pt: '₹0', status: 'NA' },
-        ],
     },
     {
         id: 'general-ledger',
@@ -62,13 +42,6 @@ const REPORTS = [
         bg: '#ecfdf5',
         border: '#a7f3d0',
         columns: ['Date', 'Ledger Account', 'Description', 'Debit (₹)', 'Credit (₹)', 'Balance (₹)'],
-        data: [
-            { date: '01 Feb 2026', account: 'Salary Payable', desc: 'Basic Salary - Feb 2026', debit: '1,85,000', credit: '-', balance: '1,85,000' },
-            { date: '01 Feb 2026', account: 'HRA Payable', desc: 'HRA Payout - Feb 2026', debit: '74,000', credit: '-', balance: '74,000' },
-            { date: '01 Feb 2026', account: 'PF Payable', desc: 'Employee PF - Feb 2026', debit: '-', credit: '22,200', balance: '-22,200' },
-            { date: '01 Feb 2026', account: 'TDS Payable', desc: 'TDS Deducted - Feb 2026', debit: '-', credit: '20,390', balance: '-20,390' },
-            { date: '28 Feb 2026', account: 'Bank Account', desc: 'Salary Disbursed', debit: '-', credit: '2,66,500', balance: '-2,66,500' },
-        ],
     },
     {
         id: 'accounts-payable',
@@ -79,13 +52,6 @@ const REPORTS = [
         bg: '#fffbeb',
         border: '#fde68a',
         columns: ['Payable Head', 'Due Date', 'Amount (₹)', 'Paid (₹)', 'Outstanding (₹)', 'Status'],
-        data: [
-            { head: 'Net Salary - Feb 2026', due: '28 Feb 2026', amount: '2,66,300', paid: '2,66,300', outstanding: '0', status: 'Paid' },
-            { head: 'PF (Employer + Employee)', due: '15 Mar 2026', amount: '44,400', paid: '0', outstanding: '44,400', status: 'Pending' },
-            { head: 'ESI Contribution', due: '15 Mar 2026', amount: '8,750', paid: '0', outstanding: '8,750', status: 'Pending' },
-            { head: 'Professional Tax', due: '31 Mar 2026', amount: '800', paid: '400', outstanding: '400', status: 'Partial' },
-            { head: 'TDS (Income Tax)', due: '07 Mar 2026', amount: '20,390', paid: '20,390', outstanding: '0', status: 'Paid' },
-        ],
     },
 ];
 
@@ -110,6 +76,43 @@ const StatusBadge = ({ value }) => {
 const ReportDetail = ({ report, month, onBack }) => {
     const [search, setSearch] = useState('');
     const [exported, setExported] = useState(null);
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchReportData = async () => {
+            setLoading(true);
+            try {
+                let result = [];
+                switch (report.id) {
+                    case 'salary-register':
+                        result = await payrollService.getSalaryRegister();
+                        break;
+                    case 'income-tax-deductions':
+                        result = await payrollService.getIncomeTaxReport();
+                        break;
+                    case 'professional-tax-deductions':
+                        result = await payrollService.getProfessionalTaxReport();
+                        break;
+                    case 'general-ledger':
+                        result = await payrollService.getGeneralLedger();
+                        break;
+                    case 'accounts-payable':
+                        result = await payrollService.getAccountsPayable();
+                        break;
+                    default:
+                        result = [];
+                }
+                setData(result || []);
+            } catch (error) {
+                console.error(`Failed to fetch ${report.id} data`, error);
+                setData([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchReportData();
+    }, [report.id, month]);
 
     const handleExport = (type) => {
         setExported(type);
@@ -152,10 +155,10 @@ const ReportDetail = ({ report, month, onBack }) => {
                     <div className="d-flex align-items-center gap-2">
                         {/* Month Picker */}
                         <select className="form-select form-select-sm rounded-3" style={{ width: 150, fontSize: '0.82rem' }}>
+                            <option>{month}</option>
                             <option>February 2026</option>
                             <option>January 2026</option>
                             <option>December 2025</option>
-                            <option>November 2025</option>
                         </select>
                         {/* Export Buttons */}
                         <button
@@ -197,7 +200,7 @@ const ReportDetail = ({ report, month, onBack }) => {
             {/* Search + Table */}
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
                 <div className="d-flex align-items-center justify-content-between px-4 py-3 border-bottom" style={{ background: '#f8faff' }}>
-                    <span className="fw-semibold small text-secondary">Report Data — February 2026</span>
+                    <span className="fw-semibold small text-secondary">Report Data — {month}</span>
                     <div className="input-group input-group-sm" style={{ width: 200 }}>
                         <span className="input-group-text bg-white border-end-0">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -223,31 +226,50 @@ const ReportDetail = ({ report, month, onBack }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {report.data
-                                .filter(row => JSON.stringify(row).toLowerCase().includes(search.toLowerCase()))
-                                .map((row, i) => (
-                                    <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                        {Object.values(row).map((val, j) => (
-                                            <td key={j} className="px-4 py-3">
-                                                {j === Object.values(row).length - 1 &&
-                                                    ['Remitted', 'Pending', 'NA', 'Paid', 'Partial'].includes(val)
-                                                    ? <StatusBadge value={val} />
-                                                    : <span style={{ color: j === 0 ? '#6b7280' : j === 1 ? '#111827' : '#374151', fontWeight: j === 1 ? 500 : 400 }}>
-                                                        {val}
-                                                    </span>
-                                                }
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={report.columns.length} className="text-center py-5">
+                                        <div className="spinner-border text-primary spinner-border-sm" role="status"></div>
+                                        <span className="ms-2 text-muted">Loading reports...</span>
+                                    </td>
+                                </tr>
+                            ) : data.length === 0 ? (
+                                <tr>
+                                    <td colSpan={report.columns.length} className="text-center py-5 text-muted small italic">
+                                        No data available for this period.
+                                    </td>
+                                </tr>
+                            ) : (
+                                data
+                                    .filter(row => JSON.stringify(row).toLowerCase().includes(search.toLowerCase()))
+                                    .map((row, i) => (
+                                        <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                            {report.columns.map((col, j) => {
+                                                const val = row[col.toLowerCase().replace(/ /g, '_')] || Object.values(row)[j] || '-';
+                                                return (
+                                                    <td key={j} className="px-4 py-3">
+                                                        {['Remitted', 'Pending', 'NA', 'Paid', 'Partial'].includes(val)
+                                                            ? <StatusBadge value={val} />
+                                                            : <span style={{ color: j === 0 ? '#6b7280' : j === 1 ? '#111827' : '#374151', fontWeight: j === 1 ? 500 : 400 }}>
+                                                                {val}
+                                                            </span>
+                                                        }
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    ))
+                            )}
                         </tbody>
                     </table>
                 </div>
-                <div className="px-4 py-2 border-top bg-white">
-                    <span className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        Showing {report.data.length} records for February 2026
-                    </span>
-                </div>
+                {!loading && data.length > 0 && (
+                    <div className="px-4 py-2 border-top bg-white">
+                        <span className="text-muted" style={{ fontSize: '0.75rem' }}>
+                            Showing {data.length} records for {month}
+                        </span>
+                    </div>
+                )}
             </div>
         </div>
     );

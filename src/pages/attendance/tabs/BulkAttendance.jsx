@@ -23,8 +23,9 @@ const BulkAttendance = () => {
     const fetchBulkList = async () => {
         setLoading(true);
         try {
-            const data = await attendanceService.getBulkAttendanceList(currentDate);
-            setEmployees(data.employees || []);
+            const response = await attendanceService.getBulkAttendanceList(currentDate);
+            const data = response?.employees || (Array.isArray(response) ? response : (response?.data || []));
+            setEmployees(data);
             setSelectedEmployees([]); // Reset selection on date change
         } catch (err) {
             console.error("Fetch bulk list failed:", err);

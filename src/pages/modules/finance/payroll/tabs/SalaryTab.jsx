@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { payrollService } from '../payrollService';
 import { useSearch } from '../../../../../context/SearchContext';
 import SalaryStructureAssignment from './SalaryStructureAssignment';
 import SalarySlip from './SalarySlip';
@@ -111,12 +112,34 @@ const SalaryTab = ({ onTabChange }) => {
         );
     }
 
+    const [components, setComponents] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchComponents = async () => {
+            setLoading(true);
+            try {
+                const data = await payrollService.getSalaryComponents();
+                setComponents(data);
+            } catch (error) {
+                console.error("Failed to fetch components", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchComponents();
+    }, []);
+
     const handleEditComponent = (name) => {
         alert(`Opening Edit Modal for Salary Component: ${name}`);
     };
 
     const handleCreateAssignment = () => {
         setActiveSection('salary-structure-assignment');
+    };
+
+    const handleCreateComponent = () => {
+        alert('Opening Create Salary Component Modal...');
     };
 
     /* ── Default: Show Salary UI grid ───────────────── */
@@ -130,16 +153,24 @@ const SalaryTab = ({ onTabChange }) => {
                         Manage salary structures, components, and assignments
                     </p>
                 </div>
-                <button
-                    className="btn btn-primary btn-sm px-3 rounded-3 shadow-sm d-flex align-items-center gap-2"
-                    onClick={handleCreateAssignment}
-                >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                    New Assignment
-                </button>
+                <div className="d-flex gap-2">
+                    <button
+                        className="btn btn-outline-primary btn-sm px-3 rounded-3 shadow-sm d-flex align-items-center gap-2"
+                        onClick={handleCreateComponent}
+                    >
+                        New Component
+                    </button>
+                    <button
+                        className="btn btn-primary btn-sm px-3 rounded-3 shadow-sm d-flex align-items-center gap-2"
+                        onClick={handleCreateAssignment}
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        New Assignment
+                    </button>
+                </div>
             </div>
 
             {/* Salary Sections Grid */}
@@ -259,40 +290,41 @@ const SalaryTab = ({ onTabChange }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {
-                                    [
-                                        { name: 'Basic Salary', type: 'Earning', calc: 'Fixed', freq: 'Monthly', status: 'Active' },
-                                        { name: 'HRA', type: 'Earning', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
-                                        { name: 'Special Allowance', type: 'Earning', calc: '% of CTC', freq: 'Monthly', status: 'Active' },
-                                        { name: 'PF (Employee)', type: 'Deduction', calc: '% of Basic', freq: 'Monthly', status: 'Active' },
-                                        { name: 'Professional Tax', type: 'Deduction', calc: 'Fixed Slab', freq: 'Monthly', status: 'Active' },
-                                    ].filter(row =>
-                                        row.name.toLowerCase().includes(search.toLowerCase()) ||
-                                        row.type.toLowerCase().includes(search.toLowerCase())
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-4">
+                                            <div className="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    components.filter(row =>
+                                        (row.name || row.component_name || "").toLowerCase().includes(search.toLowerCase()) ||
+                                        (row.type || "").toLowerCase().includes(search.toLowerCase())
                                     ).map((row, i) => (
-                                        <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name)}>
-                                            <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name}</td>
+                                        <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name || row.component_name)}>
+                                            <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name || row.component_name}</td>
                                             <td className="px-3">
                                                 <span className={`badge rounded-pill ${row.type === 'Earning' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`} style={{ fontSize: '0.72rem' }}>
                                                     {row.type}
                                                 </span>
                                             </td>
-                                            <td className="px-3 text-secondary">{row.calc}</td>
-                                            <td className="px-3 text-secondary">{row.freq}</td>
+                                            <td className="px-3 text-secondary">{row.calculation_type || row.calc || 'Fixed'}</td>
+                                            <td className="px-3 text-secondary">{row.frequency || 'Monthly'}</td>
                                             <td className="px-3">
-                                                <span className="badge rounded-pill bg-success bg-opacity-10 text-success" style={{ fontSize: '0.72rem' }}>● {row.status}</span>
+                                                <span className="badge rounded-pill bg-success bg-opacity-10 text-success" style={{ fontSize: '0.72rem' }}>● {row.status || 'Active'}</span>
                                             </td>
                                             <td className="px-3 text-end">
                                                 <button
                                                     className="btn btn-sm btn-light rounded-2 px-3 hover-primary-light"
                                                     style={{ fontSize: '0.75rem' }}
-                                                    onClick={(e) => { e.stopPropagation(); handleEditComponent(row.name); }}
+                                                    onClick={(e) => { e.stopPropagation(); handleEditComponent(row.name || row.component_name); }}
                                                 >
                                                     Edit
                                                 </button>
                                             </td>
                                         </tr>
-                                    ))}
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
