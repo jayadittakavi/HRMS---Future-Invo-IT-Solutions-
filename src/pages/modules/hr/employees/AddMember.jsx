@@ -132,11 +132,8 @@ const AddMember = () => {
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold text-secondary">EMPLOYMENT TYPE</label>
                                             <select className="form-select-premium" name="type" value={formData.type} onChange={handleInputChange}>
-                                                <option value="Employee">Permanent Employee</option>
-                                                <option value="Contractor">Contractor</option>
-                                                <option value="Intern">Internship</option>
-                                                <option value="Manager">Executive / Manager</option>
-                                                <option value="HR">HR Admin</option>
+                                                <option value="Fulltime">Fulltime</option>
+                                                <option value="Intern">Intern</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">

@@ -13,19 +13,9 @@ const SquadManagement = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('IT'); // IT or Non-IT
-    const [showCreateModal, setShowCreateModal] = useState(false);
     const [employees, setEmployees] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [memberSearchTerm, setMemberSearchTerm] = useState('');
-
-    // Squad Form State
-    const [newSquad, setNewSquad] = useState({
-        name: '',
-        type: 'General', // General or Project
-        department: 'IT',
-        project: '',
-        members: []
-    });
 
     // Mock Squads for initial view
     const [squads, setSquads] = useState([
@@ -42,10 +32,12 @@ const SquadManagement = () => {
     const fetchEmployees = async () => {
         setIsLoading(true);
         try {
-            const data = await employeeSuperAdminService.getAllEmployees();
-            setEmployees(data || []);
+            const res = await employeeSuperAdminService.getAllEmployees();
+            const data = Array.isArray(res) ? res : (res.data || res.employees || []);
+            setEmployees(data);
         } catch (error) {
             console.error("Error fetching employees:", error);
+            setEmployees([]);
         } finally {
             setIsLoading(false);
         }
@@ -86,7 +78,7 @@ const SquadManagement = () => {
                         </h2>
                         <p style={{ color: '#475569', fontWeight: 500 }}>Strategize and build project-wise performance teams</p>
                     </div>
-                    <button className="build-squad-btn" onClick={() => setShowCreateModal(true)}>
+                    <button className="build-squad-btn" onClick={() => navigate('/dashboard/build-squad')}>
                         <MdAdd /> Build New Squad
                     </button>
                 </div>
@@ -192,113 +184,6 @@ const SquadManagement = () => {
                 </div>
             </div>
 
-            {/* Create Squad Modal */}
-            {showCreateModal && (
-                <div className="squad-modal-overlay">
-                    <div className="squad-modal glass-card animate-zoom">
-                        <div className="modal-header-squad">
-                            <h3>Build New Squad</h3>
-                            <button className="close-btn" onClick={() => setShowCreateModal(false)}>&times;</button>
-                        </div>
-                        <form onSubmit={handleCreateSquad}>
-                            <div className="modal-body-squad px-4 py-3">
-                                <div className="row g-3">
-                                    <div className="col-md-12">
-                                        <label className="form-label" style={{ color: '#64748b', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase' }}>Squad / Team Name</label>
-                                        <input
-                                            type="text"
-                                            className="squad-input"
-                                            placeholder="Enter squad name..."
-                                            value={newSquad.name}
-                                            onChange={e => setNewSquad({ ...newSquad, name: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label" style={{ color: '#64748b', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase' }}>Department</label>
-                                        <select
-                                            className="squad-input"
-                                            value={newSquad.department}
-                                            onChange={e => setNewSquad({ ...newSquad, department: e.target.value })}
-                                        >
-                                            <option value="IT">IT Department</option>
-                                            <option value="Non-IT">Non-IT Department</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <label className="form-label" style={{ color: '#64748b', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase' }}>Squad Type</label>
-                                        <select
-                                            className="squad-input"
-                                            value={newSquad.type}
-                                            onChange={e => setNewSquad({ ...newSquad, type: e.target.value })}
-                                        >
-                                            <option value="General">General Team</option>
-                                            <option value="Project">Project Wise</option>
-                                        </select>
-                                    </div>
-                                    {newSquad.type === 'Project' && (
-                                        <div className="col-md-12">
-                                            <label className="form-label" style={{ color: '#64748b', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase' }}>Associated Project</label>
-                                            <input
-                                                type="text"
-                                                className="squad-input"
-                                                placeholder="Enter project name..."
-                                                value={newSquad.project}
-                                                onChange={e => setNewSquad({ ...newSquad, project: e.target.value })}
-                                                required
-                                            />
-                                        </div>
-                                    )}
-                                    <div className="col-md-12">
-                                        <label className="form-label d-flex justify-content-between" style={{ color: '#64748b', fontWeight: 600, fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                                            Select Squad Members
-                                            <span className="badge bg-primary" style={{ background: '#818cf8' }}>{newSquad.members.length} selected</span>
-                                        </label>
-                                        <div className="member-selection-list">
-                                            <div className="search-members mb-2">
-                                                <MdSearch />
-                                                <input
-                                                    type="text"
-                                                    placeholder="Search by name or ID..."
-                                                    className="w-100"
-                                                    value={memberSearchTerm}
-                                                    onChange={(e) => setMemberSearchTerm(e.target.value)}
-                                                />
-                                            </div>
-                                            <div className="members-scroll">
-                                                {isLoading ? (
-                                                    <div className="text-center p-3 text-white-50">Loading employees...</div>
-                                                ) : employees.filter(emp => {
-                                                    const term = memberSearchTerm.toLowerCase();
-                                                    return (emp.name || `${emp.first_name} ${emp.last_name}` || '').toLowerCase().includes(term) ||
-                                                        (emp.employee_id || emp.id.toString()).toLowerCase().includes(term);
-                                                }).map(emp => (
-                                                    <div
-                                                        key={emp.id}
-                                                        className={`member-item ${newSquad.members.includes(emp.id) ? 'selected' : ''}`}
-                                                        onClick={() => toggleMember(emp.id)}
-                                                    >
-                                                        <div className="emp-avatar">{(emp.name || emp.first_name || 'E').charAt(0)}</div>
-                                                        <div className="emp-info">
-                                                            <span className="name">{emp.name || `${emp.first_name} ${emp.last_name}`}</span>
-                                                            <span className="id">ID: {emp.employee_id || emp.id}</span>
-                                                        </div>
-                                                        <div className="selection-indicator"></div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer-squad p-3">
-                                <button type="button" className="cancel-pill" onClick={() => setShowCreateModal(false)}>Cancel</button>
-                                <button type="submit" className="create-pill">Build Squad</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

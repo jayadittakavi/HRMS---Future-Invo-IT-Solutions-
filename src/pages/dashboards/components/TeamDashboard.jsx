@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     FaUsers, FaUserCheck, FaUserClock, FaUserPlus,
@@ -11,42 +11,62 @@ import {
 } from 'react-icons/md';
 import { SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
 import './TeamDashboard.css';
+import { teamService } from './teamService';
 
 const TeamDashboard = ({ role }) => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
+    const [stats, setStats] = useState([
+        { label: 'Total Members', value: 0, icon: <FaUsers />, color: 'var(--primary-color)', bg: 'rgba(109, 40, 217, 0.1)', trend: '0' },
+        { label: 'Present Now', value: 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: '0%' },
+        { label: 'On Leave', value: 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: '0' },
+        { label: 'Remote / WFH', value: 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: '0' },
+    ]);
 
-    const stats = [
-        { label: 'Total Members', value: 42, icon: <FaUsers />, color: 'var(--primary-color)', bg: 'rgba(109, 40, 217, 0.1)', trend: '+3' },
-        { label: 'Present Now', value: 38, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: '92%' },
-        { label: 'On Leave', value: 2, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: '-1' },
-        { label: 'Remote / WFH', value: 12, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: 'Up' },
-    ];
+    const [teamMembers, setTeamMembers] = useState([]);
+    const [engagementData, setEngagementData] = useState([0, 0, 0, 0, 0, 0]);
+    const [loading, setLoading] = useState(true);
 
-    const teamMembers = [
-        { id: 1, name: 'Sarah Wilson', role: 'UI/UX Lead', status: 'online', avatar: 'https://i.pravatar.cc/150?u=sarah', performance: 95 },
-        { id: 2, name: 'James Miller', role: 'Frontend Dev', status: 'wfh', avatar: 'https://i.pravatar.cc/150?u=james', performance: 88 },
-        { id: 3, name: 'Elena Rodriguez', role: 'HR Manager', status: 'away', avatar: 'https://i.pravatar.cc/150?u=elena', performance: 92 },
-        { id: 4, name: 'David Chen', role: 'Backend Expert', status: 'online', avatar: 'https://i.pravatar.cc/150?u=david', performance: 97 },
-        { id: 5, name: 'Aisha Khan', role: 'DevOps Engineer', status: 'offline', avatar: 'https://i.pravatar.cc/150?u=aisha', performance: 85 },
-        { id: 6, name: 'Tom Hardy', role: 'QA Lead', status: 'online', avatar: 'https://i.pravatar.cc/150?u=tom', performance: 90 },
-    ];
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, superData, resData] = await Promise.all([
+                teamService.getStats(),
+                teamService.getSuperstars(),
+                teamService.getResilience()
+            ]);
 
-    const upcomingEvents = [
-        { title: 'Project Launch', date: 'Tomorrow', type: 'Project', icon: <FaTrophy /> },
-        { title: 'Sarah\'s Birthday', date: 'Oct 15', type: 'Personal', icon: <FaCalendarAlt /> },
-        { title: 'Team Outing', date: 'Next Friday', type: 'Social', icon: <FaUsers /> },
-    ];
+            // Map stats
+            if (sData) {
+                setStats([
+                    { label: 'Total Members', value: sData.total_members || 0, icon: <FaUsers />, color: 'var(--primary-color)', bg: 'rgba(109, 40, 217, 0.1)', trend: sData.member_trend || '+0' },
+                    { label: 'Present Now', value: sData.present || 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: sData.present_pct || '0%' },
+                    { label: 'On Leave', value: sData.on_leave || 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: sData.leave_trend || '0' },
+                    { label: 'Remote / WFH', value: sData.remote || 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: sData.remote_trend || '0' },
+                ]);
+            }
 
-    const engagementData = [65, 78, 82, 75, 88, 92, 85, 90, 95, 88, 92, 94];
+            if (Array.isArray(superData)) setTeamMembers(superData);
+            if (Array.isArray(resData)) setEngagementData(resData);
+            
+        } catch (err) {
+            console.error("Failed to fetch team data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const [activeFilter, setActiveFilter] = useState('All');
 
     const filteredMembers = teamMembers.filter(m => {
-        const matchesSearch = m.name.toLowerCase().includes(searchTerm.toLowerCase()) || m.role.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSearch = (m.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || (m.role || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesFilter = activeFilter === 'All' ||
-            (activeFilter === 'Developers' && m.role.toLowerCase().includes('dev')) ||
-            (activeFilter === 'Manager' && m.role.toLowerCase().includes('manager'));
+            (activeFilter === 'Developers' && (m.role || '').toLowerCase().includes('dev')) ||
+            (activeFilter === 'Manager' && (m.role || '').toLowerCase().includes('manager'));
         return matchesSearch && matchesFilter;
     });
 

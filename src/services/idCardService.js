@@ -1,70 +1,79 @@
-const API_BASE = "/api";
+import { API_BASE, getAuthHeader } from '../config';
 
 const authHeader = () => {
-    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-    // Using superadmin token for testing if local token is not available
-    const testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k";
-    const finalToken = token || testToken;
-
     return {
-        headers: {
-            "Content-Type": "application/json",
-            ...(finalToken ? { Authorization: `Bearer ${finalToken}` } : {}),
-        },
+        headers: getAuthHeader('hr'), // Set fallback role as hr
     };
 };
 
 export const idCardService = {
     getAllIDCards: async () => {
-        const response = await fetch(`${API_BASE}/id-card/list`, {
-            method: "GET",
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        const result = await response.json();
-        return Array.isArray(result) ? result : (result.data || result.cards || []);
+        try {
+            const response = await fetch(`${API_BASE}/id-card/list`, {
+                method: "GET",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error("Failed to fetch ID cards");
+            const result = await response.json();
+            return Array.isArray(result) ? result : (result.data || result.cards || []);
+        } catch (error) {
+            console.error("API Error (getAllIDCards):", error);
+            return [];
+        }
     },
 
     getIDCardByUserId: async (userId) => {
-        const response = await fetch(`${API_BASE}/id-card/list`, {
-            method: "GET",
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        const result = await response.json();
-        const cards = Array.isArray(result) ? result : (result.data || result.cards || []);
-        return cards.find(c => c.user_id === userId || c.id === userId) || null;
+        try {
+            const cards = await idCardService.getAllIDCards();
+            const matched = cards.find(c => String(c.user_id) === String(userId) || String(c.id) === String(userId));
+            return matched || null;
+        } catch (error) {
+            console.error("API Error (getIDCardByUserId):", error);
+            return null;
+        }
     },
 
     createIDCard: async (cardData) => {
-        const response = await fetch(`${API_BASE}/id-card/create`, {
-            method: "POST",
-            body: JSON.stringify(cardData),
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/id-card/create`, {
+                method: "POST",
+                body: JSON.stringify(cardData),
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (createIDCard):", error);
+            throw error;
+        }
     },
 
     updateIDCard: async (id, updates) => {
-        // Assuming there's an update endpoint, or using create if it handles updates
-        const response = await fetch(`${API_BASE}/id-card/create`, {
-            method: "POST",
-            body: JSON.stringify({ ...updates, id }),
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/id-card/create`, {
+                method: "POST", // Backend might use create as upsert
+                body: JSON.stringify({ ...updates, id }),
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (updateIDCard ${id}):`, error);
+            throw error;
+        }
     },
 
     deleteIDCard: async (id) => {
-        // Assuming there might be a delete endpoint, if not, this is a placeholder
-        const response = await fetch(`${API_BASE}/id-card/${id}`, {
-            method: "DELETE",
-            ...authHeader()
-        });
-        if (!response.ok) throw new Error(await response.text());
-        return true;
+        try {
+            const response = await fetch(`${API_BASE}/id-card/${id}`, {
+                method: "DELETE",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return true;
+        } catch (error) {
+            console.error(`API Error (deleteIDCard ${id}):`, error);
+            return false;
+        }
     }
 };
-

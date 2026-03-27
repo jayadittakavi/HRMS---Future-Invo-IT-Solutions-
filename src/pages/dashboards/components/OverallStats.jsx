@@ -1,19 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart, ModernTrendChart } from '../../../components/charts/CustomCharts';
 import { FaUsers, FaBuilding, FaClipboardList, FaMoneyBillWave, FaUserTie, FaUserCog, FaUserShield, FaMapMarkerAlt } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { coreService } from '../../../services/coreService';
+import { employeeSuperAdminService } from '../../modules/hr/employees/superadmin-service';
 
 const OverallStats = () => {
     const navigate = useNavigate();
+    const [statsData, setStatsData] = useState({
+        companies: 0,
+        branches: 0,
+        admins: 0,
+        hrs: 0,
+        managers: 0,
+        employees: 0
+    });
 
-    // Mock Data for Overall Stats
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const [companies, branches, employees] = await Promise.all([
+                    coreService.getCompanies(),
+                    coreService.getBranches(),
+                    employeeSuperAdminService.getAllEmployees()
+                ]);
+
+                setStatsData({
+                    companies: Array.isArray(companies) ? companies.length : 0,
+                    branches: Array.isArray(branches) ? branches.length : 0,
+                    admins: employees.filter(e => e.role?.toLowerCase() === 'admin').length,
+                    hrs: employees.filter(e => e.role?.toLowerCase() === 'hr').length,
+                    managers: employees.filter(e => e.role?.toLowerCase() === 'manager').length,
+                    employees: Array.isArray(employees) ? employees.length : 0
+                });
+            } catch (error) {
+                console.error("Error fetching dashboard stats:", error);
+            }
+        };
+        fetchStats();
+    }, []);
+
+    // Dynamic Data for Overall Stats
     const stats = [
-        { label: 'Total Companies', value: 12, icon: <FaBuilding />, color: 'bg-gradient-purple', path: '/companies' },
-        { label: 'Total Branches', value: 45, icon: <FaMapMarkerAlt />, color: 'bg-gradient-blue', path: '/branches' },
-        { label: 'Total Admins', value: 8, icon: <FaUserShield />, color: 'bg-gradient-green', path: '/users' },
-        { label: 'Total HRs', value: 24, icon: <FaUserTie />, color: 'bg-gradient-orange', path: '/users' },
-        { label: 'Total Managers', value: 56, icon: <FaUserCog />, color: 'bg-gradient-cyan', path: '/users' },
-        { label: 'Total Employees', value: 1308, icon: <FaUsers />, color: 'bg-gradient-pink', path: '/employees' },
+        { label: 'Total Companies', value: statsData.companies, icon: <FaBuilding />, color: 'bg-gradient-purple', path: '/companies' },
+        { label: 'Total Branches', value: statsData.branches, icon: <FaMapMarkerAlt />, color: 'bg-gradient-blue', path: '/branches' },
+        { label: 'Total Admins', value: statsData.admins, icon: <FaUserShield />, color: 'bg-gradient-green', path: '/users' },
+        { label: 'Total HRs', value: statsData.hrs, icon: <FaUserTie />, color: 'bg-gradient-orange', path: '/users' },
+        { label: 'Total Managers', value: statsData.managers, icon: <FaUserCog />, color: 'bg-gradient-cyan', path: '/users' },
+        { label: 'Total Employees', value: statsData.employees, icon: <FaUsers />, color: 'bg-gradient-pink', path: '/employees' },
     ];
 
     const attendanceSummary = [

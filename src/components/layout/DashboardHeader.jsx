@@ -154,10 +154,19 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                         <span>Personal Profile</span>
                                     </div>
 
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
-                                        <div className="icon-wrapper"><FiMapPin /></div>
-                                        <span>Company Hubs</span>
-                                    </div>
+                                    {/* Hide Company Hubs for HR, Employee, Manager */}
+                                    {(() => {
+                                        const r = user?.role?.toLowerCase() || '';
+                                        if (r.includes('hr') || r.includes('employee') || r.includes('manager') || r.includes('fulltime')) {
+                                            return null;
+                                        }
+                                        return (
+                                            <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
+                                                <div className="icon-wrapper"><FiMapPin /></div>
+                                                <span>Company Hubs</span>
+                                            </div>
+                                        );
+                                    })()}
 
                                     <div className="premium-dropdown-item" onClick={() => handleMenuClick('/support')}>
                                         <div className="icon-wrapper"><FiHelpCircle /></div>
@@ -223,9 +232,9 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     transform: scale(1.05);
                 }
                 .profile-img-container {
-                    width: 38px;
-                    height: 38px;
-                    border-radius: 12px;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
                     overflow: hidden;
                     background: #f1f5f9;
                     transition: all 0.2s;
@@ -267,7 +276,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 .profile-img-preview {
                     width: 44px;
                     height: 44px;
-                    border-radius: 10px;
+                    border-radius: 50%;
                     background: #f5f3ff;
                     color: #6366f1;
                     display: flex;
@@ -277,7 +286,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 .profile-img-preview img {
                     width: 100%;
                     height: 100%;
-                    border-radius: 10px;
+                    border-radius: 50%;
                     object-fit: cover;
                 }
                 .role-badge {

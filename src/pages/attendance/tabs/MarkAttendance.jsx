@@ -5,15 +5,29 @@ import { attendanceService } from '../service/service';
 
 const MarkAttendance = () => {
     const { triggerEvent } = useAutomation();
-    const [loadingDetails, setLoadingDetails] = useState(false);
-    const [submitting, setSubmitting] = useState(false);
+    const [shifts, setShifts] = useState([]);
+
+    useEffect(() => {
+        const loadShifts = async () => {
+            try {
+                const data = await attendanceService.getShifts();
+                setShifts(data || []);
+                if (data && data.length > 0) {
+                    setFormData(prev => ({ ...prev, shiftId: data[0].id }));
+                }
+            } catch (err) {
+                console.error("Shifts fetch failed:", err);
+            }
+        };
+        loadShifts();
+    }, []);
 
     const [formData, setFormData] = useState({
         employeeId: '',
         name: '',
         date: new Date().toISOString().split('T')[0],
         status: 'Present',
-        shift: 'General Shift',
+        shiftId: '',
         punchIn: '',
         punchOut: '',
         reason: ''
@@ -37,12 +51,11 @@ const MarkAttendance = () => {
                 setFormData(prev => ({
                     ...prev,
                     name: result.full_name || result.name || '',
-                    shift: result.current_shift ? result.current_shift.shift_name : prev.shift
+                    shiftId: result.current_shift ? result.current_shift.id : prev.shiftId
                 }));
             }
         } catch (err) {
             console.error("Employee details fetch failed:", err);
-            // Don't clear name yet to allow manual correction if necessary
         } finally {
             setLoadingDetails(false);
         }
@@ -52,10 +65,20 @@ const MarkAttendance = () => {
         e.preventDefault();
         setSubmitting(true);
 
-        try {
-            await attendanceService.addManualAttendance(formData);
+        // Map to Backend Payload
+        const payload = {
+            employee_id: formData.employeeId,
+            date: formData.date,
+            status: formData.status,
+            shift_id: formData.shiftId,
+            in_time: formData.punchIn,
+            out_time: formData.punchOut,
+            reason: formData.reason
+        };
 
-            // Trigger Automation
+        try {
+            await attendanceService.addManualAttendance(payload);
+
             triggerEvent('onMark', {
                 module: 'Attendance',
                 employeeName: formData.name || 'Unknown',
@@ -63,7 +86,6 @@ const MarkAttendance = () => {
             });
 
             alert('Attendance Marked Successfully!');
-            // Reset some fields
             setFormData(prev => ({
                 ...prev,
                 employeeId: '',
@@ -143,10 +165,17 @@ const MarkAttendance = () => {
                         </div>
                         <div className="col-md-4">
                             <label className="form-label text-secondary small fw-bold">Shift</label>
-                            <select className="form-select" name="shift" value={formData.shift} onChange={handleChange}>
-                                <option value="General Shift">General Shift (09:00 - 18:00)</option>
-                                <option value="Morning Shift">Morning Shift (06:00 - 15:00)</option>
-                                <option value="Night Shift">Night Shift (20:00 - 05:00)</option>
+                            <select 
+                                className="form-select" 
+                                name="shiftId" 
+                                value={formData.shiftId} 
+                                onChange={handleChange}
+                                required
+                            >
+                                {shifts.map(s => (
+                                    <option key={s.id} value={s.id}>{s.shift_name} ({s.start_time} - {s.end_time})</option>
+                                ))}
+                                {shifts.length === 0 && <option value="">No shifts available</option>}
                             </select>
                         </div>
 

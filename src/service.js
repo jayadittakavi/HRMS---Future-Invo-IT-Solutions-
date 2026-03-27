@@ -1,4 +1,5 @@
-const BASE_URL = "/api";
+import { API_BASE } from './config';
+const BASE_URL = API_BASE;
 
 export const authService = {
     login: async (email, password) => {

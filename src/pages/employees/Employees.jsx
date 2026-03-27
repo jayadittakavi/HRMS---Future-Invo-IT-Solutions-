@@ -169,10 +169,8 @@ export const EmployeesContent = () => {
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Employee Type</label>
                                             <select className="form-select" defaultValue={creationRole}>
-                                                <option>Employee</option>
-                                                <option>HR</option>
-                                                <option>Manager</option>
-                                                <option>Admin</option>
+                                                <option value="fulltime">Fulltime</option>
+                                                <option value="intern">Intern</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -316,10 +314,8 @@ export const EmployeesContent = () => {
                             </div>
                             <div className="modal-body p-4">
                                 <div className="d-grid gap-3">
-                                    <button className="btn btn-outline-primary py-3 fw-bold" onClick={() => handleRoleSelect('Employee')}>Create Employee</button>
-                                    <button className="btn btn-outline-info py-3 fw-bold" onClick={() => handleRoleSelect('HR')}>Create HR</button>
-                                    <button className="btn btn-outline-success py-3 fw-bold" onClick={() => handleRoleSelect('Manager')}>Create Manager</button>
-                                    <button className="btn btn-outline-dark py-3 fw-bold" onClick={() => handleRoleSelect('Admin')}>Create Admin</button>
+                                    <button className="btn btn-outline-primary py-3 fw-bold" onClick={() => handleRoleSelect('Fulltime')}>Create Fulltime</button>
+                                    <button className="btn btn-outline-info py-3 fw-bold" onClick={() => handleRoleSelect('Intern')}>Create Intern</button>
                                 </div>
                             </div>
                         </div>

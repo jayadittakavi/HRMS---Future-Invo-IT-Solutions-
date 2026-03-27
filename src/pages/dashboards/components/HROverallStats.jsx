@@ -1,10 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
 import { FaUsers, FaUserPlus, FaChalkboardTeacher, FaChartLine, FaUmbrellaBeach, FaUserCheck, FaSmile, FaVenusMars, FaBirthdayCake } from 'react-icons/fa';
+import { employeeSuperAdminService } from '../../modules/hr/employees/superadmin-service';
 
 const HROverallStats = () => {
     const navigate = useNavigate();
+    const [employeeCount, setEmployeeCount] = useState(0);
+
+    useEffect(() => {
+        const fetchStaffCount = async () => {
+            try {
+                const employees = await employeeSuperAdminService.getAllEmployees();
+                setEmployeeCount(Array.isArray(employees) ? employees.length : 0);
+            } catch (error) {
+                console.error("Error fetching staff count:", error);
+            }
+        };
+        fetchStaffCount();
+    }, []);
 
     const rawRecruitmentData = [
         { label: 'Applied', value: 150, color: '#94a3b8' },
@@ -27,7 +41,7 @@ const HROverallStats = () => {
         };
     });
 
-    const teamGrowthData = [850, 1100, 980, 1250, 1120, 1234];
+    const teamGrowthData = [0, 0, 0, 0, 0, employeeCount]; 
 
     const handleJoinMeeting = (role) => {
         alert(`Starting video session for ${role} position...`);
@@ -38,7 +52,7 @@ const HROverallStats = () => {
             {/* Top Stats Cards */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Total Staff', value: '1,234', icon: <FaUsers />, color: 'bg-gradient-purple', path: '/employee-directory', sub: '↑ 12 New' },
+                    { label: 'Total Staff', value: employeeCount.toLocaleString(), icon: <FaUsers />, color: 'bg-gradient-purple', path: '/employee-directory', sub: 'Active head count' },
                     { label: 'Open Positions', value: '8', icon: <FaUserPlus />, color: 'bg-gradient-orange', path: '/recruitment', sub: '3 Critical' },
                     { label: 'Onboarding', value: '3', icon: <FaChalkboardTeacher />, color: 'bg-gradient-blue', path: '/onboarding', sub: 'In progress' },
                     { label: 'Team Performance', value: '92%', icon: <FaChartLine />, color: 'bg-gradient-green', path: '/performance-reviews', sub: 'Highly Productive' },
@@ -96,7 +110,7 @@ const HROverallStats = () => {
                             <SimpleLineChart data={teamGrowthData} height="240px" color="#10b981" />
                         </div>
                         <div className="text-center small text-muted">
-                            Current Headcount: <span className="fw-bold text-success">1,234</span>
+                            Current Headcount: <span className="fw-bold text-success">{employeeCount.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

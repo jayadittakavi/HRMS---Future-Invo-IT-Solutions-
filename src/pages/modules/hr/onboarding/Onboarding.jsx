@@ -4,6 +4,7 @@ import TemplateUI from './tabs/TemplateUI';
 import VariableUI from './tabs/VariableUI';
 import ApprovalUI from './tabs/ApprovalUI';
 import ESignUI from './tabs/ESignUI';
+import { onboardingService } from './service';
 
 /* ── Icons (inline SVG) ─────────────────────────────────── */
 const IconUser = () => (
@@ -37,73 +38,11 @@ const IconDownload = () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
 );
 
+
+
 /* ── Onboarding Table ───────────────────────────────────── */
-const candidates = [
-    {
-        id: 1, name: 'Alice Johnson', role: 'Frontend Developer', dept: 'Engineering', date: '2026-02-20', status: 'In Progress', progress: 60, avatar: 'AJ',
-        docs: {
-            educational: [
-                { label: '10th Certificate', status: 'Verified', date: 'Feb 15' },
-                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 15' },
-                { label: 'Degree Certificate', status: 'Pending', date: '-' },
-                { label: 'PG Certificate', status: 'Not Required', date: '-' },
-            ],
-            identity: [
-                { label: 'PAN Card', status: 'Verified', date: 'Feb 16' },
-                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 16' },
-                { label: 'Passport', status: 'Pending', date: '-' },
-            ]
-        }
-    },
-    {
-        id: 2, name: 'Bob Smith', role: 'UI/UX Designer', dept: 'Design', date: '2026-02-22', status: 'Document Verification', progress: 80, avatar: 'BS',
-        docs: {
-            educational: [
-                { label: '10th Certificate', status: 'Verified', date: 'Feb 18' },
-                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 18' },
-                { label: 'Degree Certificate', status: 'Verified', date: 'Feb 19' },
-                { label: 'PG Certificate', status: 'Pending', date: '-' },
-            ],
-            identity: [
-                { label: 'PAN Card', status: 'Verified', date: 'Feb 18' },
-                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 18' },
-                { label: 'Passport', status: 'Verified', date: 'Feb 19' },
-            ]
-        }
-    },
-    {
-        id: 3, name: 'Charlie Davis', role: 'Backend Developer', dept: 'Engineering', date: '2026-02-25', status: 'Completed', progress: 100, avatar: 'CD',
-        docs: {
-            educational: [
-                { label: '10th Certificate', status: 'Verified', date: 'Feb 10' },
-                { label: 'Inter Certificate', status: 'Verified', date: 'Feb 10' },
-                { label: 'Degree Certificate', status: 'Verified', date: 'Feb 11' },
-                { label: 'PG Certificate', status: 'Verified', date: 'Feb 11' },
-            ],
-            identity: [
-                { label: 'PAN Card', status: 'Verified', date: 'Feb 10' },
-                { label: 'Aadhaar Card', status: 'Verified', date: 'Feb 10' },
-                { label: 'Passport', status: 'Verified', date: 'Feb 11' },
-            ]
-        }
-    },
-    {
-        id: 4, name: 'Diana Roy', role: 'HR Analyst', dept: 'HR', date: '2026-03-01', status: 'Pending', progress: 20, avatar: 'DR',
-        docs: {
-            educational: [
-                { label: '10th Certificate', status: 'Pending', date: '-' },
-                { label: 'Inter Certificate', status: 'Pending', date: '-' },
-                { label: 'Degree Certificate', status: 'Pending', date: '-' },
-                { label: 'PG Certificate', status: 'Pending', date: '-' },
-            ],
-            identity: [
-                { label: 'PAN Card', status: 'Pending', date: '-' },
-                { label: 'Aadhaar Card', status: 'Pending', date: '-' },
-                { label: 'Passport', status: 'Pending', date: '-' },
-            ]
-        }
-    },
-];
+// Candidates will be fetched from API or use local state
+const initialCandidates = [];
 
 const statusStyle = {
     'Completed': { bg: '#dcfce7', color: '#16a34a', dot: '#16a34a' },
@@ -122,13 +61,9 @@ const AvatarCircle = ({ initials, color }) => (
 
 const avatarColors = ['#2563eb', '#7c3aed', '#059669', '#dc2626'];
 
-const renderOnboarding = (onViewDocs, onSendLetter) => {
+const renderOnboarding = (candidates, stats, onViewDocs, onSendLetter, onAddHire) => {
     const handleStatClick = (label) => {
         alert(`Filtering candidates by: ${label}`);
-    };
-
-    const handleAddNewHire = () => {
-        alert('Opening "Add New Hire" wizard...');
     };
 
     return (
@@ -136,10 +71,10 @@ const renderOnboarding = (onViewDocs, onSendLetter) => {
             {/* Stats bar */}
             <div className="row g-3 mb-4">
                 {[
-                    { label: 'Total Hires', value: candidates.length, color: '#2563eb', bg: '#eff6ff', icon: '👤' },
-                    { label: 'Documents Pending', value: candidates.filter(c => c.status !== 'Completed').length, color: '#dc2626', bg: '#fef2f2', icon: '📁' },
-                    { label: 'In Progress', value: candidates.filter(c => c.status !== 'Completed' && c.status !== 'Pending').length, color: '#d97706', bg: '#fef3c7', icon: '⏳' },
-                    { label: 'Verified', value: candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
+                    { label: 'Total Hires', value: stats.total_hires || candidates.length, color: '#2563eb', bg: '#eff6ff', icon: '👤' },
+                    { label: 'Documents Pending', value: stats.pending_docs || candidates.filter(c => c.status !== 'Completed').length, color: '#dc2626', bg: '#fef2f2', icon: '📁' },
+                    { label: 'In Progress', value: stats.in_progress || candidates.filter(c => c.status !== 'Completed' && c.status !== 'Pending').length, color: '#d97706', bg: '#fef3c7', icon: '⏳' },
+                    { label: 'Verified', value: stats.verified || candidates.filter(c => c.status === 'Completed').length, color: '#16a34a', bg: '#dcfce7', icon: '✅' },
                 ].map((s, i) => (
                     <div key={i} className="col-md-3 col-6">
                         <div
@@ -168,7 +103,7 @@ const renderOnboarding = (onViewDocs, onSendLetter) => {
                     <button
                         className="btn btn-sm rounded-3 px-3 hover-scale"
                         style={{ background: '#2563eb', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}
-                        onClick={handleAddNewHire}
+                        onClick={onAddHire}
                     >
                         + Add New Hire
                     </button>
@@ -187,22 +122,28 @@ const renderOnboarding = (onViewDocs, onSendLetter) => {
                         </thead>
                         <tbody>
                             {candidates.map((c, i) => {
-                                const st = statusStyle[c.status];
+                                const st = statusStyle[c.status] || statusStyle['Pending'];
+                                const displayName = c.full_name || c.name;
+                                const displayRole = c.designation || c.role;
+                                const displayDept = c.department || c.dept;
+                                const displayDate = c.joining_date || c.date;
+                                const displayAvatar = c.avatar || (displayName ? displayName.split(' ').map(n => n[0]).join('').toUpperCase() : '??');
+
                                 return (
-                                    <tr key={c.id} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => onViewDocs(c)}>
+                                    <tr key={c.id || i} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => onViewDocs(c)}>
                                         <td className="px-4 py-3">
                                             <div className="d-flex align-items-center gap-3">
-                                                <AvatarCircle initials={c.avatar} color={avatarColors[i % 4]} />
+                                                <AvatarCircle initials={displayAvatar} color={avatarColors[i % 4]} />
                                                 <div>
-                                                    <div style={{ fontWeight: 700, color: '#111827' }}>{c.name}</div>
-                                                    <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{c.role}</div>
+                                                    <div style={{ fontWeight: 700, color: '#111827' }}>{displayName}</div>
+                                                    <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{displayRole}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="py-3">
-                                            <span style={{ fontSize: '0.75rem', color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 500 }}>{c.dept}</span>
+                                            <span style={{ fontSize: '0.75rem', color: '#374151', background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontWeight: 500 }}>{displayDept}</span>
                                         </td>
-                                        <td className="py-3" style={{ color: '#6b7280' }}>{c.date}</td>
+                                        <td className="py-3" style={{ color: '#6b7280' }}>{displayDate}</td>
                                         <td className="py-3">
                                             <span style={{ background: st.bg, color: st.color, borderRadius: 20, padding: '3px 10px', fontSize: '0.72rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                                                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: st.dot, display: 'inline-block' }} />
@@ -211,9 +152,9 @@ const renderOnboarding = (onViewDocs, onSendLetter) => {
                                         </td>
                                         <td className="py-3">
                                             <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden', width: '100px' }}>
-                                                <div style={{ width: `${c.progress}%`, height: '100%', borderRadius: 99, background: c.progress === 100 ? '#16a34a' : '#2563eb' }} />
+                                                <div style={{ width: `${c.progress || 0}%`, height: '100%', borderRadius: 99, background: (c.progress || 0) === 100 ? '#16a34a' : '#2563eb' }} />
                                             </div>
-                                            <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{c.progress}% Docs Verified</div>
+                                            <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{(c.progress || 0)}% Docs Verified</div>
                                         </td>
                                         <td className="py-3">
                                             <div className="d-flex gap-2">
@@ -227,7 +168,7 @@ const renderOnboarding = (onViewDocs, onSendLetter) => {
                                                 </button>
                                                 <button
                                                     title="Send Letter"
-                                                    onClick={(e) => { e.stopPropagation(); onSendLetter(c.name); }}
+                                                    onClick={(e) => { e.stopPropagation(); onSendLetter(displayName); }}
                                                     style={{ width: 30, height: 30, borderRadius: 8, border: 'none', background: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}
                                                     className="onboarding-action-btn"
                                                 >
@@ -409,12 +350,87 @@ export const OnboardingContent = () => {
     const [letterSubTab, setLetterSubTab] = useState('templates');
     const [sendLetterModal, setSendLetterModal] = useState(null);
     const [viewDocsCandidate, setViewDocsCandidate] = useState(null);
+    const [showAddHire, setShowAddHire] = useState(false);
+    
+    // API Data state
+    const [candidates, setCandidates] = useState(initialCandidates);
+    const [stats, setStats] = useState({ total_hires: 0, pending_docs: 0, in_progress: 0, verified: 0 });
+    const [loading, setLoading] = useState(false);
+
+    const [hireForm, setHireForm] = useState({
+        full_name: '', personal_email: '', phone_number: '',
+        department: 'Engineering', designation: '', joining_date: new Date().toISOString().split('T')[0],
+        employment_type: 'Fulltime'
+    });
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, cData] = await Promise.all([
+                onboardingService.getStats(),
+                onboardingService.getCandidates()
+            ]);
+            setStats(sData || stats);
+            if (Array.isArray(cData)) setCandidates(cData);
+        } catch (err) {
+            console.warn("Falling back to local data due to API error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleAddHire = async () => {
+        try {
+            await onboardingService.addCandidate(hireForm);
+            alert(`Candidate ${hireForm.full_name} added to onboarding pipeline!`);
+            setShowAddHire(false);
+            fetchData();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
+    const handleVerifyDoc = async (candId, docId) => {
+        try {
+            await onboardingService.verifyDocument(candId, docId);
+            const checklist = await onboardingService.getChecklist(candId);
+            setViewDocsCandidate(prev => ({ ...prev, docs: checklist }));
+            fetchData();
+        } catch (err) {
+            alert("Error verifying document: " + err.message);
+        }
+    };
+
+    const handleVerifyAll = async (candId) => {
+        try {
+            await onboardingService.verifyAll(candId);
+            setViewDocsCandidate(null);
+            fetchData();
+            alert("Onboarding completed for this candidate.");
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
 
     const MAIN_TABS = [
         { id: 'onboarding', label: 'Onboarding', icon: <IconUser />, desc: 'Track new hire progress' },
         { id: 'letters', label: 'Letters', icon: <IconFile />, desc: 'Manage HR letters' },
         { id: 'certificates', label: 'Certificates', icon: <IconAward />, desc: 'Issue certificates' },
     ];
+
+    const handleViewDocs = async (cand) => {
+        try {
+            const checklist = await onboardingService.getChecklist(cand.id);
+            setViewDocsCandidate({ ...cand, docs: checklist });
+        } catch (err) {
+            alert("Failed to load candidate documents");
+            console.error(err);
+        }
+    };
 
     return (
         <div className="p-4" style={{ maxWidth: 1100 }}>
@@ -445,7 +461,13 @@ export const OnboardingContent = () => {
             </div>
 
             {/* Onboarding Tab */}
-            {activeTab === 'onboarding' && renderOnboarding((cand) => setViewDocsCandidate(cand), (name) => setSendLetterModal(name))}
+            {activeTab === 'onboarding' && renderOnboarding(
+                candidates,
+                stats,
+                handleViewDocs, 
+                (name) => setSendLetterModal(name),
+                () => setShowAddHire(true)
+            )}
 
             {/* Document Verification Modal */}
             {viewDocsCandidate && (
@@ -470,7 +492,7 @@ export const OnboardingContent = () => {
                                             <h6 className="fw-bold d-flex align-items-center gap-2 mb-4">
                                                 <span style={{ fontSize: '1.2rem' }}>🎓</span> Educational Certificates
                                             </h6>
-                                            {viewDocsCandidate.docs.educational.map((doc, idx) => (
+                                            {viewDocsCandidate.docs?.educational?.map((doc, idx) => (
                                                 <div key={idx} className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom last-border-none">
                                                     <div>
                                                         <div className="small fw-bold text-dark">{doc.label}</div>
@@ -478,6 +500,15 @@ export const OnboardingContent = () => {
                                                     </div>
                                                     <div className="d-flex align-items-center gap-2">
                                                         <span className={`badge rounded-pill ${doc.status === 'Verified' ? 'bg-success' : doc.status === 'Pending' ? 'bg-warning' : 'bg-light text-secondary'} small`} style={{ fontSize: '0.65rem' }}>{doc.status}</span>
+                                                        {doc.status !== 'Verified' && doc.status !== 'Not Required' && (
+                                                            <button 
+                                                                className="btn btn-sm btn-primary py-1 px-2 border-0" 
+                                                                style={{ fontSize: '0.65rem' }}
+                                                                onClick={(e) => { e.stopPropagation(); handleVerifyDoc(viewDocsCandidate.id, doc.id); }}
+                                                            >
+                                                                Verify Now
+                                                            </button>
+                                                        )}
                                                         <button className="btn btn-sm btn-light py-1 px-2 border" style={{ fontSize: '0.65rem' }}>View</button>
                                                     </div>
                                                 </div>
@@ -490,7 +521,7 @@ export const OnboardingContent = () => {
                                             <h6 className="fw-bold d-flex align-items-center gap-2 mb-4">
                                                 <span style={{ fontSize: '1.2rem' }}>🆔</span> ID Proofs
                                             </h6>
-                                            {viewDocsCandidate.docs.identity.map((doc, idx) => (
+                                            {viewDocsCandidate.docs?.identity?.map((doc, idx) => (
                                                 <div key={idx} className="d-flex align-items-center justify-content-between mb-3 pb-3 border-bottom last-border-none">
                                                     <div>
                                                         <div className="small fw-bold text-dark">{doc.label}</div>
@@ -498,6 +529,15 @@ export const OnboardingContent = () => {
                                                     </div>
                                                     <div className="d-flex align-items-center gap-2">
                                                         <span className={`badge rounded-pill ${doc.status === 'Verified' ? 'bg-success' : doc.status === 'Pending' ? 'bg-warning' : 'bg-light text-secondary'} small`} style={{ fontSize: '0.65rem' }}>{doc.status}</span>
+                                                        {doc.status !== 'Verified' && doc.status !== 'Not Required' && (
+                                                            <button 
+                                                                className="btn btn-sm btn-primary py-1 px-2 border-0" 
+                                                                style={{ fontSize: '0.65rem' }}
+                                                                onClick={(e) => { e.stopPropagation(); handleVerifyDoc(viewDocsCandidate.id, doc.id); }}
+                                                            >
+                                                                Verify Now
+                                                            </button>
+                                                        )}
                                                         <button className="btn btn-sm btn-light py-1 px-2 border" style={{ fontSize: '0.65rem' }}>View</button>
                                                     </div>
                                                 </div>
@@ -510,7 +550,7 @@ export const OnboardingContent = () => {
                                 <div className="text-muted small">Checked by: <strong>Admin</strong></div>
                                 <div className="d-flex gap-2">
                                     <button className="btn btn-light rounded-3 px-4 fw-bold small" onClick={() => setViewDocsCandidate(null)}>Close</button>
-                                    <button className="btn btn-primary rounded-3 px-4 fw-bold small" style={{ background: '#2563eb' }}>Verify All Documents</button>
+                                    <button className="btn btn-primary rounded-3 px-4 fw-bold small" style={{ background: '#2563eb' }} onClick={() => handleVerifyAll(viewDocsCandidate.id)}>Verify All Documents</button>
                                 </div>
                             </div>
                         </div>
@@ -563,6 +603,83 @@ export const OnboardingContent = () => {
 
             {/* Certificates Tab */}
             {activeTab === 'certificates' && <CertificatesTab />}
+
+            {/* Add New Hire Modal */}
+            {showAddHire && (
+                <div className="modal d-block" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
+                    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 650 }}>
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div className="modal-header border-0 bg-primary text-white py-4 px-4 d-flex align-items-center justify-content-between">
+                                <div className="d-flex align-items-center gap-3">
+                                    <div style={{ width: 48, height: 48, borderRadius: 12, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>✨</div>
+                                    <div>
+                                        <h5 className="fw-bold mb-0">Onboard New Candidate</h5>
+                                        <div className="small opacity-75">Start the document verification process</div>
+                                    </div>
+                                </div>
+                                <button className="btn-close btn-close-white" onClick={() => setShowAddHire(false)} />
+                            </div>
+                            <div className="modal-body p-4 bg-light bg-opacity-50">
+                                <div className="row g-4">
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Full Name *</label>
+                                        <input className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" placeholder="e.g. Alice Johnson" value={hireForm.full_name} onChange={e => setHireForm({...hireForm, full_name: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Email Address *</label>
+                                        <input className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" placeholder="e.g. alice@example.com" value={hireForm.personal_email} onChange={e => setHireForm({...hireForm, personal_email: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Phone Number</label>
+                                        <input className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" placeholder="+91 00000 00000" value={hireForm.phone_number} onChange={e => setHireForm({...hireForm, phone_number: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Joining Date</label>
+                                        <input type="date" className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.joining_date} onChange={e => setHireForm({...hireForm, joining_date: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Department</label>
+                                        <select className="form-select rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.department} onChange={e => setHireForm({...hireForm, department: e.target.value})}>
+                                            <option>Engineering</option>
+                                            <option>Design</option>
+                                            <option>HR</option>
+                                            <option>Finance</option>
+                                            <option>Sales</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Role / Designation</label>
+                                        <input className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" placeholder="e.g. UI Designer" value={hireForm.designation} onChange={e => setHireForm({...hireForm, designation: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-4">
+                                        <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Employment Type</label>
+                                        <select className="form-select rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.employment_type} onChange={e => setHireForm({...hireForm, employment_type: e.target.value})}>
+                                            <option>Fulltime</option>
+                                            <option>Intern</option>
+                                            <option>Contract</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="mt-4 p-3 rounded-3" style={{ background: '#fef3c7', border: '1px solid #fde68a' }}>
+                                    <div className="d-flex gap-2">
+                                        <div style={{ fontSize: '1.2rem' }}>💡</div>
+                                        <div>
+                                            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#92400e' }}>Next Step: Background Verification</div>
+                                            <div style={{ fontSize: '0.72rem', color: '#b45309', opacity: 0.9 }}>Once created, the candidate will receive an invitation email to upload their documents.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                                <div className="modal-footer border-0 p-4 pt-1 gap-2">
+                                <button className="btn btn-light rounded-3 px-4 fw-bold small" onClick={() => setShowAddHire(false)}>Cancel</button>
+                                <button className="btn btn-primary rounded-3 px-4 fw-bold small" style={{ background: '#2563eb', border: 'none' }} onClick={handleAddHire}>
+                                    Start Onboarding
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Send Letter Modal */}
             {sendLetterModal && (

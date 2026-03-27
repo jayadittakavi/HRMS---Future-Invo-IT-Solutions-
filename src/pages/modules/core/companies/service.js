@@ -1,24 +1,8 @@
-const API_BASE = "/api";
+import { API_BASE, getAuthHeader } from '../../../../config';
 
-// Helper to get auth header with token dynamically
 const authHeader = () => {
-    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-
-    // Provided Tokens for Development/Testing
-    const tokens = {
-        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k",
-        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk",
-        hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
-    };
-
-    // Force SuperAdmin token for company modules locally so testing avoids "Permission denied"
-    const finalToken = localStorage.getItem("token") || localStorage.getItem("authToken") || tokens.superadmin;
-
     return {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${finalToken}`
-        },
+        headers: getAuthHeader('superadmin'), // Company functions typically require SuperAdmin permissions
     };
 };
 
@@ -83,21 +67,42 @@ export const companyService = {
     // 🔹 Create New Company
     createCompany: async (data) => {
         try {
+            // Map common fields to ensure backend compatibility
+            const payload = {
+                ...data,
+                company_name: data.name || data.company_name,
+                company_id: data.company_id || data.corporate_id,
+            };
+
             const response = await fetch(`${API_BASE}/superadmin/companies`, {
                 method: "POST",
                 headers: authHeader().headers,
-                body: JSON.stringify(data),
+                body: JSON.stringify(payload),
             });
-            if (!response.ok) {
-                const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch(e) {
-                    throw new Error(text || "Request failed");
+
+            const text = await response.text();
+            let errorMessage = `Status ${response.status}`;
+
+            try {
+                const json = JSON.parse(text);
+                errorMessage = json.message || json.error || json.msg || errorMessage;
+                if (typeof errorMessage === 'object' && errorMessage.message) {
+                    errorMessage = errorMessage.message;
                 }
+            } catch (e) {
+                errorMessage = text || errorMessage;
             }
-            return await response.json();
+
+            if (!response.ok) {
+                console.error("Company Creation Failed:", { status: response.status, text });
+                throw new Error(errorMessage);
+            }
+            
+            try {
+                return JSON.parse(text);
+            } catch(e) {
+                return { success: true };
+            }
         } catch (error) {
             console.error("API Error (createCompany):", error);
             throw error;

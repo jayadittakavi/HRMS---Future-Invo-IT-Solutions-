@@ -1,42 +1,35 @@
-const API_BASE = "/api";
+import { API_BASE, getAuthHeader } from '../../../../config';
 
 const authHeader = () => {
-    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-
-    // Provided Tokens for Development/Testing
-    const tokens = {
-        superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k",
-        admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzQ0MzcwMTl9.CfHGgz68eictFU1-g0bMMDIxy7_1Ungc5FiGkdafOHk",
-        hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo4LCJyb2xlIjoiSFIiLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk3Mzd9.rDhv3BMq4UtQXZe-K5YRcchCRo-aMvnK2e_SHREpyxI"
-    };
-
-    // Priority token from local storage, then fallback to Super Admin
-    const finalToken = token || tokens.superadmin;
-
     return {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${finalToken}`
-        },
+        headers: getAuthHeader('admin'), // Using admin role as primary for these specific endpoints
     };
 };
 
 export const employeeSuperAdminService = {
-    // 🔹 List All Employees (across all companies)
+    // 🔹 List All Employees
     getAllEmployees: async () => {
         try {
-            const response = await fetch(`${API_BASE}/admin/employees`, {
+            const timestamp = new Date().getTime();
+            // Primary: /api/admin/employees
+            let response = await fetch(`${API_BASE}/admin/employees?t=${timestamp}`, {
                 method: "GET",
+                cache: 'no-store',
                 ...authHeader()
             });
+
+            // Fallback to superadmin if admin path fails
+            if (response.status === 404 || response.status === 405) {
+                response = await fetch(`${API_BASE}/superadmin/employees?t=${timestamp}`, {
+                    method: "GET",
+                    cache: 'no-store',
+                    ...authHeader()
+                });
+            }
+
             if (!response.ok) {
                 const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch (e) {
-                    throw new Error(text || "Request failed");
-                }
+                throw new Error(text || `HTTP error! status: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
@@ -48,18 +41,24 @@ export const employeeSuperAdminService = {
     // 🔹 Get Employee Details
     getEmployeeById: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/admin/employees/${id}`, {
+            const timestamp = new Date().getTime();
+            let response = await fetch(`${API_BASE}/admin/employees/${id}?t=${timestamp}`, {
                 method: "GET",
+                cache: 'no-store',
                 ...authHeader()
             });
+
+            if (response.status === 404 || response.status === 405) {
+                response = await fetch(`${API_BASE}/superadmin/employees/${id}?t=${timestamp}`, {
+                    method: "GET",
+                    cache: 'no-store',
+                    ...authHeader()
+                });
+            }
+
             if (!response.ok) {
                 const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch (e) {
-                    throw new Error(text || "Request failed");
-                }
+                throw new Error(text || `HTTP error! status: ${response.status}`);
             }
             return await response.json();
         } catch (error) {
@@ -68,69 +67,125 @@ export const employeeSuperAdminService = {
         }
     },
 
-    // 🔹 Add New Employee (to any company)
+    // 🔹 Create New Employee
     createEmployee: async (data) => {
-        try {
-            const response = await fetch(`${API_BASE}/superadmin/users`, {
-                method: "POST",
-                headers: authHeader().headers,
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-                const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch (e) {
-                    throw new Error(text || "Request failed");
+        // Map to exact spec but PRESERVE all original data (like company_id, branch)
+        const payload = {
+            ...data,
+            full_name: data.full_name || data.name,
+            name: data.full_name || data.name,
+            email: data.email || data.company_email || data.personal_email,
+            password: data.password || "TemporaryPassword123",
+            personal_email: data.personal_email || data.email,
+            department: data.department || "General",
+            designation: data.designation || "Employee",
+            date_of_joining: data.joining_date || data.date_of_joining || new Date().toISOString().split('T')[0],
+            gender: data.gender || "Not Specified",
+            phone_number: data.phone_number || data.phone || "",
+            ctc: data.ctc ? Number(data.ctc) : 0,
+            employment_type: data.employment_type || "Full-time",
+            role: (data.role || "EMPLOYEE").toUpperCase()
+        };
+
+        const endpoints = [
+            { url: `${API_BASE}/admin/create-employee`, method: "POST" },
+            { url: `${API_BASE}/superadmin/employees`, method: "POST" },
+            { url: `${API_BASE}/superadmin/users`, method: "POST" }
+        ];
+
+        let lastErr = null;
+        for (const e of endpoints) {
+            try {
+                const response = await fetch(e.url, {
+                    method: e.method,
+                    headers: authHeader().headers,
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    const text = await response.text();
+                    try { return JSON.parse(text); } catch(err) { return { success: true }; }
                 }
+                const errText = await response.text();
+                lastErr = new Error(`Endpoint ${e.url} failed (${response.status}): ${errText}`);
+            } catch (err) {
+                lastErr = err;
             }
-            return await response.json();
-        } catch (error) {
-            console.error("API Error (createEmployee):", error);
-            throw error;
         }
+        throw lastErr || new Error("Failed to create employee after trying multiple endpoints.");
     },
 
-    // 🔹 Update Employee Details
+    // 🔹 Update Employee Profile
     updateEmployee: async (id, data) => {
-        try {
-            const response = await fetch(`${API_BASE}/admin/employees/${id}`, {
-                method: "PUT",
-                headers: authHeader().headers,
-                body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-                const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch (e) {
-                    throw new Error(text || "Request failed");
+        const actualId = id || data.id || data.user_id;
+        
+        // Map to exact spec for Update PRESERVING original context
+        const payload = {
+            ...data,
+            full_name: data.full_name || data.name,
+            name: data.full_name || data.name,
+            email: data.email || data.company_email || data.personal_email,
+            personal_email: data.personal_email || data.email,
+            department: data.department,
+            designation: data.designation,
+            date_of_joining: data.joining_date || data.date_of_joining,
+            gender: data.gender,
+            phone_number: data.phone_number || data.phone,
+            ctc: data.ctc ? Number(data.ctc) : undefined,
+            employment_type: data.employment_type,
+            role: data.role ? data.role.toUpperCase() : undefined,
+            status: data.status
+        };
+
+        // Remove undefined fields to prevent overwriting with nulls if not sent
+        Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+
+        const variations = [
+            { url: `${API_BASE}/admin/employees/${actualId}`, method: "PUT" },
+            { url: `${API_BASE}/superadmin/employees/${actualId}`, method: "PATCH" },
+            { url: `${API_BASE}/superadmin/employees/${actualId}`, method: "PUT" }
+        ];
+
+        let lastError = null;
+        for (const v of variations) {
+            try {
+                const response = await fetch(v.url, {
+                    method: v.method,
+                    headers: authHeader().headers,
+                    body: JSON.stringify(payload),
+                });
+
+                if (response.ok) {
+                    const text = await response.text();
+                    try { return JSON.parse(text); } catch(e) { return { success: true }; }
                 }
+                lastError = new Error(`Update effort failed: ${v.method} ${v.url} (${response.status})`);
+            } catch (err) {
+                lastError = err;
             }
-            return await response.json();
-        } catch (error) {
-            console.error(`API Error (updateEmployee ${id}):`, error);
-            throw error;
         }
+        throw lastError || new Error("Failed to update employee profile.");
     },
 
-    // 🔹 Delete Employee
+    // 🔹 Delete Employee (Permanent)
     deleteEmployee: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/employees/${id}`, {
+            // Primary: /api/admin/employees/<id>
+            let response = await fetch(`${API_BASE}/admin/employees/${id}`, {
                 method: "DELETE",
                 ...authHeader()
             });
+
+            if (response.status === 404 || response.status === 405) {
+                response = await fetch(`${API_BASE}/superadmin/employees/${id}`, {
+                    method: "DELETE",
+                    ...authHeader()
+                });
+            }
+
             if (!response.ok) {
                 const text = await response.text();
-                try {
-                    const json = JSON.parse(text);
-                    throw new Error(json.message || "Request failed");
-                } catch (e) {
-                    throw new Error(text || "Request failed");
-                }
+                throw new Error(text || `Deletion failed with status ${response.status}`);
             }
             return await response.json();
         } catch (error) {

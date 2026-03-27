@@ -132,8 +132,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             { name: 'Feedback', icon: <MdRateReview size={20} />, path: '/feedback' },
         ];
 
-        // Filter out specific modules for Super Admin role
-        if (role === 'superadmin') {
+        // Filter out specific modules based on roles
+        if (role.includes('superadmin') || role.includes('admin')) {
             const forbiddenPaths = [
                 '/support',
                 '/recruitment',
@@ -143,6 +143,19 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 '/feedback'
             ];
             links = links.filter(link => !forbiddenPaths.includes(link.path));
+        } else if (role.includes('hr') || role.includes('fulltime')) {
+            const forbiddenPathsForHR = [
+                '/support',
+                '/feedback',
+                '/financial-reports',
+                '/employee-directory',
+                '/companies',
+                '/branches',
+                '/calendar',
+                '/departments',
+                '/payslips'
+            ];
+            links = links.filter(link => !forbiddenPathsForHR.includes(link.path));
         }
 
         links = [...links];

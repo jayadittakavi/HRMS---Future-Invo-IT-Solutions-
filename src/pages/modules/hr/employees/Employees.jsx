@@ -10,6 +10,7 @@ import { useSearch } from '../../../../context/SearchContext';
 import { useAuth } from '../../../../context/AuthContext';
 import { employeeSuperAdminService } from './superadmin-service';
 import { companyService } from '../../core/companies/service';
+import { coreService } from '../../../../services/coreService';
 import "../../../../components/layout/DashboardLayout.css";
 
 export const EmployeesContent = () => {
@@ -19,6 +20,8 @@ export const EmployeesContent = () => {
 
     const [employees, setEmployees] = useState([]);
     const [companies, setCompanies] = useState([]);
+    const [allBranches, setAllBranches] = useState([]);
+    const [filteredBranches, setFilteredBranches] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
 
@@ -41,9 +44,11 @@ export const EmployeesContent = () => {
         department: '',
         designation: '',
         role: 'employee',
+        employment_type: 'fulltime employee',
         joining_date: '',
         company_id: '',
         branch: '',
+        gender: 'Not Specified',
         pay_grade: '',
         ctc: ''
     });
@@ -85,6 +90,11 @@ export const EmployeesContent = () => {
                 const compRes = await companyService.getAllCompanies();
                 const compData = Array.isArray(compRes) ? compRes : (compRes.data || compRes.companies || []);
                 setCompanies(compData);
+
+                // Fetch branches
+                const branchRes = await coreService.getBranches();
+                const branchData = Array.isArray(branchRes) ? branchRes : (branchRes.data || branchRes.branches || []);
+                setAllBranches(branchData);
             }
         } catch (error) {
             console.error("Error fetching employee data:", error);
@@ -110,27 +120,73 @@ export const EmployeesContent = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
+
+        // Dependent dropdown logic for branches
+        if (name === 'company_id') {
+            const selectedCompanyId = value;
+            const selectedCompany = companies.find(c => String(c.id) === String(selectedCompanyId));
+            const companyName = selectedCompany ? (selectedCompany.name || selectedCompany.company_name) : '';
+
+            // Filter branches by company_id OR company_name (depending on how branch object is structured)
+            const filtered = allBranches.filter(b => 
+                String(b.company_id) === String(selectedCompanyId) || 
+                (b.company && String(b.company).toLowerCase() === String(companyName).toLowerCase()) ||
+                (b.company_name && String(b.company_name).toLowerCase() === String(companyName).toLowerCase())
+            );
+            setFilteredBranches(filtered);
+            setFormData(prev => ({ ...prev, company_id: value, branch: '' })); // Reset branch when company changes
+        }
     };
 
     const handleAdd = async (e) => {
         e.preventDefault();
-        if (formData.password !== formData.confirm_password) {
-            alert("Passwords do not match. Please ensure both password fields are identical.");
+        if (formData.password?.trim() !== formData.confirm_password?.trim()) {
+            alert("Passwords do not match. Please ensure both password fields are identical and contain no extra spaces.");
             return;
         }
+
+        // Basic frontend unique email validation for better UX
+        const emailToSubmit = (formData.personal_email || formData.company_email || formData.email || "").toLowerCase();
+        const emailExists = employees.some(emp => 
+            (emp.personal_email || emp.company_email || emp.email || "").toLowerCase() === emailToSubmit
+        );
+
+        if (emailExists && emailToSubmit) {
+            const proceed = window.confirm(`An employee with the email ${emailToSubmit} already exists in your current view. Are you sure you want to proceed?`);
+            if (!proceed) return;
+        }
+
         try {
             if (canAddEmployee) {
-                // If not SuperAdmin, force company_id to current user's company
-                const payload = isSuperAdmin ? { ...formData } : { ...formData, company_id: currentUser.company_id };
-                payload.ctc = payload.ctc ? Number(payload.ctc) : 0;
-                payload.pay_grade = payload.pay_grade || "N/A";
+                // Determine the correct company_id
+                const companyId = isSuperAdmin ? formData.company_id : currentUser.company_id;
+                
+                // Construct final payload
+                const payload = { 
+                    ...formData, 
+                    company_id: companyId,
+                    ctc: formData.ctc ? Number(formData.ctc) : 0,
+                    pay_grade: formData.pay_grade || "N/A"
+                };
+
                 await employeeSuperAdminService.createEmployee(payload);
                 setShowAdd(false);
                 fetchData();
                 alert("Employee created successfully!");
+                
+                // Clear form for next use
+                setFormData({
+                    user_account: '', full_name: '', personal_email: '', company_email: '', phone_number: '',
+                    username: '', password: '', confirm_password: '',
+                    department: '', designation: '',
+                    role: 'employee', employment_type: 'fulltime employee',
+                    joining_date: '', company_id: currentUser?.company_id || '', branch: '',
+                    pay_grade: '', ctc: ''
+                });
             }
         } catch (error) {
-            alert("Failed to create employee: " + (error.message || "Unknown error"));
+            // Error message is already cleaned by the service
+            alert("Error: " + error.message);
         }
     };
 
@@ -262,15 +318,17 @@ export const EmployeesContent = () => {
                             {canAddEmployee && (
                                 <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
                                     onClick={() => {
+                                        setFilteredBranches([]);
                                         setFormData({
                                             user_account: '', full_name: '', personal_email: '', company_email: '', phone_number: '',
                                             username: '', password: '', confirm_password: '',
                                             department: '', designation: '',
-                                            role: 'employee', joining_date: '',
+                                            role: 'employee', employment_type: 'fulltime employee', joining_date: '',
                                             company_id: currentUser?.company_id || '', branch: '',
                                             pay_grade: '', ctc: ''
                                         });
                                         setShowAdd(true);
+                                        setShowEdit(false);
                                     }}
                                     style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', color: 'white', fontWeight: 700 }}>
                                     <FaPlus /> Add Employee
@@ -320,8 +378,8 @@ export const EmployeesContent = () => {
                                                 </div>
                                             </td>
                                             <td className="py-4">
-                                                <div className="fw-bold text-dark">{emp.designation || emp.role}</div>
-                                                <div className="small text-muted">{emp.department || 'N/A'}</div>
+                                                <div className="fw-bold text-dark">{emp.designation || 'Designation'}</div>
+                                                <div className="small text-muted">{emp.employment_type || emp.role || 'employee'} | {emp.department || 'N/A'}</div>
                                             </td>
                                             <td className="py-4">
                                                 <span className="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
@@ -339,9 +397,20 @@ export const EmployeesContent = () => {
                                                         <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
                                                             onClick={() => {
                                                                 setSelectedEmployee(emp);
+                                                                const empCompanyId = emp.company_id || '';
+                                                                const empCompanyName = emp.company_name || emp.company || '';
+                                                                
+                                                                // Pre-filter branches for the edit modal
+                                                                const initialFiltered = allBranches.filter(b => 
+                                                                    String(b.company_id) === String(empCompanyId) || 
+                                                                    (b.company && String(b.company).toLowerCase() === String(empCompanyName).toLowerCase()) ||
+                                                                    (b.company_name && String(b.company_name).toLowerCase() === String(empCompanyName).toLowerCase())
+                                                                );
+                                                                setFilteredBranches(initialFiltered);
+
                                                                 setFormData({ 
                                                                     ...emp, 
-                                                                    company_id: emp.company_id || '',
+                                                                    company_id: empCompanyId,
                                                                     full_name: emp.full_name || emp.name || '',
                                                                     personal_email: emp.personal_email || emp.email || '',
                                                                     company_email: emp.company_email || '',
@@ -349,7 +418,9 @@ export const EmployeesContent = () => {
                                                                     password: '',
                                                                     confirm_password: '',
                                                                     pay_grade: emp.pay_grade || '',
-                                                                    ctc: emp.ctc || ''
+                                                                    ctc: emp.ctc || '',
+                                                                    role: emp.role || 'employee',
+                                                                    employment_type: emp.employment_type || 'fulltime'
                                                                 });
                                                                 setShowEdit(true);
                                                             }}
@@ -385,8 +456,8 @@ export const EmployeesContent = () => {
                         <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style={{ background: '#fff' }}>
                             <div className="p-4 border-bottom border-light d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h4 className="fw-bold mb-1" style={{ color: '#0f172a' }}>Add New Employee</h4>
-                                    <p className="text-muted small mb-0">Enter employee information to add to the system</p>
+                                    <h4 className="fw-bold mb-1" style={{ color: '#0f172a' }}>{showAdd ? 'Add New Employee' : 'Edit Employee Details'}</h4>
+                                    <p className="text-muted small mb-0">{showAdd ? 'Enter employee information to add to the system' : 'Modify the existing details for this member and save your changes'}</p>
                                 </div>
                                 <button onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn-close shadow-none"></button>
                             </div>
@@ -425,15 +496,15 @@ export const EmployeesContent = () => {
 
                                         <div className="col-md-6">
                                             <label className="form-label fw-bold small text-muted text-uppercase">Username *</label>
-                                            <input type="text" name="username" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.username} onChange={handleInputChange} placeholder="dittakavijaya@gmail.com" />
+                                            <input type="text" name="username" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.username} onChange={handleInputChange} placeholder="username / email" />
                                             <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>The user will use these credentials to access their account.</div>
                                         </div>
-                                        <div className="col-md-6">
+                                        <div className="col-md-3">
                                             <label className="form-label fw-bold small text-muted text-uppercase">Password *</label>
                                             <input type="password" name="password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.password} onChange={handleInputChange} placeholder="........" />
                                         </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Confirm Password *</label>
+                                        <div className="col-md-3">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Confirm *</label>
                                             <input type="password" name="confirm_password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.confirm_password} onChange={handleInputChange} placeholder="........" />
                                         </div>
 
@@ -442,8 +513,7 @@ export const EmployeesContent = () => {
                                             <select name="department" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.department} onChange={handleInputChange}>
                                                 <option value="">Select Department</option>
                                                 <option value="IT">IT</option>
-                                                <option value="HR">HR</option>
-                                                <option value="Finance">Finance</option>
+                                                <option value="NON IT">NON IT</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -453,11 +523,22 @@ export const EmployeesContent = () => {
 
                                         <div className="col-md-6">
                                             <label className="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                                            <select name="role" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.role} onChange={handleInputChange}>
-                                                <option value="employee">Employee</option>
-                                                <option value="manager">Manager</option>
-                                                <option value="hr">HR</option>
-                                                <option value="admin">Admin</option>
+                                            <select name="employment_type" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.employment_type} onChange={(e) => {
+                                                const val = e.target.value;
+                                                let newRole = 'employee';
+                                                
+                                                if (val.toLowerCase().includes('hr')) newRole = 'hr';
+                                                else if (val.toLowerCase().includes('manager')) newRole = 'manager';
+                                                else if (val.toLowerCase().includes('admin')) newRole = 'admin';
+                                                
+                                                setFormData({ ...formData, employment_type: val, role: newRole });
+                                            }}>
+                                                <option value="fulltime HR">fulltime HR</option>
+                                                <option value="Intern HR">Intern HR</option>
+                                                <option value="MANAGER">MANAGER</option>
+                                                <option value="admin">admin</option>
+                                                <option value="fulltime employee">fulltime employee</option>
+                                                <option value="tech intern">tech intern</option>
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -478,10 +559,29 @@ export const EmployeesContent = () => {
                                             <label className="form-label fw-bold small text-muted text-uppercase">Branch</label>
                                             <select name="branch" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.branch} onChange={handleInputChange}>
                                                 <option value="">Select Branch</option>
-                                                <option value="Main">Main Branch</option>
-                                                <option value="Regional">Regional Branch</option>
+                                                {filteredBranches.map((b, idx) => (
+                                                    <option key={idx} value={b.branch_name || b.name}>{b.branch_name || b.name}</option>
+                                                ))}
+                                                {/* Fallback if no company selected or no branches found */}
+                                                {!formData.company_id && (
+                                                    <>
+                                                        <option value="Main">Main Branch</option>
+                                                        <option value="Regional">Regional Branch</option>
+                                                    </>
+                                                )}
                                             </select>
                                         </div>
+
+                                        <div className="col-md-6">
+                                            <label className="form-label fw-bold small text-muted text-uppercase">Gender</label>
+                                            <select name="gender" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.gender} onChange={handleInputChange}>
+                                                <option value="Male">Male</option>
+                                                <option value="Female">Female</option>
+                                                <option value="Other">Other</option>
+                                                <option value="Not Specified">Not Specified</option>
+                                            </select>
+                                        </div>
+
                                     </div>
                                     <div className="mt-5 d-flex gap-3 pt-3 border-top">
                                         <button type="button" onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn btn-light rounded-pill px-4 py-3 fw-bold w-100 border-0" style={{ background: '#f8fafc' }}>Cancel</button>

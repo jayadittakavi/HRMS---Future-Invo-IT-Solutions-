@@ -1,12 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { onboardingService } from '../service';
 
-const TEMPLATES_DATA = [
-    { id: 1, name: 'Offer Letter Template', category: 'Recruitment', lastModified: '2026-02-15', status: 'Active', usageCount: 45, websiteResource: 'https://example.com/offer', blogPost: 'How to write effective offer letters' },
-    { id: 2, name: 'Appointment Letter Template', category: 'Onboarding', lastModified: '2026-02-10', status: 'Active', usageCount: 32, websiteResource: 'https://example.com/appointment', blogPost: 'Best practices for appointment letters' },
-    { id: 3, name: 'Relieving Letter Template', category: 'Exit', lastModified: '2026-02-08', status: 'Draft', usageCount: 12, websiteResource: 'https://example.com/relieving', blogPost: 'Creating professional relieving letters' },
-    { id: 4, name: 'Increment Letter Template', category: 'Performance', lastModified: '2026-01-30', status: 'Active', usageCount: 20, websiteResource: '', blogPost: '' },
-    { id: 5, name: 'Performance Review Letter', category: 'Performance', lastModified: '2026-01-20', status: 'Draft', usageCount: 8, websiteResource: '', blogPost: '' },
-];
+
 
 const CAT_COLORS = {
     Recruitment: { bg: '#dbeafe', color: '#1d4ed8' },
@@ -19,41 +14,91 @@ const CAT_COLORS = {
 const EMPTY_FORM = { name: '', category: 'Recruitment', websiteResource: '', blogPost: '', content: '' };
 
 const TemplateUI = () => {
-    const [templates, setTemplates] = useState(TEMPLATES_DATA);
+    const [templates, setTemplates] = useState([]);
+    const [stats, setStats] = useState({ total_templates: 0, active: 0, draft: 0, total_usage: 0 });
+    const [categories, setCategories] = useState(['Recruitment', 'Onboarding', 'Performance', 'Exit', 'General']);
     const [showModal, setShowModal] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
     const [search, setSearch] = useState('');
     const [filterCat, setFilterCat] = useState('All');
+    const [loading, setLoading] = useState(false);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, tData, cData] = await Promise.all([
+                onboardingService.getTemplateStats(),
+                onboardingService.getTemplates(),
+                onboardingService.getTemplateCategories()
+            ]);
+            setStats(sData);
+            setTemplates(tData);
+            setCategories(cData);
+        } catch (err) {
+            console.error("Failed to fetch templates data", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const openAdd = () => { setForm(EMPTY_FORM); setEditingId(null); setShowModal(true); };
-    const openEdit = (t) => { setForm(t); setEditingId(t.id); setShowModal(true); };
-    const handleDelete = (id) => { if (window.confirm('Delete this template?')) setTemplates(ts => ts.filter(t => t.id !== id)); };
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (editingId) {
-            setTemplates(ts => ts.map(t => t.id === editingId ? { ...form, id: editingId } : t));
-        } else {
-            setTemplates(ts => [...ts, { ...form, id: Date.now(), lastModified: new Date().toISOString().split('T')[0], status: 'Active', usageCount: 0 }]);
+    const openEdit = (t) => { 
+        setForm({
+            name: t.name,
+            category: t.category,
+            websiteResource: t.websiteResource || '',
+            blogPost: t.blogPost || '',
+            content: t.content || ''
+        }); 
+        setEditingId(t.id); 
+        setShowModal(true); 
+    };
+
+    const handleDelete = async (id) => { 
+        if (window.confirm('Delete this template?')) {
+            try {
+                await onboardingService.deleteTemplate(id);
+                fetchData();
+            } catch (err) {
+                alert("Error deleting template");
+            }
         }
-        setShowModal(false);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            if (editingId) {
+                await onboardingService.updateTemplate(editingId, form);
+            } else {
+                await onboardingService.addTemplate(form);
+            }
+            setShowModal(false);
+            fetchData();
+        } catch (err) {
+            alert("Error saving template: " + err.message);
+        }
     };
 
     const filtered = templates.filter(t =>
         (filterCat === 'All' || t.category === filterCat) &&
-        t.name.toLowerCase().includes(search.toLowerCase())
+        (t.name || '').toLowerCase().includes(search.toLowerCase())
     );
-    const totalUsage = templates.reduce((s, t) => s + t.usageCount, 0);
 
     return (
         <div>
             {/* Stats */}
             <div className="row g-3 mb-4">
                 {[
-                    { label: 'Total Templates', value: templates.length, icon: '📄', color: '#2563eb', bg: '#eff6ff' },
-                    { label: 'Active', value: templates.filter(t => t.status === 'Active').length, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
-                    { label: 'Draft', value: templates.filter(t => t.status === 'Draft').length, icon: '📝', color: '#d97706', bg: '#fef3c7' },
-                    { label: 'Total Usage', value: totalUsage, icon: '📊', color: '#7c3aed', bg: '#f5f3ff' },
+                    { label: 'Total Templates', value: stats.total_templates || templates.length, icon: '📄', color: '#2563eb', bg: '#eff6ff' },
+                    { label: 'Active', value: stats.active || templates.filter(t => t.status === 'Active').length, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
+                    { label: 'Draft', value: stats.draft || templates.filter(t => t.status === 'Draft').length, icon: '📝', color: '#d97706', bg: '#fef3c7' },
+                    { label: 'Total Usage', value: stats.total_usage || templates.reduce((s,t) => s + (t.usageCount || 0), 0), icon: '📊', color: '#7c3aed', bg: '#f5f3ff' },
                 ].map((s, i) => (
                     <div key={i} className="col-md-3 col-6">
                         <div className="card border-0 shadow-sm rounded-4">
@@ -83,11 +128,9 @@ const TemplateUI = () => {
                         </div>
                         <select style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '5px 10px', fontSize: '0.8rem', color: '#374151' }} value={filterCat} onChange={e => setFilterCat(e.target.value)}>
                             <option value="All">All Categories</option>
-                            <option>Recruitment</option>
-                            <option>Onboarding</option>
-                            <option>Performance</option>
-                            <option>Exit</option>
-                            <option>General</option>
+                            {categories.map((c, idx) => (
+                                <option key={idx} value={c}>{c}</option>
+                            ))}
                         </select>
                     </div>
                     <button onClick={openAdd} style={{ background: '#1e3a8a', color: '#fff', borderRadius: 10, border: 'none', padding: '7px 18px', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer' }}>
@@ -179,7 +222,9 @@ const TemplateUI = () => {
                                         <div className="col-md-4">
                                             <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Category *</label>
                                             <select className="form-select form-select-sm rounded-3" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
-                                                <option>Recruitment</option><option>Onboarding</option><option>Performance</option><option>Exit</option><option>General</option>
+                                                {categories.map((c, i) => (
+                                                    <option key={i} value={c}>{c}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="col-md-6">

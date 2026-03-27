@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaCheckCircle, FaBell, FaEdit } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useAuth } from '../../../../context/AuthContext';
-import { attendanceService } from '../../../attendance/service/service';
+import { getAuthHeader } from '../../../../config';
+import { profileService } from '../../../../services/profileService';
 
 /* ── Role color mapping ──────────────────────────────────── */
 const ROLE_META = {
@@ -13,7 +15,15 @@ const ROLE_META = {
     employee: { label: 'Employee', color: '#a855f7', bg: '#faf5ff', gradient: 'linear-gradient(135deg,#c084fc,#a855f7)' },
     accountant: { label: 'Accountant', color: '#dc2626', bg: '#fff1f2', gradient: 'linear-gradient(135deg,#dc2626,#b91c1c)' },
 };
-const getRoleMeta = (role) => ROLE_META[role?.toLowerCase()] || ROLE_META.employee;
+const getRoleMeta = (role) => {
+    const r = role?.toLowerCase() || '';
+    if (r.includes('superadmin')) return ROLE_META.superadmin;
+    if (r.includes('admin')) return ROLE_META.admin;
+    if (r.includes('hr')) return ROLE_META.hr;
+    if (r.includes('manager')) return ROLE_META.manager;
+    if (r.includes('accountant')) return ROLE_META.accountant;
+    return ROLE_META.employee;
+};
 
 /* ── Tiny SVG Icons ─────────────────────────────────────── */
 const Ico = ({ d, size = 16 }) => (
@@ -98,21 +108,17 @@ const ProfileContent = () => {
     /* Fetch employee record in background */
     useEffect(() => {
         const fetchProfileData = async () => {
-            if (!user?.email) { setFetchingData(false); return; }
             try {
-                const response = await attendanceService.getAllEmployees();
-                const employees = Array.isArray(response) ? response : (response.data || response.employees || []);
-                const matched = employees.find(emp =>
-                    emp.email?.toLowerCase() === user.email.toLowerCase() ||
-                    emp.user?.toLowerCase() === user.username?.toLowerCase()
-                );
-                if (matched) {
-                    setEmployeeData(matched);
-                    setEditForm(f => ({
-                        ...f,
-                        name: matched.name || user.name || '',
-                        phone: matched.phone || ''
-                    }));
+                const data = await profileService.getMyProfile();
+                if (data) {
+                    setEmployeeData(data);
+                    setEditForm({
+                        name: data.name || '',
+                        phone: data.overview?.contact_information?.phone_number || data.phone || '',
+                        address: data.overview?.contact_information?.address_location || data.address || '',
+                        bio: data.overview?.about_bio || data.bio || '',
+                        emergencyContact: ''
+                    });
                 }
             } catch (err) {
                 console.error('Profile fetch error:', err);
@@ -123,10 +129,26 @@ const ProfileContent = () => {
         fetchProfileData();
     }, [user]);
 
-    const handleSave = () => {
-        updateProfile({ name: editForm.name, profilePic: pendingPic || undefined });
-        setPendingPic(null);
-        setIsEditing(false);
+    const handleSave = async () => {
+        try {
+            const updated = await profileService.updateProfile({
+                name: editForm.name,
+                phone: editForm.phone,
+                address: editForm.address,
+                bio: editForm.bio
+            });
+            if (updated) setEmployeeData(updated);
+            updateProfile({ name: editForm.name, profilePic: pendingPic || undefined });
+            setPendingPic(null);
+            setIsEditing(false);
+            alert("Profile updated successfully!");
+        } catch (err) {
+            console.warn("Server update failed, updating local state for session continuity.", err);
+            updateProfile({ name: editForm.name, profilePic: pendingPic || undefined });
+            setPendingPic(null);
+            setIsEditing(false);
+            alert("Profile saved locally! (Note: Server is currently unreachable - " + (err.message || "Internal Error") + ")");
+        }
     };
     const handleCancel = () => {
         setEditForm(f => ({ ...f, name: employeeData?.name || user?.name || '', phone: employeeData?.phone || '' }));
@@ -142,22 +164,24 @@ const ProfileContent = () => {
 
     /* Merged display data */
     const D = {
-        name: editForm.name || employeeData?.name || user?.name || '—',
+        name: employeeData?.name || user?.name || '—',
+        username: employeeData?.username || user?.username || '—',
         email: employeeData?.email || user?.email || '—',
-        phone: editForm.phone || employeeData?.phone || '',
-        role: employeeData?.type || user?.role || 'employee',
-        desig: employeeData?.desig || employeeData?.type || user?.role || '—',
-        dept: employeeData?.dept || 'N/A',
-        empId: employeeData?.employee_id || employeeData?.id || user?.id || 'N/A',
-        manager: employeeData?.manager || 'N/A',
-        joinDate: employeeData?.joiningDate || 'N/A',
-        branch: employeeData?.branch || employeeData?.city || 'N/A',
+        phone: employeeData?.overview?.contact_information?.phone_number || employeeData?.phone || '',
+        address: employeeData?.overview?.contact_information?.address_location || employeeData?.address || '',
+        bio: employeeData?.overview?.about_bio || employeeData?.bio || '',
+        role: employeeData?.role || user?.role || 'employee',
+        desig: employeeData?.designation || employeeData?.overview?.work_snapshot?.role_designation || user?.role || '—',
+        dept: employeeData?.department || employeeData?.overview?.work_snapshot?.department || 'N/A',
+        manager: employeeData?.overview?.work_snapshot?.reporting_manager || 'N/A',
+        empId: employeeData?.employee_id || 'N/A',
+        joinDate: employeeData?.joined || 'N/A',
         status: employeeData?.status || 'Active',
+        branch: employeeData?.branch || 'N/A',
         profilePic: pendingPic || user?.profilePic || null,
-        address: editForm.address || employeeData?.address || '',
-        bio: editForm.bio || '',
         emergContact: editForm.emergencyContact || '',
-        username: user?.username || '—',
+        work_info: employeeData?.work_info || {},
+        personal: employeeData?.personal || {}
     };
 
     const meta = getRoleMeta(D.role);
@@ -181,121 +205,127 @@ const ProfileContent = () => {
     return (
         <div style={{ maxWidth: 960, padding: '24px 24px 48px' }}>
 
-            {/* ── Cover Banner ── */}
-            <div style={{ borderRadius: 20, overflow: 'hidden', marginBottom: 0, position: 'relative' }}>
-                <div style={{ height: 130, background: meta.gradient, position: 'relative' }}>
+            {/* ── Outer Wrapper ── */}
+            <div style={{ position: 'relative', overflow: 'visible' }}>
+                
+                {/* 1. Cover Banner (Stays at the back) */}
+                <div style={{ 
+                    height: 150, 
+                    background: meta.gradient, 
+                    borderRadius: '24px 24px 0 0', 
+                    position: 'relative', 
+                    zIndex: 1, 
+                    boxShadow: 'inset 0 -30px 60px rgba(0,0,0,0.08)'
+                }}>
                     {/* Decorative circles */}
                     <div style={{ position: 'absolute', right: -30, top: -30, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
-                    <div style={{ position: 'absolute', right: 80, bottom: -60, width: 150, height: 150, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
-                    <div style={{ position: 'absolute', left: 30, top: 20, color: 'rgba(255,255,255,0.15)', fontSize: '4rem' }}>✦</div>
+                    <div style={{ position: 'absolute', right: 80, bottom: -60, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+                    <div style={{ position: 'absolute', left: 40, top: 30, color: 'rgba(255,255,255,0.15)', fontSize: '4rem' }}>✦</div>
                 </div>
 
-                {/* ── Profile Card (floating over cover) ── */}
-                <div className="card border-0 shadow-sm" style={{ borderRadius: '0 0 20px 20px', borderTop: `4px solid ${meta.color}` }}>
-                    <div className="card-body" style={{ padding: '0 28px 24px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, marginTop: -52, flexWrap: 'wrap' }}>
-                            {/* Avatar */}
-                            <div style={{ position: 'relative', flexShrink: 0 }}>
-                                <div
-                                    style={{
-                                        width: 104, height: 104, borderRadius: '50%',
-                                        border: `4px solid #fff`, overflow: 'hidden',
-                                        background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        boxShadow: `0 4px 20px ${meta.color}30`,
-                                        cursor: isEditing ? 'pointer' : 'default',
-                                        position: 'relative',
-                                    }}
-                                    onClick={() => isEditing && document.getElementById('profile-pic-upload').click()}
-                                >
-                                    {D.profilePic ? (
-                                        <img src={D.profilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <span style={{ fontSize: '2rem', fontWeight: 800, color: meta.color }}>{initials}</span>
-                                    )}
-                                    {isEditing && (
-                                        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, color: '#fff' }}>
-                                            <IcoCamera />
-                                            <span style={{ fontSize: '0.6rem', fontWeight: 700 }}>CHANGE</span>
-                                        </div>
-                                    )}
+                {/* 2. Floating Header Info (Highest Layer) */}
+                <div style={{ 
+                    position: 'relative', 
+                    zIndex: 100, 
+                    marginTop: -85, 
+                    padding: '0 40px', 
+                    display: 'flex', 
+                    alignItems: 'flex-end', 
+                    gap: 32, 
+                    flexWrap: 'wrap' 
+                }}>
+                    {/* DP Circle */}
+                    <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div
+                            style={{
+                                width: 142, height: 142, borderRadius: '50%',
+                                border: `6px solid #fff`, overflow: 'hidden',
+                                background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                boxShadow: `0 12px 35px rgba(0,0,0,0.22)`,
+                                cursor: isEditing ? 'pointer' : 'default',
+                                position: 'relative',
+                                zIndex: 105
+                            }}
+                            onClick={() => isEditing && document.getElementById('profile-pic-upload').click()}
+                        >
+                            {D.profilePic ? (
+                                <img src={D.profilePic} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
+                            ) : (
+                                <span style={{ fontSize: '3rem', fontWeight: 800, color: meta.color }}>{initials}</span>
+                            )}
+                            {isEditing && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, color: '#fff', zIndex: 110 }}>
+                                    <IcoCamera />
+                                    <span style={{ fontSize: '0.75rem', fontWeight: 700 }}>CHANGE DP</span>
                                 </div>
-                                {/* Online indicator */}
-                                <div style={{ position: 'absolute', bottom: 6, right: 6, width: 16, height: 16, borderRadius: '50%', background: '#16a34a', border: '2px solid #fff' }} />
-                                <input type="file" id="profile-pic-upload" className="d-none" accept="image/*" onChange={e => {
-                                    const file = e.target.files[0];
-                                    if (file) { const r = new FileReader(); r.onloadend = () => setPendingPic(r.result); r.readAsDataURL(file); }
-                                }} />
-                            </div>
-
-                            {/* Name / Badge */}
-                            <div style={{ flex: 1, paddingTop: 56, minWidth: 160 }}>
-                                {isEditing ? (
-                                    <input
-                                        style={{ fontSize: '1.4rem', fontWeight: 800, color: '#111827', border: 'none', borderBottom: `2px solid ${meta.color}`, outline: 'none', background: 'transparent', width: '100%', marginBottom: 4, padding: '2px 4px' }}
-                                        value={editForm.name}
-                                        onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
-                                        placeholder="Full name"
-                                    />
-                                ) : (
-                                    <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#111827', margin: 0 }}>{D.name}</h2>
-                                )}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
-                                    <span style={{ fontSize: '0.82rem', color: '#6b7280' }}>{D.desig}</span>
-                                    <span style={{ background: meta.bg, color: meta.color, borderRadius: 20, padding: '2px 12px', fontSize: '0.71rem', fontWeight: 800 }}>
-                                        {meta.label}
-                                    </span>
-                                    <span style={{ background: D.status === 'Active' ? '#dcfce7' : '#fee2e2', color: D.status === 'Active' ? '#16a34a' : '#dc2626', borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.status === 'Active' ? '#16a34a' : '#dc2626', display: 'inline-block' }} />{D.status}
-                                    </span>
-                                </div>
-                                <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: 3 }}>@{D.username} · {D.email}</div>
-                            </div>
-
-                            {/* Action buttons */}
-                            <div style={{ display: 'flex', gap: 8, paddingTop: 60, flexShrink: 0 }}>
-                                {isEditing ? (
-                                    <>
-                                        <button onClick={handleSave} style={{ borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700, background: '#16a34a', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <IcoCheck /> Save Changes
-                                        </button>
-                                        <button onClick={handleCancel} style={{ borderRadius: 10, padding: '8px 18px', fontSize: '0.82rem', fontWeight: 600, background: '#f1f5f9', border: 'none', color: '#374151', cursor: 'pointer' }}>
-                                            Cancel
-                                        </button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button
-                                            onClick={handleSubscribe}
-                                            style={{
-                                                borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700,
-                                                background: '#fff', border: `1.5px solid ${meta.color}`, color: meta.color,
-                                                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6,
-                                                transition: 'all 0.2s'
-                                            }}
-                                            onMouseOver={e => e.currentTarget.style.background = `${meta.color}10`}
-                                            onMouseOut={e => e.currentTarget.style.background = '#fff'}
-                                        >
-                                            <IcoBell /> Subscribe
-                                        </button>
-                                        <button onClick={() => setIsEditing(true)} style={{ borderRadius: 10, padding: '8px 20px', fontSize: '0.82rem', fontWeight: 700, background: meta.gradient, border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, boxShadow: `0 4px 12px ${meta.color}40` }}>
-                                            <IcoEdit /> Edit Profile
-                                        </button>
-                                    </>
-                                )}
-                            </div>
+                            )}
                         </div>
+                        {/* Status Dot */}
+                        <div style={{ position: 'absolute', bottom: 12, right: 12, width: 24, height: 24, borderRadius: '50%', background: '#22c55e', border: '4px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.15)', zIndex: 120 }} />
+                        <input type="file" id="profile-pic-upload" className="d-none" accept="image/*" onChange={e => {
+                            const file = e.target.files[0];
+                            if (file) { const r = new FileReader(); r.onloadend = () => setPendingPic(r.result); r.readAsDataURL(file); }
+                        }} />
+                    </div>
 
-                        {/* ── Quick Stats Row ── */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12, marginTop: 24, borderTop: '1px solid #f0f4ff', paddingTop: 20 }}>
+                    {/* Identity Details */}
+                    <div style={{ flex: 1, paddingBottom: 15, minWidth: 200 }}>
+                        {isEditing ? (
+                            <input
+                                style={{ fontSize: '1.8rem', fontWeight: 800, color: '#1e293b', border: 'none', borderBottom: `3px solid ${meta.color}`, outline: 'none', background: 'transparent', width: '100%', marginBottom: 8 }}
+                                value={editForm.name}
+                                onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
+                                placeholder="Full Name"
+                            />
+                        ) : (
+                            <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', marginBottom: 4, textShadow: '0 2px 10px rgba(255,255,255,0.8)' }}>{D.name || 'User Profile'}</h2>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                            <span style={{ background: `${meta.color}15`, color: meta.color, borderRadius: 8, padding: '4px 14px', fontSize: '0.85rem', fontWeight: 700 }}>{D.desig}</span>
+                            <span style={{ color: '#10b981', fontWeight: 800, fontSize: '0.8rem' }}>● ACTIVE</span>
+                            <span style={{ fontSize: '0.82rem', color: '#64748b' }}>@ — {D.email}</span>
+                        </div>
+                    </div>
+
+                    {/* Action Bar (Aligned right) */}
+                    <div style={{ paddingBottom: 15, display: 'flex', gap: 12 }}>
+                        {isEditing ? (
+                            <>
+                                <button onClick={handleSave} className="btn btn-success rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm">
+                                    <FaCheckCircle /> Save Changes
+                                </button>
+                                <button onClick={handleCancel} className="btn btn-light rounded-pill px-4 py-2 fw-bold border">
+                                    Cancel
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button onClick={handleSubscribe} className="btn rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2" style={{ background: '#fff', border: '1px solid #e2e8f0', color: '#475569', fontSize: '0.88rem' }}>
+                                    <FaBell /> Subscribe
+                                </button>
+                                <button onClick={() => setIsEditing(true)} className="btn rounded-pill px-4 py-2 fw-bold text-white shadow-sm" style={{ backgroundColor: meta.color, fontSize: '0.88rem' }}>
+                                    <FaEdit /> Edit Profile
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* 3. Stats Card (Restored Spacing) */}
+                <div style={{ background: '#fff', borderRadius: '0 0 24px 24px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', marginTop: -60, paddingTop: 85, position: 'relative', zIndex: 10 }}>
+                    <div style={{ padding: '24px 40px' }}>
+                        
+                        {/* Summary Stats Grid */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 20, textAlign: 'center', borderTop: '1px solid #f1f5f9', paddingTop: 24 }}>
                             {stats.map((s, i) => (
-                                <div key={i} style={{ textAlign: 'center' }}>
-                                    <div style={{ fontSize: '0.68rem', color: '#9ca3af', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{s.label}</div>
+                                <div key={i}>
+                                    <div style={{ fontSize: '0.68rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{s.label}</div>
                                     {s.isStatus ? (
-                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: '#dcfce7', color: '#16a34a', borderRadius: 20, padding: '3px 12px', fontSize: '0.78rem', fontWeight: 700 }}>
-                                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16a34a' }} />{s.value}
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0fdf4', color: '#16a34a', borderRadius: 20, padding: '4px 14px', fontSize: '0.82rem', fontWeight: 700 }}>
+                                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} />{s.value}
                                         </div>
                                     ) : (
-                                        <div style={{ fontWeight: 700, fontSize: '0.88rem', color: s.value !== 'N/A' ? '#111827' : '#9ca3af' }}>{s.value}</div>
+                                        <div style={{ fontWeight: 800, fontSize: '1rem', color: s.value !== 'N/A' ? '#1e293b' : '#cbd5e1' }}>{s.value}</div>
                                     )}
                                 </div>
                             ))}
@@ -383,6 +413,9 @@ const ProfileContent = () => {
                                 <InfoField label="Reporting Manager" value={D.manager} icon={<IcoManager />} />
                                 <InfoField label="Date of Joining" value={D.joinDate} icon={<IcoCal />} />
                                 <InfoField label="Branch / Location" value={D.branch} icon={<IcoPin />} />
+                                {D.work_info && Object.entries(D.work_info).map(([k, v]) => (
+                                    <InfoField key={k} label={k} value={v} icon={<IcoBrief />} />
+                                ))}
                             </div>
                         </div>
 
@@ -426,6 +459,11 @@ const ProfileContent = () => {
                             <div className="card-body p-4">
                                 <SectionTitle icon={<IcoPhone />} title="Emergency Contact" desc="Contact in case of emergency" />
                                 <InfoField label="Emergency Contact Name / Number" value={D.emergContact} icon={<IcoPhone />} editable={isEditing} onChange={e => setEditForm(f => ({ ...f, emergencyContact: e.target.value }))} placeholder="Name – Phone number" />
+                                
+                                {D.personal && Object.entries(D.personal).map(([k, v]) => (
+                                    <InfoField key={k} label={k} value={v} icon={<IcoUser />} />
+                                ))}
+
                                 <div style={{ marginTop: 20, padding: 14, background: '#fffbeb', borderRadius: 10, border: '1px solid #fde68a' }}>
                                     <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#b45309', marginBottom: 4 }}>⚠️ Privacy Note</div>
                                     <div style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.6 }}>Personal details are only visible to you and authorized HR personnel. Your information is securely stored and never shared externally.</div>

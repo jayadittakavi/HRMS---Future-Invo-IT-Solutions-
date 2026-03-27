@@ -22,13 +22,13 @@ const DashboardLayout = ({ title, onNavigate, activePath, children }) => {
             } else {
                 // Otherwise, append to current dashboard path
                 // This is where we ensure we stay within the correct dashboard context
-                const role = user?.role?.toLowerCase();
+                const role = user?.role?.toLowerCase() || '';
                 let basePath = '/dashboard';
-                if (role === 'superadmin') basePath = '/dashboard/super-admin';
-                else if (role === 'admin') basePath = '/dashboard/admin';
-                else if (role === 'manager') basePath = '/dashboard/manager';
-                else if (role === 'hr') basePath = '/dashboard/hr';
-                else if (role === 'employee') basePath = '/dashboard/employee';
+                if (role.includes('superadmin')) basePath = '/dashboard/super-admin';
+                else if (role.includes('admin')) basePath = '/dashboard/admin';
+                else if (role.includes('manager')) basePath = '/dashboard/manager';
+                else if (role.includes('hr')) basePath = '/dashboard/hr';
+                else if (role.includes('employee')) basePath = '/dashboard/employee';
 
                 // If the path is just 'dashboard', go to the base path
                 if (path === 'dashboard') {

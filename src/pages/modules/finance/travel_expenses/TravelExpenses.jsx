@@ -8,19 +8,73 @@ import { MdOutlineHistory, MdFilterList, MdFileDownload } from 'react-icons/md';
 export const TravelExpensesContent = () => {
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+    const [showNewClaim, setShowNewClaim] = useState(false);
+    const [claimFormData, setClaimFormData] = useState({
+        project: '',
+        category: 'Flight',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        description: ''
+    });
 
     useEffect(() => {
         setSearchTerm(globalSearchTerm);
     }, [globalSearchTerm]);
+
     // Mock Data
-    const expenses = [
+    const [expenses, setExpenses] = useState([
         { id: 'EXP-001', employee: 'John Doe', avatar: 'JD', project: 'Client Visit - NYC', amount: '$1,200', date: 'Oct 10, 2025', status: 'Approved', category: 'Flight' },
         { id: 'EXP-002', employee: 'Sarah Lee', avatar: 'SL', project: 'Tech Conference', amount: '$850', date: 'Oct 12, 2025', status: 'Pending', category: 'Hotel' },
         { id: 'EXP-003', employee: 'Mike Chen', avatar: 'MC', project: 'Team Offsite', amount: '$300', date: 'Oct 15, 2025', status: 'Rejected', category: 'Meals' },
         { id: 'EXP-004', employee: 'Meera Joshi', avatar: 'MJ', project: 'Branch Audit', amount: '$550', date: 'Oct 18, 2025', status: 'Approved', category: 'Taxi' },
-    ];
+    ]);
 
     const expenseTrend = [650, 900, 1200, 850, 1500, 1100]; // Last 6 months
+
+    const handleExport = () => {
+        const headers = ['ID', 'Employee', 'Project', 'Category', 'Date', 'Amount', 'Status'];
+        const csvContent = [
+            headers.join(','),
+            ...expenses.map(exp => [
+                exp.id,
+                `"${exp.employee}"`,
+                `"${exp.project}"`,
+                exp.category,
+                exp.date,
+                `"${exp.amount}"`,
+                exp.status
+            ].join(','))
+        ].join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `expense_claims_${new Date().toLocaleDateString()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert("Exporting expense claims to CSV...");
+    };
+
+    const handleNewClaim = (e) => {
+        e.preventDefault();
+        const newClaim = {
+            id: `EXP-00${expenses.length + 1}`,
+            employee: 'Current User', // Mocked
+            avatar: 'CU',
+            project: claimFormData.project,
+            amount: `$${Number(claimFormData.amount).toLocaleString()}`,
+            date: new Date(claimFormData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+            status: 'Pending',
+            category: claimFormData.category
+        };
+        setExpenses([newClaim, ...expenses]);
+        setShowNewClaim(false);
+        setClaimFormData({ project: '', category: 'Flight', amount: '', date: new Date().toISOString().split('T')[0], description: '' });
+        alert("New expense claim submitted successfully!");
+    };
 
     return (
         <div className="container-fluid p-0 animate__animated animate__fadeIn">
@@ -31,16 +85,17 @@ export const TravelExpensesContent = () => {
                     <p className="text-secondary small mb-0">Track employee travel requests and expense reimbursements.</p>
                 </div>
                 <div className="d-flex gap-2">
-                    <button className="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center gap-2">
+                    <button className="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center gap-2" onClick={handleExport}>
                         <MdFileDownload /> Export
                     </button>
-                    <button className="btn btn-primary btn-sm rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm">
+                    <button className="btn btn-primary btn-sm rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm" onClick={() => setShowNewClaim(true)}>
                         <FaPlus size={12} /> New Claim
                     </button>
                 </div>
             </div>
 
-    {/* Overview Cards */}
+            {/* Overview Cards... no changes here ... */}
+            {/* Overview Cards */}
             <div className="row g-4 mb-4">
                 {/* BLUE CARD */}
                 <div className="col-md-4">
@@ -61,7 +116,6 @@ export const TravelExpensesContent = () => {
                         </div>
                     </div>
                 </div>
-                {/* AMBER CARD */}
                 <div className="col-md-4">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-amber-solid h-100">
                         <div className="card-body p-4 position-relative">
@@ -80,7 +134,6 @@ export const TravelExpensesContent = () => {
                         </div>
                     </div>
                 </div>
-                {/* GREEN CARD */}
                 <div className="col-md-4">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-green-solid h-100">
                         <div className="card-body p-4 position-relative">
@@ -259,6 +312,91 @@ export const TravelExpensesContent = () => {
                 </div>
             </div>
 
+            {/* NEW CLAIM MODAL */}
+            {showNewClaim && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div className="modal-header border-0 p-4 pb-0 d-flex justify-content-between align-items-center">
+                                <h5 className="fw-bold m-0">New Expense Claim</h5>
+                                <button className="btn-close" onClick={() => setShowNewClaim(false)}></button>
+                            </div>
+                            <form onSubmit={handleNewClaim}>
+                                <div className="modal-body p-4">
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold text-muted text-uppercase">Project / Purpose</label>
+                                        <input 
+                                            type="text" 
+                                            className="form-control rounded-3 p-3 bg-light border-0 shadow-none" 
+                                            placeholder="e.g. Client Meeting NYC" 
+                                            required 
+                                            value={claimFormData.project}
+                                            onChange={e => setClaimFormData({...claimFormData, project: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="row g-3">
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold text-muted text-uppercase">Category</label>
+                                            <select 
+                                                className="form-select rounded-3 p-3 bg-light border-0 shadow-none"
+                                                value={claimFormData.category}
+                                                onChange={e => setClaimFormData({...claimFormData, category: e.target.value})}
+                                            >
+                                                <option>Flight</option>
+                                                <option>Hotel</option>
+                                                <option>Meals</option>
+                                                <option>Taxi</option>
+                                                <option>Training</option>
+                                                <option>Others</option>
+                                            </select>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <label className="form-label small fw-bold text-muted text-uppercase">Amount</label>
+                                            <div className="input-group">
+                                                <span className="input-group-text bg-light border-0 ps-3 text-muted">$</span>
+                                                <input 
+                                                    type="number" 
+                                                    className="form-control rounded-end-3 p-3 bg-light border-0 shadow-none" 
+                                                    placeholder="0.00" 
+                                                    required 
+                                                    value={claimFormData.amount}
+                                                    onChange={e => setClaimFormData({...claimFormData, amount: e.target.value})}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="mt-3">
+                                        <label className="form-label small fw-bold text-muted text-uppercase">Date of Expense</label>
+                                        <input 
+                                            type="date" 
+                                            className="form-control rounded-3 p-3 bg-light border-0 shadow-none" 
+                                            required 
+                                            value={claimFormData.date}
+                                            onChange={e => setClaimFormData({...claimFormData, date: e.target.value})}
+                                        />
+                                    </div>
+                                    <div className="mt-3">
+                                        <label className="form-label small fw-bold text-muted text-uppercase">Description</label>
+                                        <textarea 
+                                            className="form-control rounded-3 p-3 bg-light border-0 shadow-none" 
+                                            rows="3" 
+                                            placeholder="Provide detail about this expense..."
+                                            value={claimFormData.description}
+                                            onChange={e => setClaimFormData({...claimFormData, description: e.target.value})}
+                                        ></textarea>
+                                    </div>
+                                </div>
+                                <div className="modal-footer border-0 p-4 pt-0">
+                                    <button type="button" className="btn btn-light rounded-pill px-4 fw-bold" onClick={() => setShowNewClaim(false)}>Discard</button>
+                                    <button type="submit" className="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">Submit Claim</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* STYLES ... same as before ... */}
             <style>{`
                 .ls-1 { letter-spacing: 0.05rem; }
                 .ls-tight { letter-spacing: -0.05rem; }

@@ -1,18 +1,8 @@
-const API_BASE = "/api";
+import { API_BASE, getAuthHeader } from '../config';
 
 const authHeader = () => {
-    const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-
-    // Standard hardcoded token for development fallback
-    const testToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ0MjI2OTF9.M_u5L0lGqNRh3dvcBXWcv5wQD68AGQVY4UP7JJULs4k";
-
-    const finalToken = token || testToken;
-
     return {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${finalToken}`
-        },
+        headers: getAuthHeader('hr'), // Set fallback role as hr
     };
 };
 

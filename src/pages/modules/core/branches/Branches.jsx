@@ -39,18 +39,23 @@ export const BranchesContent = () => {
             ]);
 
             const cleanText = (val) => (val || '').replace(/^string:/, '').replace(/\s*,\s*/g, ', ').trim();
-            const mappedData = branchData.map(b => ({
-                id: b.id,
-                company_id: b.company_id || null,
-                name: cleanText(b.branch_name || b.name),
-                company: cleanText(b.company_name || b.company),
-                address: cleanText(b.address),
-                state: cleanText(b.state),
-                location: b.latitude && b.longitude ? `${b.latitude}, ${b.longitude}` : (b.location || ''),
-                lat: b.latitude,
-                lng: b.longitude,
-                status: b.status || 'Active'
-            }));
+            const mappedData = branchData.map(b => {
+                const cId = b.company_id || b.company || null;
+                const companyObj = compData.find(c => String(c.id) === String(cId));
+                
+                return {
+                    id: b.id,
+                    company_id: cId,
+                    name: cleanText(b.branch_name || b.name),
+                    company: cleanText(b.company_name || companyObj?.company_name || companyObj?.name || b.company || 'N/A'),
+                    address: cleanText(b.address),
+                    state: cleanText(b.state),
+                    location: b.latitude && b.longitude ? `${b.latitude}, ${b.longitude}` : (b.location || ''),
+                    lat: b.latitude,
+                    lng: b.longitude,
+                    status: b.status || 'Active'
+                };
+            });
             setBranches(mappedData);
             setCompaniesList(compData);
 
@@ -136,15 +141,11 @@ export const BranchesContent = () => {
 
     const toggleStatus = async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/branches/${id}/toggle-status`, {
-                method: "PUT",
-                headers: {
-                    'Authorization': `Bearer ${getToken()}`,
-                }
-            });
-            if (response.ok) setReload(!reload);
+            await coreService.toggleBranchStatus(id);
+            setReload(!reload);
         } catch (error) {
             console.error("Error toggling status:", error);
+            alert("Failed to toggle status: " + error.message);
         }
     };
 

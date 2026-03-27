@@ -39,6 +39,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import MySpace from "./pages/dashboards/components/MySpace";
 import MyTeam from "./pages/dashboards/components/MyTeam";
 import SquadManagement from "./pages/dashboards/components/SquadManagement";
+import BuildSquad from "./pages/dashboards/components/BuildSquad";
 
 /* Audit Logs */
 import SuperAdminAuditLogs from "./pages/superadmin/AuditLogs";
@@ -153,6 +154,7 @@ function AppContent() {
           <Route path="my-space" element={<MySpace />} />
           <Route path="my-team" element={<MyTeam />} />
           <Route path="manage-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadManagement /></ProtectedRoute>} />
+          <Route path="build-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><BuildSquad /></ProtectedRoute>} />
 
           {/* Role Specific Dashboards */}
           <Route path="super-admin" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminDashboard /></ProtectedRoute>} />

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
 import { FaPlus, FaSearch, FaBriefcase, FaUserTie, FaCheckCircle, FaFilter, FaEdit, FaTrash, FaEye, FaTimes } from 'react-icons/fa';
+import { recruitmentService } from './service';
 
 export const RecruitmentContent = () => {
     const [activeTab, setActiveTab] = useState('jobs');
@@ -11,6 +12,7 @@ export const RecruitmentContent = () => {
     useEffect(() => {
         setSearch(globalSearchTerm);
     }, [globalSearchTerm]);
+
     const [showJobModal, setShowJobModal] = useState(false);
     const [showViewJobModal, setShowViewJobModal] = useState(false);
     const [showEditJobModal, setShowEditJobModal] = useState(false);
@@ -21,21 +23,33 @@ export const RecruitmentContent = () => {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [showApplicantsModal, setShowApplicantsModal] = useState(false);
 
-    // Mock Data
-    const [jobs, setJobs] = useState([
-        { id: 1, title: 'Senior React Developer', department: 'Engineering', type: 'Full-time', location: 'Remote', applicants: 12, status: 'Open', postedDate: '2024-01-15' },
-        { id: 2, title: 'UI/UX Designer', department: 'Design', type: 'Contract', location: 'Office', applicants: 8, status: 'Open', postedDate: '2024-01-20' },
-        { id: 3, title: 'Marketing Manager', department: 'Marketing', type: 'Full-time', location: 'Office', applicants: 45, status: 'Closed', postedDate: '2024-01-10' },
-        { id: 4, title: 'Backend Developer', department: 'Engineering', type: 'Full-time', location: 'Hybrid', applicants: 22, status: 'Open', postedDate: '2024-02-01' },
-    ]);
+    // Live Data state
+    const [jobs, setJobs] = useState([]);
+    const [candidates, setCandidates] = useState([]);
+    const [stats, setStats] = useState({ open_positions: 0, total_applicants: 0, in_interview: 0, offers_made: 0 });
+    const [loading, setLoading] = useState(true);
 
-    const [candidates, setCandidates] = useState([
-        { id: 101, name: 'John Doe', email: 'john@example.com', role: 'Senior React Developer', stage: 'Interview', date: '2024-02-10', phone: '+1 234 567 8900' },
-        { id: 102, name: 'Jane Smith', email: 'jane@example.com', role: 'UI/UX Designer', stage: 'Screening', date: '2024-02-12', phone: '+1 234 567 8901' },
-        { id: 103, name: 'Mike Ross', email: 'mike@example.com', role: 'Senior React Developer', stage: 'Applied', date: '2024-02-14', phone: '+1 234 567 8902' },
-        { id: 104, name: 'Rachel Green', email: 'rachel@example.com', role: 'Marketing Manager', stage: 'Offer', date: '2024-02-08', phone: '+1 234 567 8903' },
-    ]);
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [jData, cData, sData] = await Promise.all([
+                recruitmentService.getJobs('All'),
+                recruitmentService.getApplicants(),
+                recruitmentService.getStats()
+            ]);
+            if (Array.isArray(jData)) setJobs(jData);
+            if (Array.isArray(cData)) setCandidates(cData);
+            if (sData) setStats(sData);
+        } catch (err) {
+            console.error("Failed to load recruitment data:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const [jobForm, setJobForm] = useState({
         title: '',
@@ -174,7 +188,7 @@ export const RecruitmentContent = () => {
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div className="text-secondary small mb-2 fw-semibold text-uppercase" style={{ letterSpacing: '0.5px' }}>Open Positions</div>
-                                    <h2 className="mb-0 fw-bold text-primary">{jobs.filter(j => j.status === 'Open').length}</h2>
+                                    <h2 className="mb-0 fw-bold text-primary">{stats.open_positions || jobs.filter(j => j.status === 'Open').length}</h2>
                                     <p className="text-muted small mb-0 mt-2">Active job listings</p>
                                 </div>
                                 <FaBriefcase className="text-primary" size={36} />
@@ -199,7 +213,7 @@ export const RecruitmentContent = () => {
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div className="text-secondary small mb-2 fw-semibold text-uppercase" style={{ letterSpacing: '0.5px' }}>Total Applicants</div>
-                                    <h2 className="mb-0 fw-bold text-success">{jobs.reduce((sum, j) => sum + j.applicants, 0)}</h2>
+                                    <h2 className="mb-0 fw-bold text-success">{stats.total_applicants || jobs.reduce((sum, j) => sum + j.applicants, 0)}</h2>
                                     <p className="text-muted small mb-0 mt-2">All applications</p>
                                 </div>
                                 <FaUserTie className="text-success" size={36} />
@@ -224,7 +238,7 @@ export const RecruitmentContent = () => {
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div className="text-secondary small mb-2 fw-semibold text-uppercase" style={{ letterSpacing: '0.5px' }}>In Interview</div>
-                                    <h2 className="mb-0 fw-bold text-warning">{candidates.filter(c => c.stage === 'Interview').length}</h2>
+                                    <h2 className="mb-0 fw-bold text-warning">{stats.in_interview || candidates.filter(c => c.stage === 'Interview').length}</h2>
                                     <p className="text-muted small mb-0 mt-2">Active interviews</p>
                                 </div>
                                 <FaCheckCircle className="text-warning" size={36} />
@@ -249,7 +263,7 @@ export const RecruitmentContent = () => {
                             <div className="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div className="text-secondary small mb-2 fw-semibold text-uppercase" style={{ letterSpacing: '0.5px' }}>Offers Made</div>
-                                    <h2 className="mb-0 fw-bold text-info">{candidates.filter(c => c.stage === 'Offer').length}</h2>
+                                    <h2 className="mb-0 fw-bold text-info">{stats.offers_made || candidates.filter(c => c.stage === 'Offer').length}</h2>
                                     <p className="text-muted small mb-0 mt-2">Pending acceptance</p>
                                 </div>
                                 <FaCheckCircle className="text-info" size={36} />
