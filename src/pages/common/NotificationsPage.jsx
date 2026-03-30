@@ -1,8 +1,4 @@
-import React from 'react';
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import { useNotification } from '../../context/NotificationContext';
-import { useTheme } from '../../context/ThemeContext';
-import { FaBell, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle, FaTrash, FaCheckDouble } from 'react-icons/fa';
+import { FaBell, FaCheckCircle, FaExclamationCircle, FaExclamationTriangle, FaInfoCircle, FaTimesCircle, FaCheckDouble } from 'react-icons/fa';
 
 const NotificationsPage = () => {
     const { notifications, markAllAsRead, markAsRead, deleteNotification, clearNotifications } = useNotification();
@@ -28,7 +24,7 @@ const NotificationsPage = () => {
                                 <FaCheckDouble className="me-2" /> Mark all read
                             </button>
                             <button className="btn btn-outline-danger btn-sm rounded-pill" onClick={clearNotifications}>
-                                <FaTrash className="me-2" /> Clear all
+                                <FaTimesCircle className="me-2" /> Clear all
                             </button>
                         </div>
                     </div>
@@ -62,9 +58,9 @@ const NotificationsPage = () => {
                                                     e.stopPropagation();
                                                     deleteNotification(notif.id);
                                                 }}
-                                                title="Delete Notification"
+                                                title="Dismiss Notification"
                                             >
-                                                <FaTrash size={16} />
+                                                <FaTimesCircle size={16} />
                                             </button>
                                         </div>
                                     </div>

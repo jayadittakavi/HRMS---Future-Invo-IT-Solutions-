@@ -1,21 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { onboardingService } from '../service';
 
 /* ── Mock Data ─────────────────────────────────────────── */
-const SIGN_REQUESTS = [
-    { id: 'ES-001', employee: 'Alice Johnson', letterType: 'Offer Letter', sentDate: '2026-02-18', dueDate: '2026-02-22', status: 'Signed', signedDate: '2026-02-19', signedBy: 'Alice Johnson', avatar: 'AJ', avatarColor: '#2563eb' },
-    { id: 'ES-002', employee: 'Bob Smith', letterType: 'Appointment Letter', sentDate: '2026-02-19', dueDate: '2026-02-24', status: 'Pending', signedDate: '', signedBy: '', avatar: 'BS', avatarColor: '#7c3aed' },
-    { id: 'ES-003', employee: 'Charlie Davis', letterType: 'Relieving Letter', sentDate: '2026-02-17', dueDate: '2026-02-21', status: 'Overdue', signedDate: '', signedBy: '', avatar: 'CD', avatarColor: '#dc2626' },
-    { id: 'ES-004', employee: 'Diana Roy', letterType: 'Increment Letter', sentDate: '2026-02-20', dueDate: '2026-02-26', status: 'Declined', signedDate: '', signedBy: '', avatar: 'DR', avatarColor: '#d97706' },
-    { id: 'ES-005', employee: 'Ravi Kumar', letterType: 'Offer Letter', sentDate: '2026-02-20', dueDate: '2026-02-27', status: 'Pending', signedDate: '', signedBy: '', avatar: 'RK', avatarColor: '#059669' },
-];
-
-const SIGN_SETTINGS = [
-    { id: 'otp', label: 'OTP Verification', desc: 'Signer gets OTP on email/mobile to authenticate before signing', enabled: true },
-    { id: 'selfie', label: 'Selfie Authentication', desc: 'Capture selfie at the time of signing for identity proof', enabled: false },
-    { id: 'aadhaar', label: 'Aadhaar eSign', desc: 'Government-backed digital signature via Aadhaar OTP', enabled: false },
-    { id: 'reminder', label: 'Auto Reminders', desc: 'Send automatic reminders every 24h until signed', enabled: true },
-    { id: 'expiry', label: 'Signing Expiry (7 days)', desc: 'Links expire after 7 days if not signed', enabled: true },
-];
+const SIGN_REQUESTS_INITIAL = [];
+const SIGN_SETTINGS_INITIAL = [];
 
 const statusStyle = {
     Signed: { bg: '#dcfce7', color: '#16a34a', icon: '✅', dot: '#16a34a' },
@@ -40,22 +28,67 @@ const Toggle = ({ enabled, onChange }) => (
 );
 
 const ESignUI = () => {
-    const [requests, setRequests] = useState(SIGN_REQUESTS);
-    const [settings, setSettings] = useState(SIGN_SETTINGS);
+    const [stats, setStats] = useState({ total_sent: 0, signed: 0, pending: 0, overdue: 0 });
+    const [requests, setRequests] = useState(SIGN_REQUESTS_INITIAL);
+    const [settings, setSettings] = useState(SIGN_SETTINGS_INITIAL);
+    const [loading, setLoading] = useState(false);
     const [activeSection, setActiveSection] = useState('tracking');
     const [showSendModal, setShowSendModal] = useState(false);
     const [filterStatus, setFilterStatus] = useState('All');
     const [viewRequest, setViewRequest] = useState(null);
+    const [requestForm, setRequestForm] = useState({ employee: '', letter_type: 'Offer Letter', deadline: '' });
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, rData, setts] = await Promise.all([
+                onboardingService.getESignSummary(),
+                onboardingService.getESignRequests(),
+                onboardingService.getESignSettings()
+            ]);
+            setStats(sData);
+            setRequests(rData);
+            setSettings(setts);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const toggleSetting = (id) => setSettings(ss => ss.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s));
 
+    const handleSaveSettings = async () => {
+        try {
+            await onboardingService.updateESignSettings(settings);
+            alert("Settings updated successfully!");
+        } catch (err) {
+            alert("Error updating settings: " + err.message);
+        }
+    };
+
+    const handleSendRequest = async () => {
+        try {
+            await onboardingService.sendESignRequest(requestForm);
+            setShowSendModal(false);
+            fetchData();
+            alert("E-Sign request sent!");
+        } catch (err) {
+            alert("Error sending request: " + err.message);
+        }
+    };
+
     const filtered = requests.filter(r => filterStatus === 'All' || r.status === filterStatus);
 
-    const stats = [
-        { label: 'Total Sent', value: requests.length, icon: '📨', color: '#2563eb', bg: '#eff6ff' },
-        { label: 'Signed', value: requests.filter(r => r.status === 'Signed').length, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
-        { label: 'Pending', value: requests.filter(r => r.status === 'Pending').length, icon: '⏳', color: '#d97706', bg: '#fef3c7' },
-        { label: 'Overdue', value: requests.filter(r => r.status === 'Overdue').length, icon: '🔴', color: '#dc2626', bg: '#fee2e2' },
+    const statCards = [
+        { label: 'Total Sent', value: stats.total_sent, icon: '📨', color: '#2563eb', bg: '#eff6ff' },
+        { label: 'Signed', value: stats.signed, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
+        { label: 'Pending', value: stats.pending, icon: '⏳', color: '#d97706', bg: '#fef3c7' },
+        { label: 'Overdue', value: stats.overdue, icon: '🔴', color: '#dc2626', bg: '#fee2e2' },
     ];
 
     return (
@@ -74,7 +107,7 @@ const ESignUI = () => {
 
             {/* Stats */}
             <div className="row g-3 mb-4">
-                {stats.map((s, i) => (
+                {statCards.map((s, i) => (
                     <div key={i} className="col-md-3 col-6">
                         <div
                             className="card border-0 shadow-sm rounded-4"
@@ -141,19 +174,19 @@ const ESignUI = () => {
                                     return (
                                         <tr key={r.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                             <td className="px-4 py-3">
-                                                <span style={{ fontFamily: 'monospace', background: '#f8faff', borderRadius: 6, padding: '2px 8px', border: '1px solid #e5e7eb', fontSize: '0.76rem', color: '#374151' }}>{r.id}</span>
+                                                <span style={{ fontFamily: 'monospace', background: '#f8faff', borderRadius: 6, padding: '2px 8px', border: '1px solid #e5e7eb', fontSize: '0.76rem', color: '#374151' }}>{r.id || r.RequestId}</span>
                                             </td>
                                             <td className="py-3">
                                                 <div className="d-flex align-items-center gap-2">
-                                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: r.avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{r.avatar}</div>
+                                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: r.avatarColor || '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{r.avatar || (r.employee ? r.employee[0] : 'U')}</div>
                                                     <span style={{ fontWeight: 600, color: '#111827' }}>{r.employee}</span>
                                                 </div>
                                             </td>
                                             <td className="py-3">
-                                                <span style={{ background: '#eff6ff', color: '#2563eb', borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700 }}>{r.letterType}</span>
+                                                <span style={{ background: '#eff6ff', color: '#2563eb', borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700 }}>{r.letterType || r.letter_type}</span>
                                             </td>
-                                            <td className="py-3" style={{ color: '#6b7280' }}>{r.sentDate}</td>
-                                            <td className="py-3" style={{ color: r.status === 'Overdue' ? '#dc2626' : '#6b7280', fontWeight: r.status === 'Overdue' ? 700 : 400 }}>{r.dueDate}</td>
+                                            <td className="py-3" style={{ color: '#6b7280' }}>{r.sentDate || r.sent_date}</td>
+                                            <td className="py-3" style={{ color: r.status === 'Overdue' ? '#dc2626' : '#6b7280', fontWeight: r.status === 'Overdue' ? 700 : 400 }}>{r.dueDate || r.due_date || r.deadline}</td>
                                             <td className="py-3">
                                                 <span style={{ background: s.bg, color: s.color, borderRadius: 20, padding: '3px 10px', fontSize: '0.71rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                                                     <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.dot, display: 'inline-block' }} />
@@ -203,7 +236,7 @@ const ESignUI = () => {
                             ))}
                         </div>
                         <div className="mt-4 d-flex justify-content-end">
-                            <button style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 24px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
+                            <button onClick={handleSaveSettings} style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 24px', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer' }}>
                                 Save Settings
                             </button>
                         </div>
@@ -269,17 +302,17 @@ const ESignUI = () => {
                             <div className="modal-body px-4 pt-2 pb-2">
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Employee *</label>
-                                    <input className="form-control form-control-sm rounded-3" placeholder="Search employee name or ID..." />
+                                    <input className="form-control form-control-sm rounded-3" placeholder="Search employee name or ID..." value={requestForm.employee} onChange={e => setRequestForm({...requestForm, employee: e.target.value})} />
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Letter Type *</label>
-                                    <select className="form-select form-select-sm rounded-3">
+                                    <select className="form-select form-select-sm rounded-3" value={requestForm.letter_type} onChange={e => setRequestForm({...requestForm, letter_type: e.target.value})}>
                                         <option>Offer Letter</option><option>Appointment Letter</option><option>Relieving Letter</option><option>Increment Letter</option>
                                     </select>
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Signing Deadline</label>
-                                    <input type="date" className="form-control form-control-sm rounded-3" />
+                                    <input type="date" className="form-control form-control-sm rounded-3" value={requestForm.deadline} onChange={e => setRequestForm({...requestForm, deadline: e.target.value})} />
                                 </div>
                                 <div style={{ background: '#f0fdf4', borderRadius: 10, padding: 12, border: '1px solid #bbf7d0', fontSize: '0.75rem', color: '#374151' }}>
                                     <strong>ℹ️ Note:</strong> The employee will receive an email with a secure signing link. The link will expire on the set deadline date.
@@ -287,7 +320,7 @@ const ESignUI = () => {
                             </div>
                             <div className="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
                                 <button onClick={() => setShowSendModal(false)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#f1f5f9', border: 'none', color: '#374151', fontWeight: 600 }}>Cancel</button>
-                                <button onClick={() => setShowSendModal(false)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#059669', border: 'none', color: '#fff', fontWeight: 700 }}>Send E-Sign Request</button>
+                                <button onClick={handleSendRequest} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#059669', border: 'none', color: '#fff', fontWeight: 700 }}>Send E-Sign Request</button>
                             </div>
                         </div>
                     </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     FaEdit, FaTrash, FaBan, FaCheckCircle, FaSearch,
-    FaMapMarkerAlt, FaBuilding, FaPlus, FaFilter, FaLayerGroup
+    FaMapMarkerAlt, FaBuilding, FaPlus, FaFilter, FaLayerGroup, FaTimesCircle
 } from 'react-icons/fa';
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { useSearch } from "../../../../context/SearchContext";
@@ -124,18 +124,6 @@ export const BranchesContent = () => {
         } catch (error) {
             console.error("Error updating branch:", error);
             alert("Failed to update branch: " + error.message);
-        }
-    };
-
-    const handleDeleteBranch = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this branch?")) return;
-        try {
-            await coreService.deleteBranch(id);
-            setReload(!reload);
-            alert("Branch deleted successfully!");
-        } catch (error) {
-            console.error("Error deleting branch:", error);
-            alert("Failed to delete branch: " + error.message);
         }
     };
 
@@ -295,7 +283,7 @@ export const BranchesContent = () => {
                                                     <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
                                                         onClick={() => toggleStatus(branch.id)}
                                                         style={{ background: branch.status === 'Active' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', color: branch.status === 'Active' ? '#ef4444' : '#10b981' }}>
-                                                        {branch.status === 'Active' ? <FaBan size={14} /> : <FaCheckCircle size={14} />}
+                                                        {branch.status === 'Active' ? <FaTimesCircle size={14} /> : <FaCheckCircle size={14} />}
                                                     </button>
                                                 </div>
                                             </td>

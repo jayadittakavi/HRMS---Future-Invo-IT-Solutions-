@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
-import { FaFilePdf, FaFileUpload, FaTrash, FaEye, FaSearch, FaDownload, FaCheckCircle } from 'react-icons/fa';
+import { FaFilePdf, FaFileUpload, FaTrash, FaEye, FaSearch, FaDownload, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 export const DocumentsContent = () => {
     const [activeTab, setActiveTab] = useState('policies');
     const [showViewModal, setShowViewModal] = useState(false);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [search, setSearch] = useState(globalSearchTerm);
@@ -45,17 +44,11 @@ export const DocumentsContent = () => {
         alert(`Downloading: ${doc.name}`);
     };
 
-    const handleDelete = (doc) => {
-        setSelectedDoc(doc);
-        setShowDeleteModal(true);
-    };
-
-    const confirmDelete = () => {
-        console.log('Deleting document:', selectedDoc);
-        // Add actual delete logic here
-        alert(`Document "${selectedDoc.name}" has been deleted.`);
-        setShowDeleteModal(false);
-        setSelectedDoc(null);
+    const handleToggleArchive = (doc) => {
+        // Toggle mock status or archive
+        doc.isArchived = !doc.isArchived;
+        alert(`Document "${doc.name}" has been ${doc.isArchived ? 'archived' : 'restored'}.`);
+        // Force refresh if needed
     };
 
     const handleVerify = (doc) => {
@@ -148,12 +141,12 @@ export const DocumentsContent = () => {
                                                     <FaDownload size={11} />
                                                 </button>
                                                 <button
-                                                    className="btn btn-sm btn-outline-danger px-2 py-1"
-                                                    onClick={() => handleDelete(doc)}
+                                                    className="btn btn-sm btn-outline-warning px-2 py-1"
+                                                    onClick={() => handleToggleArchive(doc)}
                                                     style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-                                                    title="Delete"
+                                                    title={doc.isArchived ? "Restore" : "Archive"}
                                                 >
-                                                    <FaTrash size={11} />
+                                                    {doc.isArchived ? <FaCheckCircle size={11} /> : <FaTimesCircle size={11} />}
                                                 </button>
                                             </div>
                                         </td>
@@ -296,38 +289,6 @@ export const DocumentsContent = () => {
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
-            {showDeleteModal && selectedDoc && (
-                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setShowDeleteModal(false)}>
-                    <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-content">
-                            <div className="modal-header border-0 bg-danger bg-opacity-10">
-                                <h5 className="modal-title fw-bold text-danger">
-                                    <FaTrash className="me-2" />
-                                    Confirm Delete
-                                </h5>
-                                <button type="button" className="btn-close" onClick={() => setShowDeleteModal(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p className="mb-3">Are you sure you want to delete this document?</p>
-                                <div className="alert alert-warning d-flex align-items-center">
-                                    <FaFilePdf className="me-2" />
-                                    <strong>{selectedDoc.name}</strong>
-                                </div>
-                                <p className="text-danger small mb-0">
-                                    <strong>Warning:</strong> This action cannot be undone.
-                                </p>
-                            </div>
-                            <div className="modal-footer border-0">
-                                <button className="btn btn-outline-secondary" onClick={() => setShowDeleteModal(false)}>Cancel</button>
-                                <button className="btn btn-danger" onClick={confirmDelete}>
-                                    <FaTrash className="me-2" />Delete Document
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

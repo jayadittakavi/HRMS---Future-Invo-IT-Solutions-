@@ -28,11 +28,11 @@ const LeaveDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const summaryRes = await leaveService.getDashboardSummary();
-                const trendsRes = await leaveService.getDashboardTrends();
+                const summaryData = await leaveService.getDashboardSummary();
+                const trendsData = await leaveService.getDashboardTrends();
                 
-                if (summaryRes.ok) setSummary(await summaryRes.json());
-                if (trendsRes.ok) setTrends(await trendsRes.json());
+                if (summaryData) setSummary(summaryData);
+                if (trendsData) setTrends(trendsData);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
             } finally {

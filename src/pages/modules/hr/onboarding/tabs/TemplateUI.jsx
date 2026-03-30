@@ -95,13 +95,13 @@ const TemplateUI = () => {
             {/* Stats */}
             <div className="row g-3 mb-4">
                 {[
-                    { label: 'Total Templates', value: stats.total_templates || templates.length, icon: '📄', color: '#2563eb', bg: '#eff6ff' },
-                    { label: 'Active', value: stats.active || templates.filter(t => t.status === 'Active').length, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
-                    { label: 'Draft', value: stats.draft || templates.filter(t => t.status === 'Draft').length, icon: '📝', color: '#d97706', bg: '#fef3c7' },
+                    { label: 'Total Templates', value: stats.total || stats.total_templates || templates.length, icon: '📄', color: '#2563eb', bg: '#eff6ff' },
+                    { label: 'Active', value: stats.active ?? templates.filter(t => t.status === 'Active').length, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
+                    { label: 'Draft', value: stats.draft ?? templates.filter(t => t.status === 'Draft').length, icon: '📝', color: '#d97706', bg: '#fef3c7' },
                     { label: 'Total Usage', value: stats.total_usage || templates.reduce((s,t) => s + (t.usageCount || 0), 0), icon: '📊', color: '#7c3aed', bg: '#f5f3ff' },
                 ].map((s, i) => (
                     <div key={i} className="col-md-3 col-6">
-                        <div className="card border-0 shadow-sm rounded-4">
+                        <div className="card border-0 shadow-sm rounded-4 h-100">
                             <div className="card-body p-3 d-flex align-items-center gap-3">
                                 <div style={{ width: 44, height: 44, borderRadius: 12, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>{s.icon}</div>
                                 <div>

@@ -3,6 +3,7 @@ import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUse
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
 import "../../../../components/layout/DashboardLayout.css";
+import { accessControlService } from './service';
 
 export const UserManagementContent = () => {
     // Tab State
@@ -16,13 +17,29 @@ export const UserManagementContent = () => {
     }, [globalSearchTerm]);
 
     // --- USER MANAGEMENT STATE ---
-    const [users, setUsers] = useState([
-        { id: 1, name: 'Meera Krishnan', email: 'meera@example.com', role: 'Super Admin', status: 'Active', lastLogin: 'Today, 10:00 AM' },
-        { id: 2, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'Active', lastLogin: 'Yesterday, 05:30 PM' },
-        { id: 3, name: 'Jane Smith', email: 'jane@example.com', role: 'Employee', status: 'Inactive', lastLogin: '2 weeks ago' },
-        { id: 4, name: 'Alice Johnson', email: 'alice@example.com', role: 'HR', status: 'Active', lastLogin: '1 hour ago' },
-        { id: 5, name: 'Bob Williams', email: 'bob@example.com', role: 'Accountant', status: 'Active', lastLogin: '3 days ago' },
-    ]);
+    const [users, setUsers] = useState([]);
+    const [roles, setRoles] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [uData, rData] = await Promise.all([
+                accessControlService.getUsers(),
+                accessControlService.getRoles()
+            ]);
+            if (Array.isArray(uData)) setUsers(uData);
+            if (Array.isArray(rData)) setRoles(rData);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
     const [showUserAdd, setShowUserAdd] = useState(false);
     const [showUserEdit, setShowUserEdit] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
@@ -47,54 +64,6 @@ export const UserManagementContent = () => {
     const modules = ['Employees', 'Attendance', 'Leave', 'Payroll', 'Assets', 'Performance'];
     const actions = ['View', 'Add', 'Edit', 'Delete', 'Status', 'Approve'];
 
-    const [roles, setRoles] = useState([
-        {
-            id: 1,
-            name: 'Super Admin',
-            description: 'Full access to all modules',
-            permissions: { all: true }
-        },
-        {
-            id: 2,
-            name: 'HR',
-            description: 'Manage employees, attendance, and payroll',
-            permissions: {
-                Employees: ['View', 'Add', 'Edit', 'Status'],
-                Attendance: ['View', 'Edit', 'Approve'],
-                Payroll: ['View', 'Add', 'Edit', 'Approve'],
-                Leave: ['View', 'Approve']
-            }
-        },
-        {
-            id: 3,
-            name: 'Manager',
-            description: 'Team management and approvals',
-            permissions: {
-                Employees: ['View'],
-                Attendance: ['View', 'Approve'],
-                Leave: ['View', 'Approve'],
-                Performance: ['View', 'Add', 'Edit']
-            }
-        },
-        {
-            id: 4,
-            name: 'Accountant',
-            description: 'Financial management access',
-            permissions: {
-                Payroll: ['View', 'Add', 'Edit', 'Approve'],
-                Assets: ['View']
-            }
-        },
-        {
-            id: 5,
-            name: 'Employee',
-            description: 'Standard employee access',
-            permissions: {
-                Leave: ['Add'], // Apply leave
-                Attendance: ['View', 'Add'] // Check-in
-            }
-        }
-    ]);
 
     const [showRoleModal, setShowRoleModal] = useState(false);
     const [currentRole, setCurrentRole] = useState(null);
@@ -129,25 +98,41 @@ export const UserManagementContent = () => {
         setShowUserEdit(true);
     };
 
-    const handleSaveUser = () => {
+    const handleSaveUser = async () => {
         if (!userForm.name) return;
-        const newUser = {
-            id: users.length + 1,
-            ...userForm,
-            lastLogin: 'Never'
-        };
-        setUsers([...users, newUser]);
-        setShowUserAdd(false);
+        try {
+            const result = await accessControlService.saveUser(userForm);
+            if (result) {
+                setShowUserAdd(false);
+                fetchData();
+            }
+        } catch (err) {
+            alert("Error adding user: " + err.message);
+        }
     };
 
-    const handleUpdateUser = () => {
+    const handleUpdateUser = async () => {
         if (!selectedUser) return;
-        setUsers(users.map(u => u.id === selectedUser.id ? { ...userForm, id: selectedUser.id, lastLogin: u.lastLogin } : u));
-        setShowUserEdit(false);
+        try {
+            const result = await accessControlService.saveUser({ ...userForm, id: selectedUser.id });
+            if (result) {
+                setShowUserEdit(false);
+                fetchData();
+            }
+        } catch (err) {
+            alert("Error updating user: " + err.message);
+        }
     };
 
-    const toggleUserStatus = (id) => {
-        setUsers(users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
+    const toggleUserStatus = async (id) => {
+        try {
+            const success = await accessControlService.toggleUserStatus(id);
+            if (success) {
+                setUsers(users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
+            }
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     // Role Handlers
@@ -187,15 +172,17 @@ export const UserManagementContent = () => {
         });
     };
 
-    const saveRole = () => {
-        if (currentRole) {
-            // Update
-            setRoles(roles.map(r => r.id === currentRole.id ? { ...r, ...roleForm } : r));
-        } else {
-            // Add
-            setRoles([...roles, { id: roles.length + 1, ...roleForm }]);
+    const saveRole = async () => {
+        try {
+            const payload = currentRole ? { ...roleForm, id: currentRole.id } : roleForm;
+            const result = await accessControlService.saveRole(payload);
+            if (result) {
+                setShowRoleModal(false);
+                fetchData();
+            }
+        } catch (err) {
+            alert("Error saving role: " + err.message);
         }
-        setShowRoleModal(false);
     };
 
     // Helper to check permission for UI checkbox
@@ -301,7 +288,6 @@ export const UserManagementContent = () => {
                                                 >
                                                     {user.status === 'Active' ? <FaTimes /> : <FaCheck />}
                                                 </button>
-                                                <button className="action-btn delete"><FaTrash /></button>
                                             </div>
                                         </td>
                                     </tr>
@@ -355,13 +341,15 @@ export const UserManagementContent = () => {
                                                     </div>
                                                 );
                                             })()}
-                                            <button
-                                                className="btn btn-light btn-sm rounded-circle shadow-sm"
-                                                onClick={() => handleEditRoleClick(role)}
-                                                disabled={role.name === 'Super Admin'}
-                                            >
-                                                <FaEdit className="text-secondary" />
-                                            </button>
+                                            <div className="d-flex gap-2">
+                                                <button
+                                                    className="btn btn-light btn-sm rounded-circle shadow-sm"
+                                                    onClick={() => handleEditRoleClick(role)}
+                                                    disabled={role.name === 'Super Admin'}
+                                                >
+                                                    <FaEdit className="text-secondary" />
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <h5 className="fw-bold text-dark mb-2">{role.name}</h5>

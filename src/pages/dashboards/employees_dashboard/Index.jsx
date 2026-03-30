@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import DashboardLayout from '../../components/DashboardLayout';
 import '../../components/DashboardLayout.css';
 
@@ -8,16 +7,15 @@ import { useAuth } from '../../context/AuthContext';
 export const EmployeesContent = () => {
     const { user } = useAuth();
     // Mock Data
-    const [employees] = useState([
-        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', type: 'Admin' },
-        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', type: 'Manager' },
-        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', type: 'Employee' },
+    const [employees, setEmployees] = useState([
+        { id: 1, user: 'praveen', name: 'Praveen Kumar', email: 'praveen@trickuweb.com', dept: 'Administration', desig: 'System Administrator', type: 'Admin', status: 'Active' },
+        { id: 2, user: 'priyanka', name: 'Priyanka Sharma', email: 'priyanka@trickuweb.com', dept: 'HR', desig: 'HR Manager', type: 'Manager', status: 'Active' },
+        { id: 3, user: 'nitin', name: 'Nitin Patel', email: 'nitin@trickuweb.com', dept: 'Engineering', desig: 'Software Developer', type: 'Employee', status: 'Active' },
     ]);
 
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     // Handlers
@@ -26,9 +24,12 @@ export const EmployeesContent = () => {
         setShowEdit(true);
     };
 
-    const handleDelete = (emp) => {
-        setSelectedEmployee(emp);
-        setShowDelete(true);
+    const handleToggleStatus = (emp) => {
+        const nextStatus = emp.status === 'Inactive' ? 'Active' : 'Inactive';
+        if (window.confirm(`Are you sure you want to ${nextStatus.toLowerCase()} ${emp.name}?`)) {
+            setEmployees(employees.map(e => e.id === emp.id ? { ...e, status: nextStatus } : e));
+            alert(`${emp.name} ${nextStatus.toLowerCase()}d!`);
+        }
     };
 
     return (
@@ -56,6 +57,7 @@ export const EmployeesContent = () => {
                                 <th>Department</th>
                                 <th>Designation</th>
                                 <th>Type</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -71,8 +73,20 @@ export const EmployeesContent = () => {
                                         <span className={`role-badge ${emp.type.toLowerCase()}`}>{emp.type}</span>
                                     </td>
                                     <td>
+                                        <span className={`badge rounded-pill ${emp.status === 'Inactive' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}`}>
+                                            {emp.status}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <button className="action-btn edit" onClick={() => handleEdit(emp)} title="Edit"><FaEdit /></button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(emp)} title="Delete"><FaTrash /></button>
+                                        <button 
+                                            className={`action-btn ${emp.status === 'Inactive' ? 'activate' : 'delete'}`} 
+                                            onClick={() => handleToggleStatus(emp)} 
+                                            title={emp.status === 'Inactive' ? "Activate" : "Deactivate"}
+                                            style={{ color: emp.status === 'Inactive' ? '#10b981' : '#ef4444' }}
+                                        >
+                                            {emp.status === 'Inactive' ? <FaCheckCircle /> : <FaTimesCircle />}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -198,27 +212,6 @@ export const EmployeesContent = () => {
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
                                 <button className="btn btn-primary btn-sm">Update Employee</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Modal */}
-            {showDelete && selectedEmployee && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title text-danger">Delete Employee</h5>
-                                <button className="btn-close" onClick={() => setShowDelete(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to delete <strong>{selectedEmployee.name}</strong>?</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
                             </div>
                         </div>
                     </div>

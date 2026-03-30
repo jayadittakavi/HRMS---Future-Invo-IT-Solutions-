@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import DashboardLayout from "../layout/DashboardLayout";
 import { useSearch } from "../../context/SearchContext";
 import { coreService } from "../../services/coreService";
@@ -19,7 +19,6 @@ export const CompaniesContent = () => {
 
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
     const [showPostModal, setShowPostModal] = useState(false);
 
     const [posts, setPosts] = useState([
@@ -143,16 +142,14 @@ export const CompaniesContent = () => {
         }
     };
 
-    const handleDelete = async () => {
-        if (!selectedCompany) return;
+    const handleToggleStatus = async (id) => {
         try {
-            await coreService.deleteCompany(selectedCompany.id);
-            setShowDelete(false);
+            await coreService.toggleCompanyStatus(id);
             fetchCompanies();
-            alert("Company deleted successfully!");
+            // alert("Status updated successfully!");
         } catch (err) {
-            console.error("Delete company error:", err);
-            alert("Failed to delete company: " + (err.message || "Unknown error"));
+            console.error("Toggle status error:", err);
+            alert("Failed to update status: " + (err.message || "Unknown error"));
         }
     };
 
@@ -384,11 +381,12 @@ export const CompaniesContent = () => {
                                                 }}>
                                                     <FaEdit />
                                                 </button>
-                                                <button className="btn-action delete" onClick={() => {
-                                                    setSelectedCompany(c);
-                                                    setShowDelete(true);
-                                                }}>
-                                                    <FaTrash />
+                                                <button 
+                                                    className={`btn-action ${c.status === 'Inactive' ? 'activate' : 'deactivate'}`} 
+                                                    onClick={() => handleToggleStatus(c.id)}
+                                                    title={c.status === 'Inactive' ? "Activate" : "Deactivate"}
+                                                >
+                                                    {c.status === 'Inactive' ? <FaCheckCircle className="text-success" /> : <FaTimesCircle className="text-danger" />}
                                                 </button>
                                             </div>
                                         </td>
@@ -517,22 +515,6 @@ export const CompaniesContent = () => {
                                 <button type="submit" className="btn-confirm">{showAdd ? 'Initialize & Create' : 'Save Changes'}</button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
-
-            {showDelete && (
-                <div className="modern-modal-overlay">
-                    <div className="modern-modal-card delete-card">
-                        <div className="text-center p-4">
-                            <div className="delete-icon-circle mb-3"><FaTrash /></div>
-                            <h3>Remove Company?</h3>
-                            <p className="text-muted">Deleting <strong>{selectedCompany?.name}</strong> is permanent.</p>
-                            <div className="d-flex gap-3 mt-4">
-                                <button className="btn-cancel flex-grow-1" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn-danger-modern flex-grow-1" onClick={handleDelete}>Delete</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             )}

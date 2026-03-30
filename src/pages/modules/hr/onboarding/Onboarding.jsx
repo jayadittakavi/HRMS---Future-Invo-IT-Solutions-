@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import TemplateUI from './tabs/TemplateUI';
 import VariableUI from './tabs/VariableUI';
@@ -133,10 +133,10 @@ const renderOnboarding = (candidates, stats, onViewDocs, onSendLetter, onAddHire
                                     <tr key={c.id || i} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => onViewDocs(c)}>
                                         <td className="px-4 py-3">
                                             <div className="d-flex align-items-center gap-3">
-                                                <AvatarCircle initials={displayAvatar} color={avatarColors[i % 4]} />
+                                                <AvatarCircle initials={displayAvatar || '??'} color={avatarColors[i % 4]} />
                                                 <div>
-                                                    <div style={{ fontWeight: 700, color: '#111827' }}>{displayName}</div>
-                                                    <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{displayRole}</div>
+                                                    <div style={{ fontWeight: 700, color: '#111827' }}>{displayName || 'Unknown Candidate'}</div>
+                                                    <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{displayRole || 'Joiner'}</div>
                                                 </div>
                                             </div>
                                         </td>
@@ -212,8 +212,55 @@ const issuedCerts = [
 ];
 
 const CertificatesTab = () => {
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [issueModal, setIssueModal] = useState(null);
-    const [form, setForm] = useState({ employee: '', employeeId: '', designation: '', purpose: '', issueDate: new Date().toISOString().split('T')[0] });
+    const [form, setForm] = useState({ 
+        recipient: '', 
+        employee_id: '', 
+        designation: '', 
+        purpose: '', 
+        issue_date: new Date().toISOString().split('T')[0] 
+    });
+
+    const fetchHistory = async () => {
+        setLoading(true);
+        try {
+            const data = await onboardingService.getCertificateHistory();
+            if (Array.isArray(data)) setHistory(data);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const handleIssue = async () => {
+        try {
+            await onboardingService.issueCertificate({
+                ...form,
+                certificate_type: issueModal.title
+            });
+            setIssueModal(null);
+            alert("Certificate issued successfully!");
+            fetchHistory();
+        } catch (err) {
+            alert("Error issuing certificate: " + err.message);
+        }
+    };
+
+    const handleView = async (cid) => {
+        const cert = await onboardingService.viewCertificate(cid);
+        if (cert) alert(`Viewing Certificate: ${cert.recipient} (${cert.certificate_type})`);
+    };
+
+    const handleDownload = async (cid) => {
+        await onboardingService.downloadCertificate(cid);
+    };
 
     return (
         <div>
@@ -249,7 +296,7 @@ const CertificatesTab = () => {
                 <div className="px-4 py-3 border-bottom d-flex align-items-center justify-content-between" style={{ background: '#f8faff' }}>
                     <div>
                         <div style={{ fontWeight: 700, fontSize: '0.92rem', color: '#111827' }}>Issued Certificates History</div>
-                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{issuedCerts.length} certificates issued to date</div>
+                        <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{history.length} certificates issued to date</div>
                     </div>
                     <button style={{ fontSize: '0.78rem', color: '#6b7280', background: '#f1f5f9', border: 'none', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}>
                         Export
@@ -267,16 +314,26 @@ const CertificatesTab = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {issuedCerts.map((c, i) => (
-                                <tr key={i} style={{ borderBottom: '1px solid #f3f4f6' }}>
-                                    <td className="px-4 py-3 fw-semibold" style={{ color: '#111827' }}>{c.name}</td>
-                                    <td className="py-3"><span style={{ background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontSize: '0.73rem', color: '#374151' }}>{c.id}</span></td>
-                                    <td className="py-3" style={{ color: '#374151' }}>{c.type}</td>
-                                    <td className="py-3" style={{ color: '#6b7280' }}>{c.date}</td>
+                            {history.length === 0 ? (
+                                <tr><td colSpan={5} className="text-center py-5 text-muted">No issued certificates found</td></tr>
+                            ) : history.map((c, i) => (
+                                <tr key={c.id || i} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                    <td className="px-4 py-3 fw-semibold" style={{ color: '#111827' }}>{c.recipient}</td>
+                                    <td className="py-3"><span style={{ background: '#f3f4f6', borderRadius: 6, padding: '2px 8px', fontSize: '0.73rem', color: '#374151' }}>{c.employee_id}</span></td>
+                                    <td className="py-3" style={{ color: '#374151' }}>{c.certificate_type}</td>
+                                    <td className="py-3" style={{ color: '#6b7280' }}>{c.issue_date}</td>
                                     <td className="py-3">
                                         <div className="d-flex gap-2">
-                                            <button title="View" style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}><IconEye /></button>
-                                            <button title="Download" style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}><IconDownload /></button>
+                                            <button 
+                                                title="View" 
+                                                onClick={() => handleView(c.id)}
+                                                style={{ width: 30, height: 30, borderRadius: 8, border: '1px solid #e5e7eb', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6b7280' }}
+                                            ><IconEye /></button>
+                                            <button 
+                                                title="Download" 
+                                                onClick={() => handleDownload(c.id)}
+                                                style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2563eb' }}
+                                            ><IconDownload /></button>
                                         </div>
                                     </td>
                                 </tr>
@@ -304,11 +361,11 @@ const CertificatesTab = () => {
                                 <div className="row g-3">
                                     <div className="col-md-6">
                                         <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Employee Name *</label>
-                                        <input className="form-control form-control-sm rounded-3" placeholder="e.g. Alice Johnson" value={form.employee} onChange={e => setForm({ ...form, employee: e.target.value })} />
+                                        <input className="form-control form-control-sm rounded-3" placeholder="e.g. Alice Johnson" value={form.recipient} onChange={e => setForm({ ...form, recipient: e.target.value })} />
                                     </div>
                                     <div className="col-md-6">
                                         <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Employee ID</label>
-                                        <input className="form-control form-control-sm rounded-3" placeholder="e.g. EMP-112" value={form.employeeId} onChange={e => setForm({ ...form, employeeId: e.target.value })} />
+                                        <input className="form-control form-control-sm rounded-3" placeholder="e.g. EMP-112" value={form.employee_id} onChange={e => setForm({ ...form, employee_id: e.target.value })} />
                                     </div>
                                     <div className="col-md-6">
                                         <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Designation</label>
@@ -316,7 +373,7 @@ const CertificatesTab = () => {
                                     </div>
                                     <div className="col-md-6">
                                         <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Issue Date</label>
-                                        <input type="date" className="form-control form-control-sm rounded-3" value={form.issueDate} onChange={e => setForm({ ...form, issueDate: e.target.value })} />
+                                        <input type="date" className="form-control form-control-sm rounded-3" value={form.issue_date} onChange={e => setForm({ ...form, issue_date: e.target.value })} />
                                     </div>
                                     <div className="col-12">
                                         <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Purpose / Remarks</label>
@@ -326,7 +383,7 @@ const CertificatesTab = () => {
                             </div>
                             <div className="modal-footer border-0 px-4 pt-2 pb-4 gap-2">
                                 <button onClick={() => setIssueModal(null)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#f1f5f9', border: 'none', color: '#374151', fontWeight: 600 }}>Cancel</button>
-                                <button onClick={() => { setIssueModal(null); }} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: issueModal.color, border: 'none', color: '#fff', fontWeight: 700 }}>Issue Certificate</button>
+                                <button onClick={handleIssue} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: issueModal.color, border: 'none', color: '#fff', fontWeight: 700 }}>Issue Certificate</button>
                             </div>
                         </div>
                     </div>
@@ -356,6 +413,14 @@ export const OnboardingContent = () => {
     const [candidates, setCandidates] = useState(initialCandidates);
     const [stats, setStats] = useState({ total_hires: 0, pending_docs: 0, in_progress: 0, verified: 0 });
     const [loading, setLoading] = useState(false);
+    const [formOptions, setFormOptions] = useState({ departments: [], designations: [], employmentTypes: [] });
+    const [letterOptions, setLetterOptions] = useState({ letter_types: [], templates: [] });
+    const [letterForm, setLetterForm] = useState({
+        letter_type: 'Offer Letter',
+        date: new Date().toISOString().split('T')[0],
+        template_option: 'Standard Format',
+        send_email_copy: true
+    });
 
     const [hireForm, setHireForm] = useState({
         full_name: '', personal_email: '', phone_number: '',
@@ -366,14 +431,16 @@ export const OnboardingContent = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [sData, cData] = await Promise.all([
+            const [sData, cData, oData] = await Promise.all([
                 onboardingService.getStats(),
-                onboardingService.getCandidates()
+                onboardingService.getCandidates(),
+                onboardingService.getFormOptions()
             ]);
             setStats(sData || stats);
             if (Array.isArray(cData)) setCandidates(cData);
+            if (oData) setFormOptions(oData);
         } catch (err) {
-            console.warn("Falling back to local data due to API error");
+            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -425,10 +492,32 @@ export const OnboardingContent = () => {
     const handleViewDocs = async (cand) => {
         try {
             const checklist = await onboardingService.getChecklist(cand.id);
-            setViewDocsCandidate({ ...cand, docs: checklist });
+            setViewDocsCandidate({ ...cand, name: cand.full_name || cand.name, docs: checklist });
         } catch (err) {
             alert("Failed to load candidate documents");
             console.error(err);
+        }
+    };
+
+    const handleSendLetter = async (cand) => {
+        try {
+            const opts = await onboardingService.getLetterOptions(cand.id);
+            setLetterOptions(opts);
+            setSendLetterModal(cand);
+            if (opts.letter_types?.length > 0) setLetterForm(prev => ({ ...prev, letter_type: opts.letter_types[0] }));
+            if (opts.templates?.length > 0) setLetterForm(prev => ({ ...prev, template_option: opts.templates[0] }));
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleGenerateLetter = async () => {
+        try {
+            await onboardingService.generateLetter(sendLetterModal.id, letterForm);
+            alert("Letter generated and sent successfully!");
+            setSendLetterModal(null);
+        } catch (err) {
+            alert("Error: " + err.message);
         }
     };
 
@@ -465,7 +554,7 @@ export const OnboardingContent = () => {
                 candidates,
                 stats,
                 handleViewDocs, 
-                (name) => setSendLetterModal(name),
+                (cand) => handleSendLetter(cand),
                 () => setShowAddHire(true)
             )}
 
@@ -640,23 +729,20 @@ export const OnboardingContent = () => {
                                     <div className="col-md-4">
                                         <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Department</label>
                                         <select className="form-select rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.department} onChange={e => setHireForm({...hireForm, department: e.target.value})}>
-                                            <option>Engineering</option>
-                                            <option>Design</option>
-                                            <option>HR</option>
-                                            <option>Finance</option>
-                                            <option>Sales</option>
+                                            {formOptions.departments.map(d => <option key={d} value={d}>{d}</option>)}
                                         </select>
                                     </div>
                                     <div className="col-md-4">
                                         <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Role / Designation</label>
-                                        <input className="form-control rounded-3 border-0 bg-white py-2 shadow-sm" placeholder="e.g. UI Designer" value={hireForm.designation} onChange={e => setHireForm({...hireForm, designation: e.target.value})} />
+                                        <select className="form-select rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.designation} onChange={e => setHireForm({...hireForm, designation: e.target.value})}>
+                                            <option value="">Select Designation</option>
+                                            {formOptions.designations.map(d => <option key={d} value={d}>{d}</option>)}
+                                        </select>
                                     </div>
                                     <div className="col-md-4">
                                         <label className="form-label fw-bold small text-muted text-uppercase mb-1" style={{ fontSize: '0.68rem', letterSpacing: '0.05em' }}>Employment Type</label>
                                         <select className="form-select rounded-3 border-0 bg-white py-2 shadow-sm" value={hireForm.employment_type} onChange={e => setHireForm({...hireForm, employment_type: e.target.value})}>
-                                            <option>Fulltime</option>
-                                            <option>Intern</option>
-                                            <option>Contract</option>
+                                            {formOptions.employmentTypes.map(t => <option key={t} value={t}>{t}</option>)}
                                         </select>
                                     </div>
                                 </div>
@@ -697,32 +783,28 @@ export const OnboardingContent = () => {
                             <div className="modal-body px-4 pt-2 pb-2">
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Letter Type</label>
-                                    <select className="form-select form-select-sm rounded-3">
-                                        <option>Offer Letter</option>
-                                        <option>Appointment Letter</option>
-                                        <option>Increment Letter</option>
-                                        <option>Relieving Letter</option>
+                                    <select className="form-select form-select-sm rounded-3" value={letterForm.letter_type} onChange={e => setLetterForm({...letterForm, letter_type: e.target.value})}>
+                                        {letterOptions.letter_types.map(t => <option key={t} value={t}>{t}</option>)}
                                     </select>
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Date</label>
-                                    <input type="date" className="form-control form-control-sm rounded-3" defaultValue={new Date().toISOString().split('T')[0]} />
+                                    <input type="date" className="form-control form-control-sm rounded-3" value={letterForm.date} onChange={e => setLetterForm({...letterForm, date: e.target.value})} />
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.76rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Template</label>
-                                    <select className="form-select form-select-sm rounded-3">
-                                        <option>Standard Format</option>
-                                        <option>Executive Format</option>
+                                    <select className="form-select form-select-sm rounded-3" value={letterForm.template_option} onChange={e => setLetterForm({...letterForm, template_option: e.target.value})}>
+                                        {letterOptions.templates.map(t => <option key={t} value={t}>{t}</option>)}
                                     </select>
                                 </div>
                                 <div className="form-check">
-                                    <input type="checkbox" className="form-check-input" id="emailCopyCheck" />
+                                    <input type="checkbox" className="form-check-input" id="emailCopyCheck" checked={letterForm.send_email_copy} onChange={e => setLetterForm({...letterForm, send_email_copy: e.target.checked})} />
                                     <label className="form-check-label" htmlFor="emailCopyCheck" style={{ fontSize: '0.78rem', color: '#374151' }}>Send email copy to employee</label>
                                 </div>
                             </div>
                             <div className="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
                                 <button onClick={() => setSendLetterModal(null)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#f1f5f9', border: 'none', color: '#374151', fontWeight: 600 }}>Cancel</button>
-                                <button onClick={() => setSendLetterModal(null)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#2563eb', border: 'none', color: '#fff', fontWeight: 700 }}>Generate Letter</button>
+                                <button onClick={handleGenerateLetter} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#2563eb', border: 'none', color: '#fff', fontWeight: 700 }}>Generate Letter</button>
                             </div>
                         </div>
                     </div>
@@ -733,7 +815,7 @@ export const OnboardingContent = () => {
 };
 
 const Onboarding = () => (
-    <DashboardLayout title="">
+    <DashboardLayout title="Onboarding" activePath="/onboarding">
         <OnboardingContent />
     </DashboardLayout>
 );

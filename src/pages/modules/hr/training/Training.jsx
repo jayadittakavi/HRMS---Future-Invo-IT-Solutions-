@@ -1,57 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { FaGraduationCap, FaPlus, FaUserGraduate, FaCalendarAlt, FaCheck, FaClock, FaEye, FaUsers, FaFileAlt, FaDownload } from 'react-icons/fa';
+import { trainingService } from './service';
 
 export const TrainingContent = () => {
+    const [stats, setStats] = useState({ active_courses: 0, completion_rate: 0, training_hours: 0 });
+    const [trainings, setTrainings] = useState([]);
+    const [loading, setLoading] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedTraining, setSelectedTraining] = useState(null);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [newProgram, setNewProgram] = useState({
+        title: '', trainer: '', start_date: '', duration: '', participants: 0, description: ''
+    });
 
-    const trainings = [
-        {
-            id: 1,
-            title: 'React Advanced Patterns',
-            trainer: 'CodeAcademy',
-            date: '2024-03-01',
-            duration: '2 Weeks',
-            participants: 15,
-            status: 'Upcoming',
-            description: 'Advanced React patterns including hooks, context, and performance optimization techniques.',
-            enrolledEmployees: ['John Doe', 'Jane Smith', 'Mike Johnson', 'Sarah Williams', 'Tom Brown'],
-            progress: 0,
-            materials: ['Course Syllabus.pdf', 'React Hooks Guide.pdf', 'Performance Tips.pdf']
-        },
-        {
-            id: 2,
-            title: 'Workplace Safety',
-            trainer: 'Internal HR',
-            date: '2024-02-15',
-            duration: '2 Hours',
-            participants: 45,
-            status: 'Completed',
-            description: 'Comprehensive workplace safety training covering emergency procedures, ergonomics, and health protocols.',
-            enrolledEmployees: ['All Employees'],
-            progress: 100,
-            materials: ['Safety Manual.pdf', 'Emergency Procedures.pdf', 'Completion Certificate.pdf']
-        },
-        {
-            id: 3,
-            title: 'Management 101',
-            trainer: 'Udemy Business',
-            date: '2024-03-10',
-            duration: '4 Weeks',
-            participants: 5,
-            status: 'In Progress',
-            description: 'Essential management skills including team leadership, communication, and conflict resolution.',
-            enrolledEmployees: ['Alice Johnson', 'Bob Smith', 'Charlie Davis', 'Diana Prince', 'Eve Adams'],
-            progress: 65,
-            materials: ['Leadership Guide.pdf', 'Communication Skills.pdf', 'Week 1-3 Assignments.pdf']
-        },
-    ];
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, pData] = await Promise.all([
+                trainingService.getStats(),
+                trainingService.getPrograms()
+            ]);
+            setStats(sData);
+            setTrainings(pData);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const handleView = (training) => {
-        setSelectedTraining(training);
-        setShowViewModal(true);
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleCreateProgram = async () => {
+        try {
+            await trainingService.createProgram(newProgram);
+            setShowCreateModal(false);
+            fetchData();
+            alert("Training program created successfully!");
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
+    const handleView = async (training) => {
+        setLoading(true);
+        try {
+            const details = await trainingService.getProgramDetails(training.id);
+            setSelectedTraining(details || training);
+            setShowViewModal(true);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAssignEmployees = async () => {
+        const ids = prompt("Enter Employee IDs (comma separated):", "EMP-001, EMP-002");
+        if (!ids) return;
+        try {
+            const idList = ids.split(',').map(id => id.trim());
+            await trainingService.assignEmployees(selectedTraining.id, idList);
+            alert("Employees assigned successfully!");
+            handleView(selectedTraining);
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
+    const handleMaterialUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            await trainingService.uploadMaterials(selectedTraining.id, formData);
+            alert("Material uploaded successfully!");
+            handleView(selectedTraining);
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
     };
 
     return (
@@ -61,8 +93,8 @@ export const TrainingContent = () => {
                     <h5 className="fw-bold text-dark mb-1">Training & Development</h5>
                     <p className="text-secondary small mb-0">Upskill employees and track progress</p>
                 </div>
-                <button className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2">
-                    <FaPlus /> Assign Training
+                <button className="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center gap-2" onClick={() => setShowCreateModal(true)}>
+                    <FaPlus /> Create Program
                 </button>
             </div>
 
@@ -71,7 +103,7 @@ export const TrainingContent = () => {
                     <div className="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3">
                         <FaGraduationCap className="text-primary" size={32} />
                         <div>
-                            <h3 className="mb-0 fw-bold">12</h3>
+                            <h3 className="mb-0 fw-bold">{stats.active_courses}</h3>
                             <div className="text-secondary small">Active Courses</div>
                         </div>
                     </div>
@@ -80,7 +112,7 @@ export const TrainingContent = () => {
                     <div className="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3">
                         <FaUserGraduate className="text-success" size={32} />
                         <div>
-                            <h3 className="mb-0 fw-bold">85%</h3>
+                            <h3 className="mb-0 fw-bold">{stats.completion_rate}%</h3>
                             <div className="text-secondary small">Completion Rate</div>
                         </div>
                     </div>
@@ -89,7 +121,7 @@ export const TrainingContent = () => {
                     <div className="card border-0 shadow-sm p-3 d-flex flex-row align-items-center gap-3">
                         <FaClock className="text-warning" size={32} />
                         <div>
-                            <h3 className="mb-0 fw-bold">450</h3>
+                            <h3 className="mb-0 fw-bold">{stats.training_hours}</h3>
                             <div className="text-secondary small">Training Hours</div>
                         </div>
                     </div>
@@ -117,8 +149,8 @@ export const TrainingContent = () => {
                             {trainings.map(t => (
                                 <tr key={t.id}>
                                     <td className="ps-4 fw-bold">{t.title}</td>
-                                    <td>{t.trainer}</td>
-                                    <td><div className="d-flex align-items-center gap-2"><FaCalendarAlt className="text-muted" /> {t.date}</div></td>
+                                    <td>{t.platform || t.trainer}</td>
+                                    <td><div className="d-flex align-items-center gap-2"><FaCalendarAlt className="text-muted" /> {t.start_date || t.date}</div></td>
                                     <td>{t.duration}</td>
                                     <td>{t.participants} Employees</td>
                                     <td>
@@ -196,13 +228,18 @@ export const TrainingContent = () => {
 
                                 {/* Enrolled Employees */}
                                 <div className="mb-4">
-                                    <h6 className="fw-bold text-dark mb-3">
-                                        <FaUsers className="me-2" />
-                                        Enrolled Employees ({selectedTraining.participants})
-                                    </h6>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 className="fw-bold text-dark mb-0">
+                                            <FaUsers className="me-2" />
+                                            Enrolled Employees ({selectedTraining.participants})
+                                        </h6>
+                                        <button className="btn btn-sm btn-outline-primary" style={{ fontSize: '0.75rem' }} onClick={handleAssignEmployees}>
+                                            <FaPlus className="me-1" /> Add
+                                        </button>
+                                    </div>
                                     <div className="border rounded p-3 bg-light">
                                         <div className="row g-2">
-                                            {selectedTraining.enrolledEmployees.map((emp, idx) => (
+                                            {(selectedTraining.enrolledEmployees || []).map((emp, idx) => (
                                                 <div className="col-md-6" key={idx}>
                                                     <div className="d-flex align-items-center gap-2">
                                                         <FaCheck className="text-success" size={12} />
@@ -210,28 +247,40 @@ export const TrainingContent = () => {
                                                     </div>
                                                 </div>
                                             ))}
+                                            {(!selectedTraining.enrolledEmployees || selectedTraining.enrolledEmployees.length === 0) && (
+                                                <div className="col-12 text-center text-secondary small py-2">No employees enrolled yet</div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Training Materials */}
                                 <div className="mb-3">
-                                    <h6 className="fw-bold text-dark mb-3">
-                                        <FaFileAlt className="me-2" />
-                                        Training Materials
-                                    </h6>
+                                    <div className="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 className="fw-bold text-dark mb-0">
+                                            <FaFileAlt className="me-2" />
+                                            Training Materials
+                                        </h6>
+                                        <label className="btn btn-sm btn-outline-primary mb-0" style={{ fontSize: '0.75rem', cursor: 'pointer' }}>
+                                            <FaPlus className="me-1" /> Upload
+                                            <input type="file" hidden onChange={handleMaterialUpload} />
+                                        </label>
+                                    </div>
                                     <div className="list-group">
-                                        {selectedTraining.materials.map((material, idx) => (
+                                        {(selectedTraining.materials || []).map((material, idx) => (
                                             <div className="list-group-item d-flex justify-content-between align-items-center" key={idx}>
                                                 <div className="d-flex align-items-center gap-2">
                                                     <FaFileAlt className="text-danger" />
-                                                    <span>{material}</span>
+                                                    <span>{typeof material === 'string' ? material : material.name}</span>
                                                 </div>
                                                 <button className="btn btn-sm btn-outline-primary">
                                                     <FaDownload size={12} />
                                                 </button>
                                             </div>
                                         ))}
+                                        {(!selectedTraining.materials || selectedTraining.materials.length === 0) && (
+                                            <div className="list-group-item text-center text-secondary small py-4">No materials uploaded yet</div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -396,6 +445,52 @@ export const TrainingContent = () => {
                                     alert('Training updated successfully!');
                                     setShowEditModal(false);
                                 }}>Save Changes</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Create Training Modal */}
+            {showCreateModal && (
+                <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setShowCreateModal(false)}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content border-0 shadow-lg rounded-4">
+                            <div className="modal-header border-0 p-4">
+                                <h5 className="modal-title fw-bold">Create New Training Program</h5>
+                                <button className="btn-close" onClick={() => setShowCreateModal(false)}></button>
+                            </div>
+                            <div className="modal-body p-4 pt-0">
+                                <div className="row g-3">
+                                    <div className="col-12">
+                                        <label className="form-label small fw-bold">Training Title *</label>
+                                        <input className="form-control" value={newProgram.title} onChange={e => setNewProgram({...newProgram, title: e.target.value})} placeholder="e.g. Advanced React" />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Trainer / Platform</label>
+                                        <input className="form-control" value={newProgram.trainer} onChange={e => setNewProgram({...newProgram, trainer: e.target.value})} placeholder="e.g. Udemy" />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Start Date</label>
+                                        <input type="date" className="form-control" value={newProgram.start_date} onChange={e => setNewProgram({...newProgram, start_date: e.target.value})} />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Duration</label>
+                                        <input className="form-control" value={newProgram.duration} onChange={e => setNewProgram({...newProgram, duration: e.target.value})} placeholder="e.g. 2 Weeks" />
+                                    </div>
+                                    <div className="col-md-6">
+                                        <label className="form-label small fw-bold">Max Participants</label>
+                                        <input type="number" className="form-control" value={newProgram.participants} onChange={e => setNewProgram({...newProgram, participants: e.target.value})} />
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label small fw-bold">Description</label>
+                                        <textarea className="form-control" rows={3} value={newProgram.description} onChange={e => setNewProgram({...newProgram, description: e.target.value})} placeholder="Program objectives..." />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer border-0 p-4 pt-0 gap-2">
+                                <button className="btn btn-light" onClick={() => setShowCreateModal(false)}>Cancel</button>
+                                <button className="btn btn-primary" onClick={handleCreateProgram}>Create Program</button>
                             </div>
                         </div>
                     </div>

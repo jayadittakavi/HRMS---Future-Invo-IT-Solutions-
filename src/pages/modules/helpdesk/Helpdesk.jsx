@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { helpdeskService } from '../../../services/helpdeskService';
 import { useAuth } from '../../../context/AuthContext';
 import DashboardLayout from '../../../components/layout/DashboardLayout';
 import { useAutomation } from '../../../context/AutomationContext';
@@ -16,70 +17,60 @@ export const HelpdeskContent = () => {
     const role = user?.role?.toLowerCase() || 'employee';
 
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [tickets, setTickets] = useState([]);
+    const [stats, setStats] = useState({ total: 0, open: 0, inProgress: 0, resolved: 0 });
+    const [loading, setLoading] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [ticketSearch, setTicketSearch] = useState('');
     const [filterCategory, setFilterCategory] = useState('All');
 
-    // Mock Data for Tickets
-    const [tickets, setTickets] = useState([
-        {
-            id: 'TKT-001',
-            subject: 'Email login issue',
-            category: 'IT Support',
-            priority: 'High',
-            status: 'Open',
-            creator: 'John Doe',
-            team: 'Engineering',
-            assignedTo: 'Admin',
-            date: '2026-02-24',
-            description: 'Cannot access my outlook account after the recent password change.',
-            comments: [
-                { user: 'System', text: 'Ticket created successfully.', time: '10:00 AM' }
-            ]
-        },
-        {
-            id: 'TKT-002',
-            subject: 'January Salary Slip missing',
-            category: 'Payroll',
-            priority: 'Medium',
-            status: 'In Progress',
-            creator: 'Alice Smith',
-            team: 'HR',
-            assignedTo: 'HR Manager',
-            date: '2026-02-23',
-            description: 'My salary slip for January 2026 is not visible in the dashboard.',
-            comments: [
-                { user: 'HR Manager', text: 'We are looking into it. Please wait.', time: '02:30 PM' }
-            ]
-        },
-        {
-            id: 'TKT-003',
-            subject: 'WFH policy query',
-            category: 'HR Query',
-            priority: 'Low',
-            status: 'Resolved',
-            creator: 'Bob Wilson',
-            team: 'Marketing',
-            assignedTo: 'HR Admin',
-            date: '2026-02-22',
-            description: 'How many WFH days are allowed per month?',
-            comments: [
-                { user: 'HR Admin', text: 'You are allowed 4 days per month.', time: '11:15 AM' }
-            ]
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [tData, sData] = await Promise.all([
+                helpdeskService.getTickets(),
+                helpdeskService.getDashboardStats()
+            ]);
+            if (Array.isArray(tData)) setTickets(tData);
+            if (sData) setStats(sData);
+        } catch (error) {
+            console.error("Error fetching helpdesk data", error);
+            // Fallback mock data if API fails
+            setTickets([
+                { id: 'TKT-001', subject: 'Email login issue', category: 'IT Support', priority: 'High', status: 'Open', creator: 'John Doe', team: 'Engineering', date: '2026-02-24', description: 'Cannot access my outlook account after the recent password change.', comments: [] },
+                { id: 'TKT-002', subject: 'January Salary Slip missing', category: 'Payroll', priority: 'Medium', status: 'In Progress', creator: 'Alice Smith', team: 'HR', date: '2026-02-23', description: 'My salary slip for January 2026 is not visible in the dashboard.', comments: [] }
+            ]);
+            setStats({ total: 2, open: 1, inProgress: 1, resolved: 0 });
+        } finally {
+            setLoading(false);
         }
-    ]);
-
-    const stats = {
-        total: role === 'employee' ? tickets.filter(t => t.creator === user?.name).length : tickets.length,
-        open: (role === 'employee' ? tickets.filter(t => t.creator === user?.name) : tickets).filter(t => t.status === 'Open').length,
-        inProgress: (role === 'employee' ? tickets.filter(t => t.creator === user?.name) : tickets).filter(t => t.status === 'In Progress').length,
-        resolved: (role === 'employee' ? tickets.filter(t => t.creator === user?.name) : tickets).filter(t => t.status === 'Resolved').length,
     };
 
-    const handleAction = (action, data) => {
-        console.log(`Action: ${action}`, data);
-        alert(`${action} successful! (Mock Integration)`);
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleAction = async (action, data) => {
+        try {
+            if (action === 'Create Ticket') {
+                await helpdeskService.createTicket(data);
+                alert("Ticket raised successfully!");
+                fetchData();
+            } else if (action === 'Status Change') {
+                if (selectedTicket) {
+                    await helpdeskService.updateTicket(selectedTicket.id, { status: data });
+                    alert("Ticket status updated!");
+                    fetchData();
+                    setSelectedTicket(prev => ({ ...prev, status: data }));
+                }
+            } else {
+                console.log(`Action: ${action}`, data);
+                alert(`${action} successful!`);
+            }
+        } catch (error) {
+            alert(`Error performs ${action}: ` + error.message);
+        }
     };
 
     const getStatusStyle = (status) => {
@@ -140,10 +131,10 @@ export const HelpdeskContent = () => {
             {/* Dash Counters */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Total Tickets', value: stats.total, icon: <MdOutlineConfirmationNumber />, color: 'primary' },
-                    { label: 'Open', value: stats.open, icon: <MdErrorOutline />, color: 'danger' },
-                    { label: 'In Progress', value: stats.inProgress, icon: <MdPendingActions />, color: 'warning' },
-                    { label: 'Resolved', value: stats.resolved, icon: <MdCheckCircle />, color: 'success' },
+                    { label: 'Total Tickets', value: stats.total || 0, icon: <MdOutlineConfirmationNumber />, color: 'primary' },
+                    { label: 'Open', value: stats.open || 0, icon: <MdErrorOutline />, color: 'danger' },
+                    { label: 'In Progress', value: stats.inProgress || 0, icon: <MdPendingActions />, color: 'warning' },
+                    { label: 'Resolved', value: stats.resolved || 0, icon: <MdCheckCircle />, color: 'success' },
                 ].map((stat, i) => (
                     <div className="col-md-3" key={i}>
                         <div className="card shadow-sm border-0 rounded-4 p-3 bg-white">
@@ -275,7 +266,7 @@ export const HelpdeskContent = () => {
                             <h5 className="fw-bold text-primary mb-0">Raise New Ticket</h5>
                             <button className="btn btn-light rounded-circle p-1" onClick={() => setShowCreateModal(false)}><MdClose /></button>
                         </div>
-                        <div className="row g-3">
+                        <div className="row g-3" id="ticketForm">
                             <div className="col-md-12">
                                 <label className="form-label small fw-bold text-secondary">Subject</label>
                                 <input type="text" className="form-control border-0 bg-light shadow-sm" placeholder="Brief summary of issue..." />
@@ -313,8 +304,15 @@ export const HelpdeskContent = () => {
                         <div className="d-flex gap-2 mt-4">
                             <button className="btn btn-light w-100 rounded-pill" onClick={() => setShowCreateModal(false)}>Cancel</button>
                             <button className="btn btn-primary w-100 rounded-pill shadow-sm" onClick={() => {
-                                handleAction('Create Ticket', {});
-                                triggerEvent('onCreate', { module: 'Helpdesk', category: 'IT Support', creator: user?.name });
+                                const form = document.getElementById('ticketForm');
+                                const formData = {
+                                    subject: form.querySelector('input').value,
+                                    category: form.querySelectorAll('select')[0].value,
+                                    priority: form.querySelectorAll('select')[1].value,
+                                    description: form.querySelector('textarea').value,
+                                };
+                                handleAction('Create Ticket', formData);
+                                triggerEvent('onCreate', { module: 'Helpdesk', category: formData.category, creator: user?.name });
                                 setShowCreateModal(false);
                             }}>Submit Ticket</button>
                         </div>

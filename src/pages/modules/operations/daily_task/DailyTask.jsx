@@ -1,16 +1,24 @@
 import React, { useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { FaTrash } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 export const DailyTaskContent = () => {
     // Mock Data based on Screenshot
     const tasks = [
-        { id: 1, task: 'Administrative Work', employee: 'Meera Joshi', manager: 'Arjun Singh', description: 'Administrative tasks: Office coordination, Vendor management, Meeting coordination. Ensured smooth office operations and organizational efficiency.', createdAt: '26-09-2025' },
-        { id: 2, task: 'Vendor management', employee: 'Sanjay Gupta', manager: 'Praveen Kumar', description: 'Daily administrative work: Vendor management, Budget tracking, Process improvement. Supported organizational operations and management.', createdAt: '26-09-2025' },
-        { id: 3, task: 'Benefits administration', employee: 'Mohan Prasad', manager: 'Priyanka Sharma', description: 'Daily HR operations: Benefits administration. Ensured smooth HR processes and employee engagement.', createdAt: '26-09-2025' },
-        { id: 4, task: 'Training coordination', employee: 'Kiran Desai', manager: 'Priyanka Sharma', description: 'HR activities completed: Training coordination. Focused on employee satisfaction and organizational development.', createdAt: '26-09-2025' },
-        { id: 5, task: 'Social media management', employee: 'Priya Nair', manager: 'Kavita Rao', description: 'Creative and marketing tasks: Social media management, Website content updates. Worked on increasing brand visibility and engagement.', createdAt: '26-09-2025' },
+        { id: 1, task: 'Administrative Work', employee: 'Meera Joshi', manager: 'Arjun Singh', description: 'Administrative tasks: Office coordination, Vendor management, Meeting coordination. Ensured smooth office operations and organizational efficiency.', createdAt: '26-09-2025', status: 'Active' },
+        { id: 2, task: 'Vendor management', employee: 'Sanjay Gupta', manager: 'Praveen Kumar', description: 'Daily administrative work: Vendor management, Budget tracking, Process improvement. Supported organizational operations and management.', createdAt: '26-09-2025', status: 'Active' },
+        { id: 3, task: 'Benefits administration', employee: 'Mohan Prasad', manager: 'Priyanka Sharma', description: 'Daily HR operations: Benefits administration. Ensured smooth HR processes and employee engagement.', createdAt: '26-09-2025', status: 'Active' },
+        { id: 4, task: 'Training coordination', employee: 'Kiran Desai', manager: 'Priyanka Sharma', description: 'HR activities completed: Training coordination. Focused on employee satisfaction and organizational development.', createdAt: '26-09-2025', status: 'Active' },
+        { id: 5, task: 'Social media management', employee: 'Priya Nair', manager: 'Kavita Rao', description: 'Creative and marketing tasks: Social media management, Website content updates. Worked on increasing brand visibility and engagement.', createdAt: '26-09-2025', status: 'Active' },
     ];
+
+    const [tasksList, setTasksList] = React.useState(tasks);
+
+    const handleToggle = (id) => {
+        setTasksList(tasksList.map(t => 
+            t.id === id ? { ...t, status: t.status === 'Active' ? 'Inactive' : 'Active' } : t
+        ));
+    };
 
     return (
         <div className="attendance-content bg-light p-4" style={{ minHeight: '80vh' }}>
@@ -44,19 +52,31 @@ export const DailyTaskContent = () => {
                                 <th className="border-bottom-0 text-dark fw-bold small" style={{ width: '15%' }}>Manager</th>
                                 <th className="border-bottom-0 text-dark fw-bold small" style={{ width: '35%' }}>Description</th>
                                 <th className="border-bottom-0 text-dark fw-bold small" style={{ width: '10%' }}>Created At</th>
+                                <th className="border-bottom-0 text-dark fw-bold small" style={{ width: '10%' }}>Status</th>
                                 <th className="border-bottom-0 text-dark fw-bold small text-center" style={{ width: '10%' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {tasks.map((row) => (
+                            {tasksList.map((row) => (
                                 <tr key={row.id}>
                                     <td className="ps-4 text-secondary small fw-bold">{row.task}</td>
                                     <td className="text-secondary small">{row.employee}</td>
                                     <td className="text-secondary small">{row.manager}</td>
                                     <td className="text-secondary small" style={{ lineHeight: '1.4' }}>{row.description}</td>
                                     <td className="text-secondary small">{row.createdAt}</td>
+                                    <td>
+                                        <span className={`badge rounded-pill ${row.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
+                                            {row.status}
+                                        </span>
+                                    </td>
                                     <td className="text-center">
-                                        <button className="btn btn-sm text-danger border-0 p-1"><FaTrash size={14} /></button>
+                                        <button 
+                                            className={`btn btn-sm border-0 p-1 ${row.status === 'Active' ? 'text-danger' : 'text-success'}`}
+                                            onClick={() => handleToggle(row.id)}
+                                            title={row.status === 'Active' ? 'Deactivate' : 'Activate'}
+                                        >
+                                            {row.status === 'Active' ? <FaTimesCircle size={14} /> : <FaCheckCircle size={14} />}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}

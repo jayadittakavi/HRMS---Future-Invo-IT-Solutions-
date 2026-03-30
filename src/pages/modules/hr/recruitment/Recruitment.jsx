@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
-import { FaPlus, FaSearch, FaBriefcase, FaUserTie, FaCheckCircle, FaFilter, FaEdit, FaTrash, FaEye, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaBriefcase, FaUserTie, FaCheckCircle, FaFilter, FaEdit, FaTrash, FaEye, FaTimes, FaTimesCircle } from 'react-icons/fa';
 import { recruitmentService } from './service';
 
 export const RecruitmentContent = () => {
@@ -16,7 +16,6 @@ export const RecruitmentContent = () => {
     const [showJobModal, setShowJobModal] = useState(false);
     const [showViewJobModal, setShowViewJobModal] = useState(false);
     const [showEditJobModal, setShowEditJobModal] = useState(false);
-    const [showDeleteJobModal, setShowDeleteJobModal] = useState(false);
     const [showCandidateModal, setShowCandidateModal] = useState(false);
     const [showMoveStageModal, setShowMoveStageModal] = useState(false);
     const [selectedJob, setSelectedJob] = useState(null);
@@ -28,18 +27,21 @@ export const RecruitmentContent = () => {
     const [candidates, setCandidates] = useState([]);
     const [stats, setStats] = useState({ open_positions: 0, total_applicants: 0, in_interview: 0, offers_made: 0 });
     const [loading, setLoading] = useState(true);
+    const [formOptions, setFormOptions] = useState({ departments: [], jobTypes: [] });
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [jData, cData, sData] = await Promise.all([
+            const [jData, cData, sData, oData] = await Promise.all([
                 recruitmentService.getJobs('All'),
                 recruitmentService.getApplicants(),
-                recruitmentService.getStats()
+                recruitmentService.getStats(),
+                recruitmentService.getFormOptions()
             ]);
             if (Array.isArray(jData)) setJobs(jData);
             if (Array.isArray(cData)) setCandidates(cData);
             if (sData) setStats(sData);
+            if (oData) setFormOptions(oData);
         } catch (err) {
             console.error("Failed to load recruitment data:", err);
         } finally {
@@ -52,12 +54,13 @@ export const RecruitmentContent = () => {
     }, []);
 
     const [jobForm, setJobForm] = useState({
-        title: '',
-        department: '',
-        type: 'Full-time',
+        job_title: '',
+        department_id: '',
+        employment_type: 'Full-time',
         location: 'Office',
         description: '',
-        requirements: ''
+        requirements: '',
+        status: 'Open'
     });
 
     const [newStage, setNewStage] = useState('');
@@ -76,55 +79,63 @@ export const RecruitmentContent = () => {
     const handleEditJob = (job) => {
         setSelectedJob(job);
         setJobForm({
-            title: job.title,
-            department: job.department,
-            type: job.type,
+            job_title: job.title || job.job_title,
+            department_id: job.department_id || (formOptions.departments.find(d => d.name === job.department)?.id || ''),
+            employment_type: job.type || job.employment_type || 'Full-time',
             location: job.location,
             description: job.description || '',
-            requirements: job.requirements || ''
+            requirements: job.requirements || '',
+            status: job.status || 'Open'
         });
         setShowEditJobModal(true);
     };
 
-    const handleDeleteJob = (job) => {
-        setSelectedJob(job);
-        setShowDeleteJobModal(true);
+    const handleToggleJobStatus = async (job) => {
+        try {
+            const newStatus = job.status === 'Open' ? 'Closed' : 'Open';
+            const updatedJob = await recruitmentService.saveJob({ ...job, status: newStatus });
+            if (updatedJob) {
+                setJobs(jobs.map(j => j.id === job.id ? updatedJob : j));
+                alert(`Job status updated to ${newStatus}`);
+            }
+        } catch (err) {
+            console.error("Error toggling job status:", err);
+            alert("Failed to update job status");
+        }
     };
 
-    const confirmDeleteJob = () => {
-        setJobs(jobs.filter(j => j.id !== selectedJob.id));
-        setShowDeleteJobModal(false);
-        setSelectedJob(null);
+    const handleSaveEditJob = async () => {
+        try {
+            const updatedJob = await recruitmentService.saveJob({ ...jobForm, id: selectedJob.id });
+            if (updatedJob) {
+                setJobs(jobs.map(j => j.id === selectedJob.id ? updatedJob : j));
+                setShowEditJobModal(false);
+                setSelectedJob(null);
+            }
+        } catch (err) {
+            console.error("Error updating job:", err);
+        }
     };
 
-    const handleSaveEditJob = () => {
-        setJobs(jobs.map(j =>
-            j.id === selectedJob.id
-                ? { ...j, ...jobForm }
-                : j
-        ));
-        setShowEditJobModal(false);
-        setSelectedJob(null);
-    };
-
-    const handlePostJob = () => {
-        const newJob = {
-            id: jobs.length + 1,
-            ...jobForm,
-            applicants: 0,
-            status: 'Open',
-            postedDate: new Date().toISOString().split('T')[0]
-        };
-        setJobs([...jobs, newJob]);
-        setShowJobModal(false);
-        setJobForm({
-            title: '',
-            department: '',
-            type: 'Full-time',
-            location: 'Office',
-            description: '',
-            requirements: ''
-        });
+    const handlePostJob = async () => {
+        try {
+            const newJob = await recruitmentService.saveJob(jobForm);
+            if (newJob) {
+                setJobs([...jobs, newJob]);
+                setShowJobModal(false);
+                setJobForm({
+                    job_title: '',
+                    department_id: '',
+                    employment_type: 'Full-time',
+                    location: 'Office',
+                    description: '',
+                    requirements: '',
+                    status: 'Open'
+                });
+            }
+        } catch (err) {
+            console.error("Error posting job:", err);
+        }
     };
 
     const handleViewCandidate = (candidate) => {
@@ -384,14 +395,14 @@ export const RecruitmentContent = () => {
                                                     <FaEdit />
                                                 </button>
                                                 <button
-                                                    className="btn btn-sm btn-outline-danger rounded-circle p-2"
-                                                    title="Delete"
-                                                    onClick={(e) => { e.stopPropagation(); handleDeleteJob(job); }}
+                                                    className="btn btn-sm btn-outline-warning rounded-circle p-2"
+                                                    title={job.status === 'Open' ? "Close Job" : "Open Job"}
+                                                    onClick={(e) => { e.stopPropagation(); handleToggleJobStatus(job); }}
                                                     style={{ width: '36px', height: '36px', transition: 'all 0.2s ease' }}
                                                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
                                                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                                                 >
-                                                    <FaTrash />
+                                                    {job.status === 'Open' ? <FaTimesCircle /> : <FaCheckCircle />}
                                                 </button>
                                             </div>
                                         </div>
@@ -541,28 +552,34 @@ export const RecruitmentContent = () => {
                                                 type="text"
                                                 className="form-control"
                                                 placeholder="e.g. Senior Software Engineer"
-                                                value={jobForm.title}
-                                                onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                                                value={jobForm.job_title}
+                                                onChange={(e) => setJobForm({ ...jobForm, job_title: e.target.value })}
                                             />
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Department *</label>
-                                            <select className="form-select" value={jobForm.department} onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}>
+                                            <select className="form-select" value={jobForm.department_id} onChange={(e) => setJobForm({ ...jobForm, department_id: e.target.value })}>
                                                 <option value="">Select Department</option>
-                                                <option>Engineering</option>
-                                                <option>Design</option>
-                                                <option>Marketing</option>
-                                                <option>Sales</option>
-                                                <option>HR</option>
+                                                {formOptions.departments.map(dept => (
+                                                    <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Employment Type *</label>
-                                            <select className="form-select" value={jobForm.type} onChange={(e) => setJobForm({ ...jobForm, type: e.target.value })}>
-                                                <option>Full-time</option>
-                                                <option>Part-time</option>
-                                                <option>Contract</option>
-                                                <option>Internship</option>
+                                            <select className="form-select" value={jobForm.employment_type} onChange={(e) => setJobForm({ ...jobForm, employment_type: e.target.value })}>
+                                                {formOptions.jobTypes && formOptions.jobTypes.length > 0 ? (
+                                                    formOptions.jobTypes.map(type => (
+                                                        <option key={type} value={type}>{type}</option>
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        <option>Full-time</option>
+                                                        <option>Part-time</option>
+                                                        <option>Contract</option>
+                                                        <option>Internship</option>
+                                                    </>
+                                                )}
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -642,26 +659,32 @@ export const RecruitmentContent = () => {
                                     <div className="row g-3">
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Job Title *</label>
-                                            <input type="text" className="form-control" value={jobForm.title} onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })} />
+                                            <input type="text" className="form-control" value={jobForm.job_title} onChange={(e) => setJobForm({ ...jobForm, job_title: e.target.value })} />
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Department *</label>
-                                            <select className="form-select" value={jobForm.department} onChange={(e) => setJobForm({ ...jobForm, department: e.target.value })}>
+                                            <select className="form-select" value={jobForm.department_id} onChange={(e) => setJobForm({ ...jobForm, department_id: e.target.value })}>
                                                 <option value="">Select Department</option>
-                                                <option>Engineering</option>
-                                                <option>Design</option>
-                                                <option>Marketing</option>
-                                                <option>Sales</option>
-                                                <option>HR</option>
+                                                {formOptions.departments.map(dept => (
+                                                    <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="col-md-6">
                                             <label className="form-label small fw-bold">Employment Type *</label>
-                                            <select className="form-select" value={jobForm.type} onChange={(e) => setJobForm({ ...jobForm, type: e.target.value })}>
-                                                <option>Full-time</option>
-                                                <option>Part-time</option>
-                                                <option>Contract</option>
-                                                <option>Internship</option>
+                                            <select className="form-select" value={jobForm.employment_type} onChange={(e) => setJobForm({ ...jobForm, employment_type: e.target.value })}>
+                                                {formOptions.jobTypes && formOptions.jobTypes.length > 0 ? (
+                                                    formOptions.jobTypes.map(type => (
+                                                        <option key={type} value={type}>{type}</option>
+                                                    ))
+                                                ) : (
+                                                    <>
+                                                        <option>Full-time</option>
+                                                        <option>Part-time</option>
+                                                        <option>Contract</option>
+                                                        <option>Internship</option>
+                                                    </>
+                                                )}
                                             </select>
                                         </div>
                                         <div className="col-md-6">
@@ -692,27 +715,6 @@ export const RecruitmentContent = () => {
                 </div>
             )}
 
-            {/* Delete Job Confirmation Modal */}
-            {showDeleteJobModal && selectedJob && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header border-0">
-                                <h5 className="modal-title fw-bold">Delete Job Posting</h5>
-                                <button className="btn-close" onClick={() => setShowDeleteJobModal(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to delete the job posting for <strong>{selectedJob.title}</strong>?</p>
-                                <p className="text-danger small mb-0">This action cannot be undone. All {selectedJob.applicants} applications will be archived.</p>
-                            </div>
-                            <div className="modal-footer border-0">
-                                <button className="btn btn-light" onClick={() => setShowDeleteJobModal(false)}>Cancel</button>
-                                <button className="btn btn-danger" onClick={confirmDeleteJob}><FaTrash className="me-2" />Delete Job</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* View Candidate Profile Modal */}
             {showCandidateModal && selectedCandidate && (
@@ -887,7 +889,7 @@ export const RecruitmentContent = () => {
 };
 
 const Recruitment = () => (
-    <DashboardLayout title="">
+    <DashboardLayout title="Recruitment" activePath="/recruitment">
         <RecruitmentContent />
     </DashboardLayout>
 );

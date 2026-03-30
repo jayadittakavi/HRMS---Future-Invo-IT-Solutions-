@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSync, FaCheckCircle, FaTimesCircle, FaDesktop } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaSync, FaCheckCircle, FaTimesCircle, FaDesktop } from 'react-icons/fa';
 import { attendanceService } from '../service/service';
 
 const AddDevice = () => {
@@ -51,15 +51,13 @@ const AddDevice = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this device?')) {
-            try {
-                // Assuming there's a delete endpoint, if not, this is a placeholder
-                // await attendanceService.deleteDevice(id);
-                setDevices(devices.filter(d => d.id !== id));
-            } catch (err) {
-                alert(`Failed: ${err.message}`);
-            }
+    const handleToggleStatus = async (device) => {
+        const newStatus = device.status === 'Active' ? 'Inactive' : 'Active';
+        try {
+            setDevices(devices.map(d => d.id === device.id ? { ...d, status: newStatus } : d));
+            alert(`Device ${newStatus.toLowerCase()} successfully!`);
+        } catch (err) {
+            alert(`Failed: ${err.message}`);
         }
     };
 
@@ -233,11 +231,11 @@ const AddDevice = () => {
                                                     <FaEdit size={12} />
                                                 </button>
                                                 <button
-                                                    className="btn btn-sm btn-outline-danger rounded-circle"
-                                                    onClick={() => handleDelete(device.id)}
-                                                    title="Delete"
+                                                    className={`btn btn-sm rounded-circle ${device.status === 'Active' ? 'btn-outline-danger' : 'btn-outline-success'}`}
+                                                    onClick={() => handleToggleStatus(device)}
+                                                    title={device.status === 'Active' ? "Deactivate" : "Activate"}
                                                 >
-                                                    <FaTrash size={12} />
+                                                    {device.status === 'Active' ? <FaTimesCircle size={12} /> : <FaCheckCircle size={12} />}
                                                 </button>
                                             </div>
                                         </td>

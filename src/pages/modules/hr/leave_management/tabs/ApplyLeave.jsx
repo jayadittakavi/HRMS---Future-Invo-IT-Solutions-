@@ -1,45 +1,87 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaPaperPlane, FaCalendarAlt, FaInfoCircle } from 'react-icons/fa';
 import { MdDateRange } from 'react-icons/md';
 import { useAutomation } from '../../../../../context/AutomationContext';
+import { leaveService } from '../../../../../services/leaveService';
 
 const leaveTypes = ['Sick Leave', 'Casual Leave', 'Privilege Leave', 'Maternity Leave', 'Paternity Leave', 'Compensatory Leave'];
-
-const balances = {
-    'Sick Leave': { avail: 5, color: '#ef4444' },
-    'Casual Leave': { avail: 7, color: '#f59e0b' },
-    'Privilege Leave': { avail: 10, color: '#10b981' },
-    'Maternity Leave': { avail: 180, color: '#8b5cf6' },
-    'Paternity Leave': { avail: 15, color: '#3b82f6' },
-    'Compensatory Leave': { avail: 3, color: '#6366f1' },
-};
-
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '14px 16px' };
 
 const ApplyLeave = () => {
     const { triggerEvent } = useAutomation();
     const [formData, setFormData] = useState({ type: 'Sick Leave', startDate: '', endDate: '', halfDay: false, halfDayType: 'Morning', reason: '', attachment: null });
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [balances, setBalances] = useState({});
+    const [calculatedDays, setCalculatedDays] = useState(0);
 
-    const days = formData.startDate && formData.endDate
-        ? Math.max(0, Math.round((new Date(formData.endDate) - new Date(formData.startDate)) / 86400000) + 1)
-        : 0;
+    // Fetch initial balances
+    useEffect(() => {
+        const fetchBalances = async () => {
+            try {
+                const data = await leaveService.getBalance();
+                // data might be an array or object, based on current service it returns response.json()
+                // assuming backend returns { "Sick Leave": { avail: 5, color: "#..." }, ... }
+                // or we might need to transform it. Let's assume it matches the structure expected by the UI.
+                if (data && typeof data === 'object') setBalances(data);
+            } catch (err) {
+                console.error("Failed to fetch leave balances", err);
+            }
+        };
+        fetchBalances();
+    }, []);
+
+    // Calculate days when dates change
+    useEffect(() => {
+        const calculate = async () => {
+            if (formData.startDate && formData.endDate) {
+                try {
+                    const result = await leaveService.calculateDays({
+                        startDate: formData.startDate,
+                        endDate: formData.endDate,
+                        halfDay: formData.halfDay
+                    });
+                    setCalculatedDays(result.days || 0);
+                } catch (err) {
+                    console.error("Failed to calculate days", err);
+                    // Fallback to manual if API fails
+                    const d = Math.max(0, Math.round((new Date(formData.endDate) - new Date(formData.startDate)) / 86400000) + 1);
+                    setCalculatedDays(formData.halfDay ? 0.5 : d);
+                }
+            }
+        };
+        calculate();
+    }, [formData.startDate, formData.endDate, formData.halfDay]);
 
     const handle = (e) => setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        setLoading(true);
 
-        // Trigger Automation Event
-        triggerEvent('onApply', {
-            module: 'Leave',
-            employeeName: 'Self',
-            leaveType: formData.type,
-            duration: days
-        });
+        try {
+            const result = await leaveService.applyLeave({
+                ...formData,
+                days: calculatedDays
+            });
 
-        setTimeout(() => setSubmitted(false), 3000);
+            if (result) {
+                setSubmitted(true);
+                // Trigger Automation Event
+                triggerEvent('onApply', {
+                    module: 'Leave',
+                    employeeName: 'Self',
+                    leaveType: formData.type,
+                    duration: calculatedDays
+                });
+                setTimeout(() => setSubmitted(false), 3000);
+            }
+        } catch (err) {
+            console.error("Failed to apply leave", err);
+            alert("Failed to submit leave application. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const balance = balances[formData.type];

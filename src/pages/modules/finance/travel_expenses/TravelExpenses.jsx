@@ -2,13 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useSearch } from '../../../../context/SearchContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { SimpleLineChart } from '../../../../components/charts/CustomCharts';
+import { expenseService } from './service';
 import { FaPlaneDeparture, FaReceipt, FaWallet, FaArrowTrendUp, FaEllipsisVertical, FaPlus } from 'react-icons/fa6';
 import { MdOutlineHistory, MdFilterList, MdFileDownload } from 'react-icons/md';
 
 export const TravelExpensesContent = () => {
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+    const [loading, setLoading] = useState(false);
     const [showNewClaim, setShowNewClaim] = useState(false);
+    const [stats, setStats] = useState({ totalExpenses: "$0", pendingClaims: "0", approvedTrips: "0" });
+    const [trends, setTrends] = useState([0, 0, 0, 0, 0, 0]);
+    const [claims, setClaims] = useState([]);
     const [claimFormData, setClaimFormData] = useState({
         project: '',
         category: 'Flight',
@@ -17,25 +22,46 @@ export const TravelExpensesContent = () => {
         description: ''
     });
 
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, tData, cData] = await Promise.all([
+                expenseService.getStats(),
+                expenseService.getTrends(),
+                expenseService.getClaims()
+            ]);
+            setStats(sData);
+            setTrends(tData.length > 0 ? tData : [650, 900, 1200, 850, 1500, 1100]);
+            setClaims(cData);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
+        fetchData();
         setSearchTerm(globalSearchTerm);
     }, [globalSearchTerm]);
 
-    // Mock Data
-    const [expenses, setExpenses] = useState([
-        { id: 'EXP-001', employee: 'John Doe', avatar: 'JD', project: 'Client Visit - NYC', amount: '$1,200', date: 'Oct 10, 2025', status: 'Approved', category: 'Flight' },
-        { id: 'EXP-002', employee: 'Sarah Lee', avatar: 'SL', project: 'Tech Conference', amount: '$850', date: 'Oct 12, 2025', status: 'Pending', category: 'Hotel' },
-        { id: 'EXP-003', employee: 'Mike Chen', avatar: 'MC', project: 'Team Offsite', amount: '$300', date: 'Oct 15, 2025', status: 'Rejected', category: 'Meals' },
-        { id: 'EXP-004', employee: 'Meera Joshi', avatar: 'MJ', project: 'Branch Audit', amount: '$550', date: 'Oct 18, 2025', status: 'Approved', category: 'Taxi' },
-    ]);
-
-    const expenseTrend = [650, 900, 1200, 850, 1500, 1100]; // Last 6 months
+    const handleAction = async (id, action) => {
+        const reason = action === 'Rejected' ? prompt("Please provide a reason for rejection:") : "";
+        if (action === 'Rejected' && reason === null) return;
+        try {
+            await expenseService.updateClaimStatus(id, action, reason);
+            fetchData();
+            alert(`Claim ${action.toLowerCase()}ed successfully!`);
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
 
     const handleExport = () => {
         const headers = ['ID', 'Employee', 'Project', 'Category', 'Date', 'Amount', 'Status'];
         const csvContent = [
             headers.join(','),
-            ...expenses.map(exp => [
+            ...claims.map(exp => [
                 exp.id,
                 `"${exp.employee}"`,
                 `"${exp.project}"`,
@@ -58,22 +84,17 @@ export const TravelExpensesContent = () => {
         alert("Exporting expense claims to CSV...");
     };
 
-    const handleNewClaim = (e) => {
+    const handleNewClaim = async (e) => {
         e.preventDefault();
-        const newClaim = {
-            id: `EXP-00${expenses.length + 1}`,
-            employee: 'Current User', // Mocked
-            avatar: 'CU',
-            project: claimFormData.project,
-            amount: `$${Number(claimFormData.amount).toLocaleString()}`,
-            date: new Date(claimFormData.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-            status: 'Pending',
-            category: claimFormData.category
-        };
-        setExpenses([newClaim, ...expenses]);
-        setShowNewClaim(false);
-        setClaimFormData({ project: '', category: 'Flight', amount: '', date: new Date().toISOString().split('T')[0], description: '' });
-        alert("New expense claim submitted successfully!");
+        try {
+            await expenseService.submitClaim(claimFormData);
+            setShowNewClaim(false);
+            setClaimFormData({ project: '', category: 'Flight', amount: '', date: new Date().toISOString().split('T')[0], description: '' });
+            fetchData();
+            alert("New expense claim submitted successfully!");
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
     };
 
     return (
@@ -110,7 +131,7 @@ export const TravelExpensesContent = () => {
                                 </span>
                             </div>
                             <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#475569' }}>Total Expenses (YTD)</h6>
-                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#0f172a' }}>$45,200</h2>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#0f172a' }}>{stats.totalExpenses || "$45,200"}</h2>
                             <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#64748b' }}>Updated 2h ago</p>
                             <div className="card-bg-icon text-primary"><FaWallet /></div>
                         </div>
@@ -128,7 +149,7 @@ export const TravelExpensesContent = () => {
                                 </div>
                             </div>
                             <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#78350f' }}>Pending Claims</h6>
-                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>08</h2>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>{stats.pendingClaims || "08"}</h2>
                             <p className="smaller mt-2 mb-0 fw-bold" style={{ color: '#d97706' }}>Requires approval action</p>
                             <div className="card-bg-icon text-warning"><FaReceipt /></div>
                         </div>
@@ -146,7 +167,7 @@ export const TravelExpensesContent = () => {
                                 </div>
                             </div>
                             <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#064e3b' }}>Approved Trips</h6>
-                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>15</h2>
+                            <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>{stats.approvedTrips || "15"}</h2>
                             <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#047857' }}>Next: NYC Client Meeting (Tomorrow)</p>
                             <div className="card-bg-icon text-success"><FaPlaneDeparture /></div>
                         </div>
@@ -163,10 +184,10 @@ export const TravelExpensesContent = () => {
                                 <div>
                                     <h6 className="fw-bold text-dark mb-1">Expense Trends (Last 6 Months)</h6>
                                     {(() => {
-                                        const last = expenseTrend[expenseTrend.length - 1];
-                                        const prev = expenseTrend[expenseTrend.length - 2];
+                                        const last = trends[trends.length - 1];
+                                        const prev = trends[trends.length - 2];
                                         const diff = last - prev;
-                                        const percent = ((diff / prev) * 100).toFixed(1);
+                                        const percent = prev !== 0 ? ((diff / prev) * 100).toFixed(1) : "0.0";
                                         const isUp = diff > 0;
                                         return (
                                             <div className="d-flex align-items-center gap-2">
@@ -184,8 +205,8 @@ export const TravelExpensesContent = () => {
                                     <option>2024 Overview</option>
                                 </select>
                             </div>
-                            <div className="px-2" style={{ marginTop: '-10px' }}>
-                                <SimpleLineChart data={expenseTrend} height="300px" color="#3b82f6" />
+                             <div className="px-2" style={{ marginTop: '-10px' }}>
+                                <SimpleLineChart data={trends} height="300px" color="#3b82f6" />
                             </div>
                         </div>
                     </div>
@@ -265,17 +286,17 @@ export const TravelExpensesContent = () => {
                                 <th className="border-0 pe-4 py-3 small fw-bold text-secondary text-uppercase ls-1 text-end">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {expenses.filter(item =>
-                                item.employee.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                item.project.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                item.id.toLowerCase().includes(searchTerm.toLowerCase())
+                         <tbody>
+                            {claims.filter(item =>
+                                (item.employee || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (item.project || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (item.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (item.id || '').toLowerCase().includes(searchTerm.toLowerCase())
                             ).map((item, idx) => (
                                 <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td className="ps-4 py-3">
                                         <div className="d-flex align-items-center gap-3">
-                                            <div className={`avatar-circle bg-secondary-subtle text-secondary small fw-bold`}>{item.avatar}</div>
+                                            <div className={`avatar-circle bg-secondary-subtle text-secondary small fw-bold`}>{item.avatar || (item.employee ? item.employee[0] : 'U')}</div>
                                             <div>
                                                 <div className="fw-bold text-dark">{item.employee}</div>
                                                 <div className="text-muted smaller">{item.id}</div>
@@ -288,7 +309,7 @@ export const TravelExpensesContent = () => {
                                     </td>
                                     <td className="py-3">
                                         <div className="text-secondary fw-medium small mb-0">{item.date}</div>
-                                        <div className="smaller text-muted opacity-75">10:45 AM</div>
+                                        <div className="smaller text-muted opacity-75">{item.time || '10:45 AM'}</div>
                                     </td>
                                     <td className="py-3">
                                         <div className="fw-bold text-dark">{item.amount}</div>
@@ -303,10 +324,26 @@ export const TravelExpensesContent = () => {
                                         </span>
                                     </td>
                                     <td className="pe-4 py-3 text-end">
-                                        <button className="btn btn-sm btn-light border rounded-pill px-3 hover-shadow transition-all text-primary fw-bold">View Details</button>
+                                        <div className="d-flex gap-2 justify-content-end align-items-center">
+                                            {item.status === 'Pending' && (
+                                                <div className="dropdown">
+                                                    <button className="btn btn-sm btn-dark rounded-pill px-3 fw-bold dropdown-toggle no-caret" data-bs-toggle="dropdown">Process</button>
+                                                    <ul className="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                                                        <li><button className="dropdown-item py-2 small fw-bold text-success" onClick={() => handleAction(item.id, 'Approved')}>✅ Approve</button></li>
+                                                        <li><button className="dropdown-item py-2 small fw-bold text-danger" onClick={() => handleAction(item.id, 'Rejected')}>❌ Reject</button></li>
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            <button className="btn btn-sm btn-light border rounded-pill px-3 hover-shadow transition-all text-primary fw-bold">View</button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
+                            {claims.length === 0 && !loading && (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-5 text-muted small">No expense claims found</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

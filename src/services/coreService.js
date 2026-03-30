@@ -181,5 +181,19 @@ export const coreService = {
             console.error(`API Error (deleteCompany ${id}):`, error);
             throw error;
         }
+    },
+
+    toggleCompanyStatus: async (id) => {
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/companies/${id}/toggle-status`, {
+                method: "PUT",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (toggleCompanyStatus ${id}):`, error);
+            throw error;
+        }
     }
 };

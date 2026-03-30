@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { FaChartBar, FaChartPie, FaUsers, FaUserPlus, FaUserMinus, FaChartLine } from 'react-icons/fa';
+import { FaChartBar, FaChartPie, FaUsers, FaUserPlus, FaUserMinus, FaChartLine, FaHistory } from 'react-icons/fa';
+import { auditService } from '../../../../services/auditService';
 import { Line, Pie } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -29,7 +30,23 @@ ChartJS.register(
 );
 
 export const HRReportsContent = () => {
+    const [activeTab, setActiveTab] = useState('analytics');
     const [timePeriod, setTimePeriod] = useState('This Month');
+    const [auditLogs, setAuditLogs] = useState([]);
+    const [auditSearch, setAuditSearch] = useState('');
+
+    const fetchAuditLogs = async () => {
+        try {
+            const logs = await auditService.getAuditLogs();
+            if (Array.isArray(logs)) setAuditLogs(logs);
+        } catch (error) {
+            console.error("Error fetching audit logs", error);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'audit') fetchAuditLogs();
+    }, [activeTab]);
 
     // Data for different time periods
     const reportData = {
@@ -161,23 +178,34 @@ export const HRReportsContent = () => {
         <div className="reports-content p-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h5 className="fw-bold text-dark mb-1">HR Reports & Analytics</h5>
-                    <p className="text-secondary small mb-0">Key metrics and insights for HR</p>
+                    <h4 className="fw-bold text-dark mb-1">HR Reports & Analytics</h4>
+                    <p className="text-secondary small mb-0">Monitor headcounts, attrition, and system activity logs.</p>
                 </div>
-                <div className="d-flex gap-2">
-                    <button className="btn btn-outline-secondary btn-sm">Export PDF</button>
-                    <select
-                        className="form-select form-select-sm"
-                        style={{ width: '140px' }}
-                        value={timePeriod}
-                        onChange={handlePeriodChange}
-                    >
-                        <option>This Month</option>
-                        <option>Last Quarter</option>
-                        <option>Yearly</option>
-                    </select>
+                <div className="nav nav-pills bg-light p-1 rounded-3">
+                    <button className={`nav-link rounded-3 px-4 py-2 ${activeTab === 'analytics' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('analytics')}>
+                        <FaChartBar className="me-2" /> Analytics
+                    </button>
+                    <button className={`nav-link rounded-3 px-4 py-2 ${activeTab === 'audit' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('audit')}>
+                        <FaHistory className="me-2" /> Audit Logs
+                    </button>
                 </div>
             </div>
+
+            {activeTab === 'analytics' ? (
+                <>
+                    <div className="d-flex justify-content-end mb-3 gap-2">
+                        <button className="btn btn-outline-secondary btn-sm rounded-3">Export PDF</button>
+                        <select
+                            className="form-select form-select-sm rounded-3"
+                            style={{ width: '140px' }}
+                            value={timePeriod}
+                            onChange={handlePeriodChange}
+                        >
+                            <option>This Month</option>
+                            <option>Last Quarter</option>
+                            <option>Yearly</option>
+                        </select>
+                    </div>
 
             {/* KPI Cards */}
             <div className="row g-4 mb-4">
@@ -251,6 +279,57 @@ export const HRReportsContent = () => {
                     </div>
                 </div>
             </div>
+                </>
+            ) : (
+                <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div className="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+                        <h6 className="fw-bold mb-0">System Activity Audit Logs</h6>
+                        <div className="input-group input-group-sm" style={{ width: '250px' }}>
+                            <span className="input-group-text bg-light border-0"><FaHistory /></span>
+                            <input type="text" className="form-control border-0 bg-light" placeholder="Search logs..." value={auditSearch} onChange={e => setAuditSearch(e.target.value)} />
+                        </div>
+                    </div>
+                    <div className="table-responsive">
+                        <table className="table table-hover align-middle mb-0">
+                            <thead className="bg-light">
+                                <tr className="small text-secondary fw-bold text-uppercase">
+                                    <th className="px-4 py-3 border-0">Timestamp</th>
+                                    <th className="py-3 border-0">User / Actor</th>
+                                    <th className="py-3 border-0">Action</th>
+                                    <th className="py-3 border-0">Module / Entity</th>
+                                    <th className="py-3 border-0">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {auditLogs.length > 0 ? auditLogs.filter(l => 
+                                    (l.action?.toLowerCase().includes(auditSearch.toLowerCase()) || 
+                                     l.user?.toLowerCase().includes(auditSearch.toLowerCase()) ||
+                                     l.module?.toLowerCase().includes(auditSearch.toLowerCase()))
+                                ).map((log, i) => (
+                                    <tr key={i} className="border-bottom-light">
+                                        <td className="px-4 py-3 small text-muted">{log.timestamp}</td>
+                                        <td className="py-3 fw-bold small">{log.user}</td>
+                                        <td className="py-3">
+                                            <span className={`badge rounded-pill px-3 py-1 ${
+                                                log.action?.includes('CREATE') ? 'bg-success-subtle text-success' : 
+                                                log.action?.includes('DELETE') ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary'
+                                            }`} style={{ fontSize: '0.65rem' }}>
+                                                {log.action}
+                                            </span>
+                                        </td>
+                                        <td className="py-3 small text-secondary">{log.module}</td>
+                                        <td className="py-3 small">{log.details || 'N/A'}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="5" className="text-center py-5 text-muted">No activity logs found.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

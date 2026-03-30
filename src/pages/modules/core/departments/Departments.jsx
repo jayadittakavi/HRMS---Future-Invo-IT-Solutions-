@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaCheckCircle, FaBuilding, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTimesCircle, FaCheckCircle, FaBuilding, FaSearch } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
 import "../../../../components/layout/DashboardLayout.css";
@@ -208,7 +208,7 @@ export const DepartmentsContent = () => {
                                                     onClick={() => toggleStatus(dept.id)}
                                                     title={dept.status === 'Active' ? "Deactivate" : "Activate"}
                                                 >
-                                                    {dept.status === 'Active' ? <FaTrash /> : <FaCheckCircle className="text-success" />}
+                                                    {dept.status === 'Active' ? <FaTimesCircle className="text-danger" /> : <FaCheckCircle className="text-success" />}
                                                 </button>
                                             </div>
                                         </td>

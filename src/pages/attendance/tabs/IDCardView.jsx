@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { FaSearch, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaSearch, FaPlus, FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { idCardService } from '../../../services/idCardService';
 import { useAuth } from '../../../context/AuthContext';
 import IDCard from '../../../components/attendance/IDCard';
@@ -27,7 +26,8 @@ const IDCardView = () => {
         emergency_contact: '',
         photo: '',
         company_name: '',
-        company_logo: ''
+        company_logo: '',
+        status: 'Active'
     });
 
     useEffect(() => {
@@ -70,7 +70,8 @@ const IDCardView = () => {
             emergency_contact: '',
             photo: '',
             company_name: '',
-            company_logo: ''
+            company_logo: '',
+            status: 'Active'
         });
         setIsEditing(false);
         setShowModal(true);
@@ -100,11 +101,16 @@ const IDCardView = () => {
         }
     };
 
-    const handleDelete = async (id) => {
+    const handleToggleStatus = async (card) => {
         if (!isAdmin) return;
-        if (window.confirm("Are you sure you want to delete this ID card?")) {
-            await idCardService.deleteIDCard(id);
-            loadCards();
+        const newStatus = card.status === 'Inactive' ? 'Active' : 'Inactive';
+        if (window.confirm(`Are you sure you want to ${newStatus.toLowerCase()} this ID card?`)) {
+            try {
+                await idCardService.updateIDCard(card.id, { ...card, status: newStatus });
+                loadCards();
+            } catch (err) {
+                console.error("Failed to update status", err);
+            }
         }
     };
 
@@ -190,11 +196,11 @@ const IDCardView = () => {
                                             <FaEdit />
                                         </button>
                                         <button
-                                            className="btn btn-light btn-sm rounded-circle shadow-sm text-danger"
-                                            onClick={(e) => { e.stopPropagation(); handleDelete(card.id); }}
-                                            title="Delete"
+                                            className={`btn btn-light btn-sm rounded-circle shadow-sm ${card.status === 'Inactive' ? 'text-success' : 'text-danger'}`}
+                                            onClick={(e) => { e.stopPropagation(); handleToggleStatus(card); }}
+                                            title={card.status === 'Inactive' ? "Activate" : "Deactivate"}
                                         >
-                                            <FaTrash />
+                                            {card.status === 'Inactive' ? <FaCheckCircle /> : <FaTimesCircle />}
                                         </button>
                                     </div>
                                 )}

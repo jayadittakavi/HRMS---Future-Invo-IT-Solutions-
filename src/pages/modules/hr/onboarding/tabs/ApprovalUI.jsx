@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { onboardingService } from '../service';
 
 /* ── Data ──────────────────────────────────────────────── */
 const WORKFLOWS = [
@@ -26,11 +27,8 @@ const WORKFLOWS = [
     },
 ];
 
-const PENDING_LETTERS = [
-    { id: 'L001', employee: 'Alice Johnson', type: 'Offer Letter', requestedBy: 'HR - Swati Rao', requestDate: '2026-02-18', currentLevel: 3, totalLevels: 3 },
-    { id: 'L002', employee: 'Bob Smith', type: 'Appointment Letter', requestedBy: 'HR - Ramesh Kumar', requestDate: '2026-02-19', currentLevel: 1, totalLevels: 2 },
-    { id: 'L003', employee: 'Maya Iyer', type: 'Increment Letter', requestedBy: 'Manager - Priya Nair', requestDate: '2026-02-20', currentLevel: 1, totalLevels: 2 },
-];
+const PENDING_LETTERS_INITIAL = [];
+const WORKFLOWS_INITIAL = [];
 
 const stepStatus = {
     Approved: { bg: '#dcfce7', color: '#16a34a', icon: '✅' },
@@ -64,22 +62,67 @@ const FlowVisualizer = ({ steps }) => (
 
 /* ── Main ApprovalUI ───────────────────────────────────── */
 const ApprovalUI = () => {
+    const [stats, setStats] = useState({ pending_approvals: 0, active_workflows: 0, approved_this_month: 0, rejected: 0 });
+    const [pendingLetters, setPendingLetters] = useState(PENDING_LETTERS_INITIAL);
+    const [workflows, setWorkflows] = useState(WORKFLOWS_INITIAL);
+    const [loading, setLoading] = useState(false);
+    const [workflowForm, setWorkflowForm] = useState({ name: '', letter_type: 'Offer Letter' });
     const [activeSection, setActiveSection] = useState('pending');
     const [expandedWorkflow, setExpandedWorkflow] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
-    const pendingCount = PENDING_LETTERS.length;
-    const workflowsActive = WORKFLOWS.filter(w => w.status === 'Active').length;
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, pData, wData] = await Promise.all([
+                onboardingService.getApprovalSummary(),
+                onboardingService.getPendingApprovals(),
+                onboardingService.getWorkflows()
+            ]);
+            setStats(sData);
+            setPendingLetters(pData);
+            setWorkflows(wData);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleAction = async (stepId, action) => {
+        try {
+            const success = await onboardingService.processApprovalAction(stepId, action);
+            if (success) {
+                fetchData();
+            }
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
+    const handleSaveWorkflow = async () => {
+        try {
+            await onboardingService.saveWorkflow(workflowForm);
+            setShowModal(false);
+            fetchData();
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
 
     return (
         <div>
             {/* Header Stats */}
             <div className="row g-3 mb-4">
                 {[
-                    { label: 'Pending Approvals', value: pendingCount, icon: '⏳', color: '#d97706', bg: '#fef3c7' },
-                    { label: 'Active Workflows', value: workflowsActive, icon: '🔄', color: '#2563eb', bg: '#eff6ff' },
-                    { label: 'Approved This Month', value: 7, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
-                    { label: 'Rejected', value: 2, icon: '❌', color: '#dc2626', bg: '#fee2e2' },
+                    { label: 'Pending Approvals', value: stats.pending_approvals, icon: '⏳', color: '#d97706', bg: '#fef3c7' },
+                    { label: 'Active Workflows', value: stats.active_workflows, icon: '🔄', color: '#2563eb', bg: '#eff6ff' },
+                    { label: 'Approved This Month', value: stats.approved_this_month, icon: '✅', color: '#16a34a', bg: '#dcfce7' },
+                    { label: 'Rejected', value: stats.rejected, icon: '❌', color: '#dc2626', bg: '#fee2e2' },
                 ].map((s, i) => (
                     <div key={i} className="col-md-3 col-6">
                         <div className="card border-0 shadow-sm rounded-4">
@@ -132,29 +175,29 @@ const ApprovalUI = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {PENDING_LETTERS.map(letter => (
-                                    <tr key={letter.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                                {pendingLetters.map(letter => (
+                                    <tr key={letter.id || letter.RequestId} style={{ borderBottom: '1px solid #f3f4f6' }}>
                                         <td className="px-4 py-3">
-                                            <span style={{ fontFamily: 'monospace', background: '#f8faff', borderRadius: 6, padding: '2px 8px', border: '1px solid #e5e7eb', fontSize: '0.78rem', color: '#374151' }}>{letter.id}</span>
+                                            <span style={{ fontFamily: 'monospace', background: '#f8faff', borderRadius: 6, padding: '2px 8px', border: '1px solid #e5e7eb', fontSize: '0.78rem', color: '#374151' }}>{letter.id || letter.RequestId}</span>
                                         </td>
                                         <td className="py-3 fw-semibold" style={{ color: '#111827' }}>{letter.employee}</td>
                                         <td className="py-3">
-                                            <span style={{ background: '#eff6ff', color: '#2563eb', borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700 }}>{letter.type}</span>
+                                            <span style={{ background: '#eff6ff', color: '#2563eb', borderRadius: 20, padding: '2px 10px', fontSize: '0.71rem', fontWeight: 700 }}>{letter.letter_type || letter.type}</span>
                                         </td>
-                                        <td className="py-3" style={{ color: '#6b7280', fontSize: '0.78rem' }}>{letter.requestedBy}</td>
-                                        <td className="py-3" style={{ color: '#6b7280' }}>{letter.requestDate}</td>
+                                        <td className="py-3" style={{ color: '#6b7280', fontSize: '0.78rem' }}>{letter.requested_by || letter.requestedBy}</td>
+                                        <td className="py-3" style={{ color: '#6b7280' }}>{letter.date || letter.requestDate}</td>
                                         <td className="py-3">
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                 <div style={{ flex: 1, height: 5, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden', maxWidth: 70 }}>
-                                                    <div style={{ width: `${(letter.currentLevel / letter.totalLevels) * 100}%`, height: '100%', background: '#d97706', borderRadius: 99 }} />
+                                                    <div style={{ width: `${((letter.currentLevel || letter.approval_level) / (letter.totalLevels || 3)) * 100}%`, height: '100%', background: '#d97706', borderRadius: 99 }} />
                                                 </div>
-                                                <span style={{ fontSize: '0.73rem', color: '#6b7280' }}>Level {letter.currentLevel}/{letter.totalLevels}</span>
+                                                <span style={{ fontSize: '0.73rem', color: '#6b7280' }}>Level {letter.currentLevel || letter.approval_level}/{letter.totalLevels || 3}</span>
                                             </div>
                                         </td>
                                         <td className="py-3">
                                             <div className="d-flex gap-2">
-                                                <button style={{ padding: '4px 10px', borderRadius: 8, background: '#dcfce7', color: '#16a34a', border: 'none', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}>✅ Approve</button>
-                                                <button style={{ padding: '4px 10px', borderRadius: 8, background: '#fee2e2', color: '#dc2626', border: 'none', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}>❌ Reject</button>
+                                                <button onClick={() => handleAction(letter.id || letter.RequestId, 'APPROVE')} style={{ padding: '4px 10px', borderRadius: 8, background: '#dcfce7', color: '#16a34a', border: 'none', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}>✅ Approve</button>
+                                                <button onClick={() => handleAction(letter.id || letter.RequestId, 'REJECT')} style={{ padding: '4px 10px', borderRadius: 8, background: '#fee2e2', color: '#dc2626', border: 'none', fontSize: '0.74rem', fontWeight: 700, cursor: 'pointer' }}>❌ Reject</button>
                                                 <button style={{ padding: '4px 10px', borderRadius: 8, background: '#f1f5f9', color: '#374151', border: 'none', fontSize: '0.74rem', fontWeight: 600, cursor: 'pointer' }}>👁 View</button>
                                             </div>
                                         </td>
@@ -169,7 +212,7 @@ const ApprovalUI = () => {
             {/* Approval Workflows */}
             {activeSection === 'workflows' && (
                 <div className="d-flex flex-column gap-3">
-                    {WORKFLOWS.map(wf => (
+                    {workflows.map(wf => (
                         <div key={wf.id} className="card border-0 shadow-sm rounded-4 overflow-hidden">
                             <div
                                 className="px-4 py-3 d-flex align-items-center justify-content-between"
@@ -220,11 +263,11 @@ const ApprovalUI = () => {
                             <div className="modal-body px-4 py-3">
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Workflow Name *</label>
-                                    <input className="form-control form-control-sm rounded-3" placeholder="e.g. Offer Letter Approval" />
+                                    <input className="form-control form-control-sm rounded-3" placeholder="e.g. Offer Letter Approval" value={workflowForm.name} onChange={e => setWorkflowForm({...workflowForm, name: e.target.value})} />
                                 </div>
                                 <div className="mb-3">
                                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: 4 }}>Letter Type</label>
-                                    <select className="form-select form-select-sm rounded-3">
+                                    <select className="form-select form-select-sm rounded-3" value={workflowForm.letter_type} onChange={e => setWorkflowForm({...workflowForm, letter_type: e.target.value})}>
                                         <option>Offer Letter</option><option>Appointment Letter</option><option>Relieving Letter</option><option>Increment Letter</option>
                                     </select>
                                 </div>
@@ -235,7 +278,7 @@ const ApprovalUI = () => {
                             </div>
                             <div className="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
                                 <button onClick={() => setShowModal(false)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#f1f5f9', border: 'none', color: '#374151', fontWeight: 600 }}>Cancel</button>
-                                <button onClick={() => setShowModal(false)} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#d97706', border: 'none', color: '#fff', fontWeight: 700 }}>Create Workflow</button>
+                                <button onClick={handleSaveWorkflow} style={{ borderRadius: 10, padding: '7px 20px', fontSize: '0.82rem', background: '#d97706', border: 'none', color: '#fff', fontWeight: 700 }}>Create Workflow</button>
                             </div>
                         </div>
                     </div>

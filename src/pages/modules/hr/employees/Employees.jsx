@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    FaEdit, FaTrash, FaCheckCircle, FaBan, FaPlus,
+    FaEdit, FaCheckCircle, FaBan, FaPlus,
     FaFileCsv, FaSearch, FaUsers, FaUserPlus,
-    FaBuilding, FaFilter, FaEllipsisV, FaEnvelope, FaPhone
+    FaBuilding, FaFilter, FaEllipsisV, FaEnvelope, FaPhone, FaTimesCircle
 } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
@@ -28,7 +28,6 @@ export const EmployeesContent = () => {
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
 
     // Form Data
@@ -48,7 +47,7 @@ export const EmployeesContent = () => {
         joining_date: '',
         company_id: '',
         branch: '',
-        gender: 'Not Specified',
+        gender: 'Other',
         pay_grade: '',
         ctc: ''
     });
@@ -213,16 +212,15 @@ export const EmployeesContent = () => {
         }
     };
 
-    const handleDelete = async () => {
+    const handleToggleStatus = async (id) => {
         try {
-            if ((isSuperAdmin || isAdmin) && selectedEmployee) {
-                await employeeSuperAdminService.deleteEmployee(selectedEmployee.id);
-                setShowDelete(false);
+            if (isSuperAdmin || isAdmin) {
+                await employeeSuperAdminService.toggleStatus(id);
                 fetchData();
-                alert("Employee deleted successfully!");
+                alert("Status updated successfully!");
             }
         } catch (error) {
-            alert("Failed to delete employee: " + (error.message || "Unknown error"));
+            alert("Failed to toggle status: " + (error.message || "Unknown error"));
         }
     };
 
@@ -325,7 +323,7 @@ export const EmployeesContent = () => {
                                             department: '', designation: '',
                                             role: 'employee', employment_type: 'fulltime employee', joining_date: '',
                                             company_id: currentUser?.company_id || '', branch: '',
-                                            pay_grade: '', ctc: ''
+                                            pay_grade: '', ctc: '', gender: 'Other'
                                         });
                                         setShowAdd(true);
                                         setShowEdit(false);
@@ -429,12 +427,13 @@ export const EmployeesContent = () => {
                                                         </button>
                                                         {(isSuperAdmin || isAdmin) && (
                                                             <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
-                                                                onClick={() => {
-                                                                    setSelectedEmployee(emp);
-                                                                    setShowDelete(true);
-                                                                }}
-                                                                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-                                                                <FaTrash size={14} />
+                                                                onClick={() => handleToggleStatus(emp.id)}
+                                                                title={emp.status === 'Inactive' ? "Activate" : "Deactivate"}
+                                                                style={{ 
+                                                                    background: emp.status === 'Inactive' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
+                                                                    color: emp.status === 'Inactive' ? '#10b981' : '#ef4444' 
+                                                                }}>
+                                                                {emp.status === 'Inactive' ? <FaCheckCircle size={14} /> : <FaTimesCircle size={14} />}
                                                             </button>
                                                         )}
                                                     </div>
@@ -578,7 +577,6 @@ export const EmployeesContent = () => {
                                                 <option value="Male">Male</option>
                                                 <option value="Female">Female</option>
                                                 <option value="Other">Other</option>
-                                                <option value="Not Specified">Not Specified</option>
                                             </select>
                                         </div>
 
@@ -590,27 +588,6 @@ export const EmployeesContent = () => {
                                         </button>
                                     </div>
                                 </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {showDelete && (
-                <div className="modal fade show d-block" style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
-                            <div className="modal-body p-5 text-center">
-                                <div className="rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
-                                    style={{ width: 80, height: 80, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444' }}>
-                                    <FaTrash size={32} />
-                                </div>
-                                <h4 className="fw-bold mb-3">Delete Employee?</h4>
-                                <p className="text-muted mb-4">You are about to remove <strong>{selectedEmployee?.name}</strong> from the system. This action is irreversible.</p>
-                                <div className="d-flex gap-3">
-                                    <button className="btn btn-light rounded-pill px-4 py-3 fw-bold flex-grow-1 border-0" onClick={() => setShowDelete(false)}>Wait, Cancel</button>
-                                    <button className="btn btn-danger rounded-pill px-4 py-3 fw-bold flex-grow-1 border-0 shadow-lg" onClick={handleDelete}>Delete Anyway</button>
-                                </div>
                             </div>
                         </div>
                     </div>

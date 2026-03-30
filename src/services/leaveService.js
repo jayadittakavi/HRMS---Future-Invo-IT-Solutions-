@@ -7,88 +7,239 @@ const authHeader = () => {
 };
 
 export const leaveService = {
-    // 1. Dashboard Overview
+    // 1. Dashboard Overview (Personalized for Employee Dashboard)
     getDashboardSummary: async () => {
-        const response = await fetch(`${API_BASE}/leaves/dashboard/summary`, authHeader());
-        if (!response.ok) return { total: 0, pending: 0, approved: 0 };
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leave/my-dashboard/summary`, authHeader());
+            if (!response.ok) return { totalBalance: 0, pending: 0, approved: 0, total: 0, leaveTypes: [], recentRequests: [] };
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getDashboardSummary):", error);
+            return { totalBalance: 0, pending: 0, approved: 0, total: 0, leaveTypes: [], recentRequests: [] };
+        }
     },
     getDashboardTrends: async () => {
-        const response = await fetch(`${API_BASE}/leaves/dashboard/trends`, authHeader());
-        if (!response.ok) return [];
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leave/my-dashboard/trends`, authHeader());
+            if (!response.ok) return { labels: [], data: [] };
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getDashboardTrends):", error);
+            return { labels: [], data: [] };
+        }
+    },
+    getRecentRequests: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/my-dashboard/recent`, authHeader());
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getRecentRequests):", error);
+            return [];
+        }
+    },
+
+    // 1b. Administration Dashboard (HR View)
+    getManagementSummary: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leaves/dashboard/summary`, authHeader());
+            if (!response.ok) return { total: 0, pending: 0, approved: 0 };
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getManagementSummary):", error);
+            return { total: 0, pending: 0, approved: 0 };
+        }
+    },
+    getManagementTrends: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leaves/dashboard/trends`, authHeader());
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getManagementTrends):", error);
+            return [];
+        }
     },
 
     // 2. Pending & Bulk Approvals
     getPendingApprovals: async () => {
-        const response = await fetch(`${API_BASE}/leaves/pending-approvals`, authHeader());
-        if (!response.ok) return [];
-        const data = await response.json();
-        return Array.isArray(data) ? data : (data.data || []);
+        try {
+            const response = await fetch(`${API_BASE}/leaves/pending-approvals`, authHeader());
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.data || []);
+        } catch (error) {
+            console.error("API Error (getPendingApprovals):", error);
+            return [];
+        }
     },
     bulkAction: async (ids, action) => {
-        const response = await fetch(`${API_BASE}/leaves/bulk-action`, {
-            method: "POST",
-            ...authHeader(),
-            body: JSON.stringify({ ids, action }),
-        });
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leaves/bulk-action`, {
+                method: "POST",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ ids, action }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (bulkAction):", error);
+            throw error;
+        }
     },
 
     // 3. Leave Policy Management (CRUD)
     getUiPolicies: async () => {
-        const response = await fetch(`${API_BASE}/leaves/ui-policies`, authHeader());
-        if (!response.ok) return [];
-        const data = await response.json();
-        return Array.isArray(data) ? data : (data.data || []);
+        try {
+            const response = await fetch(`${API_BASE}/leaves/ui-policies`, authHeader());
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.data || []);
+        } catch (error) {
+            console.error("API Error (getUiPolicies):", error);
+            return [];
+        }
     },
     createUiPolicy: async (policyData) => {
-        const response = await fetch(`${API_BASE}/leaves/ui-policies`, {
-            method: "POST",
-            ...authHeader(),
-            body: JSON.stringify(policyData),
-        });
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leaves/ui-policies`, {
+                method: "POST",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(policyData),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (createUiPolicy):", error);
+            throw error;
+        }
     },
     updateUiPolicy: async (id, policyData) => {
-        const response = await fetch(`${API_BASE}/leaves/ui-policies/${id}`, {
-            method: "PUT",
-            ...authHeader(),
-            body: JSON.stringify(policyData),
-        });
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leaves/ui-policies/${id}`, {
+                method: "PUT",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(policyData),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (updateUiPolicy):", error);
+            throw error;
+        }
     },
     deleteUiPolicy: async (id) => {
-        const response = await fetch(`${API_BASE}/leaves/ui-policies/${id}`, {
-            method: "DELETE",
-            ...authHeader()
-        });
-        return response.status === 204 || response.ok;
+        try {
+            const response = await fetch(`${API_BASE}/leaves/ui-policies/${id}`, {
+                method: "DELETE",
+                ...authHeader()
+            });
+            return response.status === 204 || response.ok;
+        } catch (error) {
+            console.error("API Error (deleteUiPolicy):", error);
+            return false;
+        }
     },
 
     // 4. History Log
     getHistory: async (filters = {}) => {
-        const queryParams = new URLSearchParams(filters).toString();
-        const response = await fetch(`${API_BASE}/leaves/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
-        if (!response.ok) return [];
-        const data = await response.json();
-        return Array.isArray(data) ? data : (data.data || []);
+        try {
+            const queryParams = new URLSearchParams(filters).toString();
+            const response = await fetch(`${API_BASE}/leaves/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.data || []);
+        } catch (error) {
+            console.error("API Error (getHistory):", error);
+            return [];
+        }
     },
 
     // 5. Individual Actions
     approveLeave: async (id) => {
-        const response = await fetch(`${API_BASE}/leaves/${id}/approve`, {
-            method: "POST",
-            ...authHeader()
-        });
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leaves/${id}/approve`, {
+                method: "POST",
+                ...authHeader()
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (approveLeave):", error);
+            throw error;
+        }
     },
     rejectLeave: async (id) => {
-        const response = await fetch(`${API_BASE}/leaves/${id}/action`, {
-            method: "PUT",
-            ...authHeader(),
-            body: JSON.stringify({ action: "REJECT" }),
-        });
-        return response.json();
+        try {
+            const response = await fetch(`${API_BASE}/leaves/${id}/action`, {
+                method: "PUT",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ action: "REJECT" }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (rejectLeave):", error);
+            throw error;
+        }
+    },
+
+    // 6. Enhanced Leave APIs (Personal)
+    calculateDays: async (data) => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/calculate-days`, {
+                method: "POST",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (calculateDays):", error);
+            throw error;
+        }
+    },
+    applyLeave: async (data) => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/apply`, {
+                method: "POST",
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (applyLeave):", error);
+            throw error;
+        }
+    },
+    getAllMine: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/mine`, authHeader());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getAllMine):", error);
+            return [];
+        }
+    },
+    getBalance: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/balance`, authHeader());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getBalance):", error);
+            return [];
+        }
     }
 };

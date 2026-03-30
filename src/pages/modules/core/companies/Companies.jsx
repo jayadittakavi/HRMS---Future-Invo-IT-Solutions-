@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaEllipsisV } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaEllipsisV, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { companyService } from "./service.js";
 import "./Companies.css";
@@ -11,7 +11,6 @@ export const CompaniesContent = () => {
 
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
 
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [formData, setFormData] = useState({
@@ -98,13 +97,12 @@ export const CompaniesContent = () => {
         }
     };
 
-    const handleDelete = async () => {
+    const handleToggleStatus = async (id) => {
         try {
-            await companyService.deleteCompany(selectedCompany.id);
-            setShowDelete(false);
+            await companyService.toggleStatus(id);
             fetchCompanies();
         } catch (err) {
-            alert("Failed to delete company: " + (err.message || "Unknown error"));
+            alert("Failed to update status: " + (err.message || "Unknown error"));
         }
     };
 
@@ -214,6 +212,7 @@ export const CompaniesContent = () => {
                                 <th>Corporate ID</th>
                                 <th>Size / Team</th>
                                 <th>Location</th>
+                                <th>Status</th>
                                 <th className="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -253,6 +252,11 @@ export const CompaniesContent = () => {
                                                 <div className="text-muted ms-3">{c.country || 'Global'}</div>
                                             </div>
                                         </td>
+                                        <td>
+                                            <span className={`badge ${c.status === 'Inactive' ? 'bg-danger' : 'bg-success'}`}>
+                                                {c.status || 'Active'}
+                                            </span>
+                                        </td>
                                         <td className="text-end">
                                             <div className="action-buttons">
                                                 <button className="btn-action edit" onClick={() => {
@@ -271,11 +275,12 @@ export const CompaniesContent = () => {
                                                 }}>
                                                     <FaEdit />
                                                 </button>
-                                                <button className="btn-action delete" onClick={() => {
-                                                    setSelectedCompany(c);
-                                                    setShowDelete(true);
-                                                }}>
-                                                    <FaTrash />
+                                                <button
+                                                    className={`btn-action ${c.status === 'Inactive' ? 'activate' : 'deactivate'}`}
+                                                    onClick={() => handleToggleStatus(c.id)}
+                                                    title={c.status === 'Inactive' ? "Activate" : "Deactivate"}
+                                                >
+                                                    {c.status === 'Inactive' ? <FaCheckCircle className="text-success" /> : <FaTimesCircle className="text-danger" />}
                                                 </button>
                                             </div>
                                         </td>
@@ -383,22 +388,6 @@ export const CompaniesContent = () => {
                                 <button type="submit" className="btn-confirm">{showAdd ? 'Initialize & Create' : 'Save Changes'}</button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
-
-            {showDelete && (
-                <div className="modern-modal-overlay">
-                    <div className="modern-modal-card delete-card">
-                        <div className="text-center p-4">
-                            <div className="delete-icon-circle mb-3"><FaTrash /></div>
-                            <h3>Delete Company?</h3>
-                            <p className="text-muted">You are about to remove <strong>{selectedCompany?.name}</strong>. This action is irreversible and will affect all linked records.</p>
-                            <div className="d-flex gap-3 mt-4">
-                                <button className="btn-cancel flex-grow-1" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn-danger-modern flex-grow-1" onClick={handleDelete}>Delete Anyway</button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             )}

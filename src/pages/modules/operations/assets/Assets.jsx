@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash, FaBox, FaUserCheck, FaShoppingCart, FaExclamationTriangle } from 'react-icons/fa';
+import { FaEdit, FaBox, FaUserCheck, FaShoppingCart, FaExclamationTriangle } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 

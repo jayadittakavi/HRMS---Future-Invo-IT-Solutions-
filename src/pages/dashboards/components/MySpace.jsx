@@ -14,6 +14,7 @@ import {
     Title, PointElement, LineElement, Filler
 } from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
+import { spaceService } from '../../../services/spaceService';
 
 ChartJS.register(
     ArcElement, Tooltip, Legend,
@@ -24,19 +25,37 @@ ChartJS.register(
 const MySpace = ({ role, onNavigate }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
+    const [data, setData] = React.useState(null);
+    const [loading, setLoading] = React.useState(true);
 
-    const attendanceStats = {
-        monthlyPercentage: 92,
-        present: 22,
-        absent: 1,
-        late: 1,
-    };
+    React.useEffect(() => {
+        const fetchSummary = async () => {
+            try {
+                const res = await spaceService.getSummary();
+                setData(res);
+            } catch (err) {
+                console.error("Failed to load space summary", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSummary();
+    }, []);
+
+    if (loading) return <div className="p-5 text-center"><div className="spinner-border text-primary"></div></div>;
+
+    const stats = data?.attendanceStats || { monthlyPercentage: 0, present: 0, absent: 0, late: 0, holiday: 0 };
+    const leaveBalances = data?.leaveBalances || [
+        { type: 'Casual', rem: 0, total: 12, color: 'primary' },
+        { type: 'Sick', rem: 0, total: 7, color: 'success' },
+        { type: 'Earned', rem: 0, total: 15, color: 'warning' },
+    ];
 
     const attendanceTrendData = {
-        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        labels: data?.trends?.attendance?.labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
         datasets: [{
             label: 'Present Days',
-            data: [5, 4, 5, 5],
+            data: data?.trends?.attendance?.data || [0, 0, 0, 0],
             backgroundColor: '#3b82f6',
             borderRadius: 6,
             barThickness: 30
@@ -46,7 +65,7 @@ const MySpace = ({ role, onNavigate }) => {
     const attendancePieData = {
         labels: ['Present', 'Absent', 'Late', 'Holiday'],
         datasets: [{
-            data: [22, 1, 1, 2],
+            data: [stats.present, stats.absent, stats.late, stats.holiday],
             backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#3b82f6'],
             borderWidth: 0,
             cutout: '80%',
@@ -54,10 +73,10 @@ const MySpace = ({ role, onNavigate }) => {
     };
 
     const leaveTrendData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        labels: data?.trends?.leaves?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
         datasets: [{
             label: 'Leave Usage',
-            data: [2, 5, 3, 8, 4, 6],
+            data: data?.trends?.leaves?.data || [0, 0, 0, 0, 0, 0],
             borderColor: '#8b5cf6',
             backgroundColor: 'rgba(139, 92, 246, 0.1)',
             fill: true,
@@ -132,23 +151,19 @@ const MySpace = ({ role, onNavigate }) => {
                             <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0">View Balance Details</button>
                         </div>
                         <div className="row g-3">
-                            {[
-                                { type: 'Casual', rem: 7, total: 12, color: 'primary' },
-                                { type: 'Sick', rem: 5, total: 7, color: 'success' },
-                                { type: 'Earned', rem: 15, total: 15, color: 'warning' },
-                            ].map((l, i) => (
+                            {leaveBalances.map((l, i) => (
                                 <div key={i} className="col-md-4">
-                                    <div className="p-3 bg-light rounded-3 border">
-                                        <div className="text-secondary small fw-bold text-uppercase mb-1">{l.type}</div>
-                                        <div className="d-flex align-items-end gap-2 mb-2">
-                                            <h3 className="mb-0 fw-bold text-dark">{l.rem}</h3>
-                                            <span className="text-muted small mb-1">/ {l.total} days</span>
-                                        </div>
-                                        <div className="progress" style={{ height: '5px' }}>
-                                            <div className={`progress-bar bg-${l.color}`} style={{ width: `${(l.rem / l.total) * 100}%` }}></div>
-                                        </div>
-                                    </div>
-                                </div>
+                                     <div className="p-3 bg-light rounded-3 border">
+                                         <div className="text-secondary small fw-bold text-uppercase mb-1">{l.type}</div>
+                                         <div className="d-flex align-items-end gap-2 mb-2">
+                                             <h3 className="mb-0 fw-bold text-dark">{l.rem}</h3>
+                                             <span className="text-muted small mb-1">/ {l.total} days</span>
+                                         </div>
+                                         <div className="progress" style={{ height: '5px' }}>
+                                             <div className={`progress-bar bg-${l.color || 'primary'}`} style={{ width: `${(l.rem / l.total) * 100}%` }}></div>
+                                         </div>
+                                     </div>
+                                 </div>
                             ))}
                         </div>
                     </div>
@@ -166,13 +181,13 @@ const MySpace = ({ role, onNavigate }) => {
                         <div style={{ width: '150px', margin: '0 auto', position: 'relative' }}>
                             <Doughnut data={attendancePieData} options={{ cutout: '80%', plugins: { legend: { display: false } } }} />
                             <div className="position-absolute top-50 start-50 translate-middle">
-                                <h4 className="fw-bold mb-0">{attendanceStats.monthlyPercentage}%</h4>
+                                <h4 className="fw-bold mb-0">{stats.monthlyPercentage}%</h4>
                                 <small className="text-muted">Presence</small>
                             </div>
                         </div>
                         <div className="mt-4 d-flex justify-content-center flex-wrap gap-2">
-                            <div className="px-2 border-end"><span className="dot bg-success"></span> <small className="silver-text fw-bold">Present (22)</small></div>
-                            <div className="px-2"><span className="dot bg-danger"></span> <small className="silver-text fw-bold">Absent (1)</small></div>
+                            <div className="px-2 border-end"><span className="dot bg-success"></span> <small className="silver-text fw-bold">Present ({stats.present})</small></div>
+                            <div className="px-2"><span className="dot bg-danger"></span> <small className="silver-text fw-bold">Absent ({stats.absent})</small></div>
                         </div>
                     </div>
                 </div>
@@ -231,12 +246,7 @@ const MySpace = ({ role, onNavigate }) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {[
-                                        { record: 'Punch In', date: 'May 23, 2026', time: '09:12 AM', badge: 'success', status: 'On Time', link: 'my-attendance' },
-                                        { record: 'Leave Applied', date: 'May 22, 2026', time: '11:45 AM', badge: 'warning', status: 'Pending', link: 'my-leaves' },
-                                        { record: 'Late Mark', date: 'May 21, 2026', time: '09:45 AM', badge: 'danger', status: 'Late', link: 'my-attendance' },
-                                        { record: 'Punch Out', date: 'May 20, 2026', time: '06:10 PM', badge: 'info', status: 'Checked Out', link: 'my-attendance' },
-                                    ].map((r, i) => (
+                                    {(data?.recentActivity || []).map((r, i) => (
                                         <tr key={i} onClick={() => go(r.link)} style={{ cursor: 'pointer' }}>
                                             <td className="text-secondary py-3 px-3">{r.date}</td>
                                             <td className="fw-bold text-dark silver-text py-3 px-3">{r.record}</td>
@@ -262,11 +272,7 @@ const MySpace = ({ role, onNavigate }) => {
                             <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0" onClick={() => navigate('/calendar')}>Calendar View</button>
                         </div>
                         <div className="d-flex flex-column gap-3">
-                            {[
-                                { date: 'AUG 15', name: 'Independence Day', sub: 'National Holiday' },
-                                { date: 'OCT 02', name: 'Gandhi Jayanti', sub: 'National Holiday' },
-                                { date: 'DEC 25', name: 'Christmas', sub: 'Gazetted Holiday' },
-                            ].map((h, i) => (
+                            {(data?.upcomingHolidays || []).map((h, i) => (
                                 <div key={i}
                                     className="d-flex align-items-center gap-3 p-3 rounded-3 border-start border-4 border-danger bg-light border-top border-bottom border-end"
                                     onClick={() => navigate('/calendar')}

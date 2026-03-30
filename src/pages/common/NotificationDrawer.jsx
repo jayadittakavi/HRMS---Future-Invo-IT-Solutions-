@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNotification } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
-import { FaTimes, FaBell, FaCheckDouble, FaTrash, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { FaTimes, FaBell, FaCheckDouble, FaTimesCircle, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 
 const NotificationDrawer = () => {
     const {
@@ -66,7 +66,7 @@ const NotificationDrawer = () => {
                         <FaCheckDouble className="me-1" /> Mark all read
                     </button>
                     <button className="btn btn-sm text-danger fw-bold" onClick={clearNotifications} disabled={notifications.length === 0}>
-                        <FaTrash className="me-1" /> Clear all
+                        <FaTimesCircle className="me-1" /> Clear all
                     </button>
                 </div>
 
@@ -104,9 +104,9 @@ const NotificationDrawer = () => {
                                                 e.stopPropagation();
                                                 deleteNotification(notif.id);
                                             }}
-                                            title="Delete Notification"
+                                            title="Dismiss Notification"
                                         >
-                                            <FaTrash size={12} />
+                                            <FaTimesCircle size={12} />
                                         </button>
                                     </div>
                                 </div>

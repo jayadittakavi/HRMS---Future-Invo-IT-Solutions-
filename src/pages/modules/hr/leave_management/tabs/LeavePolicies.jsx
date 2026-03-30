@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEdit, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaSave, FaTimes, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { leaveService } from '../../../../../services/leaveService';
 
 const LeavePolicies = () => {
@@ -52,15 +52,17 @@ const LeavePolicies = () => {
         setShowModal(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this leave policy?')) {
+    const handleToggleStatus = async (policy) => {
+        const action = policy.status === 'Inactive' ? 'activate' : 'deactivate';
+        if (window.confirm(`Are you sure you want to ${action} this leave policy?`)) {
             try {
-                const response = await leaveService.deleteUiPolicy(id);
+                const updatedPolicy = { ...policy, status: policy.status === 'Inactive' ? 'Active' : 'Inactive' };
+                const response = await leaveService.updateUiPolicy(policy.id, updatedPolicy);
                 if (response.ok) {
                     fetchPolicies();
                 }
             } catch (error) {
-                console.error("Error deleting policy:", error);
+                console.error("Error updating policy status:", error);
             }
         }
     };
@@ -120,10 +122,10 @@ const LeavePolicies = () => {
                                         </button>
                                         <button
                                             className="btn btn-sm btn-light rounded-circle"
-                                            onClick={() => handleDelete(policy.id)}
-                                            title="Delete"
+                                            onClick={() => handleToggleStatus(policy)}
+                                            title={policy.status === 'Inactive' ? "Activate" : "Deactivate"}
                                         >
-                                            <FaTrash className="text-danger" />
+                                            {policy.status === 'Inactive' ? <FaCheckCircle className="text-success" /> : <FaTimesCircle className="text-danger" />}
                                         </button>
                                     </div>
                                 </div>

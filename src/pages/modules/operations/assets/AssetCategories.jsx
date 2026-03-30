@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 
@@ -14,7 +14,6 @@ export const AssetCategoriesContent = () => {
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
     // Handlers
@@ -23,9 +22,12 @@ export const AssetCategoriesContent = () => {
         setShowEdit(true);
     };
 
-    const handleDelete = (cat) => {
-        setSelectedCategory(cat);
-        setShowDelete(true);
+    const handleToggleStatus = (cat) => {
+        // Toggle mock status
+        cat.status = cat.status === 'Inactive' ? 'Active' : 'Inactive';
+        // Force re-render if needed, but since it's mock and state-based categories:
+        // Actually categories is static here, let's make it stateful if we want to see changes.
+        alert(`Status of ${cat.name} updated to ${cat.status}`);
     };
 
     return (
@@ -48,6 +50,7 @@ export const AssetCategoriesContent = () => {
                                 <th>Category Name</th>
                                 <th>Description</th>
                                 <th>Created At</th>
+                                <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -58,8 +61,19 @@ export const AssetCategoriesContent = () => {
                                     <td>{cat.description}</td>
                                     <td>{cat.created}</td>
                                     <td>
+                                        <span className={`badge ${cat.status === 'Inactive' ? 'bg-danger' : 'bg-success'}`}>
+                                            {cat.status || 'Active'}
+                                        </span>
+                                    </td>
+                                    <td>
                                         <button className="action-btn edit" onClick={() => handleEdit(cat)}><FaEdit /></button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(cat)}><FaTrash /></button>
+                                        <button 
+                                            className={`action-btn ${cat.status === 'Inactive' ? 'activate' : 'deactivate'}`} 
+                                            onClick={() => handleToggleStatus(cat)}
+                                            title={cat.status === 'Inactive' ? "Activate" : "Deactivate"}
+                                        >
+                                            {cat.status === 'Inactive' ? <FaCheckCircle className="text-success" /> : <FaTimesCircle className="text-danger" />}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -128,26 +142,6 @@ export const AssetCategoriesContent = () => {
                 </div>
             )}
 
-            {/* Delete Modal */}
-            {showDelete && selectedCategory && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title text-danger">Delete Category</h5>
-                                <button className="btn-close" onClick={() => setShowDelete(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to delete <strong>{selectedCategory.name}</strong>?</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </>
     );
 };

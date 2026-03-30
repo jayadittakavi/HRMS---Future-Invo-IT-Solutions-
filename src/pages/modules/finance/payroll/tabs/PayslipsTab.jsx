@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaTrash, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes } from 'react-icons/fa';
+import { FaEye, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { payrollService } from '../payrollService';
 
 const PayslipsTab = ({ personal = false, onTabChange }) => {
@@ -71,14 +70,14 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
         setShowPrintModal(true);
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Are you sure you want to delete this payslip?")) {
-            try {
-                await payrollService.deletePayslip(id);
-                fetchPayslips();
-            } catch (error) {
-                alert("Failed to delete payslip: " + error.message);
-            }
+    const handleToggleStatus = (slip) => {
+        // Toggle mock status or real status
+        const nextStatus = slip.status === 'Paid' ? 'Cancelled' : 'Paid';
+        if (window.confirm(`Are you sure you want to ${nextStatus.toLowerCase()} this payslip?`)) {
+            // Update UI optimistically or call service
+            slip.status = nextStatus;
+            setPayrolls([...payrolls]);
+            alert(`Payslip ${nextStatus.toLowerCase()} successfully!`);
         }
     };
 
@@ -172,7 +171,7 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
                                         <td><span className="fw-bold text-primary">₹{(slip.net_salary || slip.net || 0).toLocaleString()}</span></td>
                                         <td className="text-secondary">{slip.pay_date || slip.payDate || 'N/A'}</td>
                                         <td>
-                                            <span className={`badge rounded-pill ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
+                                            <span className={`badge rounded-pill ${slip.status === 'Paid' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}`}>
                                                 {slip.status}
                                             </span>
                                         </td>
@@ -185,8 +184,12 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
                                                     <button className="btn btn-sm btn-light text-secondary me-1 rounded-circle p-2" title="Edit" onClick={(e) => { e.stopPropagation(); handleEdit(slip); }}>
                                                         <FaEdit />
                                                     </button>
-                                                    <button className="btn btn-sm btn-light text-danger rounded-circle p-2" title="Delete" onClick={(e) => { e.stopPropagation(); handleDelete(slip.id); }}>
-                                                        <FaTrash />
+                                                    <button 
+                                                        className={`btn btn-sm btn-light rounded-circle p-2 me-1 ${slip.status === 'Paid' ? 'text-danger' : 'text-success'}`} 
+                                                        title={slip.status === 'Paid' ? "Cancel Slip" : "Reactivate"} 
+                                                        onClick={(e) => { e.stopPropagation(); handleToggleStatus(slip); }}
+                                                    >
+                                                        {slip.status === 'Paid' ? <FaTimesCircle /> : <FaCheckCircle />}
                                                     </button>
                                                 </>
                                             )}

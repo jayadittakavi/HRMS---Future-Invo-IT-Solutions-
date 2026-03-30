@@ -27,6 +27,7 @@ const DashboardManager = () => {
         case 'manager':
             return <ManagerDashboard />;
         case 'hr':
+        case 'fulltime':
             return <HRDashboard />;
         case 'accountant':
             return <AccountantDashboard />;

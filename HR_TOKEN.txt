@@ -1,0 +1,10 @@
+Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM3MDkwfQ.eXgZnjQAOt__mvD-C08DCLS9BL6ZKHGuWKkhiWD85xY
+Role: HR / Fulltime
+Company ID: 3
+User ID: 17
+Expires: 1774937090 (approx 2026-03-31)
+
+To use this token in the browser for development:
+localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM3MDkwfQ.eXgZnjQAOt__mvD-C08DCLS9BL6ZKHGuWKkhiWD85xY');
+localStorage.setItem('role', 'hr');
+localStorage.setItem('user_role', 'hr');

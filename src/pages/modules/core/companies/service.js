@@ -167,5 +167,28 @@ export const companyService = {
             console.error(`API Error (deleteCompany ${id}):`, error);
             throw error;
         }
+    },
+
+    // 🔹 Toggle Company Status (Activate/Deactivate)
+    toggleStatus: async (id) => {
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/companies/${id}/toggle-status`, {
+                method: "PUT",
+                headers: authHeader().headers,
+            });
+            if (!response.ok) {
+                const text = await response.text();
+                try {
+                    const json = JSON.parse(text);
+                    throw new Error(json.message || "Request failed");
+                } catch(e) {
+                    throw new Error(text || "Request failed");
+                }
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`API Error (toggleStatus ${id}):`, error);
+            throw error;
+        }
     }
 };

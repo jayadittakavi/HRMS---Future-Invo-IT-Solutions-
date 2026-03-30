@@ -136,9 +136,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         if (role.includes('superadmin') || role.includes('admin')) {
             const forbiddenPaths = [
                 '/support',
-                '/recruitment',
-                '/onboarding',
-                '/training',
                 '/payslips',
                 '/feedback'
             ];

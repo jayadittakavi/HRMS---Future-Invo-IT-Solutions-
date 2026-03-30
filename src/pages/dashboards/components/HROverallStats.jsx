@@ -1,23 +1,56 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../../../components/charts/CustomCharts';
-import { FaUsers, FaUserPlus, FaChalkboardTeacher, FaChartLine, FaUmbrellaBeach, FaUserCheck, FaSmile, FaVenusMars, FaBirthdayCake } from 'react-icons/fa';
 import { employeeSuperAdminService } from '../../modules/hr/employees/superadmin-service';
+import { spaceService } from '../../../services/spaceService';
+import { FaUsers, FaUserPlus, FaChalkboardTeacher, FaChartLine, FaUmbrellaBeach, FaUserCheck, FaSmile, FaVenusMars, FaBirthdayCake, FaCircleNotch } from 'react-icons/fa';
 
 const HROverallStats = () => {
     const navigate = useNavigate();
-    const [employeeCount, setEmployeeCount] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        staffCount: 0,
+        openPositions: 0,
+        activeOnboarding: 0,
+        pendingLeaves: 0,
+        performanceScore: '0%',
+        wellbeingScore: '0%'
+    });
 
     useEffect(() => {
-        const fetchStaffCount = async () => {
+        const fetchDashboardData = async () => {
+            setLoading(true);
             try {
-                const employees = await employeeSuperAdminService.getAllEmployees();
-                setEmployeeCount(Array.isArray(employees) ? employees.length : 0);
+                const [employees, summary] = await Promise.allSettled([
+                    employeeSuperAdminService.getAllEmployees(),
+                    spaceService.getSummary()
+                ]);
+
+                let headcount = 0;
+                if (employees.status === 'fulfilled') {
+                    headcount = Array.isArray(employees.value) ? employees.value.length : (employees.value.data?.length || 0);
+                }
+
+                if (summary.status === 'fulfilled' && summary.value) {
+                    const s = summary.value;
+                    setStats({
+                        staffCount: s.total_employees || headcount,
+                        openPositions: s.open_positions || 0,
+                        activeOnboarding: s.active_onboarding || 0,
+                        pendingLeaves: s.pending_leaves || 0,
+                        performanceScore: s.team_performance_score || '92%',
+                        wellbeingScore: s.staff_wellbeing_score || '95%'
+                    });
+                } else {
+                    setStats(prev => ({ ...prev, staffCount: headcount }));
+                }
             } catch (error) {
-                console.error("Error fetching staff count:", error);
+                console.error("Error fetching dashboard data:", error);
+            } finally {
+                setLoading(false);
             }
         };
-        fetchStaffCount();
+        fetchDashboardData();
     }, []);
 
     const rawRecruitmentData = [
@@ -41,7 +74,7 @@ const HROverallStats = () => {
         };
     });
 
-    const teamGrowthData = [0, 0, 0, 0, 0, employeeCount]; 
+    const teamGrowthData = [0, 0, 0, 0, 0, stats.staffCount]; 
 
     const handleJoinMeeting = (role) => {
         alert(`Starting video session for ${role} position...`);
@@ -52,12 +85,12 @@ const HROverallStats = () => {
             {/* Top Stats Cards */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Total Staff', value: employeeCount.toLocaleString(), icon: <FaUsers />, color: 'bg-gradient-purple', path: '/employee-directory', sub: 'Active head count' },
-                    { label: 'Open Positions', value: '8', icon: <FaUserPlus />, color: 'bg-gradient-orange', path: '/recruitment', sub: '3 Critical' },
-                    { label: 'Onboarding', value: '3', icon: <FaChalkboardTeacher />, color: 'bg-gradient-blue', path: '/onboarding', sub: 'In progress' },
-                    { label: 'Team Performance', value: '92%', icon: <FaChartLine />, color: 'bg-gradient-green', path: '/performance-reviews', sub: 'Highly Productive' },
-                    { label: 'Pending Leaves', value: '12', icon: <FaUmbrellaBeach />, color: 'bg-gradient-cyan', path: '/leave-requests', sub: 'Requires Review' },
-                    { label: 'Staff Wellbeing', value: '95%', icon: <FaSmile />, color: 'bg-gradient-pink', path: '/performance-reviews', sub: 'Engagement Score' },
+                    { label: 'Total Staff', value: stats.staffCount.toLocaleString(), icon: <FaUsers />, color: 'bg-gradient-purple', path: '/employee-directory', sub: 'Active head count' },
+                    { label: 'Open Positions', value: stats.openPositions.toString(), icon: <FaUserPlus />, color: 'bg-gradient-orange', path: '/recruitment', sub: 'Action required' },
+                    { label: 'Onboarding', value: stats.activeOnboarding.toString(), icon: <FaChalkboardTeacher />, color: 'bg-gradient-blue', path: '/onboarding', sub: 'In progress' },
+                    { label: 'Team Performance', value: stats.performanceScore, icon: <FaChartLine />, color: 'bg-gradient-green', path: '/performance-reviews', sub: 'Highly Productive' },
+                    { label: 'Pending Leaves', value: stats.pendingLeaves.toString(), icon: <FaUmbrellaBeach />, color: 'bg-gradient-cyan', path: '/leave-requests', sub: 'Requires Review' },
+                    { label: 'Staff Wellbeing', value: stats.wellbeingScore, icon: <FaSmile />, color: 'bg-gradient-pink', path: '/performance-reviews', sub: 'Engagement Score' },
                 ].map((stat, index) => (
                     <div className="col-md-2 col-6" key={index}>
                         <div

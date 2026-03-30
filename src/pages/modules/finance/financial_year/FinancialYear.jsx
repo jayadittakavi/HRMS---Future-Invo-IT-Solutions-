@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "../../../../components/layout/DashboardLayout.css";
 
@@ -14,7 +13,7 @@ export const FinancialYearContent = () => {
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
+
     const [selectedYear, setSelectedYear] = useState(null);
 
     // Handlers
@@ -23,9 +22,11 @@ export const FinancialYearContent = () => {
         setShowEdit(true);
     };
 
-    const handleDelete = (fy) => {
-        setSelectedYear(fy);
-        setShowDelete(true);
+    const handleToggleStatus = (fy) => {
+        // Toggle mock status
+        fy.status = fy.status === 'Active' ? 'Closed' : 'Active';
+        alert(`Financial Year status updated to: ${fy.status}`);
+        // Force refresh if this was real state but it's mock
     };
 
     return (
@@ -65,7 +66,14 @@ export const FinancialYearContent = () => {
                                     </td>
                                     <td>
                                         <button className="action-btn edit" onClick={() => handleEdit(fy)}><FaEdit /></button>
-                                        <button className="action-btn delete" onClick={() => handleDelete(fy)}><FaTrash /></button>
+                                        <button 
+                                            className="action-btn" 
+                                            onClick={() => handleToggleStatus(fy)}
+                                            style={{ color: fy.status === 'Active' ? '#ef4444' : '#10b981', background: 'none', border: 'none', marginLeft: '10px' }}
+                                            title={fy.status === 'Active' ? "Close Year" : "Activate Year"}
+                                        >
+                                            {fy.status === 'Active' ? <FaTimesCircle /> : <FaCheckCircle />}
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
@@ -147,27 +155,6 @@ export const FinancialYearContent = () => {
                             <div className="modal-footer">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setShowEdit(false)}>Close</button>
                                 <button className="btn btn-primary btn-sm">Update</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Delete Modal */}
-            {showDelete && selectedYear && (
-                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog modal-dialog-centered">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title text-danger">Delete Financial Year</h5>
-                                <button className="btn-close" onClick={() => setShowDelete(false)}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Are you sure you want to delete <strong>{selectedYear.name}</strong>?</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setShowDelete(false)}>Cancel</button>
-                                <button className="btn btn-danger btn-sm">Delete</button>
                             </div>
                         </div>
                     </div>

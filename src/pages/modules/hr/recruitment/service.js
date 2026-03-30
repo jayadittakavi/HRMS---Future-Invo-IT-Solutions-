@@ -10,30 +10,24 @@ export const recruitmentService = {
     // 1. Recruitment Dashboard Stats
     getStats: async () => {
         try {
-            const response = await fetch(`${API_BASE}/recruitment/stats`, {
-                method: "GET",
-                ...authHeader()
-            });
-            if (!response.ok) throw new Error("Failed to fetch recruitment stats");
+            const response = await fetch(`${API_BASE}/recruitment/stats`, authHeader());
+            if (!response.ok) return { open_positions: 0, total_applicants: 0, in_interview: 0, offers_made: 0 };
             return await response.json();
         } catch (error) {
             console.error("API Error (getStats):", error);
-            throw error;
+            return { open_positions: 0, total_applicants: 0, in_interview: 0, offers_made: 0 };
         }
     },
 
     // 2. Get Job Openings
     getJobs: async (status = 'Open') => {
         try {
-            const response = await fetch(`${API_BASE}/recruitment/jobs?status=${status}`, {
-                method: "GET",
-                ...authHeader()
-            });
-            if (!response.ok) throw new Error("Failed to fetch job openings");
+            const response = await fetch(`${API_BASE}/recruitment/jobs?status=${status}`, authHeader());
+            if (!response.ok) return [];
             return await response.json();
         } catch (error) {
             console.error("API Error (getJobs):", error);
-            throw error;
+            return [];
         }
     },
 
@@ -42,10 +36,12 @@ export const recruitmentService = {
         try {
             const response = await fetch(`${API_BASE}/recruitment/jobs`, {
                 method: "POST",
-                ...authHeader(),
+                headers: {
+                    ...authHeader().headers,
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify(jobData)
             });
-            if (!response.ok) throw new Error("Failed to save job");
             return await response.json();
         } catch (error) {
             console.error("API Error (saveJob):", error);
@@ -60,41 +56,34 @@ export const recruitmentService = {
                 method: "DELETE",
                 ...authHeader()
             });
-            if (!response.ok) throw new Error("Failed to delete job");
-            return await response.json();
+            return response.ok;
         } catch (error) {
             console.error("API Error (deleteJob):", error);
-            throw error;
+            return false;
         }
     },
 
     // 5. Get All Applicants
     getApplicants: async () => {
         try {
-            const response = await fetch(`${API_BASE}/recruitment/applicants`, {
-                method: "GET",
-                ...authHeader()
-            });
-            if (!response.ok) throw new Error("Failed to fetch applicants");
+            const response = await fetch(`${API_BASE}/recruitment/applicants`, authHeader());
+            if (!response.ok) return [];
             return await response.json();
         } catch (error) {
             console.error("API Error (getApplicants):", error);
-            throw error;
+            return [];
         }
     },
 
     // 6. Job Form Options
     getFormOptions: async () => {
         try {
-            const response = await fetch(`${API_BASE}/recruitment/jobs/form-options`, {
-                method: "GET",
-                ...authHeader()
-            });
-            if (!response.ok) throw new Error("Failed to fetch job form options");
+            const response = await fetch(`${API_BASE}/recruitment/jobs/form-options`, authHeader());
+            if (!response.ok) return { departments: [], jobTypes: [] };
             return await response.json();
         } catch (error) {
             console.error("API Error (getFormOptions):", error);
-            throw error;
+            return { departments: [], jobTypes: [] };
         }
     }
 };

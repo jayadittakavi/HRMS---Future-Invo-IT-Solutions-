@@ -80,7 +80,7 @@ export const employeeSuperAdminService = {
             department: data.department || "General",
             designation: data.designation || "Employee",
             date_of_joining: data.joining_date || data.date_of_joining || new Date().toISOString().split('T')[0],
-            gender: data.gender || "Not Specified",
+            gender: data.gender || "Other",
             phone_number: data.phone_number || data.phone || "",
             ctc: data.ctc ? Number(data.ctc) : 0,
             employment_type: data.employment_type || "Full-time",
@@ -190,6 +190,34 @@ export const employeeSuperAdminService = {
             return await response.json();
         } catch (error) {
             console.error(`API Error (deleteEmployee ${id}):`, error);
+            throw error;
+        }
+    },
+
+    // 🔹 Toggle Employee Status (Activate/Deactivate)
+    toggleStatus: async (id) => {
+        try {
+            const variations = [
+                { url: `${API_BASE}/admin/employees/${id}/toggle-status`, method: "PUT" },
+                { url: `${API_BASE}/superadmin/employees/${id}/toggle-status`, method: "PUT" }
+            ];
+
+            let lastErr = null;
+            for (const v of variations) {
+                try {
+                    const response = await fetch(v.url, {
+                        method: v.method,
+                        ...authHeader()
+                    });
+                    if (response.ok) return await response.json();
+                    lastErr = new Error(`Toggle status failed at ${v.url} with status ${response.status}`);
+                } catch (err) {
+                    lastErr = err;
+                }
+            }
+            throw lastErr || new Error("Failed to toggle employee status.");
+        } catch (error) {
+            console.error(`API Error (toggleStatus ${id}):`, error);
             throw error;
         }
     }

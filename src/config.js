@@ -6,9 +6,9 @@ export const API_BASE = "/api";
 
 // Latest Tokens provided by the user (as of March 26, 2026)
 export const TEST_TOKENS = {
-    superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ2OTkyMzB9.A-xsMXYYQHQMulVU5l2FvFnWapakriZ7WgqpS9mfFnE",
-    admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo2LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjozLCJleHAiOjE3NzQ2MTE4MjV9.dXJnujoGhWQsEImGIoBphsLGB6jVH---XGO3",
-    hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0NzA0NTcxfQ.PMLM4zArIGyg3HS_NHybOu3jyRS3VOdy4X1dbZguUGs"
+    superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzQ5MzcxMjR9.ByoJHanhzBkBA4xTn5vsDEooec72We8VgPRWLF10Jug",
+    admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxOCwicm9sZSI6IkVNUExPWUVFIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM4MjE1fQ.2tKpw8dQUZl-HceXNZobDsRA5Q5dj07xClRd8nGM9qA",
+    hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM3MDkwfQ.eXgZnjQAOt__mvD-C08DCLS9BL6ZKHGuWKkhiWD85xY"
 };
 
 /**
