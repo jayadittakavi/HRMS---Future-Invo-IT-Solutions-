@@ -143,7 +143,7 @@ const HROverallStats = () => {
                             <SimpleLineChart data={teamGrowthData} height="240px" color="#10b981" />
                         </div>
                         <div className="text-center small text-muted">
-                            Current Headcount: <span className="fw-bold text-success">{employeeCount.toLocaleString()}</span>
+                            Current Headcount: <span className="fw-bold text-success">{(stats.staffCount || 0).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>

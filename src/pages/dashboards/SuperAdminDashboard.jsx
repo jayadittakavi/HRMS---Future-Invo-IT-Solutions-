@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
 import { CompaniesContent } from '../modules/core/companies/Companies';
 import { EmployeesContent } from '../modules/hr/employees/Employees';
@@ -16,7 +15,7 @@ import { DeskManagementContent } from '../modules/administration/desk/DeskManage
 import '../../components/layout/DashboardLayout.css';
 import OverallStats from './components/OverallStats';
 import MySpace from './components/MySpace';
-import AuditLogs from '../../components/audit/AuditLogs'; // Added missing import
+import { AuditLogsContent } from '../../components/audit/AuditLogs'; // Corrected import
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const SuperAdminDashboard = () => {
@@ -55,7 +54,33 @@ const SuperAdminDashboard = () => {
                         </div>
                     </div>
 
-                    <OverallStats />
+                    {/* Dashboard Tabs */}
+                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('overall');
+                                navigate('/dashboard/super-admin?tab=overall');
+                            }}
+                        >
+                            Overview
+                        </button>
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('myspace');
+                                navigate('/dashboard/super-admin?tab=myspace');
+                            }}
+                        >
+                            My Space
+                        </button>
+                    </div>
+
+                    {dashboardType === 'overall' ? (
+                        <OverallStats />
+                    ) : (
+                        <MySpace role="superadmin" onNavigate={handleNavigate} />
+                    )}
                 </>
             )}
 
@@ -68,10 +93,17 @@ const SuperAdminDashboard = () => {
             {activeView === 'users' && <UserManagementContent />}
             {activeView === 'attendance' && <AttendanceContent />}
             {activeView === 'profile' && <ProfileContent />}
-            {activeView === 'audit-logs' && <AuditLogs role="superadmin" />}
+            {activeView === 'audit-logs' && <AuditLogsContent role="superadmin" />}
             {activeView === 'delegation' && <DelegationContent />}
             {activeView === 'visitors' && <VisitorContent />}
             {activeView === 'desk-management' && <DeskManagementContent />}
+            
+            {/* My Space Sub-views */}
+            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
+            {activeView === 'my-leaves' && <LeaveManagementContent personal={true} initialTab="dashboard" />}
+            {activeView === 'request-leave' && <LeaveManagementContent personal={true} initialTab="apply" />}
+            {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
+            {activeView === 'my-payslips' && <PayrollContent personal={true} />}
         </div>
     );
 };

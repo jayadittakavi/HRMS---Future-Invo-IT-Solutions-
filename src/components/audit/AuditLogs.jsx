@@ -14,7 +14,7 @@ const mockAuditData = [
     { id: 5, action: 'Process', entity: 'Payroll', entityId: 'PAY-FEB', performedBy: 'Accountant', date: '2026-02-06 16:40', ipAddress: '192.168.1.50', details: 'Processed payroll batch for Feb 2026' },
 ];
 
-const AuditLogs = ({ role }) => {
+export const AuditLogsContent = ({ role }) => {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -67,7 +67,7 @@ const AuditLogs = ({ role }) => {
 
     // Filter Logic (Client-side search for smoother UX on small datasets)
     const filteredLogs = logs.filter(log => {
-        const query = searchQuery.toLowerCase();
+        const query = (searchQuery || '').toLowerCase();
         return (
             (log.performedBy && log.performedBy.toLowerCase().includes(query)) ||
             (log.entity && log.entity.toLowerCase().includes(query)) ||
@@ -82,108 +82,115 @@ const AuditLogs = ({ role }) => {
     };
 
     return (
-        <DashboardLayout>
-            <div className="container-fluid p-0">
+        <div className="container-fluid p-0">
 
-                {/* Header & Controls */}
-                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-                    <div>
-                        <h4 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
-                            <FaClipboardList className="text-primary" /> {role === 'superadmin' ? 'System Audit Logs' : 'Organization Audit Logs'}
-                        </h4>
-                        <p className="text-muted small mb-0">Monitor {role === 'superadmin' ? 'all system' : 'organization'} activities and user actions</p>
-                    </div>
-
-                    <div className="d-flex flex-wrap align-items-center gap-2">
-                        <button
-                            className="btn btn-white border shadow-sm p-2 text-muted"
-                            title="Refresh Logs"
-                            onClick={handleRefresh}
-                            disabled={loading}
-                        >
-                            <FaSyncAlt className={loading ? "fa-spin" : ""} />
-                        </button>
-
-                        <div className="input-group shadow-sm" style={{ maxWidth: '300px' }}>
-                            <span className="input-group-text bg-transparent border-end-0 ps-3">
-                                <FaSearch className="text-muted small" />
-                            </span>
-                            <input
-                                type="text"
-                                className="form-control border-start-0 ps-2 glassy-search"
-                                placeholder="Search logs..."
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    setSearchQuery(val);
-                                    setGlobalSearchTerm(val);
-                                }}
-                            />
-                        </div>
-
-                        <select
-                            className="form-select shadow-sm border-0 bg-white"
-                            style={{ maxWidth: '150px' }}
-                            value={filterModule}
-                            onChange={(e) => setFilterModule(e.target.value)}
-                        >
-                            <option value="">All Modules</option>
-                            <option value="Auth">Auth</option>
-                            <option value="Employee">Employee</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Company">Company</option>
-                            <option value="System">System</option>
-                        </select>
-
-                        <select
-                            className="form-select shadow-sm border-0 bg-white"
-                            style={{ maxWidth: '150px' }}
-                            value={filterAction}
-                            onChange={(e) => setFilterAction(e.target.value)}
-                        >
-                            <option value="">All Actions</option>
-                            <option value="Create">Create</option>
-                            <option value="Update">Update</option>
-                            <option value="Delete">Delete</option>
-                            <option value="Login">Login</option>
-                            <option value="Logout">Logout</option>
-                        </select>
-                    </div>
+            {/* Header & Controls */}
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                <div>
+                    <h4 className="fw-bold text-dark mb-1 d-flex align-items-center gap-2">
+                        <FaClipboardList className="text-primary" /> {role === 'superadmin' ? 'System Audit Logs' : 'Organization Audit Logs'}
+                    </h4>
+                    <p className="text-muted small mb-0">Monitor {role === 'superadmin' ? 'all system' : 'organization'} activities and user actions</p>
                 </div>
 
-                {/* Error Message */}
-                {error && (
-                    <div className="alert alert-danger" role="alert">
-                        {error}
+                <div className="d-flex flex-wrap align-items-center gap-2">
+                    <button
+                        className="btn btn-white border shadow-sm p-2 text-muted"
+                        title="Refresh Logs"
+                        onClick={handleRefresh}
+                        disabled={loading}
+                    >
+                        <FaSyncAlt className={loading ? "fa-spin" : ""} />
+                    </button>
+
+                    <div className="input-group shadow-sm" style={{ maxWidth: '300px' }}>
+                        <span className="input-group-text bg-transparent border-end-0 ps-3">
+                            <FaSearch className="text-muted small" />
+                        </span>
+                        <input
+                            type="text"
+                            className="form-control border-start-0 ps-2 glassy-search"
+                            placeholder="Search logs..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchQuery(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
                     </div>
-                )}
 
-                {/* Logs Table Component */}
-                <AuditLogTable logs={showAll ? filteredLogs : filteredLogs.slice(0, 5)} />
+                    <select
+                        className="form-select shadow-sm border-0 bg-white"
+                        style={{ maxWidth: '150px' }}
+                        value={filterModule}
+                        onChange={(e) => setFilterModule(e.target.value)}
+                    >
+                        <option value="">All Modules</option>
+                        <option value="Auth">Auth</option>
+                        <option value="Employee">Employee</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Company">Company</option>
+                        <option value="System">System</option>
+                    </select>
 
-                {/* View More / Hide Toggle */}
-                {!loading && filteredLogs.length > 5 && (
-                    <div className="text-center mt-3 mb-5">
-                        <button
-                            className="btn btn-outline-primary btn-sm rounded-pill px-4"
-                            onClick={() => setShowAll(!showAll)}
-                        >
-                            {showAll ? "Hide (Show Less)" : "View All"}
-                        </button>
-                    </div>
-                )}
-
-                {loading && (
-                    <div className="text-center py-5">
-                        <span className="spinner-border text-primary" role="status"></span>
-                        <p className="text-muted mt-2">Loading logs...</p>
-                    </div>
-                )}
-
+                    <select
+                        className="form-select shadow-sm border-0 bg-white"
+                        style={{ maxWidth: '150px' }}
+                        value={filterAction}
+                        onChange={(e) => setFilterAction(e.target.value)}
+                    >
+                        <option value="">All Actions</option>
+                        <option value="Create">Create</option>
+                        <option value="Update">Update</option>
+                        <option value="Delete">Delete</option>
+                        <option value="Login">Login</option>
+                        <option value="Logout">Logout</option>
+                    </select>
+                </div>
             </div>
+
+            {/* Error Message */}
+            {error && (
+                <div className="alert alert-danger" role="alert">
+                    {error}
+                </div>
+            )}
+
+            {/* Logs Table Component */}
+            <AuditLogTable logs={showAll ? filteredLogs : filteredLogs.slice(0, 5)} />
+
+            {/* View More / Hide Toggle */}
+            {!loading && filteredLogs.length > 5 && (
+                <div className="text-center mt-3 mb-5">
+                    <button
+                        className="btn btn-outline-primary btn-sm rounded-pill px-4"
+                        onClick={() => setShowAll(!showAll)}
+                    >
+                        {showAll ? "Hide (Show Less)" : "View All"}
+                    </button>
+                </div>
+            )}
+
+            {loading && (
+                <div className="text-center py-5">
+                    <span className="spinner-border text-primary" role="status"></span>
+                    <p className="text-muted mt-2">Loading logs...</p>
+                </div>
+            )}
+
+        </div>
+    );
+};
+
+const AuditLogs = ({ role }) => {
+    return (
+        <DashboardLayout>
+            <AuditLogsContent role={role} />
         </DashboardLayout>
     );
 };
+
 
 
 export default AuditLogs;

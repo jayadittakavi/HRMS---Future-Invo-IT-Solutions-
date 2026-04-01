@@ -43,7 +43,33 @@ const HRDashboard = () => {
                         </div>
                     </div>
 
-                    <HROverallStats />
+                    {/* Dashboard Tabs */}
+                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('overall');
+                                navigate('/dashboard/hr?tab=overall');
+                            }}
+                        >
+                            Overview
+                        </button>
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('myspace');
+                                navigate('/dashboard/hr?tab=myspace');
+                            }}
+                        >
+                            My Space
+                        </button>
+                    </div>
+
+                    {dashboardType === 'overall' ? (
+                        <HROverallStats />
+                    ) : (
+                        <MySpace role="hr" onNavigate={handleNavigate} />
+                    )}
                 </>
             )}
 
@@ -60,10 +86,11 @@ const HRDashboard = () => {
                 */}
             {activeView === 'leave-management' && <LeaveManagementContent personal={false} initialTab="dashboard" />}
             {activeView === 'leave-requests' && <LeaveManagementContent personal={false} initialTab="pending" />}
+            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
             {activeView === 'my-leaves' && <LeaveManagementContent personal={true} initialTab="dashboard" />}
             {activeView === 'request-leave' && <LeaveManagementContent personal={true} initialTab="apply" />}
             {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
-            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
+            {activeView === 'my-payslips' && <PayrollContent personal={true} />}
             {activeView === 'onboarding' && <OnboardingContent />}
             {activeView === 'delegation' && <DelegationContent />}
             {activeView === 'visitors' && <VisitorContent />}

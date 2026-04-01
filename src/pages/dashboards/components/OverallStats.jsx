@@ -19,19 +19,27 @@ const OverallStats = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const [companies, branches, employees] = await Promise.all([
+                // Use allSettled to prevent one failing API from breaking the whole dashboard
+                const results = await Promise.allSettled([
                     coreService.getCompanies(),
                     coreService.getBranches(),
                     employeeSuperAdminService.getAllEmployees()
                 ]);
 
+                const companies = results[0].status === 'fulfilled' ? results[0].value : [];
+                const branches = results[1].status === 'fulfilled' ? results[1].value : [];
+                const employees = results[2].status === 'fulfilled' ? results[2].value : [];
+
+                // Ensure employees is an array before filtering
+                const empList = Array.isArray(employees) ? employees : [];
+
                 setStatsData({
                     companies: Array.isArray(companies) ? companies.length : 0,
                     branches: Array.isArray(branches) ? branches.length : 0,
-                    admins: employees.filter(e => e.role?.toLowerCase() === 'admin').length,
-                    hrs: employees.filter(e => e.role?.toLowerCase() === 'hr').length,
-                    managers: employees.filter(e => e.role?.toLowerCase() === 'manager').length,
-                    employees: Array.isArray(employees) ? employees.length : 0
+                    admins: empList.filter(e => (e.role || '').toLowerCase().includes('admin')).length,
+                    hrs: empList.filter(e => (e.role || '').toLowerCase() === 'hr').length,
+                    managers: empList.filter(e => (e.role || '').toLowerCase() === 'manager').length,
+                    employees: empList.length
                 });
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);

@@ -54,7 +54,7 @@ export const EmployeesContent = () => {
 
     const isAdmin = currentUser?.role?.toLowerCase() === 'admin';
     const isSuperAdmin = currentUser?.role?.toLowerCase() === 'superadmin' || currentUser?.role?.toUpperCase() === 'SUPER_ADMIN' || isAdmin;
-    const isHR = currentUser?.role?.toLowerCase() === 'hr';
+    const isHR = currentUser?.role?.toLowerCase() === 'hr' || currentUser?.role?.toLowerCase() === 'fulltime';
     const isEmployee = currentUser?.role?.toLowerCase() === 'employee';
 
     // Permissions
@@ -213,14 +213,20 @@ export const EmployeesContent = () => {
     };
 
     const handleToggleStatus = async (id) => {
+        // Simplified based on user request: Action available for all administrative roles
+        const canToggle = isSuperAdmin || isAdmin || isHR;
+        
         try {
-            if (isSuperAdmin || isAdmin) {
-                await employeeSuperAdminService.toggleStatus(id);
+            if (canToggle) {
+                await employeeSuperAdminService.toggleStatus(id, currentUser?.role);
                 fetchData();
                 alert("Status updated successfully!");
+            } else {
+                alert("Permission Denied: You do not have sufficient privileges to modify member records.");
             }
         } catch (error) {
-            alert("Failed to toggle status: " + (error.message || "Unknown error"));
+            console.error("Toggle Failure:", error);
+            alert(`Toggle Action Failed:\n\n${error.message}\n\nPlease check your server connectivity or permissions.`);
         }
     };
 
@@ -425,7 +431,7 @@ export const EmployeesContent = () => {
                                                             style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
                                                             <FaEdit size={14} />
                                                         </button>
-                                                        {(isSuperAdmin || isAdmin) && (
+                                                        {(isSuperAdmin || isAdmin || isHR) && (
                                                             <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
                                                                 onClick={() => handleToggleStatus(emp.id)}
                                                                 title={emp.status === 'Inactive' ? "Activate" : "Deactivate"}

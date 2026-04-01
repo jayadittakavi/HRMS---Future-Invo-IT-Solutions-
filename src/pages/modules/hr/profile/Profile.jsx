@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCheckCircle, FaBell, FaEdit } from 'react-icons/fa';
+import { FaCheckCircle, FaBell, FaEdit, FaTrash } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useAuth } from '../../../../context/AuthContext';
 import { getAuthHeader } from '../../../../config';
@@ -95,7 +95,7 @@ const ProfileContent = () => {
     const [employeeData, setEmployeeData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [activeTab, setActiveTab] = useState('overview');
-    const [pendingPic, setPendingPic] = useState(null);
+    const [pendingPic, setPendingPic] = useState(undefined);
 
     const [editForm, setEditForm] = useState({
         name: user?.name || '',
@@ -135,24 +135,31 @@ const ProfileContent = () => {
                 name: editForm.name,
                 phone: editForm.phone,
                 address: editForm.address,
-                bio: editForm.bio
+                bio: editForm.bio,
+                profilePic: pendingPic !== undefined ? pendingPic : user?.profilePic
             });
             if (updated) setEmployeeData(updated);
-            updateProfile({ name: editForm.name, profilePic: pendingPic || undefined });
-            setPendingPic(null);
+            updateProfile({ 
+                name: editForm.name, 
+                profilePic: pendingPic !== undefined ? pendingPic : user?.profilePic 
+            });
+            setPendingPic(undefined);
             setIsEditing(false);
             alert("Profile updated successfully!");
         } catch (err) {
             console.warn("Server update failed, updating local state for session continuity.", err);
-            updateProfile({ name: editForm.name, profilePic: pendingPic || undefined });
-            setPendingPic(null);
+            updateProfile({ 
+                name: editForm.name, 
+                profilePic: pendingPic !== undefined ? pendingPic : user?.profilePic 
+            });
+            setPendingPic(undefined);
             setIsEditing(false);
             alert("Profile saved locally! (Note: Server is currently unreachable - " + (err.message || "Internal Error") + ")");
         }
     };
     const handleCancel = () => {
         setEditForm(f => ({ ...f, name: employeeData?.name || user?.name || '', phone: employeeData?.phone || '' }));
-        setPendingPic(null);
+        setPendingPic(undefined);
         setIsEditing(false);
     };
 
@@ -178,7 +185,7 @@ const ProfileContent = () => {
         joinDate: employeeData?.joined || 'N/A',
         status: employeeData?.status || 'Active',
         branch: employeeData?.branch || 'N/A',
-        profilePic: pendingPic || user?.profilePic || null,
+        profilePic: pendingPic === undefined ? user?.profilePic : pendingPic,
         emergContact: editForm.emergencyContact || '',
         work_info: employeeData?.work_info || {},
         personal: employeeData?.personal || {}
@@ -266,6 +273,27 @@ const ProfileContent = () => {
                             const file = e.target.files[0];
                             if (file) { const r = new FileReader(); r.onloadend = () => setPendingPic(r.result); r.readAsDataURL(file); }
                         }} />
+                        
+                        {/* Remove DP Button (Overlay) */}
+                        {isEditing && D.profilePic && (
+                            <button
+                                onClick={(e) => { e.stopPropagation(); setPendingPic(null); }}
+                                style={{
+                                    position: 'absolute', top: -5, right: -5,
+                                    width: 34, height: 34, borderRadius: '50%',
+                                    background: '#ef4444', color: '#fff',
+                                    border: '3px solid #fff', display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer', zIndex: 120, boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+                                    transition: 'all 0.2s',
+                                }}
+                                title="Remove Profile Picture"
+                                onMouseOver={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                                onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+                            >
+                                <FaTrash size={14} />
+                            </button>
+                        )}
                     </div>
 
                     {/* Identity Details */}

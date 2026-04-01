@@ -31,7 +31,10 @@ const EmployeeDashboard = () => {
             try {
                 const data = await attendanceService.getMyAttendance();
                 const todayStr = new Date().toISOString().split('T')[0];
-                const todayRecord = data.find(record => record.date?.startsWith(todayStr));
+                
+                // Safe check if data is an array
+                const records = Array.isArray(data) ? data : (data?.data || []);
+                const todayRecord = records.find(record => record.date?.startsWith(todayStr));
 
                 if (todayRecord) {
                     const formatTime = (timeStr) => {

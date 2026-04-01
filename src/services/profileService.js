@@ -28,7 +28,9 @@ export const profileService = {
                 address: profileData.address,
                 address_location: profileData.address, // Fallback for address
                 bio: profileData.bio,
-                about_bio: profileData.bio // Fallback for bio
+                about_bio: profileData.bio, // Fallback for bio
+                profile_picture: profileData.profilePic,
+                profilePic: profileData.profilePic
             };
 
             const response = await fetch(`${API_BASE}/me/profile`, {

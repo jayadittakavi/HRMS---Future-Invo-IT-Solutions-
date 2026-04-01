@@ -61,7 +61,33 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <OverallStats />
+                    {/* Dashboard Tabs */}
+                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('overall');
+                                navigate('/dashboard/admin?tab=overall');
+                            }}
+                        >
+                            Overview
+                        </button>
+                        <button
+                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
+                            onClick={() => {
+                                setDashboardType('myspace');
+                                navigate('/dashboard/admin?tab=myspace');
+                            }}
+                        >
+                            My Space
+                        </button>
+                    </div>
+
+                    {dashboardType === 'overall' ? (
+                        <OverallStats />
+                    ) : (
+                        <MySpace role="admin" onNavigate={handleNavigate} />
+                    )}
                 </>
             )}
 
@@ -79,10 +105,11 @@ const AdminDashboard = () => {
             {activeView === 'payroll' && <PayrollContent />}
             {activeView === 'financial-year' && <FinancialYearContent />}
             {activeView === 'leave-management' && <LeaveManagementContent />}
+            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
             {activeView === 'my-leaves' && <LeaveManagementContent personal={true} initialTab="dashboard" />}
             {activeView === 'request-leave' && <LeaveManagementContent personal={true} initialTab="apply" />}
             {activeView === 'leave-history' && <LeaveManagementContent personal={true} initialTab="history" />}
-            {activeView === 'my-attendance' && <AttendanceContent personal={true} />}
+            {activeView === 'my-payslips' && <PayrollContent personal={true} />}
             {activeView === 'users' && <UserManagementContent />}
             {activeView === 'delegation' && <DelegationContent />}
             {activeView === 'visitors' && <VisitorContent />}

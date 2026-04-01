@@ -195,29 +195,44 @@ export const employeeSuperAdminService = {
     },
 
     // 🔹 Toggle Employee Status (Activate/Deactivate)
-    toggleStatus: async (id) => {
-        try {
-            const variations = [
-                { url: `${API_BASE}/admin/employees/${id}/toggle-status`, method: "PUT" },
-                { url: `${API_BASE}/superadmin/employees/${id}/toggle-status`, method: "PUT" }
-            ];
+    toggleStatus: async (id, currentUserRole = null) => {
+        // Strict adherence to the requested URLs for toggle actions
+        // URL format: POST /api/{role}/employees/{id}/toggle
+        const roleStr = (currentUserRole || '').toLowerCase();
+        let pathRole = 'admin';
+        if (roleStr.includes('superadmin') || roleStr.includes('super_admin')) {
+            pathRole = 'superadmin';
+        }
+        
+        const url = `${API_BASE}/${pathRole}/employees/${id}/toggle`;
 
-            let lastErr = null;
-            for (const v of variations) {
-                try {
-                    const response = await fetch(v.url, {
-                        method: v.method,
-                        ...authHeader()
-                    });
-                    if (response.ok) return await response.json();
-                    lastErr = new Error(`Toggle status failed at ${v.url} with status ${response.status}`);
-                } catch (err) {
-                    lastErr = err;
-                }
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: getAuthHeader(currentUserRole || 'admin'),
+                body: JSON.stringify({}) // Some backends require a body for POST even if empty
+            });
+
+            if (response.ok) {
+                return await response.json();
             }
-            throw lastErr || new Error("Failed to toggle employee status.");
+
+            // Fallback to legacy path only if specific one fails with 404 (optional)
+            if (response.status === 404 || response.status === 405) {
+                console.warn(`Primary URL ${url} failed with ${response.status}, trying legacy fallback...`);
+                // Fallback for safety using the same method for now
+                const legacyUrl = `${url}-status`;
+                const fallbackResponse = await fetch(legacyUrl, {
+                    method: "PUT",
+                    headers: getAuthHeader(currentUserRole || 'admin')
+                });
+                if (fallbackResponse.ok) return await fallbackResponse.json();
+            }
+
+            const text = await response.text();
+            throw new Error(`API returned ${response.status} for ${url}: ${text}`);
         } catch (error) {
-            console.error(`API Error (toggleStatus ${id}):`, error);
+            console.error(`Toggle Status Error (${url}):`, error);
             throw error;
         }
     }

@@ -1,0 +1,10 @@
+Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzUxMzAzMjd9.DD_q3ckl2jdycquJnhYExGiSq95uoqA3OzZH1L0dF_Q
+Role: Super Admin
+Company ID: null
+User ID: 2
+Expires: 1775130327 (approx 2026-04-01)
+
+To use this token in the browser for development:
+localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzUxMzAzMjd9.DD_q3ckl2jdycquJnhYExGiSq95uoqA3OzZH1L0dF_Q');
+localStorage.setItem('role', 'superadmin');
+localStorage.setItem('user_role', 'superadmin');
