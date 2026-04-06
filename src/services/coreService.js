@@ -23,6 +23,35 @@ export const coreService = {
         }
     },
 
+    // 🔹 Dashboard Stats
+    getDashboardStats: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/dashboard/stats`, {
+                method: "GET",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getDashboardStats):", error);
+            throw error;
+        }
+    },
+
+    getSuperAdminDashboardStats: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/superadmin/dashboard-stats`, {
+                method: "GET",
+                ...authHeader()
+            });
+            if (!response.ok) throw new Error(await response.text());
+            return await response.json();
+        } catch (error) {
+            console.error("API Error (getSuperAdminDashboardStats):", error);
+            throw error;
+        }
+    },
+
     getCompanyStats: async () => {
         try {
             const response = await fetch(`${API_BASE}/superadmin/companies/stats`, {

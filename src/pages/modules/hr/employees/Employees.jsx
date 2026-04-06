@@ -321,21 +321,9 @@ export const EmployeesContent = () => {
                             </button>
                             {canAddEmployee && (
                                 <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
-                                    onClick={() => {
-                                        setFilteredBranches([]);
-                                        setFormData({
-                                            user_account: '', full_name: '', personal_email: '', company_email: '', phone_number: '',
-                                            username: '', password: '', confirm_password: '',
-                                            department: '', designation: '',
-                                            role: 'employee', employment_type: 'fulltime employee', joining_date: '',
-                                            company_id: currentUser?.company_id || '', branch: '',
-                                            pay_grade: '', ctc: '', gender: 'Other'
-                                        });
-                                        setShowAdd(true);
-                                        setShowEdit(false);
-                                    }}
+                                    onClick={() => navigate('/invite-member')}
                                     style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', color: 'white', fontWeight: 700 }}>
-                                    <FaPlus /> Add Employee
+                                    <FaUserPlus /> Invite Member
                                 </button>
                             )}
                         </div>
@@ -349,6 +337,7 @@ export const EmployeesContent = () => {
                                 <tr>
                                     <th className="px-4 py-3 border-0 text-muted small fw-bold">EMPLOYEE</th>
                                     <th className="py-3 border-0 text-muted small fw-bold">CONTACT</th>
+                                    {!isEmployee && <th className="py-3 border-0 text-muted small fw-bold">CREDENTIALS</th>}
                                     <th className="py-3 border-0 text-muted small fw-bold">ROLE & DEPT</th>
                                     <th className="py-3 border-0 text-muted small fw-bold">COMPANY</th>
                                     <th className="py-3 border-0 text-muted small fw-bold">STATUS</th>
@@ -371,7 +360,7 @@ export const EmployeesContent = () => {
                                                     </div>
                                                     <div>
                                                         <div className="fw-bold text-dark">{emp.full_name || emp.name}</div>
-                                                        <div className="small text-muted">ID: #{emp.id}</div>
+                                                        <div className="small text-muted">ID: {emp.employee_id || `#${emp.id}`}</div>
                                                     </div>
                                                 </div>
                                             </td>
@@ -381,6 +370,12 @@ export const EmployeesContent = () => {
                                                     <div className="small text-muted d-flex align-items-center gap-2"><FaPhone className="text-muted" size={12} /> {emp.phone_number || emp.phone || 'No phone'}</div>
                                                 </div>
                                             </td>
+                                            {!isEmployee && (
+                                                <td className="py-4">
+                                                    <div className="small text-dark"><strong>User:</strong> {emp.username || emp.email || 'N/A'}</div>
+                                                    <div className="small text-muted"><strong>Pass:</strong> {emp.password || '••••••••'}</div>
+                                                </td>
+                                            )}
                                             <td className="py-4">
                                                 <div className="fw-bold text-dark">{emp.designation || 'Designation'}</div>
                                                 <div className="small text-muted">{emp.employment_type || emp.role || 'employee'} | {emp.department || 'N/A'}</div>

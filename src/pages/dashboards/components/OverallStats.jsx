@@ -15,32 +15,45 @@ const OverallStats = () => {
         managers: 0,
         employees: 0
     });
+    const [attendanceSummary, setAttendanceSummary] = useState([
+        { label: 'Present', value: 0, color: '#10b981' },
+        { label: 'Absent', value: 0, color: '#ef4444' },
+        { label: 'WFH', value: 0, color: '#3b82f6' },
+        { label: 'Leave', value: 0, color: '#f59e0b' },
+    ]);
+    const [revenueTrend, setRevenueTrend] = useState([0]);
+    const [alerts, setAlerts] = useState([
+        { type: "Critical", message: "Server storage usage at 85%. Consider upgrading plan." },
+        { type: "Info", message: "System maintenance scheduled for Sunday 2 AM." }
+    ]);
 
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                // Use allSettled to prevent one failing API from breaking the whole dashboard
-                const results = await Promise.allSettled([
-                    coreService.getCompanies(),
-                    coreService.getBranches(),
-                    employeeSuperAdminService.getAllEmployees()
-                ]);
-
-                const companies = results[0].status === 'fulfilled' ? results[0].value : [];
-                const branches = results[1].status === 'fulfilled' ? results[1].value : [];
-                const employees = results[2].status === 'fulfilled' ? results[2].value : [];
-
-                // Ensure employees is an array before filtering
-                const empList = Array.isArray(employees) ? employees : [];
-
+                const data = await coreService.getSuperAdminDashboardStats();
                 setStatsData({
-                    companies: Array.isArray(companies) ? companies.length : 0,
-                    branches: Array.isArray(branches) ? branches.length : 0,
-                    admins: empList.filter(e => (e.role || '').toLowerCase().includes('admin')).length,
-                    hrs: empList.filter(e => (e.role || '').toLowerCase() === 'hr').length,
-                    managers: empList.filter(e => (e.role || '').toLowerCase() === 'manager').length,
-                    employees: empList.length
+                    companies: data.companies || 0,
+                    branches: data.branches || 0,
+                    admins: data.admins || 0,
+                    hrs: data.hrs || 0,
+                    managers: data.managers || 0,
+                    employees: data.employees || 0
                 });
+
+                if (data.attendance_summary) {
+                    setAttendanceSummary(data.attendance_summary);
+                }
+                
+                if (data.revenue_trend) {
+                    setRevenueTrend(data.revenue_trend);
+                }
+                
+                if (data.missing_checkouts !== undefined) {
+                    setAlerts(prev => [
+                        { type: "Warning", message: `${data.missing_checkouts} Employees missing attendance check-out yesterday.` },
+                        ...prev
+                    ]);
+                }
             } catch (error) {
                 console.error("Error fetching dashboard stats:", error);
             }
@@ -58,14 +71,6 @@ const OverallStats = () => {
         { label: 'Total Employees', value: statsData.employees, icon: <FaUsers />, color: 'bg-gradient-pink', path: '/employees' },
     ];
 
-    const attendanceSummary = [
-        { label: 'Present', value: 850, color: '#10b981' },
-        { label: 'Absent', value: 45, color: '#ef4444' },
-        { label: 'WFH', value: 120, color: '#3b82f6' },
-        { label: 'Leave', value: 30, color: '#f59e0b' },
-        { label: 'WeekOff', value: 263, color: '#6b7280' },
-    ];
-
     const departmentData = [
         { label: 'IT', value: 450, color: '#3b82f6' },
         { label: 'HR', value: 50, color: '#ec4899' },
@@ -73,8 +78,6 @@ const OverallStats = () => {
         { label: 'Sales', value: 200, color: '#f59e0b' },
         { label: 'Support', value: 150, color: '#ef4444' },
     ];
-
-    const revenueTrend = [120, 135, 125, 145, 160, 155, 170, 180, 190, 200, 210, 220];
 
     const handleAction = (type, data) => {
         console.log(`${type} Action:`, data);
@@ -189,18 +192,14 @@ const OverallStats = () => {
                             <FaClipboardList className="fs-4 opacity-50" />
                         </div>
                         <ul className="list-unstyled mb-0">
-                            <li className="mb-3 border-bottom border-white border-opacity-25 pb-2">
-                                <span className="badge bg-danger mb-1">Critical</span>
-                                <p className="mb-0 small">Server storage usage at 85%. Consider upgrading plan.</p>
-                            </li>
-                            <li className="mb-3 border-bottom border-white border-opacity-25 pb-2">
-                                <span className="badge bg-warning text-dark mb-1">Warning</span>
-                                <p className="mb-0 small">5 Employees missing attendance check-out yesterday.</p>
-                            </li>
-                            <li>
-                                <span className="badge bg-info text-dark mb-1">Info</span>
-                                <p className="mb-0 small">System maintenance scheduled for Sunday 2 AM.</p>
-                            </li>
+                            {alerts.map((alert, idx) => (
+                                <li key={idx} className="mb-3 border-bottom border-white border-opacity-25 pb-2">
+                                    <span className={`badge ${alert.type === 'Critical' ? 'bg-danger' : alert.type === 'Warning' ? 'bg-warning text-dark' : 'bg-info text-dark'} mb-1`}>
+                                        {alert.type}
+                                    </span>
+                                    <p className="mb-0 small">{alert.message}</p>
+                                </li>
+                            ))}
                         </ul>
                     </div>
                 </div>

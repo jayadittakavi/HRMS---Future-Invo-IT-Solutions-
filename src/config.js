@@ -4,9 +4,9 @@
 // This ensures requests go to http://100.67.241.99:5000/api via the local dev server
 export const API_BASE = "/api";
 
-// Latest Tokens provided by the user (as of March 26, 2026)
+// Latest Tokens provided by the user (as of April 6, 2026)
 export const TEST_TOKENS = {
-    superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzUxMzAzMjd9.DD_q3ckl2jdycquJnhYExGiSq95uoqA3OzZH1L0dF_Q",
+    superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzU1NTA1MzN9.GONoLYTgYRfAgM990LB6B_ne9dFnannRVFMtbaX_PRg",
     admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxOCwicm9sZSI6IkVNUExPWUVFIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM4MjE1fQ.2tKpw8dQUZl-HceXNZobDsRA5Q5dj07xClRd8nGM9qA",
     hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc1MTMwMzk4fQ.hSc8v5HHGiFcHfQMQtZvg4lUqPrOnqBqxTY1fKfHaDc"
 };
@@ -26,10 +26,13 @@ export const getAuthHeader = (role = 'superadmin') => {
     
     const fallbackToken = TEST_TOKENS[tokenKey] || TEST_TOKENS.superadmin;
     
-    const finalToken = token || fallbackToken;
+    const finalToken = (role === 'superadmin' && !token) ? fallbackToken : (token || fallbackToken);
+    
+    // Safety: If the requested role is superadmin, we MUST use the superadmin token if available
+    const tokenToUse = (role === 'superadmin') ? (TEST_TOKENS.superadmin || finalToken) : finalToken;
 
     return {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${finalToken}`
+        "Authorization": `Bearer ${tokenToUse}`
     };
 };

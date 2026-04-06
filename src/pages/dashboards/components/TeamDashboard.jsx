@@ -5,6 +5,7 @@ import {
     FaChartLine, FaTrophy, FaCalendarAlt, FaSearch,
     FaEllipsisV, FaCommentDots, FaVideo, FaPhone
 } from 'react-icons/fa';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 import {
     MdOutlineWavingHand, MdOutlineEmojiEvents,
     MdOutlineAutoGraph, MdOutlineGroupWork
@@ -16,11 +17,15 @@ import { teamService } from './teamService';
 const TeamDashboard = ({ role }) => {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteData, setInviteData] = useState({ name: '', email: '', company_email: '', password: '', confirm_password: '' });
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [stats, setStats] = useState([
         { label: 'Total Members', value: 0, icon: <FaUsers />, color: 'var(--primary-color)', bg: 'rgba(109, 40, 217, 0.1)', trend: '0' },
-        { label: 'Present Now', value: 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: '0%' },
-        { label: 'On Leave', value: 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: '0' },
-        { label: 'Remote / WFH', value: 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: '0' },
+        { label: 'Active Now', value: 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: '0%' },
+        { label: 'Pending', value: 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: '0' },
+        { label: 'Admins', value: 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: '0' },
     ]);
 
     const [teamMembers, setTeamMembers] = useState([]);
@@ -40,9 +45,9 @@ const TeamDashboard = ({ role }) => {
             if (sData) {
                 setStats([
                     { label: 'Total Members', value: sData.total_members || 0, icon: <FaUsers />, color: 'var(--primary-color)', bg: 'rgba(109, 40, 217, 0.1)', trend: sData.member_trend || '+0' },
-                    { label: 'Present Now', value: sData.present || 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: sData.present_pct || '0%' },
-                    { label: 'On Leave', value: sData.on_leave || 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: sData.leave_trend || '0' },
-                    { label: 'Remote / WFH', value: sData.remote || 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: sData.remote_trend || '0' },
+                    { label: 'Active Now', value: sData.present || 0, icon: <FaUserCheck />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', trend: sData.present_pct || '0%' },
+                    { label: 'Pending', value: sData.pending || 0, icon: <FaUserClock />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', trend: sData.leave_trend || '0' },
+                    { label: 'Admins', value: sData.admins || 0, icon: <MdOutlineGroupWork />, color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', trend: sData.remote_trend || '0' },
                 ]);
             }
 
@@ -91,16 +96,17 @@ const TeamDashboard = ({ role }) => {
                         />
                     </div>
                     <button
-                        className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
-                        onClick={() => navigate('/dashboard/manage-squad')}
+                        className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
+                        onClick={() => setShowInviteModal(true)}
+                        style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', borderColor: 'transparent' }}
                     >
-                        <FaUsers /> Manage Squad
+                        <FaUserPlus /> Invite Member
                     </button>
                     <button
                         className="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
-                        onClick={() => navigate('/recruitment')}
+                        onClick={() => navigate('/dashboard/manage-squad')}
                     >
-                        <FaUserPlus /> Hire Talent
+                        <FaUsers /> Manage Squad
                     </button>
                 </div>
             </div>
@@ -288,6 +294,155 @@ const TeamDashboard = ({ role }) => {
                     </table>
                 </div>
             </div>
+
+            {/* Invite Member Custom Modal */}
+            {showInviteModal && (
+                <div className="custom-modal-backdrop">
+                    <div className="custom-invite-card">
+                        <h4 className="fw-bolder mb-4 custom-modal-title">Add New Member</h4>
+                        
+                        <div className="mb-4">
+                            <label className="fw-bold mb-2 custom-label">Full Name</label>
+                            <input type="text" className="form-control custom-input" placeholder="Enter full name" value={inviteData.name} onChange={e => setInviteData({...inviteData, name: e.target.value})} />
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="fw-bold mb-2 custom-label">Email Address</label>
+                            <input type="email" className="form-control custom-input" placeholder="Enter email" value={inviteData.email} onChange={e => setInviteData({...inviteData, email: e.target.value})} />
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="fw-bold mb-2 custom-label">Company Mail</label>
+                            <input type="email" className="form-control custom-input" placeholder="Enter company mail" value={inviteData.company_email} onChange={e => setInviteData({...inviteData, company_email: e.target.value})} />
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="fw-bold mb-2 custom-label d-flex align-items-center gap-1">
+                                Password <span className="custom-light-text">(will be sent to employee via email)</span>
+                            </label>
+                            <div className="position-relative">
+                                <input type={showPassword ? "text" : "password"} className="form-control custom-input" placeholder="Set a temporary password" value={inviteData.password} onChange={e => setInviteData({...inviteData, password: e.target.value})} style={{ paddingRight: '40px' }} />
+                                <button type="button" className="btn position-absolute top-50 end-0 translate-middle-y border-0 shadow-none bg-transparent" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <FiEyeOff size={18} className="text-secondary" /> : <FiEye size={18} className="text-secondary" />}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="mb-5">
+                            <label className="fw-bold mb-2 custom-label">Confirm Password</label>
+                            <div className="position-relative">
+                                <input type={showConfirmPassword ? "text" : "password"} className="form-control custom-input" placeholder="Confirm temporary password" value={inviteData.confirm_password} onChange={e => setInviteData({...inviteData, confirm_password: e.target.value})} style={{ paddingRight: '40px' }} />
+                                <button type="button" className="btn position-absolute top-50 end-0 translate-middle-y border-0 shadow-none bg-transparent" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                                    {showConfirmPassword ? <FiEyeOff size={18} className="text-secondary" /> : <FiEye size={18} className="text-secondary" />}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="d-flex justify-content-between align-items-center mt-2">
+                            <button className="btn btn-link text-decoration-none custom-cancel p-0" onClick={() => setShowInviteModal(false)}>Cancel</button>
+                            <button className="btn btn-primary custom-submit" style={{ backgroundColor: '#6d28d9' }} onClick={() => { 
+                                if (!inviteData.email && !inviteData.company_email) {
+                                    alert("Please enter at least one email address.");
+                                    return;
+                                }
+                                if (inviteData.password !== inviteData.confirm_password) {
+                                    alert("Passwords do not match.");
+                                    return;
+                                }
+                                
+                                setShowInviteModal(false); 
+                                navigate('/add-member', { state: { newMember: inviteData } }); 
+                            }}>
+                                Roles & Permissions &rarr;
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style>{`
+                .custom-modal-backdrop {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(15, 23, 42, 0.35);
+                    backdrop-filter: blur(3px);
+                    z-index: 1050;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .custom-invite-card {
+                    background-color: #f7f6ec; /* Off-white tint matched closely to image */
+                    border-radius: 16px;
+                    padding: 40px;
+                    width: 100%;
+                    max-width: 480px;
+                    box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+                    animation: slideUpFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                @keyframes slideUpFade {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+                .custom-modal-title {
+                    color: #0f172a;
+                    font-family: 'Georgia', serif; /* Serif font mapped from screenshot */
+                    font-size: 1.5rem;
+                    letter-spacing: -0.5px;
+                }
+                .custom-label {
+                    color: #475569;
+                    font-size: 0.82rem;
+                    letter-spacing: 0.3px;
+                }
+                .custom-light-text {
+                    color: #64748b;
+                    font-weight: 500;
+                    font-size: 0.75rem;
+                    letter-spacing: 0;
+                }
+                .custom-input {
+                    background-color: transparent;
+                    border: 1.5px solid #e2e8f0;
+                    border-radius: 10px;
+                    padding: 12px 16px;
+                    font-size: 0.95rem;
+                    color: #334155;
+                    box-shadow: none;
+                    transition: border-color 0.2s;
+                }
+                .custom-input:focus {
+                    border-color: #94a3b8;
+                    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1);
+                    background-color: #ffffff;
+                }
+                .custom-input::placeholder {
+                    color: #94a3b8;
+                }
+                .custom-cancel {
+                    color: #94a3b8;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                }
+                .custom-cancel:hover {
+                    color: #64748b;
+                }
+                .custom-submit {
+                    background-color: #3b82f6;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 24px;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+                }
+                .custom-submit:hover {
+                    background-color: #2563eb;
+                }
+            `}</style>
         </div>
     );
 };

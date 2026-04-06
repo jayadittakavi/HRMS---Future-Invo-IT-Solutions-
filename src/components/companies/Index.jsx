@@ -256,7 +256,7 @@ export const CompaniesContent = () => {
                     />
                 </div>
                 <button
-                    className="btn-add-premium"
+                    className="btn-add-premium rounded-pill"
                     onClick={() => { resetForm(); setShowAdd(true); }}
                 >
                     <FaPlus className="me-2" /> <span>Add New Company</span>

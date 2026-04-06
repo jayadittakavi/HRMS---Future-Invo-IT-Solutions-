@@ -9,27 +9,19 @@ import {
     MdBusiness, // Departments
     MdBadge, // Designations
     MdFactCheck, // Attendance
-    MdEvent, // Calendar
     MdEventBusy, // Leave
     MdAttachMoney, // Payroll
-    MdRateReview, // Performance
     MdBarChart, // Reports
     MdNotifications,
     MdPerson, // Profile
     MdLogout,
     MdGroups, // Team
-    MdWork, // Recruitment
-    MdAssignmentInd, // Onboarding
-    MdSchool, // Training
     MdDescription, // Documents or Leave Req
-    MdTrackChanges, // Goals
     MdCalculate, // Tax
     MdAccountBalanceWallet, // Salary Structure
     MdFileUpload, // Upload
     MdPolicy, // Policies
-    MdHelp, // Help
     MdVpnKey, // Change Password
-    MdReceiptLong, // Payslips
     MdTask, // Alternative for Task
     MdAssignment, // Alternative for Daily Task
     MdAttachMoney as MdMoney, // Loans/Money
@@ -44,7 +36,6 @@ import {
     MdExpandLess,
     MdExpandMore,
     MdChevronLeft,
-    MdSupportAgent,
     MdChevronRight
 } from 'react-icons/md';
 
@@ -101,8 +92,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
             { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
             { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
-            { name: 'Calendar', icon: <MdEvent size={20} />, path: '/calendar' },
-            { name: 'Concierge & Support', icon: <MdSupportAgent size={20} />, path: '/support' },
             {
                 name: 'Requests',
                 icon: <MdEventBusy size={20} />,
@@ -111,13 +100,9 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                     { name: 'WFH', path: '/wfh-requests' }
                 ]
             },
-            { name: 'Recruitment', icon: <MdWork size={20} />, path: '/recruitment' },
-            { name: 'Onboarding', icon: <MdAssignmentInd size={20} />, path: '/onboarding' },
-            { name: 'Training', icon: <MdSchool size={20} />, path: '/training' },
             { name: 'Payroll & Salary', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
             { name: 'Loans & Advances', icon: <MdMoney size={20} />, path: '/loans' },
             { name: 'Travel & Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-            { name: 'Payslips & Tax', icon: <MdReceiptLong size={20} />, path: '/payslips' },
             { name: 'Financial Reports', icon: <MdBarChart size={20} />, path: '/financial-reports' },
             {
                 name: 'Administration',
@@ -129,28 +114,28 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 ]
             },
             { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
-            { name: 'Feedback', icon: <MdRateReview size={20} />, path: '/feedback' },
         ];
 
-        // Filter out specific modules based on roles
-        if (role.includes('superadmin') || role.includes('admin')) {
-            const forbiddenPaths = [
-                '/support',
-                '/payslips',
-                '/feedback'
+        // Filter out specific modules based on remaining roles if needed
+        if (role === 'employee') {
+            const allowedForEmployee = [
+                'Dashboard',
+                'Attendance',
+                'Requests',
+                'Payroll & Salary',
+                'Loans & Advances',
+                'Travel & Expenses',
+                'Administration',
+                'Documents'
             ];
-            links = links.filter(link => !forbiddenPaths.includes(link.path));
+            links = links.filter(link => allowedForEmployee.includes(link.name));
         } else if (role.includes('hr') || role.includes('fulltime')) {
             const forbiddenPathsForHR = [
-                '/support',
-                '/feedback',
                 '/financial-reports',
                 '/employee-directory',
                 '/companies',
                 '/branches',
-                '/calendar',
                 '/departments',
-                '/payslips'
             ];
             links = links.filter(link => !forbiddenPathsForHR.includes(link.path));
         }

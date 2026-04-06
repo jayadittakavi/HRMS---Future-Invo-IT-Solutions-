@@ -64,7 +64,9 @@ import UserManagement from "./pages/modules/core/user_management/UserManagement"
 
 /* HR */
 import Employees from "./pages/modules/hr/employees/Employees";
+import InviteMember from "./pages/modules/hr/employees/InviteMember";
 import AddMember from "./pages/modules/hr/employees/AddMember";
+import RolesList from "./pages/modules/hr/employees/RolesList";
 import CreateUsername from "./pages/modules/hr/employees/CreateUsername";
 import WFHRequests from "./pages/modules/hr/wfh/WFHRequests";
 import Attendance from "./pages/attendance/Attendance";
@@ -180,7 +182,7 @@ function AppContent() {
         <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Loans /></ProtectedRoute>} />
         <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><TravelExpenses /></ProtectedRoute>} />
         <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><UserManagement /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
 
         {/* Administration - Delegation, Visitor, Desk */}
         <Route path="/delegation" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr']}><Delegation /></ProtectedRoute>} />
@@ -205,7 +207,9 @@ function AppContent() {
 
         {/* HR Routes */}
         <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'employee']}><Employees /></ProtectedRoute>} />
+        <Route path="/invite-member" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><InviteMember /></ProtectedRoute>} />
         <Route path="/add-member" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><AddMember /></ProtectedRoute>} />
+        <Route path="/roles-list" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><RolesList /></ProtectedRoute>} />
         <Route path="/create-username" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><CreateUsername /></ProtectedRoute>} />
         <Route path="/wfh-requests" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'manager']}><WFHRequests /></ProtectedRoute>} />
         <Route path="/recruitment" element={<ProtectedRoute requiredRoles={['hr']}><Recruitment /></ProtectedRoute>} />

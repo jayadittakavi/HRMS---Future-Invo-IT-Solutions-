@@ -4,10 +4,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotification } from '../../context/NotificationContext';
 import { useSearch } from '../../context/SearchContext';
 import {
-    FaSearch, FaBell, FaPhoneAlt, FaRegCalendarAlt, FaCog
+    FaSearch, FaBell, FaCog
 } from 'react-icons/fa';
 import {
-    FiUser, FiMapPin, FiHelpCircle, FiFileText, FiShield, FiStar, FiLogOut
+    FiUser, FiMapPin, FiFileText, FiShield, FiLogOut
 } from 'react-icons/fi';
 
 const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
@@ -83,12 +83,6 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 <div className="d-flex align-items-center gap-2">
                     <button className="header-icon-circle-premium" title="Settings" onClick={() => navigate('/settings')}>
                         <FaCog size={15} />
-                    </button>
-                    <button className="header-icon-circle-premium calendar" title="Calendar" onClick={() => navigate('/calendar')}>
-                        <FaRegCalendarAlt size={15} />
-                    </button>
-                    <button className="header-icon-circle-premium support" title="Support" onClick={() => navigate('/support')}>
-                        <FaPhoneAlt size={14} />
                     </button>
                     <button className="header-icon-circle-premium notify position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
                         <FaBell size={15} />
@@ -168,24 +162,9 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                         );
                                     })()}
 
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/support')}>
-                                        <div className="icon-wrapper"><FiHelpCircle /></div>
-                                        <span>Support Center</span>
-                                    </div>
-
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/knowledge-base')}>
-                                        <div className="icon-wrapper"><FiFileText /></div>
-                                        <span>Resources</span>
-                                    </div>
-
                                     <div className="premium-dropdown-item" onClick={() => handleMenuClick('/privacy')}>
                                         <div className="icon-wrapper"><FiShield /></div>
                                         <span>Legal & Privacy</span>
-                                    </div>
-
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/feedback')}>
-                                        <div className="icon-wrapper"><FiStar /></div>
-                                        <span>Share Feedback</span>
                                     </div>
                                 </div>
 
