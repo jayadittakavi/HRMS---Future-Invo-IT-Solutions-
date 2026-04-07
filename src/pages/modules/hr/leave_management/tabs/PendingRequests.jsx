@@ -25,9 +25,8 @@ const PendingRequests = () => {
     const fetchPendingRequests = async () => {
         try {
             setLoading(true);
-            const response = await leaveService.getPendingApprovals();
-            if (response.ok) {
-                const data = await response.json();
+            const data = await leaveService.getPendingApprovals();
+            if (Array.isArray(data)) {
                 setRequests(data);
             }
         } catch (error) {
@@ -43,36 +42,34 @@ const PendingRequests = () => {
     const [actionMsg, setActionMsg] = useState('');
 
     const filtered = requests.filter(r =>
-        r.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.type.toLowerCase().includes(search.toLowerCase())
+        r.name?.toLowerCase().includes(search.toLowerCase()) ||
+        r.type?.toLowerCase().includes(search.toLowerCase())
     );
 
     const notify = (msg) => { setActionMsg(msg); setTimeout(() => setActionMsg(''), 3000); };
 
     const approve = async (id) => {
         try {
-            const response = await leaveService.approveLeave(id);
-            if (response.ok) {
-                setRequests(prev => prev.filter(r => r.id !== id));
-                notify('✅ Leave approved successfully.');
-            }
+            await leaveService.approveLeave(id);
+            setRequests(prev => prev.filter(r => r.id !== id));
+            notify('✅ Leave approved successfully.');
         } catch (error) {
             console.error("Error approving leave:", error);
+            alert("Failed to approve leave");
         }
     };
 
     const rejectConfirm = async () => {
         if (!rejectReason.trim()) return;
         try {
-            const response = await leaveService.rejectLeave(rejectModal);
-            if (response.ok) {
-                setRequests(prev => prev.filter(r => r.id !== rejectModal));
-                setRejectModal(null);
-                setRejectReason('');
-                notify('❌ Leave rejected.');
-            }
+            await leaveService.rejectLeave(rejectModal);
+            setRequests(prev => prev.filter(r => r.id !== rejectModal));
+            setRejectModal(null);
+            setRejectReason('');
+            notify('❌ Leave rejected.');
         } catch (error) {
             console.error("Error rejecting leave:", error);
+            alert("Failed to reject leave");
         }
     };
 

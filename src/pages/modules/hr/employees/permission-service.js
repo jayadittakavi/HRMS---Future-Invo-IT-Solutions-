@@ -26,8 +26,10 @@ export const permissionService = {
     inviteMemberWithPermissions: async (data, initialRole = 'admin') => {
         const endpoints = [
             `${API_BASE}/admin/access-control/invite`,
+            `${API_BASE}/admin/access-control/assign-role`,
             `${API_BASE}/admin/invite-member-with-permissions`,
             `${API_BASE}/superadmin/invite-member-with-permissions`,
+            `${API_BASE}/superadmin/users/assign-role`,
             `${API_BASE}/superadmin/users/invite`
         ];
 
@@ -83,23 +85,62 @@ export const permissionService = {
             }
         }
         
-        const finalError = priorityError || lastError || new Error("Failed to invite member with permissions");
+        // If all POST endpoints failed and we have a user_id, try a direct PUT update (common for existing members)
+        if (data.user_id) {
+            try {
+                const putUrl = `${API_BASE}/admin/access-control/users/${data.user_id}`;
+                console.log(`Fallback: Trying direct PUT to: ${putUrl}`);
+                const putRes = await fetch(putUrl, {
+                    method: "PUT",
+                    headers: getAuthHeader('superadmin'),
+                    body: JSON.stringify(data)
+                });
+                if (putRes.ok) return await putRes.json();
+            } catch (err) {
+                console.warn("Fallback PUT failed:", err);
+            }
+        }
+        
+        const finalError = priorityError || lastError || new Error("Failed to invite or update member permissions after trying all available endpoints");
         console.error("API Error (inviteMemberWithPermissions):", finalError);
         throw finalError;
     },
 
-    // 3. GET /api/superadmin/user-permissions/<user_id>
+    // 3. GET /api/access-control/user-permissions/<user_id>
     getUserPermissions: async (user_id) => {
-        try {
-            const response = await fetch(`${API_BASE}/superadmin/user-permissions/${user_id}`, {
-                method: "GET",
-                ...authHeader()
-            });
-            if (!response.ok) throw new Error("Failed to fetch user permissions");
-            return await response.json();
-        } catch (error) {
-            console.error("API Error (getUserPermissions):", error);
-            throw error;
+        const endpoints = [
+            `${API_BASE}/admin/access-control/users/${user_id}`,
+            `${API_BASE}/superadmin/user-permissions/${user_id}`,
+            `${API_BASE}/admin/user-permissions/${user_id}`,
+            `${API_BASE}/management/permissions/users/${user_id}`
+        ];
+
+        let lastError = null;
+        
+        for (const url of endpoints) {
+            try {
+                const response = await fetch(url, {
+                    method: "GET",
+                    headers: getAuthHeader('superadmin')
+                });
+                
+                if (response.ok) {
+                    return await response.json();
+                }
+                
+                if (response.status === 404 || response.status === 405) {
+                    continue; // Path issues, try next one
+                }
+                
+                const text = await response.text();
+                throw new Error(`Status ${response.status}: ${text || "Failed to fetch"}`);
+            } catch (error) {
+                lastError = error;
+                continue;
+            }
         }
+        
+        console.error("API Error (getUserPermissions):", lastError);
+        throw lastError || new Error("Failed to load user's existing permissions from any known endpoint");
     }
 };

@@ -1,63 +1,101 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
+import { useAuth } from '../../../../context/AuthContext';
 import { FaFilePdf, FaFileUpload, FaTrash, FaEye, FaSearch, FaDownload, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+
+import { documentService } from './service';
 
 export const DocumentsContent = () => {
     const [activeTab, setActiveTab] = useState('policies');
     const [showViewModal, setShowViewModal] = useState(false);
     const [selectedDoc, setSelectedDoc] = useState(null);
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+    const { user } = useAuth();
     const [search, setSearch] = useState(globalSearchTerm);
+    const [uploading, setUploading] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [policies, setPolicies] = useState([]);
+    const [employeeDocs, setEmployeeDocs] = useState([]);
+
+    const isEmployee = user?.role?.toLowerCase() === 'employee';
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            if (activeTab === 'policies') {
+                const data = await documentService.getPolicies();
+                setPolicies(Array.isArray(data) ? data : []);
+            } else if (activeTab === 'employee') {
+                const data = isEmployee 
+                    ? await documentService.getMyDocuments()
+                    : await documentService.getAdminList();
+                setEmployeeDocs(Array.isArray(data) ? data : []);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [activeTab]);
 
     useEffect(() => {
         setSearch(globalSearchTerm);
     }, [globalSearchTerm]);
-
-    const policies = [
-        { id: 1, name: 'Employee Handbook 2024', type: 'PDF', size: '2.4 MB', uploadDate: 'Jan 10, 2024', url: '#' },
-        { id: 2, name: 'Remote Work Policy', type: 'DOCX', size: '1.2 MB', uploadDate: 'Jan 15, 2024', url: '#' },
-        { id: 3, name: 'Leave Policy', type: 'PDF', size: '0.8 MB', uploadDate: 'Feb 01, 2024', url: '#' },
-    ];
-
-    const employeeDocs = [
-        { id: 1, employee: 'John Doe', name: 'Offer Letter', type: 'PDF', status: 'Verified', url: '#' },
-        { id: 2, employee: 'Jane Smith', name: 'Identity Proof', type: 'JPG', status: 'Pending Verification', url: '#' },
-        { id: 3, employee: 'Mike Ross', name: 'Experience Letter', type: 'PDF', status: 'Verified', url: '#' },
-    ];
 
     const handleView = (doc) => {
         setSelectedDoc(doc);
         setShowViewModal(true);
     };
 
-    const handleDownload = (doc) => {
-        // Simulate download
-        const link = document.createElement('a');
-        link.href = doc.url || '#';
-        link.download = doc.name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Show success message
-        alert(`Downloading: ${doc.name}`);
+    const handleDownload = async (doc) => {
+        try {
+            await documentService.downloadDocument(doc.id, doc.name);
+        } catch (error) {
+            alert("Download failed: " + error.message);
+        }
     };
 
     const handleToggleArchive = (doc) => {
-        // Toggle mock status or archive
-        doc.isArchived = !doc.isArchived;
-        alert(`Document "${doc.name}" has been ${doc.isArchived ? 'archived' : 'restored'}.`);
-        // Force refresh if needed
+        alert(`Archive action for "${doc.name}" is restricted to development mode.`);
     };
 
-    const handleVerify = (doc) => {
-        if (doc.status === 'Verified') return;
+    const handleUploadClick = () => {
+        document.getElementById('employee-doc-upload').click();
+    };
 
-        // Simulate verification
-        console.log('Verifying document:', doc);
-        alert(`Document "${doc.name}" for ${doc.employee} has been verified.`);
-        // Add actual verify logic here
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('document', file);
+            formData.append('type', 'Personal');
+            
+            await documentService.uploadDocument(formData);
+            alert(`File "${file.name}" uploaded successfully and sent for verification!`);
+            fetchData();
+        } catch (error) {
+            alert("Upload failed: " + error.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleVerify = async (doc, action = 'APPROVE') => {
+        try {
+            await documentService.verifyDocument(doc.id, action);
+            alert(`Document "${doc.name}" ${action.toLowerCase()}ed successfully.`);
+            fetchData();
+        } catch (error) {
+            alert("Verification failed: " + error.message);
+        }
     };
 
     return (
@@ -112,7 +150,9 @@ export const DocumentsContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {policies.filter(doc =>
+                                {loading ? (
+                                    <tr><td colSpan="5" className="text-center py-5"><div className="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                                ) : policies.filter(doc =>
                                     doc.name.toLowerCase().includes(search.toLowerCase())
                                 ).map(doc => (
                                     <tr key={doc.id}>
@@ -120,8 +160,8 @@ export const DocumentsContent = () => {
                                             <FaFilePdf className="text-danger me-2" /> {doc.name}
                                         </td>
                                         <td>{doc.type}</td>
-                                        <td>{doc.size}</td>
-                                        <td>{doc.uploadDate}</td>
+                                        <td>{doc.size || 'N/A'}</td>
+                                        <td>{doc.uploadDate || doc.created_at || 'N/A'}</td>
                                         <td className="text-end pe-4">
                                             <div className="d-flex justify-content-end gap-2 flex-nowrap">
                                                 <button
@@ -140,18 +180,23 @@ export const DocumentsContent = () => {
                                                 >
                                                     <FaDownload size={11} />
                                                 </button>
-                                                <button
-                                                    className="btn btn-sm btn-outline-warning px-2 py-1"
-                                                    onClick={() => handleToggleArchive(doc)}
-                                                    style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-                                                    title={doc.isArchived ? "Restore" : "Archive"}
-                                                >
-                                                    {doc.isArchived ? <FaCheckCircle size={11} /> : <FaTimesCircle size={11} />}
-                                                </button>
+                                                {!isEmployee && (
+                                                    <button
+                                                        className="btn btn-sm btn-outline-warning px-2 py-1"
+                                                        onClick={() => handleToggleArchive(doc)}
+                                                        style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
+                                                        title={doc.isArchived ? "Restore" : "Archive"}
+                                                    >
+                                                        {doc.isArchived ? <FaCheckCircle size={11} /> : <FaTimesCircle size={11} />}
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
+                                {policies.length === 0 && !loading && (
+                                    <tr><td colSpan="5" className="text-center py-5 text-muted">No policies found</td></tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -162,19 +207,35 @@ export const DocumentsContent = () => {
                 <div className="card border-0 shadow-sm">
                     <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom-0">
                         <h6 className="mb-0 fw-bold">Submitted Documents</h6>
-                        <div className="input-group input-group-sm w-auto">
-                            <span className="input-group-text bg-light border-0"><FaSearch /></span>
+                        <div className="d-flex align-items-center gap-2">
+                            <div className="input-group input-group-sm w-auto">
+                                <span className="input-group-text bg-light border-0"><FaSearch /></span>
+                                <input
+                                    type="text"
+                                    className="form-control border-0 bg-light"
+                                    placeholder="Search employee..."
+                                    value={search}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSearch(val);
+                                        setGlobalSearchTerm(val);
+                                    }}
+                                />
+                            </div>
                             <input
-                                type="text"
-                                className="form-control border-0 bg-light"
-                                placeholder="Search employee..."
-                                value={search}
-                                onChange={e => {
-                                    const val = e.target.value;
-                                    setSearch(val);
-                                    setGlobalSearchTerm(val);
-                                }}
+                                type="file"
+                                id="employee-doc-upload"
+                                className="d-none"
+                                onChange={handleFileUpload}
+                                accept=".pdf,.doc,.docx,.jpg,.png"
                             />
+                            <button 
+                                className="btn btn-primary btn-sm d-flex align-items-center gap-2"
+                                onClick={handleUploadClick}
+                                disabled={uploading}
+                            >
+                                <FaFileUpload /> {uploading ? 'Uploading...' : 'Upload Document'}
+                            </button>
                         </div>
                     </div>
                     <div className="table-responsive">
@@ -189,14 +250,16 @@ export const DocumentsContent = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {employeeDocs.filter(doc =>
-                                    doc.employee.toLowerCase().includes(search.toLowerCase()) ||
-                                    doc.name.toLowerCase().includes(search.toLowerCase())
+                                {loading ? (
+                                    <tr><td colSpan="5" className="text-center py-5"><div className="spinner-border spinner-border-sm text-primary"></div></td></tr>
+                                ) : employeeDocs.filter(doc =>
+                                    (doc.employee || '').toLowerCase().includes(search.toLowerCase()) ||
+                                    (doc.name || '').toLowerCase().includes(search.toLowerCase())
                                 ).map(doc => (
                                     <tr key={doc.id}>
-                                        <td className="ps-4 fw-bold">{doc.employee}</td>
+                                        <td className="ps-4 fw-bold">{doc.employee || user?.name || 'Venkateswara'}</td>
                                         <td>{doc.name}</td>
-                                        <td>{doc.type}</td>
+                                        <td><span className="badge bg-light text-secondary border fw-normal">{doc.type}</span></td>
                                         <td>
                                             <span className={`badge bg-opacity-10 text-dark border ${doc.status === 'Verified' ? 'bg-success text-success border-success' : 'bg-warning text-warning border-warning'
                                                 }`}>
@@ -204,7 +267,7 @@ export const DocumentsContent = () => {
                                             </span>
                                         </td>
                                         <td className="text-end pe-4">
-                                            <div className="d-flex justify-content-end gap-2 flex-nowrap">
+                                            <div className="d-flex justify-content-end gap-2 flex-nowrap align-items-center">
                                                 <button
                                                     className="btn btn-sm btn-outline-primary px-2 py-1"
                                                     onClick={() => handleView(doc)}
@@ -221,19 +284,36 @@ export const DocumentsContent = () => {
                                                 >
                                                     <FaDownload size={11} />
                                                 </button>
-                                                <button
-                                                    className={`btn btn-sm px-2 py-1 ${doc.status === 'Verified' ? 'btn-outline-secondary' : 'btn-outline-warning'}`}
-                                                    onClick={() => handleVerify(doc)}
-                                                    style={{ fontSize: '0.75rem', whiteSpace: 'nowrap' }}
-                                                    title="Verify"
-                                                    disabled={doc.status === 'Verified'}
-                                                >
-                                                    <FaCheckCircle size={11} />
-                                                </button>
+                                                {!isEmployee && doc.status !== 'Verified' && (
+                                                    <div className="d-flex gap-1">
+                                                        <button
+                                                            className="btn btn-sm btn-success px-2 py-1"
+                                                            onClick={() => handleVerify(doc, 'APPROVE')}
+                                                            style={{ fontSize: '0.75rem' }}
+                                                            title="Approve"
+                                                        >
+                                                            <FaCheckCircle size={11} />
+                                                        </button>
+                                                        <button
+                                                            className="btn btn-sm btn-danger px-2 py-1"
+                                                            onClick={() => handleVerify(doc, 'REJECT')}
+                                                            style={{ fontSize: '0.75rem' }}
+                                                            title="Reject"
+                                                        >
+                                                            <FaTimesCircle size={11} />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {!isEmployee && doc.status === 'Verified' && (
+                                                    <span className="text-success small fw-bold px-2">✓ Verified</span>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
+                                {employeeDocs.length === 0 && !loading && (
+                                    <tr><td colSpan="5" className="text-center py-5 text-muted">No documents found</td></tr>
+                                )}
                             </tbody>
                         </table>
                     </div>

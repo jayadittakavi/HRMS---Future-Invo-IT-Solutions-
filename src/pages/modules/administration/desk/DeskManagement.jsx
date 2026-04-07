@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { deskService } from '../../../../services/deskService';
 import {
     MdWindow, MdEventAvailable, MdHistory, MdSettings,
     MdPeople, MdLocationOn, MdLibraryAdd, MdFactCheck,
@@ -26,29 +27,51 @@ export const DeskManagementContent = () => {
     const [floorModalView, setFloorModalView] = useState('options'); // 'options' | 'layout'
 
 
-    // Mock Data
-    const [desks, setDesks] = useState([
-        { id: 'D01', name: 'Desk 101', floor: '1st Floor', wing: 'Alpha', status: 'Available', type: 'Hot Desk', team: 'Engineering' },
-        { id: 'D02', name: 'Desk 102', floor: '1st Floor', wing: 'Alpha', status: 'Booked', type: 'Hot Desk', team: 'Engineering', bookedBy: 'John Doe', allocatedAt: '10:00 AM' },
-        { id: 'D03', name: 'Desk 103', floor: '2nd Floor', wing: 'Beta', status: 'Assigned', type: 'Permanent', team: 'HR', bookedBy: 'Alice Smith', allocatedAt: 'Feb 20, 09:15 AM' },
-        { id: 'D04', name: 'Desk 104', floor: '1st Floor', wing: 'Gamma', status: 'Available', type: 'Hot Desk', team: 'Marketing' },
-    ]);
+    const [loading, setLoading] = useState(false);
+    const [desks, setDesks] = useState([]);
+    const [bookings, setBookings] = useState([]);
+    const [stats, setStats] = useState({
+        total: 0,
+        available: 0,
+        booked: 0,
+        assigned: 0
+    });
 
-    const [bookings, setBookings] = useState([
-        { id: 'B01', deskId: 'D02', employee: 'John Doe', date: '2026-02-25', time: '10:00 AM', status: 'Confirmed', team: 'Engineering' },
-        { id: 'B02', deskId: 'D04', employee: 'Bob Wilson', date: '2026-02-25', time: '02:30 PM', status: 'Pending Approval', team: 'Engineering' },
-    ]);
+    useEffect(() => {
+        fetchData();
+    }, [activeTab]);
 
-    const stats = {
-        total: desks.length,
-        available: desks.filter(d => d.status === 'Available').length,
-        booked: desks.filter(d => d.status === 'Booked').length,
-        assigned: desks.filter(d => d.status === 'Assigned').length,
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [dData, sData] = await Promise.all([
+                deskService.getDeskList(),
+                deskService.getStats()
+            ]);
+            setDesks(dData || []);
+            setStats(sData || stats);
+
+            if (activeTab === 'my-bookings') {
+                const bData = await deskService.getMyBookings();
+                setBookings(bData || []);
+            }
+        } catch (error) {
+            console.error("Desk Fetch Error:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleAction = (action, data) => {
-        console.log(`Action: ${action}`, data);
-        alert(`${action} successful! (Mock)`);
+    const handleAction = async (action, data) => {
+        try {
+            if (action === 'Booking') {
+                await deskService.bookDesk({ desk_id: data.id, date: new Date().toISOString().split('T')[0] });
+            }
+            alert(`${action} successful!`);
+            fetchData();
+        } catch (error) {
+            alert(`${action} failed: ` + error.message);
+        }
     };
 
     const getStatusStyle = (status) => {

@@ -96,9 +96,41 @@ const AddMember = () => {
             }
         };
 
+        const fetchExistingMembers = async () => {
+            try {
+                const users = await coreService.getUsers();
+                const mapped = (users || []).map(u => ({
+                    user_id: u.id,
+                    name: u.name || u.username,
+                    initial: (u.name || u.username || 'U').charAt(0).toUpperCase(),
+                    email: u.email
+                }));
+                setExistingMembers(mapped);
+            } catch (err) {
+                console.warn("Failed to fetch existing members list", err);
+            }
+        };
+
         fetchModules();
         fetchDropdownData();
+        fetchExistingMembers();
     }, []);
+
+    // Handle incoming existing member for editing
+    useEffect(() => {
+        if (location.state?.newMember?.user_id) {
+            const memberId = location.state.newMember.user_id;
+            
+            // Set basic details
+            if (location.state.newMember.company_id) setSelectedCompany(location.state.newMember.company_id);
+            if (location.state.newMember.branch) setSelectedBranch(location.state.newMember.branch);
+            
+            // Fetch their permissions
+            setTimeout(() => {
+                handleLoadUserPermissions(memberId);
+            }, 500); // Small delay to ensure modules are loaded first
+        }
+    }, [location.state, dynamicModules]);
 
     const handleCompanyChange = (e) => {
         const companyId = e.target.value;
@@ -132,7 +164,13 @@ const AddMember = () => {
                 // 2. Dashboard - only view action
                 if (newPerms['Dashboard']) newPerms['Dashboard']['VIEW'] = true;
 
-                // 3. Attendance - only view his data and export
+                // 3. My Team - view, create
+                if (newPerms['My Team']) {
+                    newPerms['My Team']['VIEW'] = true;
+                    newPerms['My Team']['CREATE'] = true;
+                }
+
+                // 4. Attendance - only view his data and export
                 if (newPerms['Attendance']) {
                     newPerms['Attendance']['VIEW'] = true;
                     newPerms['Attendance']['EXPORT'] = true;
@@ -247,11 +285,10 @@ const AddMember = () => {
         try {
             setLoading(true);
             const data = await permissionService.getUserPermissions(user_id);
-            setSelectedRole(data.role || '');
+            if (data.role) setSelectedRole(data.role);
             setSelectedUserId(user_id);
             
             // Re-map permissions from backend structure
-            // Assume data.permissions looks like: { "Dashboard": ["VIEW", "EDIT"], "Employees": ["VIEW"] }
             if (data.permissions) {
                 setPermissions(prev => {
                     const newPerms = { ...prev };
@@ -268,7 +305,10 @@ const AddMember = () => {
             }
         } catch (err) {
             console.error("Error loading user permissions", err);
-            alert("Could not load user's existing permissions.");
+            // Don't alert if we just navigated here, maybe it's a new user with no perms yet
+            if (!location.state?.newMember) {
+                alert("The system could not retrieve specific permissions for this user. You can still assign new permissions manually.");
+            }
         } finally {
             setLoading(false);
         }

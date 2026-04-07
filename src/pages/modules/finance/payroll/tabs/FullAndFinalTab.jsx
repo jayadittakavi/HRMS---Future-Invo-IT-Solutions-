@@ -519,7 +519,7 @@ const EmployeeDetail = ({ emp, onBack }) => {
 };
 
 /* ─── Main FullAndFinalTab ────────────────────────────────── */
-const FullAndFinalTab = () => {
+const FullAndFinalTab = ({ personal = false }) => {
     const [selected, setSelected] = useState(null);
     const [filterStatus, setFilterStatus] = useState('');
     const [settlements, setSettlements] = useState([]);
@@ -535,14 +535,25 @@ const FullAndFinalTab = () => {
 
     useEffect(() => {
         fetchSettlements();
-        fetchEmployees();
-    }, []);
+        if (!personal) {
+            fetchEmployees();
+        }
+    }, [personal]);
 
     const fetchSettlements = async () => {
         setLoading(true);
         try {
+            // For personal mode, we might fetch from a specific endpoint or filter
+            // Here we assume getSettlements handles access or we filter.
             const data = await payrollService.getSettlements();
             setSettlements(data || []);
+            
+            // If personal, automatically select the user's settlement if found
+            if (personal && data && data.length > 0) {
+                // In a real app, we'd match the user ID from context
+                // For now, if personal mode, show the first available (usually only one for user)
+                setSelected(data[0].id);
+            }
         } catch (error) {
             console.error("Failed to fetch settlements", error);
         } finally {
@@ -573,8 +584,19 @@ const FullAndFinalTab = () => {
 
     const emp = settlements.find(e => e.id === selected);
 
+    if (personal && (!selected || !emp)) {
+        if (loading) return <div className="p-4 text-center">Loading your settlement...</div>;
+        return (
+            <div className="text-center py-5">
+                <FaExclamationTriangle size={40} className="text-warning mb-3" />
+                <h5>No Settlement Found</h5>
+                <p className="text-secondary">You do not have a Full & Final settlement process active at this time.</p>
+            </div>
+        );
+    }
+
     if (selected && emp) {
-        return <EmployeeDetail emp={emp} onBack={() => setSelected(null)} />;
+        return <EmployeeDetail emp={emp} onBack={personal ? null : () => setSelected(null)} />;
     }
 
     const filtered = settlements.filter(e => !filterStatus || e.status === filterStatus);

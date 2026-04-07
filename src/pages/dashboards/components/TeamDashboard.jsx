@@ -36,9 +36,9 @@ const TeamDashboard = ({ role }) => {
         setLoading(true);
         try {
             const [sData, superData, resData] = await Promise.all([
-                teamService.getStats(),
-                teamService.getSuperstars(),
-                teamService.getResilience()
+                teamService.getStats(role),
+                teamService.getSuperstars(role),
+                teamService.getResilience(role)
             ]);
 
             // Map stats
@@ -95,19 +95,23 @@ const TeamDashboard = ({ role }) => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button
-                        className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
-                        onClick={() => setShowInviteModal(true)}
-                        style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', borderColor: 'transparent' }}
-                    >
-                        <FaUserPlus /> Invite Member
-                    </button>
-                    <button
-                        className="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
-                        onClick={() => navigate('/dashboard/manage-squad')}
-                    >
-                        <FaUsers /> Manage Squad
-                    </button>
+                    {role !== 'employee' && (
+                        <>
+                            <button
+                                className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"
+                                onClick={() => setShowInviteModal(true)}
+                                style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', borderColor: 'transparent' }}
+                            >
+                                <FaUserPlus /> Invite Member
+                            </button>
+                            <button
+                                className="btn btn-outline-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2"
+                                onClick={() => navigate('/dashboard/manage-squad')}
+                            >
+                                <FaUsers /> Manage Squad
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 

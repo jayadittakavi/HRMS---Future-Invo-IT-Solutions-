@@ -37,7 +37,7 @@ export const PayrollContent = ({ personal = false }) => {
             case 'form16':
                 return <Form16Tab onTabChange={setActiveTab} />;
             case 'fnf':
-                return <FullAndFinalTab onTabChange={setActiveTab} />;
+                return <FullAndFinalTab personal={personal} onTabChange={setActiveTab} />;
             case 'letters':
                 return <LettersTab onTabChange={setActiveTab} />;
             case 'reports':
@@ -64,7 +64,7 @@ export const PayrollContent = ({ personal = false }) => {
                 {tabs.map((tab) => {
                     // Simple access control logic: Usually handled better, but here we check visibility
                     // If personal mode, hide management tabs mostly.
-                    if (personal && !['payslip', 'form16'].includes(tab.id)) return null;
+                    if (personal && !['payslip', 'form16', 'fnf'].includes(tab.id)) return null;
 
                     return (
                         <button

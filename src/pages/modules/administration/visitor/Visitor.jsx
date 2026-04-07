@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { useSearch } from '../../../../context/SearchContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
+import { visitorService } from '../../../../services/visitorService';
 import {
     MdPersonAdd, MdAssignment, MdHistory, MdBarChart,
     MdCheckCircle, MdCancel, MdLogin, MdLogout, MdPrint,
@@ -109,8 +110,19 @@ export const VisitorContent = () => {
         return <span className={`badge rounded-pill border px-3 py-1 ${styles[status] || 'bg-light text-dark'}`}>{status}</span>;
     };
 
-    const handleAction = (id, newStatus) => {
-        setVisitors(prev => prev.map(v => v.id === id ? { ...v, status: newStatus } : v));
+    const handleAction = async (id, action) => {
+        try {
+            const apiAction = action === 'Approved' ? 'APPROVE' : 
+                             action === 'Rejected' ? 'REJECT' : 
+                             action === 'Checked-In' ? 'CHECK_IN' : 'CHECK_OUT';
+            const res = await visitorService.takeAction(id, apiAction);
+            if (res.success) {
+                alert(`Action ${action} successful!`);
+                fetchData();
+            }
+        } catch (error) {
+            alert("Action failed: " + error.message);
+        }
     };
 
     return (
@@ -343,15 +355,15 @@ export const VisitorContent = () => {
                                 <div className="d-flex flex-column gap-3">
                                     <div className="d-flex justify-content-between">
                                         <span className="opacity-75 small">Total Expected</span>
-                                        <span className="fw-bold h5 mb-0">12</span>
+                                        <span className="fw-bold h5 mb-0">{stats.total_expected}</span>
                                     </div>
                                     <div className="d-flex justify-content-between">
                                         <span className="opacity-75 small">Inside Premise</span>
-                                        <span className="fw-bold h5 mb-0">4</span>
+                                        <span className="fw-bold h5 mb-0">{stats.inside_premise}</span>
                                     </div>
                                     <div className="d-flex justify-content-between">
                                         <span className="opacity-75 small">Completed</span>
-                                        <span className="fw-bold h5 mb-0">8</span>
+                                        <span className="fw-bold h5 mb-0">{stats.completed}</span>
                                     </div>
                                 </div>
                             </div>
@@ -391,42 +403,49 @@ export const VisitorContent = () => {
                             <div className="row g-3">
                                 <div className="col-md-12">
                                     <label className="form-label small fw-bold">Visitor Name</label>
-                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="Enter guest name" />
+                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="Enter guest name" 
+                                        value={requestForm.visitor_name} onChange={e => setRequestForm({...requestForm, visitor_name: e.target.value})} />
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Organization / Company</label>
-                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="Self or Company" />
+                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="Self or Company" 
+                                        value={requestForm.organization} onChange={e => setRequestForm({...requestForm, organization: e.target.value})} />
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Phone No.</label>
-                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="+91" />
+                                    <input type="text" className="form-control border-0 shadow-sm" placeholder="+91" 
+                                        value={requestForm.phone_number} onChange={e => setRequestForm({...requestForm, phone_number: e.target.value})} />
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Date of Visit</label>
-                                    <input type="date" className="form-control border-0 shadow-sm" defaultValue={new Date().toISOString().split('T')[0]} />
+                                    <input type="date" className="form-control border-0 shadow-sm" 
+                                        value={requestForm.visit_date} onChange={e => setRequestForm({...requestForm, visit_date: e.target.value})} />
                                 </div>
                                 <div className="col-md-6">
                                     <label className="form-label small fw-bold">Preferred Time</label>
-                                    <input type="time" className="form-control border-0 shadow-sm" />
+                                    <input type="time" className="form-control border-0 shadow-sm" 
+                                        value={requestForm.preferred_time} onChange={e => setRequestForm({...requestForm, preferred_time: e.target.value})} />
                                 </div>
                                 <div className="col-md-12">
                                     <label className="form-label small fw-bold">Meeting With (Employee)</label>
-                                    <select className="form-select border-0 shadow-sm">
-                                        <option>Select staff member...</option>
-                                        <option>Rahul Sharma</option>
-                                        <option>Priya HR</option>
-                                        <option>Suresh Manager</option>
+                                    <select className="form-select border-0 shadow-sm" 
+                                        value={requestForm.meeting_with_employee_id} onChange={e => setRequestForm({...requestForm, meeting_with_employee_id: e.target.value})}>
+                                        <option value="">Select staff member...</option>
+                                        {staffList.map(s => (
+                                            <option key={s.id} value={s.id}>{s.name} - {s.designation}</option>
+                                        ))}
                                     </select>
                                 </div>
                                 <div className="col-md-12">
                                     <label className="form-label small fw-bold">Purpose of Visit</label>
-                                    <textarea className="form-control border-0 shadow-sm" rows="3" placeholder="Meeting, Delivery, Technical Support..."></textarea>
+                                    <textarea className="form-control border-0 shadow-sm" rows="3" placeholder="Meeting, Delivery, Technical Support..."
+                                        value={requestForm.purpose} onChange={e => setRequestForm({...requestForm, purpose: e.target.value})}></textarea>
                                 </div>
                             </div>
                         </div>
                         <div className="p-4 bg-white d-flex gap-2">
                             <button className="btn btn-light border w-100 py-2 rounded-3" onClick={() => setShowModal(false)}>Cancel</button>
-                            <button className="btn btn-primary w-100 py-2 rounded-3" onClick={() => setShowModal(false)}>Submit Request</button>
+                            <button className="btn btn-primary w-100 py-2 rounded-3" onClick={handleSubmitRequest}>Submit Request</button>
                         </div>
                     </div>
                 </div>

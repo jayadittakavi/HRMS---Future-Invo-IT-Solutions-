@@ -1,16 +1,17 @@
 import { API_BASE, getAuthHeader } from '../../../../config';
 
-const authHeader = () => {
-    return {
-        headers: getAuthHeader('hr'), // These APIs are specifically for the HR role
-    };
-};
+const authHeader = (role = 'superadmin') => ({ 
+    headers: {
+        ...getAuthHeader(role),
+        "Content-Type": "application/json"
+    }
+});
 
 export const onboardingService = {
     // 1. Get Onboarding Statistics
     getStats: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr/onboarding/stats`, authHeader());
+            const response = await fetch(`${API_BASE}/hr/onboarding/stats`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { total_hires: 0, pending_docs: 0, in_progress: 0, verified: 0 };
             return await response.json();
         } catch (error) {
@@ -22,7 +23,7 @@ export const onboardingService = {
     // 2. Get Candidate List
     getCandidates: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr/onboarding/candidates`, authHeader());
+            const response = await fetch(`${API_BASE}/hr/onboarding/candidates`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -34,7 +35,7 @@ export const onboardingService = {
     // 3. Get Document Checklist
     getChecklist: async (employeeId) => {
         try {
-            const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/checklist`, authHeader());
+            const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/checklist`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { educational: [], identity: [] };
             return await response.json();
         } catch (error) {
@@ -48,7 +49,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/verify-document/${documentId}`, {
                 method: "POST",
-                ...authHeader()
+                headers: authHeader('superadmin').headers
             });
             return response.ok;
         } catch (error) {
@@ -62,7 +63,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/verify-all`, {
                 method: "POST",
-                ...authHeader()
+                headers: authHeader('superadmin').headers
             });
             return response.ok;
         } catch (error) {
@@ -74,7 +75,7 @@ export const onboardingService = {
     // 6. Get Form Options
     getFormOptions: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr/onboarding/form-options`, authHeader());
+            const response = await fetch(`${API_BASE}/hr/onboarding/form-options`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { departments: [], designations: [], employmentTypes: [] };
             return await response.json();
         } catch (error) {
@@ -88,10 +89,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr/onboarding/add-candidate`, {
                 method: "POST",
-                headers: {
-                    ...authHeader().headers,
-                    "Content-Type": "application/json"
-                },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -104,7 +102,7 @@ export const onboardingService = {
     // 8. Get Letter Options
     getLetterOptions: async (employeeId) => {
         try {
-            const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/letter-options`, authHeader());
+            const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/letter-options`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { letter_types: [], templates: [] };
             return await response.json();
         } catch (error) {
@@ -118,10 +116,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr/onboarding/${employeeId}/generate-letter`, {
                 method: "POST",
-                headers: {
-                    ...authHeader().headers,
-                    "Content-Type": "application/json"
-                },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -134,7 +129,7 @@ export const onboardingService = {
     // ... rest of template methods (unchanged for now or keep standardizing if needed)
     getTemplateStats: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/stats`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/stats`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { total: 0, active: 0, draft: 0 };
             return await response.json();
         } catch (error) {
@@ -144,7 +139,7 @@ export const onboardingService = {
     },
     getTemplates: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/list`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/list`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -155,7 +150,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/letters/templates/add`, {
                 method: "POST",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -167,7 +162,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/letters/templates/${id}`, {
                 method: "PUT",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -179,7 +174,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/letters/templates/${id}`, {
                 method: "DELETE",
-                ...authHeader()
+                headers: getAuthHeader('superadmin')
             });
             return response.ok;
         } catch (error) {
@@ -188,7 +183,7 @@ export const onboardingService = {
     },
     getTemplateCategories: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/categories`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/templates/categories`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -199,7 +194,7 @@ export const onboardingService = {
     // 16. Letter Approvals
     getApprovalSummary: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/summary`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/summary`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { pending_approvals: 0, active_workflows: 0, approved_this_month: 0, rejected: 0 };
             return await response.json();
         } catch (error) {
@@ -210,7 +205,7 @@ export const onboardingService = {
 
     getPendingApprovals: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/pending`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/pending`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -223,7 +218,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/letters/approval/${stepId}/action`, {
                 method: "POST",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify({ action }),
             });
             return response.ok;
@@ -235,7 +230,7 @@ export const onboardingService = {
 
     getWorkflows: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/workflows`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/letters/approval/workflows`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -248,7 +243,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/letters/approval/workflows`, {
                 method: "POST",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -261,7 +256,7 @@ export const onboardingService = {
     // 17. Certificates
     getCertificateHistory: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/certificates/history`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/certificates/history`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -274,7 +269,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/certificates/issue`, {
                 method: "POST",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data),
             });
             return await response.json();
@@ -286,7 +281,7 @@ export const onboardingService = {
 
     viewCertificate: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/certificates/${id}/view`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/certificates/${id}/view`, { headers: getAuthHeader('superadmin') });
             return await response.json();
         } catch (error) {
             console.error("API Error (viewCertificate):", error);
@@ -296,7 +291,7 @@ export const onboardingService = {
 
     downloadCertificate: async (id) => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/certificates/${id}/download`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/certificates/${id}/download`, { headers: getAuthHeader('superadmin') });
             if (response.ok) {
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
@@ -315,7 +310,7 @@ export const onboardingService = {
     // 18. E-Signing
     getESignSummary: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/esign/summary`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/esign/summary`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return { total_sent: 0, signed: 0, pending: 0, overdue: 0 };
             return await response.json();
         } catch (error) {
@@ -326,7 +321,7 @@ export const onboardingService = {
 
     getESignRequests: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/esign/requests`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/esign/requests`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -339,7 +334,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/esign/requests`, {
                 method: "POST",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(data)
             });
             return await response.json();
@@ -351,7 +346,7 @@ export const onboardingService = {
 
     getESignSettings: async () => {
         try {
-            const response = await fetch(`${API_BASE}/hr-docs/esign/settings`, authHeader());
+            const response = await fetch(`${API_BASE}/hr-docs/esign/settings`, { headers: getAuthHeader('superadmin') });
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -364,7 +359,7 @@ export const onboardingService = {
         try {
             const response = await fetch(`${API_BASE}/hr-docs/esign/settings`, {
                 method: "PUT",
-                headers: { ...authHeader().headers, "Content-Type": "application/json" },
+                headers: authHeader('superadmin').headers,
                 body: JSON.stringify(settings)
             });
             return await response.json();

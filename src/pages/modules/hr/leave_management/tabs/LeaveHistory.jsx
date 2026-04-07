@@ -32,9 +32,8 @@ const LeaveHistory = ({ personal = false }) => {
                 type: typeFilter !== 'All' ? typeFilter : undefined,
                 personal: personal || undefined
             };
-            const response = await leaveService.getHistory(filters);
-            if (response.ok) {
-                const data = await response.json();
+            const data = await leaveService.getHistory(filters);
+            if (Array.isArray(data)) {
                 setHistory(data);
             }
         } catch (error) {
@@ -45,8 +44,8 @@ const LeaveHistory = ({ personal = false }) => {
     };
 
     const filtered = history.filter(h => 
-        h.name.toLowerCase().includes(search.toLowerCase()) || 
-        h.type.toLowerCase().includes(search.toLowerCase())
+        (h.name && h.name.toLowerCase().includes(search.toLowerCase())) || 
+        (h.type && h.type.toLowerCase().includes(search.toLowerCase()))
     );
 
     const types = ['All', ...Array.from(new Set(history.map(h => h.type)))];

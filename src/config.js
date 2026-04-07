@@ -8,7 +8,9 @@ export const API_BASE = "/api";
 export const TEST_TOKENS = {
     superadmin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoyLCJyb2xlIjoiU1VQRVJfQURNSU4iLCJjb21wYW55X2lkIjpudWxsLCJleHAiOjE3NzU1NTA1MzN9.GONoLYTgYRfAgM990LB6B_ne9dFnannRVFMtbaX_PRg",
     admin: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxOCwicm9sZSI6IkVNUExPWUVFIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc0OTM4MjE1fQ.2tKpw8dQUZl-HceXNZobDsRA5Q5dj07xClRd8nGM9qA",
-    hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc1MTMwMzk4fQ.hSc8v5HHGiFcHfQMQtZvg4lUqPrOnqBqxTY1fKfHaDc"
+    hr: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxNywicm9sZSI6IkZVTExUSU1FIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc1MTMwMzk4fQ.hSc8v5HHGiFcHfQMQtZvg4lUqPrOnqBqxTY1fKfHaDc",
+    manager: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1OCwicm9sZSI6Ik1BTkFHRVIiLCJjb21wYW55X2lkIjozLCJleHAiOjE3NzU2MjQ4NDR9.kT9_zffc5FomqpLt1mQneD5rtXwtg7cjZ8vk4ksFcvw",
+    employee: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1Nywicm9sZSI6IkVNUExPWUVFIiwiY29tcGFueV9pZCI6MywiZXhwIjoxNzc1NjI1MTQ4fQ.3vyBTLAw9rrRb_SInaSQBSlTogD166HmBk_g5GQ6iZQ"
 };
 
 /**
@@ -23,6 +25,8 @@ export const getAuthHeader = (role = 'superadmin') => {
     const normalizedRole = (role || 'superadmin').toLowerCase().replace(/_/g, '');
     let tokenKey = normalizedRole;
     if (normalizedRole.includes('hr') || normalizedRole.includes('fulltime')) tokenKey = 'hr';
+    if (normalizedRole.includes('employee')) tokenKey = 'employee';
+    if (normalizedRole.includes('manager')) tokenKey = 'manager';
     
     const fallbackToken = TEST_TOKENS[tokenKey] || TEST_TOKENS.superadmin;
     

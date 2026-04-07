@@ -22,9 +22,8 @@ const LeavePolicies = () => {
     const fetchPolicies = async () => {
         try {
             setLoading(true);
-            const response = await leaveService.getUiPolicies();
-            if (response.ok) {
-                const data = await response.json();
+            const data = await leaveService.getUiPolicies();
+            if (Array.isArray(data)) {
                 setPolicies(data);
             }
         } catch (error) {
@@ -57,12 +56,11 @@ const LeavePolicies = () => {
         if (window.confirm(`Are you sure you want to ${action} this leave policy?`)) {
             try {
                 const updatedPolicy = { ...policy, status: policy.status === 'Inactive' ? 'Active' : 'Inactive' };
-                const response = await leaveService.updateUiPolicy(policy.id, updatedPolicy);
-                if (response.ok) {
-                    fetchPolicies();
-                }
+                await leaveService.updateUiPolicy(policy.id, updatedPolicy);
+                fetchPolicies();
             } catch (error) {
                 console.error("Error updating policy status:", error);
+                alert("Failed to update policy status");
             }
         }
     };
@@ -70,19 +68,16 @@ const LeavePolicies = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            let response;
             if (editingPolicy) {
-                response = await leaveService.updateUiPolicy(editingPolicy, formData);
+                await leaveService.updateUiPolicy(editingPolicy, formData);
             } else {
-                response = await leaveService.createUiPolicy(formData);
+                await leaveService.createUiPolicy(formData);
             }
-
-            if (response.ok) {
-                setShowModal(false);
-                fetchPolicies();
-            }
+            setShowModal(false);
+            fetchPolicies();
         } catch (error) {
             console.error("Error saving policy:", error);
+            alert("Failed to save policy");
         }
     };
 

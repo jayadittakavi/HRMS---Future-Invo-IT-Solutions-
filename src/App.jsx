@@ -74,6 +74,7 @@ import LeaveManagement from "./pages/modules/hr/leave_management/LeaveManagement
 import Profile from "./pages/modules/hr/profile/Profile";
 import MyDocuments from "./pages/modules/hr/documents/MyDocuments";
 import MyPerformance from "./pages/modules/hr/performance/MyPerformance";
+import MyAssets from "./pages/modules/administration/assets/MyAssets";
 import Recruitment from "./pages/modules/hr/recruitment/Recruitment";
 import Training from "./pages/modules/hr/training/Training";
 import PerformanceReviews from "./pages/modules/hr/performance/PerformanceReviews";
@@ -215,7 +216,7 @@ function AppContent() {
         <Route path="/recruitment" element={<ProtectedRoute requiredRoles={['hr']}><Recruitment /></ProtectedRoute>} />
         <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><Training /></ProtectedRoute>} />
         <Route path="/performance-reviews" element={<ProtectedRoute requiredRoles={['hr']}><PerformanceReviews /></ProtectedRoute>} />
-        <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr']}><Documents /></ProtectedRoute>} />
+        <Route path="/documents" element={<ProtectedRoute requiredRoles={['hr', 'admin', 'manager', 'employee', 'superadmin']}><Documents /></ProtectedRoute>} />
         <Route path="/leave-requests" element={<ProtectedRoute requiredRoles={['hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
         <Route path="/onboarding" element={<ProtectedRoute requiredRoles={['superadmin', 'hr']}><Onboarding /></ProtectedRoute>} />
 
@@ -247,6 +248,7 @@ function AppContent() {
         <Route path="/my-payslips" element={<ProtectedRoute><Payroll personal={true} /></ProtectedRoute>} />
         <Route path="/my-documents" element={<ProtectedRoute><MyDocuments /></ProtectedRoute>} />
         <Route path="/my-performance" element={<ProtectedRoute><MyPerformance /></ProtectedRoute>} />
+        <Route path="/my-assets" element={<ProtectedRoute><MyAssets /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />

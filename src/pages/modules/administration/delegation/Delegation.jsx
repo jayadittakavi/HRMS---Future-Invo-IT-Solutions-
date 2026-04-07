@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../../context/AuthContext';
 import { useSearch } from '../../../../context/SearchContext';
+import { delegationService } from '../../../../services/delegationService';
 import {
     MdSecurity, MdAdd, MdHistory, MdCancel, MdCheckCircle,
     MdTimer, MdPerson, MdLayers, MdCalendarToday, MdFilterList
@@ -15,38 +16,42 @@ export const DelegationContent = () => {
         setSearchTerm(globalSearchTerm);
     }, [globalSearchTerm]);
 
-    const [delegations, setDelegations] = useState([
-        {
-            id: 1,
-            delegated_by: 'Admin User',
-            delegated_by_role: 'admin',
-            delegated_to: 'John Manager',
-            module: 'Payroll Approval',
-            start_date: '2026-02-20',
-            end_date: '2026-02-25',
-            status: 'Active'
-        },
-        {
-            id: 2,
-            delegated_by: 'Super Admin',
-            delegated_by_role: 'superadmin',
-            delegated_to: 'Sarah HR',
-            module: 'Leave Approval',
-            start_date: '2026-01-10',
-            end_date: '2026-01-15',
-            status: 'Expired'
-        },
-        {
-            id: 3,
-            delegated_by: 'Manager Wong',
-            delegated_by_role: 'manager',
-            delegated_to: 'Kevin Lead',
-            module: 'Task Approval',
-            start_date: '2026-03-01',
-            end_date: '2026-03-10',
-            status: 'Active'
+    const [loading, setLoading] = useState(false);
+    const [delegations, setDelegations] = useState([]);
+    const [stats, setStats] = useState({
+        active: 0,
+        expired: 0,
+        total: 0
+    });
+
+    useEffect(() => {
+        setSearchTerm(globalSearchTerm);
+    }, [globalSearchTerm]);
+
+    useEffect(() => {
+        fetchData();
+    }, [searchTerm]);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [list, sData] = await Promise.all([
+                delegationService.getDelegationHistory(searchTerm),
+                delegationService.getStats()
+            ]);
+            setDelegations(Array.isArray(list) ? list : []);
+            if (sData) setStats({
+                active: sData.active_count || 0,
+                expired: (sData.total_count || 0) - (sData.active_count || 0),
+                total: sData.total_count || 0
+            });
+        } catch (error) {
+            console.error("Delegation Fetch Error:", error);
+        } finally {
+            setLoading(false);
         }
-    ]);
+    };
+
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         delegated_to: '',
@@ -58,67 +63,35 @@ export const DelegationContent = () => {
     const userRole = user?.role?.toLowerCase() || 'employee';
 
     // Role Hierarchy rules
-    // SuperAdmin > Admin > Manager > HR > Employee
     const canCreateDelegation = ['superadmin', 'admin', 'manager', 'hr'].includes(userRole);
 
     // Filtering delegations based on role visibility and search
-    const visibleDelegations = delegations.filter(d => {
-        const matchesSearch = d.delegated_by.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            d.delegated_to.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            d.module.toLowerCase().includes(searchTerm.toLowerCase());
+    const visibleDelegations = delegations; // API already filters if needed, or we filter here if returned all
 
-        if (!matchesSearch) return false;
-
-        if (userRole === 'superadmin') return true;
-        if (userRole === 'admin') return d.delegated_by_role !== 'superadmin';
-        if (userRole === 'manager') return d.delegated_by_role === 'manager' || d.delegated_to.includes(user?.name);
-        if (userRole === 'hr') return d.delegated_by_role === 'hr' || d.delegated_to.includes(user?.name);
-        return false;
-    });
-
-    // Role levels for hierarchy check
-    const ROLE_LEVELS = {
-        'superadmin': 5,
-        'admin': 4,
-        'manager': 3,
-        'hr': 2,
-        'employee': 1
-    };
-
-    const handleCreate = (e) => {
+    const handleCreate = async (e) => {
         e.preventDefault();
-
-        // Mock role detection for the 'To' user (in 2real app this comes from API)
-        const targetUserLower = formData.delegated_to.toLowerCase();
-        let targetRole = 'employee';
-        if (targetUserLower.includes('admin')) targetRole = 'admin';
-        if (targetUserLower.includes('super')) targetRole = 'superadmin';
-        if (targetUserLower.includes('manager')) targetRole = 'manager';
-        if (targetUserLower.includes('hr')) targetRole = 'hr';
-
-        // Check if creator is higher than or equal to target role
-        if (ROLE_LEVELS[userRole] < ROLE_LEVELS[targetRole]) {
-            alert(`Access Denied: You (${userRole}) cannot delegate authority to a higher role (${targetRole}).`);
-            return;
+        try {
+            const res = await delegationService.createDelegation(formData);
+            if (res.success) {
+                alert("Delegation created successfully!");
+                setShowModal(false);
+                fetchData();
+            }
+        } catch (error) {
+            alert("Creation failed: " + error.message);
         }
-
-        const newDelegation = {
-            id: delegations.length + 1,
-            delegated_by: user?.name || 'Current User',
-            delegated_by_role: userRole,
-            delegated_to: formData.delegated_to,
-            module: formData.module,
-            start_date: formData.start_date,
-            end_date: formData.end_date,
-            status: 'Active'
-        };
-        setDelegations([newDelegation, ...delegations]);
-        setShowModal(false);
-        setFormData({ delegated_to: '', module: 'Leave Approval', start_date: '', end_date: '' });
     };
 
-    const cancelDelegation = (id) => {
-        setDelegations(delegations.map(d => d.id === id ? { ...d, status: 'Cancelled' } : d));
+    const cancelDelegation = async (id) => {
+        try {
+            const res = await delegationService.cancelDelegation(id);
+            if (res.success) {
+                alert("Delegation cancelled!");
+                fetchData();
+            }
+        } catch (error) {
+            alert("Cancel failed: " + error.message);
+        }
     };
 
     const getStatusColor = (status) => {
@@ -152,9 +125,9 @@ export const DelegationContent = () => {
             {/* Stats Cards */}
             <div className="row g-4 mb-4">
                 {[
-                    { label: 'Active Delegations', value: visibleDelegations.filter(d => d.status === 'Active').length, icon: <MdCheckCircle />, color: '#10b981' },
-                    { label: 'Expired', value: visibleDelegations.filter(d => d.status === 'Expired').length, icon: <MdHistory />, color: '#6b7280' },
-                    { label: 'Total Logs', value: visibleDelegations.length, icon: <MdLayers />, color: '#6366f1' }
+                    { label: 'Active Delegations', value: stats.active, icon: <MdCheckCircle />, color: '#10b981' },
+                    { label: 'Expired', value: stats.expired, icon: <MdHistory />, color: '#6b7280' },
+                    { label: 'Total Logs', value: stats.total, icon: <MdLayers />, color: '#6366f1' }
                 ].map((stat, i) => (
                     <div key={i} className="col-md-4">
                         <div className="card border-0 shadow-sm p-3" style={{ borderRadius: '15px' }}>

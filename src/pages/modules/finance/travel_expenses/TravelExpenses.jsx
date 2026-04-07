@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { useSearch } from '../../../../context/SearchContext';
+import { useAuth } from '../../../../context/AuthContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { SimpleLineChart } from '../../../../components/charts/CustomCharts';
 import { expenseService } from './service';
@@ -11,9 +11,14 @@ export const TravelExpensesContent = () => {
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
     const [loading, setLoading] = useState(false);
     const [showNewClaim, setShowNewClaim] = useState(false);
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase() || 'employee';
+    const isEmployee = role === 'employee';
+
     const [stats, setStats] = useState({ totalExpenses: "$0", pendingClaims: "0", approvedTrips: "0" });
     const [trends, setTrends] = useState([0, 0, 0, 0, 0, 0]);
     const [claims, setClaims] = useState([]);
+    const [budget, setBudget] = useState([]);
     const [claimFormData, setClaimFormData] = useState({
         project: '',
         category: 'Flight',
@@ -25,16 +30,25 @@ export const TravelExpensesContent = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [sData, tData, cData] = await Promise.all([
-                expenseService.getStats(),
-                expenseService.getTrends(),
-                expenseService.getClaims()
+            const [statsRes, trendsRes, claimsRes, budgetRes] = await Promise.all([
+                expenseService.getStats(role),
+                expenseService.getTrends(role),
+                expenseService.getClaims(role),
+                expenseService.getBudgetUtilization(role)
             ]);
-            setStats(sData);
-            setTrends(tData.length > 0 ? tData : [650, 900, 1200, 850, 1500, 1100]);
-            setClaims(cData);
+
+            setStats(statsRes || { totalExpenses: "$0", pendingClaims: "0", approvedTrips: "0" });
+            
+            // Ensure trends is an array of numbers for the chart
+            const finalTrends = Array.isArray(trendsRes) && trendsRes.length > 0 
+                ? trendsRes 
+                : [650, 900, 1200, 850, 1500, 1100];
+            setTrends(finalTrends);
+            
+            setClaims(Array.isArray(claimsRes) ? claimsRes : []);
+            setBudget(Array.isArray(budgetRes) ? budgetRes : []);
         } catch (err) {
-            console.error(err);
+            console.error("Fetch Error:", err);
         } finally {
             setLoading(false);
         }
@@ -102,8 +116,8 @@ export const TravelExpensesContent = () => {
             {/* Header / Actions */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 className="fw-bold text-dark mb-1">Travel & Expenses</h4>
-                    <p className="text-secondary small mb-0">Track employee travel requests and expense reimbursements.</p>
+                    <h4 className="fw-bold text-dark mb-1">{isEmployee ? 'My Space' : 'Travel & Expenses'}</h4>
+                    <p className="text-secondary small mb-0">{isEmployee ? 'Track your active travel requests and personal reimbursements.' : 'Track employee travel requests and expense reimbursements.'}</p>
                 </div>
                 <div className="d-flex gap-2">
                     <button className="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center gap-2" onClick={handleExport}>
@@ -184,10 +198,11 @@ export const TravelExpensesContent = () => {
                                 <div>
                                     <h6 className="fw-bold text-dark mb-1">Expense Trends (Last 6 Months)</h6>
                                     {(() => {
+                                        if (!trends || trends.length < 2) return null;
                                         const last = trends[trends.length - 1];
                                         const prev = trends[trends.length - 2];
                                         const diff = last - prev;
-                                        const percent = prev !== 0 ? ((diff / prev) * 100).toFixed(1) : "0.0";
+                                        const percent = prev && prev !== 0 ? ((diff / prev) * 100).toFixed(1) : "0.0";
                                         const isUp = diff > 0;
                                         return (
                                             <div className="d-flex align-items-center gap-2">
@@ -219,24 +234,38 @@ export const TravelExpensesContent = () => {
                         }}>
                         <div className="card-body p-4 position-relative z-1">
                             <h6 className="small fw-bold text-uppercase text-white-50 mb-4 ls-1">Budget Utilization</h6>
-                            <div className="mb-4">
-                                <div className="d-flex justify-content-between mb-1">
-                                    <span className="small">Marketing Dept</span>
-                                    <span className="small fw-bold">85%</span>
+                            {budget.length > 0 ? budget.map((b, i) => (
+                                <div className="mb-4" key={i}>
+                                    <div className="d-flex justify-content-between mb-1">
+                                        <span className="small">{b.label}</span>
+                                        <span className="small fw-bold">{b.value}%</span>
+                                    </div>
+                                    <div className="progress bg-white-10" style={{ height: '6px' }}>
+                                        <div className="progress-bar bg-white" style={{ width: `${b.value}%` }}></div>
+                                    </div>
                                 </div>
-                                <div className="progress bg-white-10" style={{ height: '6px' }}>
-                                    <div className="progress-bar bg-white" style={{ width: '85%' }}></div>
-                                </div>
-                            </div>
-                            <div className="mb-4">
-                                <div className="d-flex justify-content-between mb-1">
-                                    <span className="small">Sales Operations</span>
-                                    <span className="small fw-bold">42%</span>
-                                </div>
-                                <div className="progress bg-white-10" style={{ height: '6px' }}>
-                                    <div className="progress-bar bg-white" style={{ width: '42%' }}></div>
-                                </div>
-                            </div>
+                            )) : (
+                                <>
+                                    <div className="mb-4">
+                                        <div className="d-flex justify-content-between mb-1">
+                                            <span className="small">Marketing Dept</span>
+                                            <span className="small fw-bold">85%</span>
+                                        </div>
+                                        <div className="progress bg-white-10" style={{ height: '6px' }}>
+                                            <div className="progress-bar bg-white" style={{ width: '85%' }}></div>
+                                        </div>
+                                    </div>
+                                    <div className="mb-4">
+                                        <div className="d-flex justify-content-between mb-1">
+                                            <span className="small">Sales Operations</span>
+                                            <span className="small fw-bold">42%</span>
+                                        </div>
+                                        <div className="progress bg-white-10" style={{ height: '6px' }}>
+                                            <div className="progress-bar bg-white" style={{ width: '42%' }}></div>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                             <div className="mt-5 pt-3">
                                 <p className="small text-white-50 mb-2">Policy Compliance</p>
                                 <div className="d-flex align-items-center gap-2">
@@ -278,34 +307,37 @@ export const TravelExpensesContent = () => {
                     <table className="table table-hover align-middle mb-0">
                         <thead className="bg-light-subtle">
                             <tr>
-                                <th className="border-0 ps-4 py-3 small fw-bold text-secondary text-uppercase ls-1">Employee</th>
-                                <th className="border-0 py-3 small fw-bold text-secondary text-uppercase ls-1">Category / Project</th>
+                                {!isEmployee && <th className="border-0 ps-4 py-3 small fw-bold text-secondary text-uppercase ls-1">Employee</th>}
+                                <th className={`border-0 py-3 small fw-bold text-secondary text-uppercase ls-1 ${isEmployee ? 'ps-4' : ''}`}>Category / Project</th>
                                 <th className="border-0 py-3 small fw-bold text-secondary text-uppercase ls-1">Date</th>
                                 <th className="border-0 py-3 small fw-bold text-secondary text-uppercase ls-1">Amount</th>
                                 <th className="border-0 py-3 small fw-bold text-secondary text-uppercase ls-1">Status</th>
                                 <th className="border-0 pe-4 py-3 small fw-bold text-secondary text-uppercase ls-1 text-end">Action</th>
                             </tr>
                         </thead>
-                         <tbody>
+                             <tbody>
                             {claims.filter(item =>
-                                (item.employee || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 (item.project || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                                 (item.category || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                (item.id || '').toLowerCase().includes(searchTerm.toLowerCase())
+                                (item.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                (!isEmployee && (item.employee || '').toLowerCase().includes(searchTerm.toLowerCase()))
                             ).map((item, idx) => (
                                 <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                    <td className="ps-4 py-3">
-                                        <div className="d-flex align-items-center gap-3">
-                                            <div className={`avatar-circle bg-secondary-subtle text-secondary small fw-bold`}>{item.avatar || (item.employee ? item.employee[0] : 'U')}</div>
-                                            <div>
-                                                <div className="fw-bold text-dark">{item.employee}</div>
-                                                <div className="text-muted smaller">{item.id}</div>
+                                    {!isEmployee && (
+                                        <td className="ps-4 py-3">
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className={`avatar-circle bg-secondary-subtle text-secondary small fw-bold`}>{item.avatar || (item.employee ? item.employee[0] : 'U')}</div>
+                                                <div>
+                                                    <div className="fw-bold text-dark">{item.employee}</div>
+                                                    <div className="text-muted smaller">{item.id}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-3">
+                                        </td>
+                                    )}
+                                    <td className={`py-3 ${isEmployee ? 'ps-4' : ''}`}>
                                         <div className="fw-medium text-dark">{item.category}</div>
                                         <div className="text-muted smaller">{item.project}</div>
+                                        {isEmployee && <div className="smallest text-muted opacity-50 mt-1">ID: {item.id}</div>}
                                     </td>
                                     <td className="py-3">
                                         <div className="text-secondary fw-medium small mb-0">{item.date}</div>
@@ -325,7 +357,7 @@ export const TravelExpensesContent = () => {
                                     </td>
                                     <td className="pe-4 py-3 text-end">
                                         <div className="d-flex gap-2 justify-content-end align-items-center">
-                                            {item.status === 'Pending' && (
+                                            {item.status === 'Pending' && !isEmployee && (
                                                 <div className="dropdown">
                                                     <button className="btn btn-sm btn-dark rounded-pill px-3 fw-bold dropdown-toggle no-caret" data-bs-toggle="dropdown">Process</button>
                                                     <ul className="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">

@@ -3,30 +3,35 @@ import { FaIdCard } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
 import { idCardService } from '../../../services/idCardService';
 import IDCard from '../../../components/attendance/IDCard';
+import { attendanceService } from '../../../services/attendanceService';
 
 const MyAttendanceList = () => {
     const { user } = useAuth();
     const [showIdCard, setShowIdCard] = useState(false);
     const [myIdCard, setMyIdCard] = useState(null);
+    const [attendanceData, setAttendanceData] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    // Mock Attendance Data (Keep existing mock or fetch real if available)
-    const attendanceData = [
-        { id: 1, status: 'Present', loggedTime: '8.95', loginAt: '10:21', logoutAt: '20:18', date: '27-09-2025' },
-        { id: 2, status: 'Present', loggedTime: '7.67', loginAt: '10:23', logoutAt: '19:03', date: '27-09-2025' },
-        { id: 3, status: 'Present', loggedTime: '9.13', loginAt: '09:11', logoutAt: '19:19', date: '27-09-2025' },
-        { id: 4, status: 'Present', loggedTime: '7.43', loginAt: '10:05', logoutAt: '18:31', date: '27-09-2025' },
-        { id: 5, status: 'Present', loggedTime: '9.82', loginAt: '09:37', logoutAt: '20:26', date: '27-09-2025' },
-        { id: 6, status: 'Half Day', loggedTime: '5.87', loginAt: '12:20', logoutAt: '18:12', date: '27-09-2025' },
-        { id: 7, status: 'Present', loggedTime: '8.73', loginAt: '10:30', logoutAt: '20:14', date: '27-09-2025' },
-    ];
+    const fetchAttendance = async () => {
+        setLoading(true);
+        try {
+            const data = await attendanceService.getMyAttendance();
+            setAttendanceData(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Fetch error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAttendance();
+    }, []);
 
     useEffect(() => {
         if (showIdCard && !myIdCard && user) {
             // Fetch ID card for current user
-            // using a mock ID match since real user.id might not match mock service IDs
-            // For demo, we'll Try to find one by role or just pick the first one roughly matching
             idCardService.getAllIDCards().then(cards => {
-                // Try to find exact match or fallback to a demo card based on role
                 const card = cards.find(c => c.user_id === user.id) ||
                     cards.find(c => c.role === user.role) ||
                     cards[0];
@@ -69,15 +74,30 @@ const MyAttendanceList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {attendanceData.map(row => (
-                                <tr key={row.id}>
-                                    <td className={`py-4 ps-4 fw-bold ${getStatusStyle(row.status)}`}>{row.status}</td>
-                                    <td className="py-4 text-secondary">{row.loggedTime}</td>
-                                    <td className="py-4 text-secondary">{row.loginAt}</td>
-                                    <td className="py-4 text-secondary">{row.logoutAt}</td>
-                                    <td className="py-4 pe-4 text-secondary">{row.date}</td>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-5">
+                                        <div className="spinner-border spinner-border-sm text-primary me-2"></div>
+                                        <span className="text-muted">Fetching your attendance records...</span>
+                                    </td>
                                 </tr>
-                            ))}
+                            ) : attendanceData.length > 0 ? (
+                                attendanceData.map(row => (
+                                    <tr key={row.id}>
+                                        <td className={`py-4 ps-4 fw-bold ${getStatusStyle(row.status || 'Present')}`}>{row.status || 'Present'}</td>
+                                        <td className="py-4 text-secondary">{row.loggedTime || row.total_hours || '0.00'}</td>
+                                        <td className="py-4 text-secondary">{row.loginAt || row.check_in || '--:--'}</td>
+                                        <td className="py-4 text-secondary">{row.logoutAt || row.check_out || '--:--'}</td>
+                                        <td className="py-4 pe-4 text-secondary">{row.date}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="5" className="text-center py-5 text-muted">
+                                        No attendance records found for this period.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

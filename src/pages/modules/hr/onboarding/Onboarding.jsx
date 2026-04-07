@@ -121,13 +121,14 @@ const renderOnboarding = (candidates, stats, onViewDocs, onSendLetter, onAddHire
                             </tr>
                         </thead>
                         <tbody>
-                            {candidates.map((c, i) => {
+                            {Array.isArray(candidates) && candidates.length > 0 ? candidates.map((c, i) => {
                                 const st = statusStyle[c.status] || statusStyle['Pending'];
                                 const displayName = c.full_name || c.name;
                                 const displayRole = c.designation || c.role;
-                                const displayDept = c.department || c.dept;
-                                const displayDate = c.joining_date || c.date;
+                                const displayDept = c.department || c.dept || 'General';
+                                const displayDate = c.joining_date || c.date || 'TBD';
                                 const displayAvatar = c.avatar || (displayName ? displayName.split(' ').map(n => n[0]).join('').toUpperCase() : '??');
+                                const progress = Number(c.progress) || 0;
 
                                 return (
                                     <tr key={c.id || i} style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }} onClick={() => onViewDocs(c)}>
@@ -152,9 +153,9 @@ const renderOnboarding = (candidates, stats, onViewDocs, onSendLetter, onAddHire
                                         </td>
                                         <td className="py-3">
                                             <div style={{ background: '#f1f5f9', borderRadius: 99, height: 6, overflow: 'hidden', width: '100px' }}>
-                                                <div style={{ width: `${c.progress || 0}%`, height: '100%', borderRadius: 99, background: (c.progress || 0) === 100 ? '#16a34a' : '#2563eb' }} />
+                                                <div style={{ width: `${progress}%`, height: '100%', borderRadius: 99, background: progress === 100 ? '#16a34a' : '#2563eb' }} />
                                             </div>
-                                            <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{(c.progress || 0)}% Docs Verified</div>
+                                            <div style={{ fontSize: '0.68rem', color: '#9ca3af', marginTop: 3 }}>{progress}% Docs Verified</div>
                                         </td>
                                         <td className="py-3">
                                             <div className="d-flex gap-2">
@@ -178,7 +179,11 @@ const renderOnboarding = (candidates, stats, onViewDocs, onSendLetter, onAddHire
                                         </td>
                                     </tr>
                                 );
-                            })}
+                            }) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-5 text-muted">No candidates found in onboarding pipeline</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

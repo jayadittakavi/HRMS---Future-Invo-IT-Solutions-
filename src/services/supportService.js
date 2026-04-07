@@ -1,50 +1,67 @@
 import { API_BASE, getAuthHeader } from '../config';
 
-const authHeader = () => {
-    return {
-        headers: getAuthHeader('hr'), // Support functions typically used by HR or Employees
-    };
-};
+const authHeader = (role = 'employee') => ({
+    headers: {
+        ...getAuthHeader(role),
+        "Content-Type": "application/json"
+    }
+});
 
 export const supportService = {
+    // 🔹 Get Helpdesk Configuration (Categories & Priority)
+    getConfig: async (role = 'employee') => {
+        try {
+            const response = await fetch(`${API_BASE}/support/config`, {
+                headers: getAuthHeader(role)
+            });
+            if (!response.ok) return { categories: [], priorities: [] };
+            const data = await response.json();
+            return data?.data || data;
+        } catch (error) {
+            console.error("API Error (getConfig):", error);
+            return { categories: [], priorities: [] };
+        }
+    },
+
     // 🔹 Get Support Dashboard Stats
-    getDashboardStats: async () => {
+    getDashboardStats: async (role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/support/dashboard-stats`, {
                 method: "GET",
-                ...authHeader()
+                headers: getAuthHeader(role)
             });
-            if (!response.ok) throw new Error(await response.text());
-            return await response.json();
+            if (!response.ok) return { total_active: 0, pending_action: 0, resolution_rate: '0%' };
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getDashboardStats):", error);
-            throw error;
+            return { total_active: 0, pending_action: 0, resolution_rate: '0%' };
         }
     },
 
     // 🔹 List Tickets
-    getTickets: async () => {
+    getTickets: async (role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/support/tickets`, {
                 method: "GET",
-                ...authHeader()
+                headers: getAuthHeader(role)
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) return [];
             const result = await response.json();
-            return Array.isArray(result) ? result : (result.data || result.tickets || []);
+            return result?.data || (Array.isArray(result) ? result : (result.tickets || []));
         } catch (error) {
             console.error("API Error (getTickets):", error);
-            throw error;
+            return [];
         }
     },
 
     // 🔹 Raise Ticket
-    createTicket: async (ticketData) => {
+    createTicket: async (ticketData, role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/support/tickets`, {
                 method: "POST",
                 body: JSON.stringify(ticketData),
-                ...authHeader()
+                headers: authHeader(role).headers
             });
             if (!response.ok) throw new Error(await response.text());
             return await response.json();
@@ -54,13 +71,13 @@ export const supportService = {
         }
     },
 
-    // 🔹 Update Ticket (Status or Priority)
-    updateTicket: async (id, ticketData) => {
+    // 🔹 Update Ticket (Status or Priority) - Use Action endpoint
+    updateTicket: async (id, actionData, role = 'hr') => {
         try {
-            const response = await fetch(`${API_BASE}/support/tickets/${id}`, {
-                method: "PUT",
-                body: JSON.stringify(ticketData),
-                ...authHeader()
+            const response = await fetch(`${API_BASE}/support/tickets/${id}/action`, {
+                method: "PATCH",
+                body: JSON.stringify(actionData),
+                headers: authHeader(role).headers
             });
             if (!response.ok) throw new Error(await response.text());
             return await response.json();

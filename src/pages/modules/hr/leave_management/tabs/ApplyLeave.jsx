@@ -185,9 +185,9 @@ const ApplyLeave = () => {
                         <MdDateRange className="me-1" /> Days Calculated
                     </div>
                     <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#4f46e5', lineHeight: 1 }}>
-                        {formData.halfDay ? '0.5' : days || '—'}
+                        {formData.halfDay ? '0.5' : calculatedDays || '—'}
                     </div>
-                    <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{days && !formData.halfDay ? 'working day(s)' : ''}</div>
+                    <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{calculatedDays && !formData.halfDay ? 'working day(s)' : ''}</div>
                 </div>
 
                 {/* Balance for selected type */}
@@ -197,9 +197,9 @@ const ApplyLeave = () => {
                     </div>
                     <div style={{ fontSize: '1.6rem', fontWeight: 800, color: balance?.color }}>{balance?.avail}</div>
                     <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>days remaining</div>
-                    {days > 0 && balance && (
-                        <div style={{ marginTop: 6, padding: '5px 8px', borderRadius: 7, background: days > balance.avail ? '#fee2e2' : '#d1fae5', fontSize: '0.68rem', fontWeight: 600, color: days > balance.avail ? '#991b1b' : '#065f46' }}>
-                            {days > balance.avail ? `⚠ Insufficient balance (need ${days - balance.avail} more days)` : `✓ Balance sufficient`}
+                    {calculatedDays > 0 && balance && (
+                        <div style={{ marginTop: 6, padding: '5px 8px', borderRadius: 7, background: calculatedDays > balance.avail ? '#fee2e2' : '#d1fae5', fontSize: '0.68rem', fontWeight: 600, color: calculatedDays > balance.avail ? '#991b1b' : '#065f46' }}>
+                            {calculatedDays > balance.avail ? `⚠ Insufficient balance (need ${calculatedDays - balance.avail} more days)` : `✓ Balance sufficient`}
                         </div>
                     )}
                 </div>

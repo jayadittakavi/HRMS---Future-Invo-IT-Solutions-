@@ -23,9 +23,8 @@ const BulkApproval = () => {
     const fetchPendingRequests = async () => {
         try {
             setLoading(true);
-            const response = await leaveService.getPendingApprovals();
-            if (response.ok) {
-                const data = await response.json();
+            const data = await leaveService.getPendingApprovals();
+            if (Array.isArray(data)) {
                 setRequests(data);
             }
         } catch (error) {
@@ -38,8 +37,8 @@ const BulkApproval = () => {
     const notify = (msg) => { setToast(msg); setTimeout(() => setToast(''), 3000); };
 
     const filtered = requests.filter(r =>
-        r.name.toLowerCase().includes(search.toLowerCase()) ||
-        r.type.toLowerCase().includes(search.toLowerCase())
+        r.name?.toLowerCase().includes(search.toLowerCase()) ||
+        r.type?.toLowerCase().includes(search.toLowerCase())
     );
 
     const toggle = (id) => setSelectedIds(p => p.includes(id) ? p.filter(s => s !== id) : [...p, id]);
@@ -47,14 +46,13 @@ const BulkApproval = () => {
 
     const bulkApprove = async () => {
         try {
-            const response = await leaveService.bulkAction(selectedIds, "APPROVE");
-            if (response.ok) {
-                setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
-                notify(`✅ ${selectedIds.length} request(s) approved.`);
-                setSelectedIds([]);
-            }
+            await leaveService.bulkAction(selectedIds, "APPROVE");
+            setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
+            notify(`✅ ${selectedIds.length} request(s) approved.`);
+            setSelectedIds([]);
         } catch (error) {
             console.error("Error in bulk approve:", error);
+            alert("Bulk approval failed");
         }
     };
 
@@ -62,16 +60,15 @@ const BulkApproval = () => {
         if (!rejectReason.trim()) return;
         try {
             // Reusing bulkAction with REJECT action
-            const response = await leaveService.bulkAction(selectedIds, "REJECT");
-            if (response.ok) {
-                setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
-                notify(`❌ ${selectedIds.length} request(s) rejected.`);
-                setSelectedIds([]);
-                setRejectModal(false);
-                setRejectReason('');
-            }
+            await leaveService.bulkAction(selectedIds, "REJECT");
+            setRequests(p => p.filter(r => !selectedIds.includes(r.id)));
+            notify(`❌ ${selectedIds.length} request(s) rejected.`);
+            setSelectedIds([]);
+            setRejectModal(false);
+            setRejectReason('');
         } catch (error) {
             console.error("Error in bulk reject:", error);
+            alert("Bulk rejection failed");
         }
     };
 

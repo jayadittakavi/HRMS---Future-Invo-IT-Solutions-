@@ -117,9 +117,11 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         ];
 
         // Filter out specific modules based on remaining roles if needed
+        // Filter and Map links for Employee role
         if (role === 'employee') {
             const allowedForEmployee = [
                 'Dashboard',
+                'My Team',
                 'Attendance',
                 'Requests',
                 'Payroll & Salary',
@@ -128,8 +130,29 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 'Administration',
                 'Documents'
             ];
-            links = links.filter(link => allowedForEmployee.includes(link.name));
-        } else if (role.includes('hr') || role.includes('fulltime')) {
+            links = links
+                .filter(link => allowedForEmployee.includes(link.name))
+                .map(link => {
+                    if (link.name === 'Attendance') return { ...link, path: '/my-attendance' };
+                    if (link.name === 'Payroll & Salary') return { ...link, path: '/my-payslips' };
+                    if (link.name === 'Requests') {
+                        return {
+                            ...link,
+                            children: [
+                                { name: 'Apply Leave', path: '/my-leaves' },
+                                { name: 'WFH', path: '/wfh-requests' }
+                            ]
+                        };
+                    }
+                    return link;
+                });
+        }
+
+        if (role === 'manager') {
+            const forbiddenForManager = ['Companies'];
+            links = links.filter(link => !forbiddenForManager.includes(link.name));
+        }
+        else if (role.includes('hr') || role.includes('fulltime')) {
             const forbiddenPathsForHR = [
                 '/financial-reports',
                 '/employee-directory',

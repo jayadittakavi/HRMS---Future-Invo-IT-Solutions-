@@ -28,8 +28,9 @@ const LeaveDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const summaryData = await leaveService.getDashboardSummary();
-                const trendsData = await leaveService.getDashboardTrends();
+                // For this management-style view, we use the plural 'leaves' management endpoints
+                const summaryData = await leaveService.getManagementSummary();
+                const trendsData = await leaveService.getManagementTrends();
                 
                 if (summaryData) setSummary(summaryData);
                 if (trendsData) setTrends(trendsData);
@@ -105,11 +106,11 @@ const LeaveDashboard = () => {
                                 <div style={{ fontSize: '0.68rem', color: lt.color, fontWeight: 700 }}>{lt.total - lt.used} left</div>
                             </div>
                             <div style={{ height: 5, background: '#f1f5f9', borderRadius: 3 }}>
-                                <div style={{ height: '100%', width: `${(lt.used / lt.total) * 100}%`, background: lt.color, borderRadius: 3, transition: 'width 0.5s' }} />
+                                <div style={{ height: '100%', width: lt.total > 0 ? `${(lt.used / lt.total) * 100}%` : '0%', background: lt.color, borderRadius: 3, transition: 'width 0.5s' }} />
                             </div>
                             <div className="d-flex justify-content-between mt-1">
-                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.used} used</span>
-                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.total} total</span>
+                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.used || 0} used</span>
+                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.total || 0} total</span>
                             </div>
                         </div>
                     </div>

@@ -17,19 +17,31 @@ const SupportTicket = () => {
     const [selectedTicket, setSelectedTicket] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [tickets, setTickets] = useState([]);
-    const [statsData, setStatsData] = useState({ total_active: 0, pending_action: 0, resolution_rate: '0%' });
+    const [config, setConfig] = useState({ categories: ['Technical', 'Finance', 'HR', 'Workspace'], priorities: ['Low', 'Medium', 'High'] });
     const [loading, setLoading] = useState(false);
     const [newTicket, setNewTicket] = useState({ subject: '', category: 'Technical', priority: 'Medium', description: '' });
 
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [statsRes, ticketsRes] = await Promise.all([
-                supportService.getDashboardStats(),
-                supportService.getTickets()
+            const [statsRes, ticketsRes, configRes] = await Promise.all([
+                supportService.getDashboardStats(role),
+                supportService.getTickets(role),
+                supportService.getConfig(role)
             ]);
             setStatsData(statsRes);
             setTickets(ticketsRes);
+            if (configRes && (configRes.categories?.length > 0 || configRes.priorities?.length > 0)) {
+                setConfig({
+                    categories: configRes.categories || config.categories,
+                    priorities: configRes.priorities || config.priorities
+                });
+                setNewTicket(prev => ({
+                    ...prev,
+                    category: configRes.categories?.[0] || prev.category,
+                    priority: configRes.priorities?.[0] || prev.priority
+                }));
+            }
         } catch (err) {
             console.error("Failed to load support data", err);
         } finally {
@@ -44,9 +56,9 @@ const SupportTicket = () => {
     const handleRaiseTicket = async (e) => {
         e.preventDefault();
         try {
-            await supportService.createTicket(newTicket);
+            await supportService.createTicket(newTicket, role);
             setShowModal(false);
-            setNewTicket({ subject: '', category: 'Technical', priority: 'Medium', description: '' });
+            setNewTicket({ subject: '', category: config.categories?.[0] || 'Technical', priority: config.priorities?.[0] || 'Medium', description: '' });
             fetchData();
             alert("Support Ticket raised successfully!");
         } catch (err) {
@@ -131,17 +143,21 @@ const SupportTicket = () => {
                                 </div>
                             </div>
                             <div className="col-md-6 text-end">
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0 ms-auto"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
-                                        color: 'white',
-                                        padding: '12px 28px',
-                                        fontWeight: 700
-                                    }}>
-                                    <FaPlus size={14} /> Raise New Ticket
-                                </button>
+                                {loading ? (
+                                    <div className="spinner-border spinner-border-sm text-primary"></div>
+                                ) : (
+                                    <button
+                                        onClick={() => setShowModal(true)}
+                                        className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0 ms-auto"
+                                        style={{
+                                            background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
+                                            color: 'white',
+                                            padding: '12px 28px',
+                                            fontWeight: 700
+                                        }}>
+                                        <FaPlus size={14} /> Raise New Ticket
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -238,26 +254,21 @@ const SupportTicket = () => {
                                             <div className="col-md-6">
                                                 <label className="form-label fw-bold small text-muted text-uppercase">Service Category</label>
                                                 <select
-                                                    className="form-select rounded-3 p-3 bg-light border-0 shadow-none"
+                                                    className="form-select rounded-3 p-3 bg-light border-0 shadow-none text-dark"
                                                     value={newTicket.category}
                                                     onChange={(e) => setNewTicket({ ...newTicket, category: e.target.value })}
                                                 >
-                                                    <option>Technical</option>
-                                                    <option>Finance</option>
-                                                    <option>HR</option>
-                                                    <option>Workspace</option>
+                                                    {config.categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                                 </select>
                                             </div>
                                             <div className="col-md-6">
                                                 <label className="form-label fw-bold small text-muted text-uppercase">Priority Level</label>
                                                 <select
-                                                    className="form-select rounded-3 p-3 bg-light border-0 shadow-none"
+                                                    className="form-select rounded-3 p-3 bg-light border-0 shadow-none text-dark"
                                                     value={newTicket.priority}
                                                     onChange={(e) => setNewTicket({ ...newTicket, priority: e.target.value })}
                                                 >
-                                                    <option>Low</option>
-                                                    <option>Medium</option>
-                                                    <option>High</option>
+                                                    {config.priorities.map(pri => <option key={pri} value={pri}>{pri}</option>)}
                                                 </select>
                                             </div>
                                             <div className="col-12">
@@ -307,7 +318,7 @@ const SupportTicket = () => {
                                                         value={selectedTicket.status}
                                                         onChange={async (e) => {
                                                             try {
-                                                                await supportService.updateTicket(selectedTicket.id, { status: e.target.value });
+                                                                await supportService.updateTicket(selectedTicket.id, { status: e.target.value }, role);
                                                                 setSelectedTicket({ ...selectedTicket, status: e.target.value });
                                                                 fetchData();
                                                             } catch (err) {
@@ -334,13 +345,36 @@ const SupportTicket = () => {
                                         <div className="col-6">
                                             <label className="small fw-bold text-muted text-uppercase opacity-75">Impact Level</label>
                                             <div className="mt-2">
-                                                <span style={{
-                                                    padding: '6px 16px', borderRadius: '50px',
-                                                    fontSize: '0.7rem', fontWeight: 800,
-                                                    background: selectedTicket.priority === 'High' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                                                    color: selectedTicket.priority === 'High' ? '#ef4444' : '#10b981',
-                                                    textTransform: 'uppercase'
-                                                }}>{selectedTicket.priority}</span>
+                                                {isAdminRole ? (
+                                                    <select 
+                                                        className="form-select form-select-sm rounded-pill"
+                                                        value={selectedTicket.priority}
+                                                        onChange={async (e) => {
+                                                            try {
+                                                                await supportService.updateTicket(selectedTicket.id, { priority: e.target.value }, role);
+                                                                setSelectedTicket({ ...selectedTicket, priority: e.target.value });
+                                                                fetchData();
+                                                            } catch (err) {
+                                                                alert("Priority Update failed: " + err.message);
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            width: '120px', fontWeight: 800,
+                                                            background: selectedTicket.priority === 'High' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                                            color: selectedTicket.priority === 'High' ? '#ef4444' : '#10b981',
+                                                        }}
+                                                    >
+                                                        {config.priorities.map(pri => <option key={pri} value={pri}>{pri}</option>)}
+                                                    </select>
+                                                ) : (
+                                                    <span style={{
+                                                        padding: '6px 16px', borderRadius: '50px',
+                                                        fontSize: '0.7rem', fontWeight: 800,
+                                                        background: selectedTicket.priority === 'High' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                                                        color: selectedTicket.priority === 'High' ? '#ef4444' : '#10b981',
+                                                        textTransform: 'uppercase'
+                                                    }}>{selectedTicket.priority}</span>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

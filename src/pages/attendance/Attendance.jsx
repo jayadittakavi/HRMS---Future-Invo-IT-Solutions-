@@ -29,12 +29,14 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
     const role = user?.role?.toLowerCase();
 
     // Default tab based on role or personal mode
-    const [activeTab, setActiveTab] = useState(initialTab);
+    const [activeTab, setActiveTab] = useState(personal ? 'my-attendance' : 'dashboard');
 
     const canManageAttendance = ['superadmin', 'admin', 'hr', 'manager'].includes(role);
 
     const tabs = [
-        { id: 'dashboard', label: 'Dashboard', icon: <MdDashboard /> },
+        ...(canManageAttendance && !personal ? [
+            { id: 'dashboard', label: 'Dashboard', icon: <MdDashboard /> }
+        ] : []),
         ...(personal ? [
             { id: 'my-attendance', label: 'My Attendance Log', icon: <MdPlaylistAddCheck /> }
         ] : []),
@@ -44,12 +46,16 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
             { id: 'bulk', label: 'Bulk Attendance', icon: <MdPlaylistAddCheck /> },
             { id: 'shift', label: 'Shift View', icon: <MdSchedule /> },
             { id: 'idcard', label: 'ID Card View', icon: <MdBadge /> },
-            { id: 'devices', label: 'Devices', icon: <FaDesktop /> },
+            // Operational regularization for Managers
             { id: 'regularization', label: 'Regularization', icon: <FaFileAlt /> },
-            { id: 'sync', label: 'Sync', icon: <FaSync /> },
-            { id: 'sync-logs', label: 'Sync Logs', icon: <FaClipboardList /> },
-            { id: 'mobile', label: 'Mobile Attendance', icon: <FaMobileAlt /> },
-            { id: 'policy', label: 'Attendance Policy', icon: <MdPolicy /> },
+            // System configuration tabs - restricted for Managers
+            ...(role !== 'manager' ? [
+                { id: 'devices', label: 'Devices', icon: <FaDesktop /> },
+                { id: 'sync', label: 'Sync', icon: <FaSync /> },
+                { id: 'sync-logs', label: 'Sync Logs', icon: <FaClipboardList /> },
+                { id: 'mobile', label: 'Mobile Attendance', icon: <FaMobileAlt /> },
+                { id: 'policy', label: 'Attendance Policy', icon: <MdPolicy /> },
+            ] : [])
         ] : [])
     ];
 

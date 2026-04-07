@@ -395,33 +395,19 @@ export const EmployeesContent = () => {
                                                     <div className="d-flex gap-2 justify-content-end">
                                                         <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
                                                             onClick={() => {
-                                                                setSelectedEmployee(emp);
-                                                                const empCompanyId = emp.company_id || '';
-                                                                const empCompanyName = emp.company_name || emp.company || '';
-                                                                
-                                                                // Pre-filter branches for the edit modal
-                                                                const initialFiltered = allBranches.filter(b => 
-                                                                    String(b.company_id) === String(empCompanyId) || 
-                                                                    (b.company && String(b.company).toLowerCase() === String(empCompanyName).toLowerCase()) ||
-                                                                    (b.company_name && String(b.company_name).toLowerCase() === String(empCompanyName).toLowerCase())
-                                                                );
-                                                                setFilteredBranches(initialFiltered);
-
-                                                                setFormData({ 
-                                                                    ...emp, 
-                                                                    company_id: empCompanyId,
-                                                                    full_name: emp.full_name || emp.name || '',
-                                                                    personal_email: emp.personal_email || emp.email || '',
-                                                                    company_email: emp.company_email || '',
-                                                                    phone_number: emp.phone_number || emp.phone || '',
-                                                                    password: '',
-                                                                    confirm_password: '',
-                                                                    pay_grade: emp.pay_grade || '',
-                                                                    ctc: emp.ctc || '',
-                                                                    role: emp.role || 'employee',
-                                                                    employment_type: emp.employment_type || 'fulltime'
+                                                                // Redirect to Roles & Permissions page for editing
+                                                                navigate('/add-member', { 
+                                                                    state: { 
+                                                                        newMember: {
+                                                                            id: emp.id,
+                                                                            user_id: emp.user_id || emp.id,
+                                                                            name: emp.full_name || emp.name,
+                                                                            email: emp.personal_email || emp.email,
+                                                                            company_id: emp.company_id,
+                                                                            branch: emp.branch
+                                                                        }
+                                                                    } 
                                                                 });
-                                                                setShowEdit(true);
                                                             }}
                                                             style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
                                                             <FaEdit size={14} />

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { FaEye, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { payrollService } from '../payrollService';
 
@@ -225,19 +226,18 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
                                     <div className="text-center mb-4">
                                         <h4 className="fw-bold text-primary mb-1">TrickuWeb Technologies</h4>
                                         <p className="text-muted small mb-2">Tech Park, Bangalore, Karnataka, India</p>
-                                        <h5 className="text-uppercase border-top border-bottom py-2 d-inline-block mt-2">Salary Slip for {selectedSlip.period}</h5>
                                     </div>
 
                                     <div className="row mb-4">
                                         <div className="col-12">
                                             <h6 className="text-primary fw-bold mb-3">Employee Details</h6>
                                             <div className="row g-3 small">
-                                                <div className="col-md-6"><strong>Name:</strong> {selectedSlip.employee}</div>
-                                                <div className="col-md-6"><strong>Emp ID:</strong> {selectedSlip.employeeId}</div>
+                                                <div className="col-md-6"><strong>Name:</strong> {selectedSlip.employee_name || selectedSlip.employee}</div>
+                                                <div className="col-md-6"><strong>Emp ID:</strong> {selectedSlip.employee_id || selectedSlip.employeeId}</div>
                                                 <div className="col-md-6"><strong>Department:</strong> {selectedSlip.department}</div>
                                                 <div className="col-md-6"><strong>Designation:</strong> {selectedSlip.designation}</div>
-                                                <div className="col-md-6"><strong>Bank:</strong> HDFC Bank</div>
-                                                <div className="col-md-6"><strong>Account:</strong> ************4590</div>
+                                                <div className="col-md-6"><strong>Bank:</strong> {selectedSlip.bank_name || 'HDFC Bank'}</div>
+                                                <div className="col-md-6"><strong>Account:</strong> {selectedSlip.account_number || '************4590'}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -255,27 +255,27 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
                                             <tbody>
                                                 <tr>
                                                     <td>Basic Salary</td>
-                                                    <td className="text-end">{selectedSlip.basic.toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.basic_salary || selectedSlip.basic || 0).toLocaleString()}</td>
                                                     <td>PF Employee</td>
-                                                    <td className="text-end">1,800</td>
+                                                    <td className="text-end">{(selectedSlip.pf_employee || 1800).toLocaleString()}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>HRA</td>
-                                                    <td className="text-end">{selectedSlip.hra.toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.hra || 0).toLocaleString()}</td>
                                                     <td>Professional Tax</td>
-                                                    <td className="text-end">200</td>
+                                                    <td className="text-end">{(selectedSlip.professional_tax || 200).toLocaleString()}</td>
                                                 </tr>
                                                 <tr>
                                                     <td>Transport Allowance</td>
-                                                    <td className="text-end">{selectedSlip.transport.toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.transport_allowance || selectedSlip.transport || 0).toLocaleString()}</td>
                                                     <td>Income Tax</td>
-                                                    <td className="text-end">{(selectedSlip.deductions - 2000).toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.income_tax || (selectedSlip.total_deductions - 2000) || 0).toLocaleString()}</td>
                                                 </tr>
                                                 <tr className="fw-bold bg-light">
                                                     <td>Total Earnings</td>
-                                                    <td className="text-end">{selectedSlip.gross.toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.gross_earnings || selectedSlip.gross || 0).toLocaleString()}</td>
                                                     <td>Total Deductions</td>
-                                                    <td className="text-end">{selectedSlip.deductions.toLocaleString()}</td>
+                                                    <td className="text-end">{(selectedSlip.total_deductions || selectedSlip.deductions || 0).toLocaleString()}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -283,7 +283,7 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
 
                                     <div className="d-flex justify-content-between align-items-center bg-primary-subtle p-3 rounded">
                                         <h5 className="mb-0 text-primary">Net Salary Payable</h5>
-                                        <h4 className="mb-0 fw-bold">₹{selectedSlip.net.toLocaleString()}</h4>
+                                        <h4 className="mb-0 fw-bold">₹{(selectedSlip.net_salary || selectedSlip.net || 0).toLocaleString()}</h4>
                                     </div>
                                     <p className="text-muted small mt-2 text-center">** This is a computer-generated document and does not require a signature.</p>
                                 </div>

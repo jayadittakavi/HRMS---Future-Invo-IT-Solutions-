@@ -8,14 +8,19 @@ const authHeader = () => {
 
 export const teamService = {
     // 1. Team Dashboard Stats
-    getStats: async () => {
+    getStats: async (role = 'admin') => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/team/dashboard`, {
+            const url = role === 'employee' 
+                ? `${API_BASE}/team/employee/dashboard` 
+                : `${API_BASE}/superadmin/team/dashboard`;
+                
+            const response = await fetch(url, {
                 method: "GET",
                 ...authHeader()
             });
             if (!response.ok) throw new Error("Failed to fetch team dashboard stats");
-            return await response.json();
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getStats):", error);
             throw error;
@@ -23,14 +28,19 @@ export const teamService = {
     },
 
     // 2. Team Superstars
-    getSuperstars: async () => {
+    getSuperstars: async (role = 'admin') => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/team/superstars`, {
+            const url = role === 'employee' 
+                ? `${API_BASE}/team/employee/superstars` 
+                : `${API_BASE}/superadmin/team/superstars`;
+
+            const response = await fetch(url, {
                 method: "GET",
                 ...authHeader()
             });
             if (!response.ok) throw new Error("Failed to fetch team superstars");
-            return await response.json();
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getSuperstars):", error);
             throw error;
@@ -38,14 +48,19 @@ export const teamService = {
     },
 
     // 3. Team Resilience
-    getResilience: async () => {
+    getResilience: async (role = 'admin') => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/team/resilience`, {
+            const url = role === 'employee' 
+                ? `${API_BASE}/team/employee/resilience` 
+                : `${API_BASE}/superadmin/team/resilience`;
+
+            const response = await fetch(url, {
                 method: "GET",
                 ...authHeader()
             });
             if (!response.ok) throw new Error("Failed to fetch team resilience data");
-            return await response.json();
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getResilience):", error);
             throw error;

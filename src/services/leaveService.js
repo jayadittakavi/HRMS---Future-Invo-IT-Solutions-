@@ -1,16 +1,13 @@
 import { API_BASE, getAuthHeader } from '../config';
 
-const authHeader = () => {
-    return {
-        headers: getAuthHeader('hr'), // Standard HR fallback
-    };
-};
+// Role-based auth header helper. Defaults to superadmin for management, employee for personal space.
+const authHeader = (role = 'superadmin') => ({ headers: getAuthHeader(role) });
 
 export const leaveService = {
     // 1. Dashboard Overview (Personalized for Employee Dashboard)
     getDashboardSummary: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/my-dashboard/summary`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/my-dashboard/summary`, authHeader('employee'));
             if (!response.ok) return { totalBalance: 0, pending: 0, approved: 0, total: 0, leaveTypes: [], recentRequests: [] };
             return await response.json();
         } catch (error) {
@@ -20,7 +17,7 @@ export const leaveService = {
     },
     getDashboardTrends: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/my-dashboard/trends`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/my-dashboard/trends`, authHeader('employee'));
             if (!response.ok) return { labels: [], data: [] };
             return await response.json();
         } catch (error) {
@@ -30,7 +27,7 @@ export const leaveService = {
     },
     getRecentRequests: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/my-dashboard/recent`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/my-dashboard/recent`, authHeader('employee'));
             if (!response.ok) return [];
             return await response.json();
         } catch (error) {
@@ -194,10 +191,10 @@ export const leaveService = {
     // 6. Enhanced Leave APIs (Personal)
     calculateDays: async (data) => {
         try {
-            const response = await fetch(`${API_BASE}/leave/calculate-days`, {
+            const response = await fetch(`${API_BASE}/leaves/calculate-days`, {
                 method: "POST",
                 headers: {
-                    ...authHeader().headers,
+                    ...authHeader('employee').headers,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data),
@@ -210,10 +207,10 @@ export const leaveService = {
     },
     applyLeave: async (data) => {
         try {
-            const response = await fetch(`${API_BASE}/leave/apply`, {
+            const response = await fetch(`${API_BASE}/leaves/apply`, {
                 method: "POST",
                 headers: {
-                    ...authHeader().headers,
+                    ...authHeader('employee').headers,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(data),
@@ -226,7 +223,7 @@ export const leaveService = {
     },
     getAllMine: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/mine`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/mine`, authHeader('employee'));
             return await response.json();
         } catch (error) {
             console.error("API Error (getAllMine):", error);
@@ -235,7 +232,7 @@ export const leaveService = {
     },
     getBalance: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/balance`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/balance`, authHeader('employee'));
             return await response.json();
         } catch (error) {
             console.error("API Error (getBalance):", error);

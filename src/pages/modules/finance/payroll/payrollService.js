@@ -219,8 +219,23 @@ export const payrollService = {
         const data = await response.json();
         return data?.data || data;
     },
+    getSettlements: async () => {
+        const response = await fetch(`${BASE_URL}/payroll/fnf`, { headers: getAuthHeaders() });
+        if (!response.ok) throw new Error(await response.text());
+        const data = await response.json();
+        return data?.data || data;
+    },
     saveFullAndFinal: async (data) => {
         const response = await fetch(`${BASE_URL}/payroll/fnf`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return await response.json();
+    },
+    initiateSettlement: async (data) => {
+        const response = await fetch(`${BASE_URL}/payroll/fnf/initiate`, {
             method: "POST",
             headers: getAuthHeaders(),
             body: JSON.stringify(data)

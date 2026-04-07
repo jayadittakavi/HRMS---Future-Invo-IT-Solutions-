@@ -1,10 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FaUserAstronaut, FaCalendarCheck, FaWalking, FaHistory, FaHeadset, FaUsers } from 'react-icons/fa';
+import { FaUserAstronaut, FaCalendarCheck, FaWalking, FaHistory, FaHeadset, FaUsers, FaMoneyBillWave } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
 const Settings = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase().replace(/\s/g, '') || 'new_user';
 
     const settingsItems = [
         {
@@ -38,6 +41,16 @@ const Settings = () => {
             path: '/my-leaves'
         },
         {
+            title: 'Assigned Assets',
+            desc: 'Track your assigned company hardware, laptops, and devices.',
+            icon: <FaLaptop size={18} />,
+            iconBg: '#fef3c7',
+            iconColor: '#d97706',
+            status: 'INVENTORY',
+            statusColor: '#d97706',
+            path: '/my-assets'
+        },
+        {
             title: 'Audit Logs',
             desc: 'Track system actions, changes, and security events across the workspace.',
             icon: <FaHistory size={18} />,
@@ -58,6 +71,16 @@ const Settings = () => {
             path: '/helpdesk'
         },
         {
+            title: 'Payroll & Salary',
+            desc: 'View your payslips, salary structure, tax declarations, and financial documents.',
+            icon: <FaMoneyBillWave size={18} />,
+            iconBg: '#ecfdf5',
+            iconColor: '#10b981',
+            status: 'FINANCE',
+            statusColor: '#10b981',
+            path: '/payroll-dashboard'
+        },
+        {
             title: 'User Management',
             desc: 'Manage team directory, roles, permissions, and user access control.',
             icon: <FaUsers size={18} />,
@@ -68,6 +91,23 @@ const Settings = () => {
             path: '/users'
         }
     ];
+
+    // Role-based filtering and path adjustment
+    const filteredItems = settingsItems
+        .filter(item => {
+            if (role === 'employee') {
+                if (item.title === 'My Space Dashboard') return false;
+                if (item.title === 'Audit Logs') return false;
+                if (item.title === 'User Management') return false;
+            }
+            return true;
+        })
+        .map(item => {
+            if (role === 'employee' && item.title === 'Payroll & Salary') {
+                return { ...item, path: '/my-payslips' };
+            }
+            return item;
+        });
 
     return (
         <DashboardLayout title="Settings">
@@ -91,7 +131,7 @@ const Settings = () => {
 
                 {/* ── Settings Grid ── */}
                 <div className="settings-grid">
-                    {settingsItems.map((item, idx) => (
+                    {filteredItems.map((item, idx) => (
                         <div key={idx} className="settings-card"
                             style={{ border: 'none', background: '#fff', cursor: 'pointer' }}
                             onClick={() => navigate(item.path)}

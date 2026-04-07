@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SimpleBarChart, SimpleDonutChart } from '../../../../components/charts/CustomCharts';
 import { FaHandHoldingUsd, FaMoneyBillAlt, FaPercent, FaSearch, FaCheck, FaTimes } from 'react-icons/fa';
 import { useSearch } from '../../../../context/SearchContext';
+import { useAuth } from '../../../../context/AuthContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { loansService } from './service';
 
@@ -15,17 +16,29 @@ export const LoansContent = () => {
     });
     const [requests, setRequests] = useState([]);
 
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase() || 'employee';
+    const isEmployee = role === 'employee';
+
     const fetchData = async () => {
         setLoading(true);
         try {
             const [dData, rData] = await Promise.all([
-                loansService.getDashboard(),
-                loansService.getRequests()
+                loansService.getDashboard(role),
+                loansService.getRequests(role)
             ]);
-            setDashboard(dData);
-            setRequests(rData);
+            // Ensure we have the nested objects
+            const safeDData = {
+                stats: dData?.stats || { totalDisbursed: "₹0", activeLoans: 0, avgInterest: "0%" },
+                charts: {
+                    distribution: dData?.charts?.distribution || [],
+                    trend: dData?.charts?.trend || []
+                }
+            };
+            setDashboard(safeDData);
+            setRequests(Array.isArray(rData) ? rData : []);
         } catch (err) {
-            console.error(err);
+            console.error("Fetch Error:", err);
         } finally {
             setLoading(false);
         }
@@ -72,13 +85,13 @@ export const LoansContent = () => {
 
     useEffect(() => {
         const emi = calculateEMI(applicationForm.amount, applicationForm.interest_rate, applicationForm.tenure_months);
-        setApplicationForm(prev => ({ ...prev, emi }));
-    }, [applicationForm.amount, applicationForm.interest_rate, applicationForm.tenure_months]);
+        setApplicationForm(prev => ({ ...prev, emi, employee_id: user?.employee_id || '' }));
+    }, [applicationForm.amount, applicationForm.interest_rate, applicationForm.tenure_months, user?.employee_id]);
 
     return (
         <div className="container-fluid p-0">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="fw-bold mb-0">Loan Management</h4>
+                <h4 className="fw-bold mb-0">{isEmployee ? 'My Loan Space' : 'Loan Management'}</h4>
                 <button className="btn btn-primary px-4 rounded-pill fw-bold" onClick={() => setShowApplyModal(true)}>
                     + Apply for Loan
                 </button>
@@ -119,7 +132,7 @@ export const LoansContent = () => {
                     <div className="bg-white p-4 rounded shadow-sm h-100">
                         <h6 className="fw-bold mb-4">Loan Type Distribution</h6>
                         <div className="d-flex justify-content-center">
-                            <SimpleDonutChart segments={dashboard.charts.distribution.length > 0 ? dashboard.charts.distribution : [
+                            <SimpleDonutChart segments={dashboard.charts?.distribution?.length > 0 ? dashboard.charts.distribution : [
                                 { label: 'Personal', value: 45, color: '#3b82f6' },
                                 { label: 'Home', value: 30, color: '#10b981' },
                                 { label: 'Emergency', value: 25, color: '#f59e0b' },
@@ -131,7 +144,7 @@ export const LoansContent = () => {
                 <div className="col-md-7">
                     <div className="bg-white p-4 rounded shadow-sm h-100">
                         <h6 className="fw-bold mb-4">Monthly Disbursement Trend</h6>
-                        <SimpleBarChart data={dashboard.charts.trend.length > 0 ? dashboard.charts.trend : [
+                        <SimpleBarChart data={dashboard.charts?.trend?.length > 0 ? dashboard.charts.trend : [
                             { label: 'Jan', value: 120000, color: '#6366f1' },
                             { label: 'Feb', value: 85000, color: '#6366f1' },
                             { label: 'Mar', value: 150000, color: '#6366f1' },
@@ -166,7 +179,7 @@ export const LoansContent = () => {
                         <thead className="bg-light">
                             <tr>
                                 <th className="border-0 small fw-bold text-secondary">ID</th>
-                                <th className="border-0 small fw-bold text-secondary">Employee</th>
+                                {!isEmployee && <th className="border-0 small fw-bold text-secondary">Employee</th>}
                                 <th className="border-0 small fw-bold text-secondary">Amount</th>
                                 <th className="border-0 small fw-bold text-secondary">Type</th>
                                 <th className="border-0 small fw-bold text-secondary">Status</th>
@@ -182,7 +195,7 @@ export const LoansContent = () => {
                             ).map(loan => (
                                 <tr key={loan.id}>
                                     <td className="text-muted">#{loan.id}</td>
-                                    <td className="fw-bold">{loan.employee}</td>
+                                    {!isEmployee && <td className="fw-bold">{loan.employee}</td>}
                                     <td>{loan.amount}</td>
                                     <td>{loan.type}</td>
                                     <td>
@@ -195,7 +208,7 @@ export const LoansContent = () => {
                                     <td>{loan.emi}</td>
                                     <td className="text-end">
                                         <div className="d-flex gap-2 justify-content-end">
-                                            {loan.status === 'Pending' && (
+                                            {loan.status === 'Pending' && !isEmployee && (
                                                 <>
                                                     <button onClick={() => handleAction(loan.id, 'APPROVE')} className="btn btn-sm btn-outline-success border-0 px-2" title="Approve"><FaCheck /></button>
                                                     <button onClick={() => handleAction(loan.id, 'REJECT')} className="btn btn-sm btn-outline-danger border-0 px-2" title="Reject"><FaTimes /></button>
