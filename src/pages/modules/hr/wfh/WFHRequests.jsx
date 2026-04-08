@@ -5,6 +5,7 @@ import { MdPendingActions } from 'react-icons/md';
 import { useAuth } from '../../../../context/AuthContext';
 import { useSearch } from '../../../../context/SearchContext';
 import { useEffect } from 'react';
+import { wfhService } from '../../../../services/wfhService';
 
 /* ─── shared style tokens ─── */
 const card = {
@@ -40,15 +41,39 @@ const initRequests = [
 
 const WFHRequests = () => {
     const { user } = useAuth();
-    const isManager = ['superadmin', 'admin', 'hr', 'manager'].includes(user?.role?.toLowerCase());
+    const role = user?.role?.toLowerCase() || 'employee';
+    const isManager = ['superadmin', 'admin', 'hr', 'manager'].includes(role);
 
-    const [requests, setRequests] = useState(initRequests);
+    const [requests, setRequests] = useState([]);
+    const [stats, setStats] = useState({ total: 0, pending: 0, approved: 0, rejected: 0 });
+    const [loading, setLoading] = useState(false);
     const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
     const [search, setSearch] = useState(globalSearchTerm);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [sData, rData] = await Promise.all([
+                wfhService.getSummary(role),
+                wfhService.getRequests(role)
+            ]);
+            setStats(sData);
+            setRequests(rData);
+        } catch (error) {
+            console.error("Failed to load WFH data", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, [search]);
 
     useEffect(() => {
         setSearch(globalSearchTerm);
     }, [globalSearchTerm]);
+
     const [statusFilter, setStatus] = useState('All');
     const [showModal, setShowModal] = useState(false);
     const [toast, setToast] = useState('');
@@ -62,33 +87,43 @@ const WFHRequests = () => {
         return matchSearch && matchStatus;
     });
 
-    const approve = (id) => {
-        setRequests(p => p.map(r => r.id === id ? { ...r, status: 'Approved' } : r));
-        notify('Request approved successfully.');
+    const approve = async (id) => {
+        try {
+            await wfhService.updateStatus(id, { action: 'APPROVE' }, role);
+            notify('Request approved successfully.');
+            fetchData();
+        } catch (err) {
+            notify('Failed to approve request.');
+        }
     };
 
-    const reject = (id) => {
-        setRequests(p => p.map(r => r.id === id ? { ...r, status: 'Rejected' } : r));
-        notify('Request rejected.');
+    const reject = async (id) => {
+        try {
+            await wfhService.updateStatus(id, { action: 'REJECT' }, role);
+            notify('Request rejected.');
+            fetchData();
+        } catch (err) {
+            notify('Failed to reject request.');
+        }
     };
 
-    const addRequest = (e) => {
+    const addRequest = async (e) => {
         e.preventDefault();
-        const initials = (form.employee || user?.name || 'ME').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-        setRequests(p => [...p, {
-            id: Date.now(),
-            employee: form.employee || user?.name || 'Me',
-            dept: user?.department || 'General',
-            startDate: form.startDate,
-            endDate: form.endDate,
-            days: 1,
-            reason: form.reason,
-            status: 'Pending',
-            avatar: initials,
-        }]);
-        setShowModal(false);
-        setForm({ employee: '', startDate: '', endDate: '', reason: '' });
-        notify('WFH request submitted successfully.');
+        try {
+            const payload = {
+                employee_name: isManager ? form.employee : user?.name,
+                from_date: form.startDate,
+                to_date: form.endDate,
+                reason: form.reason
+            };
+            await wfhService.submitRequest(payload, role);
+            setShowModal(false);
+            setForm({ employee: '', startDate: '', endDate: '', reason: '' });
+            fetchData();
+            notify('WFH request submitted successfully.');
+        } catch (error) {
+            alert("Submission failed: " + error.message);
+        }
     };
 
     return (
@@ -127,7 +162,12 @@ const WFHRequests = () => {
 
                 {/* ── KPI Cards ── */}
                 <div className="row g-2 mb-3">
-                    {kpis.map((k, i) => (
+                    {[
+                        { label: 'Total WFH', val: stats.total, borderColor: '#4f46e5', icon: <FaLaptopHouse size={16} color="#4f46e5" /> },
+                        { label: 'Pending', val: stats.pending, borderColor: '#d97706', icon: <MdPendingActions size={17} color="#d97706" /> },
+                        { label: 'Approved', val: stats.approved, borderColor: '#059669', icon: <FaCheckCircle size={15} color="#059669" /> },
+                        { label: 'Rejected', val: stats.rejected, borderColor: '#dc2626', icon: <FaTimesCircle size={15} color="#dc2626" /> },
+                    ].map((k, i) => (
                         <div key={i} className="col-6 col-md-3">
                             <div style={{ ...card, borderLeft: `3px solid ${k.borderColor}`, display: 'flex', alignItems: 'center', gap: 12 }}>
                                 <div style={{ flexShrink: 0 }}>{k.icon}</div>
@@ -193,13 +233,21 @@ const WFHRequests = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.length === 0 ? (
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={isManager ? 7 : 6} style={{ textAlign: 'center', padding: '32px 0' }}>
+                                        <div className="spinner-border spinner-border-sm text-primary me-2"></div>
+                                        <span className="text-muted">Fetching WFH records...</span>
+                                    </td>
+                                </tr>
+                            ) : filtered.length === 0 ? (
                                 <tr>
                                     <td colSpan={isManager ? 7 : 6} style={{ textAlign: 'center', padding: '32px 0', color: '#94a3b8', fontSize: '0.8rem' }}>
                                         No WFH requests match your filters.
                                     </td>
                                 </tr>
                             ) : filtered.map((r, i) => {
+                                const initials = (r.employee || r.employee_name || '??').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
                                 const sty = statusMeta[r.status] || {};
                                 return (
                                     <tr key={r.id}>
@@ -212,19 +260,19 @@ const WFHRequests = () => {
                                                     fontSize: '0.6rem', fontWeight: 700,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                                                 }}>
-                                                    {r.avatar}
+                                                    {r.avatar || initials}
                                                 </div>
-                                                <span className="fw-semibold" style={{ color: '#0f172a' }}>{r.employee}</span>
+                                                <span className="fw-semibold" style={{ color: '#0f172a' }}>{r.employee || r.employee_name}</span>
                                             </div>
                                         </td>
                                         {/* Dept */}
-                                        <td style={{ padding: '8px 10px', color: '#475569' }}>{r.dept}</td>
+                                        <td style={{ padding: '8px 10px', color: '#475569' }}>{r.dept || r.department || 'N/A'}</td>
                                         {/* Period */}
                                         <td style={{ padding: '8px 10px', color: '#475569' }}>
-                                            {r.startDate} &mdash; {r.endDate}
+                                            {r.startDate || r.from_date} &mdash; {r.endDate || r.to_date}
                                         </td>
                                         {/* Days */}
-                                        <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>{r.days}d</td>
+                                        <td style={{ padding: '8px 10px', fontWeight: 700, color: '#0f172a' }}>{r.days || (r.to_date && r.from_date ? 'Check' : '1')}d</td>
                                         {/* Reason */}
                                         <td style={{ padding: '8px 10px', color: '#64748b', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                             {r.reason}

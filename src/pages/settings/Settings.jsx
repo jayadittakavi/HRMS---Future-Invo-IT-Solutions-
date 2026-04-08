@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '../../components/layout/DashboardLayout';
-import { FaUserAstronaut, FaCalendarCheck, FaWalking, FaHistory, FaHeadset, FaUsers, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUserAstronaut, FaCalendarCheck, FaWalking, FaHistory, FaHeadset, FaUsers, FaMoneyBillWave, FaLaptop } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
 const Settings = () => {
@@ -95,9 +95,12 @@ const Settings = () => {
     // Role-based filtering and path adjustment
     const filteredItems = settingsItems
         .filter(item => {
-            if (role === 'employee') {
-                if (item.title === 'My Space Dashboard') return false;
-                if (item.title === 'Audit Logs') return false;
+            if (role === 'employee' || role === 'manager') {
+                if (item.title === 'My Space Dashboard' && role === 'employee') return false;
+                if (item.title === 'Audit Logs' && role === 'manager') {
+                    // Only allow if admin/superadmin route is accessible or if we had a manager-specific audit log
+                    return false; 
+                }
                 if (item.title === 'User Management') return false;
             }
             return true;

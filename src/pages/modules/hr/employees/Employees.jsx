@@ -24,6 +24,7 @@ export const EmployeesContent = () => {
     const [filteredBranches, setFilteredBranches] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
+    const [managerStats, setManagerStats] = useState(null);
 
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
@@ -64,24 +65,34 @@ export const EmployeesContent = () => {
 
     const fetchData = async () => {
         setLoading(true);
+        const role = currentUser?.role?.toLowerCase();
         try {
+            // Fetch stats if manager
+            let dashboardStats = null;
+            if (role === 'manager') {
+                dashboardStats = await employeeSuperAdminService.getDashboardStats(role);
+            }
+
             // Fetch all for SuperAdmin/Admin/HR to allow filtering
-            // Note: If backend supports restricted listing, we should use that
-            // For now, we fetch and filter in frontend to meet UI requirements
-            const empRes = await employeeSuperAdminService.getAllEmployees();
+            const empRes = await employeeSuperAdminService.getAllEmployees(role);
             let empData = Array.isArray(empRes) ? empRes : (empRes.data || empRes.employees || []);
 
             // Apply role-based filtering
             if (isSuperAdmin) {
                 setEmployees(empData);
-            } else if (isAdmin || isHR) {
-                // Admin and HR see employees of their own company
+            } else if (isAdmin || isHR || role === 'manager') {
+                // Admin, HR, and Manager see employees of their own company/department
+                // Usually backend filters for Manager, but we keep frontend filter as safety
                 const filtered = empData.filter(e => e.company_id === currentUser?.company_id || e.company_name === currentUser?.company_name);
                 setEmployees(filtered);
             } else if (isEmployee) {
-                // Employee only sees themselves
                 const self = empData.filter(e => e.id === currentUser?.user_id || e.id === currentUser?.id || e.email === currentUser?.email);
-                setEmployees(self.length > 0 ? self : [currentUser]); // Fallback to current user context
+                setEmployees(self.length > 0 ? self : [currentUser]);
+            }
+
+            // If we have dashboardStats, override the calculated stats for Manager
+            if (dashboardStats) {
+                setManagerStats(dashboardStats);
             }
 
             // Fetch companies for dropdown if allowed to manage
@@ -252,9 +263,9 @@ export const EmployeesContent = () => {
     }).length;
 
     const stats = [
-        { label: 'Total Employees', count: employees.length, icon: <FaUsers />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
-        { label: 'Active Now', count: employees.filter(e => e.status === 'Active' || !e.status).length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : newThisMonthCount, icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
+        { label: 'Total Employees', count: managerStats?.totalMembers || employees.length, icon: <FaUsers />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
+        { label: 'Active Now', count: managerStats?.activeNow || employees.filter(e => e.status === 'Active' || !e.status).length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
+        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : (managerStats?.newThisMonth || newThisMonthCount), icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
     ];
 
     return (

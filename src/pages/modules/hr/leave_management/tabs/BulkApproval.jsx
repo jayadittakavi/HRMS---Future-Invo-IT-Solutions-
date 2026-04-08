@@ -146,8 +146,8 @@ const BulkApproval = () => {
                                         checked={selectedIds.length === filtered.length && filtered.length > 0}
                                         onChange={toggleAll} />
                                 </th>
-                                {['Employee', 'Dept', 'Type', 'Date', 'Days', 'Reason'].map(h => (
-                                    <th key={h} style={{ padding: '5px 8px', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>{h}</th>
+                                {['Employee', 'Dept', 'Type', 'Duration', 'Days', 'Applied', 'Reason'].map(h => (
+                                    <th key={h} style={{ padding: '8px 8px', fontSize: '0.62rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
@@ -166,12 +166,17 @@ const BulkApproval = () => {
                                         </div>
                                     </td>
                                     <td style={{ padding: '6px 8px', color: '#64748b' }}>{r.dept}</td>
-                                    <td style={{ padding: '6px 8px' }}>
+                                    <td style={{ padding: '8px 8px' }}>
                                         <span style={{ background: '#ede9fe', color: '#4f46e5', borderRadius: 20, padding: '2px 8px', fontSize: '0.63rem', fontWeight: 700 }}>{r.type}</span>
                                     </td>
-                                    <td style={{ padding: '6px 8px', color: '#64748b', fontSize: '0.72rem' }}>{r.from}</td>
-                                    <td style={{ padding: '6px 8px', fontWeight: 700 }}>{r.days}d</td>
-                                    <td style={{ padding: '6px 8px', color: '#64748b', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.reason}</td>
+                                    <td style={{ padding: '8px 8px', color: '#64748b', fontSize: '0.7rem' }}>
+                                        {r.from} <span className="mx-1 text-light-silver">→</span> {r.to || r.from}
+                                    </td>
+                                    <td style={{ padding: '8px 8px', fontWeight: 700 }}>{r.days}d</td>
+                                    <td style={{ padding: '8px 8px', color: '#94a3b8', fontSize: '0.68rem' }}>{r.applied || 'N/A'}</td>
+                                    <td style={{ padding: '8px 8px', color: '#64748b', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.reason}>
+                                        {r.reason}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

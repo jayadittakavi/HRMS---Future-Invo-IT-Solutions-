@@ -32,7 +32,12 @@ const LeaveHistory = ({ personal = false }) => {
                 type: typeFilter !== 'All' ? typeFilter : undefined,
                 personal: personal || undefined
             };
-            const data = await leaveService.getHistory(filters);
+            
+            // If it's personal, use the optimized personal history endpoint
+            const data = personal 
+                ? await leaveService.getAllMine() 
+                : await leaveService.getHistory(filters);
+                
             if (Array.isArray(data)) {
                 setHistory(data);
             }

@@ -1,6 +1,6 @@
 import { API_BASE, getAuthHeader } from '../../../../config';
 // Role-based auth header helper. Defaults to superadmin for management, employee for personal space.
-const authHeader = (role = 'superadmin') => ({ 
+const authHeader = (role = 'manager') => ({ 
     headers: {
         ...getAuthHeader(role),
         "Content-Type": "application/json"
@@ -8,9 +8,9 @@ const authHeader = (role = 'superadmin') => ({
 });
 
 export const expenseService = {
-    getStats: async (role = 'employee') => {
+    getStats: async (role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/stats`, { headers: getAuthHeader(role) });
+            const response = await fetch(`${API_BASE}/travel-expenses/stats`, { headers: getAuthHeader(role) });
             if (!response.ok) return { totalExpenses: "$0", pendingClaims: "0", approvedTrips: "0" };
             const data = await response.json();
             return data?.data || data;
@@ -20,9 +20,9 @@ export const expenseService = {
         }
     },
 
-    getTrends: async (role = 'employee') => {
+    getTrends: async (role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/trends`, { headers: getAuthHeader(role) });
+            const response = await fetch(`${API_BASE}/travel-expenses/trends`, { headers: getAuthHeader(role) });
             if (!response.ok) return [];
             const data = await response.json();
             return data?.data || data;
@@ -32,9 +32,9 @@ export const expenseService = {
         }
     },
 
-    getClaims: async (role = 'employee') => {
+    getClaims: async (role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/claims`, { headers: getAuthHeader(role) });
+            const response = await fetch(`${API_BASE}/travel-expenses/claims`, { headers: getAuthHeader(role) });
             if (!response.ok) return [];
             const data = await response.json();
             return data?.data || data;
@@ -44,9 +44,9 @@ export const expenseService = {
         }
     },
 
-    getBudgetUtilization: async (role = 'employee') => {
+    getBudgetUtilization: async (role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/budget-utilization`, { headers: getAuthHeader(role) });
+            const response = await fetch(`${API_BASE}/travel-expenses/budget`, { headers: getAuthHeader(role) });
             if (!response.ok) return [];
             const data = await response.json();
             return data?.data || data;
@@ -58,11 +58,12 @@ export const expenseService = {
 
     submitClaim: async (data) => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/claims`, {
+            const response = await fetch(`${API_BASE}/travel-expenses/claims`, {
                 method: "POST",
                 headers: authHeader('employee').headers,
                 body: JSON.stringify(data)
             });
+            if (!response.ok) throw new Error(await response.text());
             return await response.json();
         } catch (error) {
             console.error("API Error (submitClaim):", error);
@@ -70,13 +71,14 @@ export const expenseService = {
         }
     },
 
-    updateClaimStatus: async (id, action, reason = "") => {
+    updateClaimStatus: async (id, action, reason = "", role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/expenses/claims/${id}/action`, {
+            const response = await fetch(`${API_BASE}/travel-expenses/claims/${id}/action`, {
                 method: "PATCH",
-                headers: authHeader('superadmin').headers,
+                headers: authHeader(role).headers,
                 body: JSON.stringify({ action, reason })
             });
+            if (!response.ok) throw new Error(await response.text());
             return await response.json();
         } catch (error) {
             console.error("API Error (updateClaimStatus):", error);

@@ -9,7 +9,8 @@ export const leaveService = {
         try {
             const response = await fetch(`${API_BASE}/leaves/my-dashboard/summary`, authHeader('employee'));
             if (!response.ok) return { totalBalance: 0, pending: 0, approved: 0, total: 0, leaveTypes: [], recentRequests: [] };
-            return await response.json();
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getDashboardSummary):", error);
             return { totalBalance: 0, pending: 0, approved: 0, total: 0, leaveTypes: [], recentRequests: [] };
@@ -19,7 +20,8 @@ export const leaveService = {
         try {
             const response = await fetch(`${API_BASE}/leaves/my-dashboard/trends`, authHeader('employee'));
             if (!response.ok) return { labels: [], data: [] };
-            return await response.json();
+            const data = await response.json();
+            return data?.data || data;
         } catch (error) {
             console.error("API Error (getDashboardTrends):", error);
             return { labels: [], data: [] };
@@ -29,17 +31,18 @@ export const leaveService = {
         try {
             const response = await fetch(`${API_BASE}/leaves/my-dashboard/recent`, authHeader('employee'));
             if (!response.ok) return [];
-            return await response.json();
+            const data = await response.json();
+            return data?.data || (Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("API Error (getRecentRequests):", error);
             return [];
         }
     },
 
-    // 1b. Administration Dashboard (HR View)
+    // 1b. Administration Dashboard (Management Control)
     getManagementSummary: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/dashboard/summary`, authHeader());
+            const response = await fetch(`${API_BASE}/leave/dashboard-stats`, authHeader());
             if (!response.ok) return { total: 0, pending: 0, approved: 0 };
             return await response.json();
         } catch (error) {
@@ -49,11 +52,24 @@ export const leaveService = {
     },
     getManagementTrends: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/dashboard/trends`, authHeader());
-            if (!response.ok) return [];
-            return await response.json();
+            // Reusing dashboard-stats endpoint as it returns weekly/monthly analytics
+            const response = await fetch(`${API_BASE}/leave/dashboard-stats`, authHeader());
+            if (!response.ok) return { labels: [], data: [] };
+            const data = await response.json();
+            return data?.trends || data?.data?.trends || { labels: [], data: [] };
         } catch (error) {
             console.error("API Error (getManagementTrends):", error);
+            return { labels: [], data: [] };
+        }
+    },
+    getManagementRecentRequests: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leave/control/recent-requests`, authHeader());
+            if (!response.ok) return [];
+            const data = await response.json();
+            return Array.isArray(data) ? data : (data.data || []);
+        } catch (error) {
+            console.error("API Error (getManagementRecentRequests):", error);
             return [];
         }
     },
@@ -61,7 +77,7 @@ export const leaveService = {
     // 2. Pending & Bulk Approvals
     getPendingApprovals: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/pending-approvals`, authHeader());
+            const response = await fetch(`${API_BASE}/leave/pending-approvals`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -72,7 +88,7 @@ export const leaveService = {
     },
     bulkAction: async (ids, action) => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/bulk-action`, {
+            const response = await fetch(`${API_BASE}/leave/control/bulk-action`, {
                 method: "POST",
                 headers: {
                     ...authHeader().headers,
@@ -87,10 +103,10 @@ export const leaveService = {
         }
     },
 
-    // 3. Leave Policy Management (CRUD)
+    // 3. Leave Policy Configuration (Rules)
     getUiPolicies: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/ui-policies`, authHeader());
+            const response = await fetch(`${API_BASE}/leave/control/policies`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -101,7 +117,7 @@ export const leaveService = {
     },
     createUiPolicy: async (policyData) => {
         try {
-            const response = await fetch(`${API_BASE}/leaves/ui-policies`, {
+            const response = await fetch(`${API_BASE}/leave/control/policies`, {
                 method: "POST",
                 headers: {
                     ...authHeader().headers,
@@ -144,17 +160,26 @@ export const leaveService = {
         }
     },
 
-    // 4. History Log
+    // 4. History Log (Audit & Search)
     getHistory: async (filters = {}) => {
         try {
             const queryParams = new URLSearchParams(filters).toString();
-            const response = await fetch(`${API_BASE}/leaves/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
+            const response = await fetch(`${API_BASE}/leave/control/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
         } catch (error) {
             console.error("API Error (getHistory):", error);
             return [];
+        }
+    },
+    exportHistory: async (filters = {}) => {
+        try {
+            const queryParams = new URLSearchParams(filters).toString();
+            // This endpoint handles CSV generation and returns the downloadable stream
+            window.location.href = `${API_BASE}/leave/control/history/export${queryParams ? `?${queryParams}` : ""}`;
+        } catch (error) {
+            console.error("API Error (exportHistory):", error);
         }
     },
 
@@ -189,6 +214,17 @@ export const leaveService = {
     },
 
     // 6. Enhanced Leave APIs (Personal)
+    getLeaveTypes: async () => {
+        try {
+            const response = await fetch(`${API_BASE}/leaves/types`, authHeader('employee'));
+            if (!response.ok) return [];
+            const data = await response.json();
+            return data?.data || (Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("API Error (getLeaveTypes):", error);
+            return [];
+        }
+    },
     calculateDays: async (data) => {
         try {
             const response = await fetch(`${API_BASE}/leaves/calculate-days`, {
@@ -199,7 +235,8 @@ export const leaveService = {
                 },
                 body: JSON.stringify(data),
             });
-            return await response.json();
+            const result = await response.json();
+            return result?.data || result;
         } catch (error) {
             console.error("API Error (calculateDays):", error);
             throw error;
@@ -215,6 +252,7 @@ export const leaveService = {
                 },
                 body: JSON.stringify(data),
             });
+            if (!response.ok) throw new Error(await response.text());
             return await response.json();
         } catch (error) {
             console.error("API Error (applyLeave):", error);
@@ -224,7 +262,8 @@ export const leaveService = {
     getAllMine: async () => {
         try {
             const response = await fetch(`${API_BASE}/leaves/mine`, authHeader('employee'));
-            return await response.json();
+            const data = await response.json();
+            return data?.data || (Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("API Error (getAllMine):", error);
             return [];

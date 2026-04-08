@@ -56,7 +56,7 @@ const Regularization = () => {
 
     const handleApprove = async (id) => {
         try {
-            await attendanceService.reviewRegularization(id, { status: 'Approved' });
+            await attendanceService.approveRegularization(id);
             fetchRequests();
         } catch (err) {
             alert(`Failed: ${err.message}`);
@@ -64,8 +64,10 @@ const Regularization = () => {
     };
 
     const handleReject = async (id) => {
+        const reason = prompt("Please enter a reason for rejection:");
+        if (reason === null) return;
         try {
-            await attendanceService.reviewRegularization(id, { status: 'Rejected' });
+            await attendanceService.rejectRegularization(id, reason);
             fetchRequests();
         } catch (err) {
             alert(`Failed: ${err.message}`);

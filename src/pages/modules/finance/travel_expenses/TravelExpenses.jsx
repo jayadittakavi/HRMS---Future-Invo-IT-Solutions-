@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { useSearch } from '../../../../context/SearchContext';
 import { useAuth } from '../../../../context/AuthContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
@@ -63,7 +64,7 @@ export const TravelExpensesContent = () => {
         const reason = action === 'Rejected' ? prompt("Please provide a reason for rejection:") : "";
         if (action === 'Rejected' && reason === null) return;
         try {
-            await expenseService.updateClaimStatus(id, action, reason);
+            await expenseService.updateClaimStatus(id, action, reason, role);
             fetchData();
             alert(`Claim ${action.toLowerCase()}ed successfully!`);
         } catch (err) {

@@ -1,21 +1,51 @@
 import { API_BASE, getAuthHeader } from '../../../../config';
 
-const authHeader = () => {
+const authHeader = (role = 'admin') => {
     return {
-        headers: getAuthHeader('admin'), // Using admin role as primary for these specific endpoints
+        headers: getAuthHeader(role),
     };
 };
 
 export const employeeSuperAdminService = {
+    // 🔹 Dashboard Stats (TOTAL, ACTIVE, NEW)
+    getDashboardStats: async (role = 'admin') => {
+        try {
+            const response = await fetch(`${API_BASE}/dashboard/stats`, {
+                headers: getAuthHeader(role)
+            });
+            if (!response.ok) throw new Error("Failed to fetch dashboard stats");
+            const data = await response.json();
+            return data?.data || data;
+        } catch (error) {
+            console.error("Dashboard Stats Error:", error);
+            throw error;
+        }
+    },
+
+    // 🔹 Dropdown Data for Filters (Roles, Depts, Companies)
+    getDropdownData: async (role = 'admin') => {
+        try {
+            const response = await fetch(`${API_BASE}/admin/dropdown-data`, {
+                headers: getAuthHeader(role)
+            });
+            if (!response.ok) throw new Error("Failed to fetch dropdown data");
+            const data = await response.json();
+            return data?.data || data;
+        } catch (error) {
+            console.error("Dropdown Data Error:", error);
+            throw error;
+        }
+    },
+
     // 🔹 List All Employees
-    getAllEmployees: async () => {
+    getAllEmployees: async (role = 'admin') => {
         try {
             const timestamp = new Date().getTime();
             // Primary: /api/admin/employees
             let response = await fetch(`${API_BASE}/admin/employees?t=${timestamp}`, {
                 method: "GET",
                 cache: 'no-store',
-                ...authHeader()
+                ...authHeader(role)
             });
 
             // Fallback to superadmin if admin path fails
@@ -39,13 +69,13 @@ export const employeeSuperAdminService = {
     },
 
     // 🔹 Get Employee Details
-    getEmployeeById: async (id) => {
+    getEmployeeById: async (id, role = 'admin') => {
         try {
             const timestamp = new Date().getTime();
             let response = await fetch(`${API_BASE}/admin/employees/${id}?t=${timestamp}`, {
                 method: "GET",
                 cache: 'no-store',
-                ...authHeader()
+                ...authHeader(role)
             });
 
             if (response.status === 404 || response.status === 405) {
@@ -195,14 +225,11 @@ export const employeeSuperAdminService = {
     },
 
     // 🔹 Toggle Employee Status (Activate/Deactivate)
-    toggleStatus: async (id, currentUserRole = null) => {
+    toggleStatus: async (id, currentUserRole = 'admin') => {
         // Strict adherence to the requested URLs for toggle actions
         // URL format: POST /api/{role}/employees/{id}/toggle
-        const roleStr = (currentUserRole || '').toLowerCase();
-        let pathRole = 'admin';
-        if (roleStr.includes('superadmin') || roleStr.includes('super_admin')) {
-            pathRole = 'superadmin';
-        }
+        const roleStr = (currentUserRole || 'admin').toLowerCase();
+        let pathRole = roleStr === 'manager' ? 'admin' : (roleStr.includes('superadmin') ? 'superadmin' : 'admin');
         
         const url = `${API_BASE}/${pathRole}/employees/${id}/toggle`;
 

@@ -180,7 +180,7 @@ function AppContent() {
 
         <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><DailyTask /></ProtectedRoute>} />
         <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
-        <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Loans /></ProtectedRoute>} />
+        <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Loans /></ProtectedRoute>} />
         <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><TravelExpenses /></ProtectedRoute>} />
         <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
@@ -198,13 +198,13 @@ function AppContent() {
 
         {/* Audit Logs */}
         <Route path="/super-admin/audit-logs" element={<ProtectedRoute requiredRoles={['superadmin']}><SuperAdminAuditLogs /></ProtectedRoute>} />
-        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['admin', 'superadmin', 'hr']}><AdminAuditLogs /></ProtectedRoute>} />
+        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredRoles={['admin', 'superadmin', 'hr', 'manager']}><AdminAuditLogs /></ProtectedRoute>} />
 
         {/* Additional Dashboard Routes */}
         <Route path="/companies" element={<ProtectedRoute requiredRoles={['superadmin']}><Companies /></ProtectedRoute>} />
         <Route path="/branches" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee', 'accountant']}><Branches /></ProtectedRoute>} />
-        <Route path="/departments" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Departments /></ProtectedRoute>} />
-        <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
+        <Route path="/departments" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Departments /></ProtectedRoute>} />
+        <Route path="/reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'hr', 'manager']}><PlaceholderPage title="Reports" /></ProtectedRoute>} />
 
         {/* HR Routes */}
         <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'employee']}><Employees /></ProtectedRoute>} />
@@ -212,7 +212,7 @@ function AppContent() {
         <Route path="/add-member" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><AddMember /></ProtectedRoute>} />
         <Route path="/roles-list" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><RolesList /></ProtectedRoute>} />
         <Route path="/create-username" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><CreateUsername /></ProtectedRoute>} />
-        <Route path="/wfh-requests" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'manager']}><WFHRequests /></ProtectedRoute>} />
+        <Route path="/wfh-requests" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'manager', 'employee']}><WFHRequests /></ProtectedRoute>} />
         <Route path="/recruitment" element={<ProtectedRoute requiredRoles={['hr']}><Recruitment /></ProtectedRoute>} />
         <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><Training /></ProtectedRoute>} />
         <Route path="/performance-reviews" element={<ProtectedRoute requiredRoles={['hr']}><PerformanceReviews /></ProtectedRoute>} />
@@ -231,12 +231,12 @@ function AppContent() {
         <Route path="/performance" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Performance" /></ProtectedRoute>} />
         <Route path="/team-reports" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Reports" /></ProtectedRoute>} />
 
-        {/* Accountant Routes */}
-        <Route path="/payroll-processing" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Payroll Processing" /></ProtectedRoute>} />
-        <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
+        {/* Accountant & Manager Payroll Routes */}
+        <Route path="/payroll-processing" element={<ProtectedRoute requiredRoles={['accountant', 'manager']}><PlaceholderPage title="Payroll Processing" /></ProtectedRoute>} />
+        <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant', 'manager']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
         <Route path="/payroll-dashboard" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Payroll /></ProtectedRoute>} />
-        <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant']}><Payroll /></ProtectedRoute>} />
+        <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'manager']}><Payroll /></ProtectedRoute>} />
         <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
         <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />
         <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
@@ -253,10 +253,10 @@ function AppContent() {
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
 
-        {/* Admin Routes */}
-        <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
-        <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><Payroll /></ProtectedRoute>} />
-        <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
+        {/* Admin & Manager Management Routes */}
+        <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
+        <Route path="/payroll-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Payroll /></ProtectedRoute>} />
+        <Route path="/performance-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Performance Management" /></ProtectedRoute>} />
 
         {/* New User Routes */}
         <Route path="/welcome" element={<ProtectedRoute requiredRoles={['newuser']}><NewUserDashboard /></ProtectedRoute>} />

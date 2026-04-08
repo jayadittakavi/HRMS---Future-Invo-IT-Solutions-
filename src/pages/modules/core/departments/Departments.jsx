@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { FaEdit, FaTimesCircle, FaCheckCircle, FaBuilding, FaSearch } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
+import { useAuth } from '../../../../context/AuthContext';
 import "../../../../components/layout/DashboardLayout.css";
 import { departmentService } from './departmentService';
 
 export const DepartmentsContent = () => {
+    const { user } = useAuth();
+    const role = user?.role?.toLowerCase() || 'superadmin';
+
     const [departments, setDepartments] = useState([]);
     const [companiesList, setCompaniesList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -37,15 +41,15 @@ export const DepartmentsContent = () => {
             setLoading(true);
             try {
                 const [deptRes, compRes] = await Promise.all([
-                    departmentService.getDepartments(),
-                    departmentService.getCompanies()
+                    departmentService.getDepartments(role),
+                    departmentService.getCompanies(role)
                 ]);
 
-                if (deptRes.success && deptRes.data) {
-                    setDepartments(deptRes.data);
+                if (deptRes) {
+                    setDepartments(Array.isArray(deptRes) ? deptRes : (deptRes.data || []));
                 }
-                if (compRes.success && compRes.data) {
-                    setCompaniesList(compRes.data);
+                if (compRes) {
+                    setCompaniesList(Array.isArray(compRes) ? compRes : (compRes.data || []));
                 }
             } catch (error) {
                 console.error("Error fetching departments/companies:", error);
@@ -55,7 +59,7 @@ export const DepartmentsContent = () => {
         };
 
         fetchData();
-    }, [reload]);
+    }, [reload, role]);
 
     // Handlers
     const handleInputChange = (e) => {
@@ -89,7 +93,7 @@ export const DepartmentsContent = () => {
                 location: formData.location,
                 company_id: formData.company_id,
                 status: formData.status
-            });
+            }, role);
             setShowAdd(false);
             setReload(!reload);
         } catch (error) {
@@ -105,7 +109,7 @@ export const DepartmentsContent = () => {
                 dept_head: formData.head,
                 location: formData.location,
                 status: formData.status
-            });
+            }, role);
             setShowEdit(false);
             setReload(!reload);
         } catch (error) {
@@ -115,7 +119,7 @@ export const DepartmentsContent = () => {
 
     const toggleStatus = async (id) => {
         try {
-            await departmentService.toggleStatus(id);
+            await departmentService.toggleStatus(id, role);
             setReload(!reload);
         } catch (error) {
             console.error("Failed to toggle status:", error);

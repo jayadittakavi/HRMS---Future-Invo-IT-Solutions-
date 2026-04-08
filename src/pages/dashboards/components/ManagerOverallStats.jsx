@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUsers, FaCalendarCheck, FaClipboardList, FaPlusCircle, FaChartLine } from 'react-icons/fa';
+import { dashboardService } from '../../../services/dashboardService';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -27,6 +28,32 @@ ChartJS.register(
 );
 
 const ManagerOverallStats = ({ onNavigate }) => {
+    const [loading, setLoading] = useState(true);
+    const [statsData, setStatsData] = useState(null);
+
+    const fetchData = async () => {
+        try {
+            const data = await dashboardService.getManagerStats();
+            setStatsData(data);
+        } catch (error) {
+            console.error("Dashboard Fetch Error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const summaryCards = [
+        { label: 'Total Team', value: statsData?.totalMembers || '12', icon: <FaUsers />, color: 'bg-gradient-purple', sub: 'Full Strength' },
+        { label: 'Present Today', value: statsData?.presentToday || '9', icon: <FaCalendarCheck />, color: 'bg-gradient-green', sub: '75% Attendance' },
+        { label: 'Pending Tasks', value: statsData?.pendingTasks || '5', icon: <FaClipboardList />, color: 'bg-gradient-orange', sub: 'Needs Review' },
+        { label: 'Avg. Efficiency', value: statsData?.avgEfficiency || '85%', icon: <FaChartLine />, color: 'bg-gradient-blue', sub: 'Top Performance' },
+        { label: 'Clocked Hours', value: statsData?.clockedHours || '42h', icon: <FaPlusCircle />, color: 'bg-gradient-cyan', sub: 'This Week' },
+        { label: 'Active Goals', value: statsData?.activeGoals || '3', icon: <FaChartLine />, color: 'bg-gradient-pink', sub: 'On Track' },
+    ];
 
     const teamAttendance = {
         labels: ['Present', 'Absent', 'On Leave', 'WFH'],
@@ -142,14 +169,7 @@ const ManagerOverallStats = ({ onNavigate }) => {
 
             {/* Top Stats Row with Gradients */}
             <div className="row g-4 mb-4">
-                {[
-                    { label: 'Total Team', value: '12', icon: <FaUsers />, color: 'bg-gradient-purple', sub: 'Full Strength' },
-                    { label: 'Present Today', value: '9', icon: <FaCalendarCheck />, color: 'bg-gradient-green', sub: '75% Attendance' },
-                    { label: 'Pending Tasks', value: '5', icon: <FaClipboardList />, color: 'bg-gradient-orange', sub: 'Needs Review' },
-                    { label: 'Avg. Efficiency', value: '85%', icon: <FaChartLine />, color: 'bg-gradient-blue', sub: 'Top Performance' },
-                    { label: 'Clocked Hours', value: '42h', icon: <FaPlusCircle />, color: 'bg-gradient-cyan', sub: 'This Week' },
-                    { label: 'Active Goals', value: '3', icon: <FaChartLine />, color: 'bg-gradient-pink', sub: 'On Track' },
-                ].map((stat, index) => (
+                {summaryCards.map((stat, index) => (
                     <div className="col-md-2 col-6" key={index}>
                         <div
                             className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm border-0`}

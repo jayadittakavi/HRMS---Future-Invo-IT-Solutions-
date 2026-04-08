@@ -1,135 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { payrollService } from '../payrollService';
+import { payrollService } from '../../../../../services/payrollService';
 import { employeeSuperAdminService } from '../../../hr/employees/superadmin-service';
-import { FaUserTimes, FaCheckCircle, FaExclamationTriangle, FaDownload } from 'react-icons/fa';
-
-
-/* ─── Mock F&F Data ───────────────────────────────────────── */
-const FNF_EMPLOYEES = [
-    {
-        id: 'FNF001',
-        empId: 'EMP008',
-        name: 'Vikram Singh',
-        designation: 'Senior Developer',
-        department: 'Engineering',
-        joinDate: '15 Mar 2020',
-        resignDate: '01 Jun 2025',
-        lastWorkingDay: '30 Jun 2025',
-        yearsOfService: 5.3,
-        noticePeriodRequired: 60,   // days
-        noticePeriodServed: 60,     // days
-        noticePeriodShortfall: 0,   // days
-        noticeStatus: 'Served',
-        status: 'Processing',
-        avatar: 'VS',
-        color: '#7c3aed',
-        salary: {
-            lastDrawnBasic: 48000,
-            lastDrawnGross: 80000,
-            perDay: 2667,
-        },
-        settlement: {
-            // Earnings
-            salaryForLastMonth: 52000,      // Prorated salary for days worked
-            leaveEncashment: 24000,         // Pending leaves × per day salary
-            pendingLeaves: 9,
-            gratuity: 138462,               // Formula: (last basic × 15 × years) / 26
-            noticePeriodPayIn: 0,           // Compensation if employer waives notice
-            bonusDues: 15000,               // Pro-rated annual bonus
-            expenseReimbursement: 5500,     // Pending expense claims
-
-            // Deductions
-            noticePeriodRecovery: 0,        // If notice not served
-            loanRecovery: 12000,            // Outstanding salary advance/loan
-            pfEmployee: 57600,              // PF corpus - employee share (accum.)
-            pfEmployer: 57600,              // PF corpus - employer share
-            pfTotal: 115200,
-            gratuityTaxExempt: 138462,
-            tdsOnSettlement: 4500,
-            assetRecovery: 0,               // Laptop / equipment pending
-        },
-    },
-    {
-        id: 'FNF002',
-        empId: 'EMP014',
-        name: 'Ananya Rao',
-        designation: 'HR Generalist',
-        department: 'Human Resources',
-        joinDate: '10 Aug 2021',
-        resignDate: '15 Jan 2026',
-        lastWorkingDay: '14 Feb 2026',
-        yearsOfService: 4.5,
-        noticePeriodRequired: 30,
-        noticePeriodServed: 20,
-        noticePeriodShortfall: 10,
-        noticeStatus: 'Short',
-        status: 'Pending',
-        avatar: 'AR',
-        color: '#0891b2',
-        salary: {
-            lastDrawnBasic: 36000,
-            lastDrawnGross: 58000,
-            perDay: 1933,
-        },
-        settlement: {
-            salaryForLastMonth: 38667,
-            leaveEncashment: 11600,
-            pendingLeaves: 6,
-            gratuity: 103846,
-            noticePeriodPayIn: 0,
-            bonusDues: 8000,
-            expenseReimbursement: 2000,
-            noticePeriodRecovery: 19330,     // 10 days × per day rate
-            loanRecovery: 0,
-            pfEmployee: 43200,
-            pfEmployer: 43200,
-            pfTotal: 86400,
-            gratuityTaxExempt: 103846,
-            tdsOnSettlement: 1200,
-            assetRecovery: 0,
-        },
-    },
-    {
-        id: 'FNF003',
-        empId: 'EMP021',
-        name: 'Deepak Nair',
-        designation: 'Operations Manager',
-        department: 'Operations',
-        joinDate: '01 Apr 2017',
-        resignDate: '01 Dec 2025',
-        lastWorkingDay: '31 Jan 2026',
-        yearsOfService: 8.8,
-        noticePeriodRequired: 90,
-        noticePeriodServed: 90,
-        noticePeriodShortfall: 0,
-        noticeStatus: 'Served',
-        status: 'Settled',
-        avatar: 'DN',
-        color: '#059669',
-        salary: {
-            lastDrawnBasic: 60000,
-            lastDrawnGross: 98000,
-            perDay: 3267,
-        },
-        settlement: {
-            salaryForLastMonth: 98000,
-            leaveEncashment: 52267,
-            pendingLeaves: 16,
-            gratuity: 304615,
-            noticePeriodPayIn: 0,
-            bonusDues: 25000,
-            expenseReimbursement: 8700,
-            noticePeriodRecovery: 0,
-            loanRecovery: 0,
-            pfEmployee: 72000,
-            pfEmployer: 72000,
-            pfTotal: 144000,
-            gratuityTaxExempt: 200000,
-            tdsOnSettlement: 18000,
-            assetRecovery: 0,
-        },
-    },
-];
+import { FaUserTimes, FaCheckCircle, FaExclamationTriangle, FaDownload, FaFilePdf } from 'react-icons/fa';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -461,10 +333,37 @@ const EmployeeDetail = ({ emp, onBack }) => {
                             }}>
                                 {emp.status}
                             </span>
-                            <button className="btn btn-sm fw-bold rounded-3 px-4 text-white"
-                                style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', fontSize: '0.8rem' }}>
-                                Approve & Settle
-                            </button>
+                            <div className="d-flex gap-2">
+                                {emp.status === 'Settled' && (
+                                    <button 
+                                        className="btn btn-sm btn-light border fw-bold rounded-3 px-3 d-flex align-items-center gap-2"
+                                        style={{ fontSize: '0.8rem' }}
+                                        onClick={async () => {
+                                            try {
+                                                const blob = await payrollService.downloadFnF(emp.id);
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = `FNF_Statement_${emp.name || 'Employee'}.pdf`;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                window.URL.revokeObjectURL(url);
+                                                document.body.removeChild(a);
+                                            } catch (err) {
+                                                alert("Failed to download F&F Statement");
+                                            }
+                                        }}
+                                    >
+                                        <FaFilePdf size={14} className="text-danger" /> Download Statement
+                                    </button>
+                                )}
+                                {!personal && (
+                                    <button className="btn btn-sm fw-bold rounded-3 px-4 text-white"
+                                        style={{ background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', fontSize: '0.8rem' }}>
+                                        Approve & Settle
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -543,15 +442,12 @@ const FullAndFinalTab = ({ personal = false }) => {
     const fetchSettlements = async () => {
         setLoading(true);
         try {
-            // For personal mode, we might fetch from a specific endpoint or filter
-            // Here we assume getSettlements handles access or we filter.
-            const data = await payrollService.getSettlements();
-            setSettlements(data || []);
+            const data = personal 
+                ? await payrollService.getFnF()
+                : []; // Management view handles separately if needed
+            setSettlements(Array.isArray(data) ? data : []);
             
-            // If personal, automatically select the user's settlement if found
             if (personal && data && data.length > 0) {
-                // In a real app, we'd match the user ID from context
-                // For now, if personal mode, show the first available (usually only one for user)
                 setSelected(data[0].id);
             }
         } catch (error) {

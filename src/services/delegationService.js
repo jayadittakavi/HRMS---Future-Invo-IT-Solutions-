@@ -1,12 +1,12 @@
 import { API_BASE, getAuthHeader } from '../config';
 
-const authHeader = (role = 'employee') => ({ headers: getAuthHeader(role) });
+const authHeader = (role = 'manager') => ({ headers: getAuthHeader(role) });
 
 export const delegationService = {
     // 1. Delegation Stats
-    getStats: async () => {
+    getStats: async (role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/delegation/stats`, authHeader());
+            const response = await fetch(`${API_BASE}/administration/delegations/stats`, authHeader(role));
             if (!response.ok) return null;
             const data = await response.json();
             return data.data || data;
@@ -16,26 +16,27 @@ export const delegationService = {
         }
     },
 
-    // 2. Delegation History List
-    getDelegationList: async () => {
+    // 2. Delegation History List (Search supported)
+    getDelegationHistory: async (search = "", role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/delegation/list`, authHeader());
+            const query = search ? `?search=${encodeURIComponent(search)}` : "";
+            const response = await fetch(`${API_BASE}/administration/delegations/list${query}`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
-            return data.data || data;
+            return data.data || (Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("API Error (getDelegationList):", error);
+            console.error("API Error (getDelegationHistory):", error);
             return [];
         }
     },
 
     // 3. Create New Delegation
-    createDelegation: async (delegationData) => {
+    createDelegation: async (delegationData, role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/delegation/create`, {
+            const response = await fetch(`${API_BASE}/administration/delegations/create`, {
                 method: 'POST',
                 headers: {
-                    ...authHeader().headers,
+                    ...authHeader(role).headers,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(delegationData)
@@ -48,12 +49,12 @@ export const delegationService = {
     },
 
     // 4. Cancel Delegation
-    cancelDelegation: async (id) => {
+    cancelDelegation: async (id, role = 'manager') => {
         try {
-            const response = await fetch(`${API_BASE}/delegation/cancel/${id}`, {
+            const response = await fetch(`${API_BASE}/administration/delegations/cancel/${id}`, {
                 method: 'POST',
                 headers: {
-                    ...authHeader().headers,
+                    ...authHeader(role).headers,
                     'Content-Type': 'application/json'
                 }
             });

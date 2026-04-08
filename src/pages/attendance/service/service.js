@@ -140,29 +140,27 @@ export const attendanceService = {
 
     // 🔹 Attendance Dashboard Stats
     getDashboardStats: async () => {
-        const endpoints = [
-            `${API_BASE}/attendance/dashboard-stats`,
-            `${API_BASE}/admin/attendance/dashboard-stats`,
-            `${API_BASE}/superadmin/attendance/dashboard-stats`,
-            `${API_BASE}/management/attendance/stats`
-        ];
+        const url = `${API_BASE}/attendance/dashboard-stats`;
 
-        let lastErr = null;
-        for (const url of endpoints) {
-            try {
-                // Try with current user token first, then fallback to superadmin token for system data
-                const response = await fetch(url, {
-                    method: "GET",
-                    headers: getAuthHeader('superadmin') // System-wide stats often require SA privilege
-                });
-                if (response.ok) return await response.json();
-            } catch (err) {
-                lastErr = err;
-            }
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                ...authHeader()
+            });
+            if (response.ok) return await response.json();
+            
+            // Fallback for different API suites if the primary fails
+            const altResponse = await fetch(`${API_BASE}/superadmin/attendance/dashboard-stats`, {
+                method: "GET",
+                ...authHeader()
+            });
+            if (altResponse.ok) return await altResponse.json();
+
+        } catch (err) {
+            console.error("API Error (getDashboardStats): Fetch failed.", err);
         }
         
-        console.error("API Error (getDashboardStats): All endpoints failed.", lastErr);
-        // Return a mock object if everything fails so the UI doesn't crash
+        // Return a mock object if everything fails to prevent UI hang
         return {
             summary: { PRESENT: 0, ABSENT: 0, 'HALF DAY': 0, LATE: 0, WFH: 0 },
             shift_dist: { labels: ['General', 'Night', 'Morning'], data: [0,0,0] },
@@ -170,7 +168,6 @@ export const attendanceService = {
             overview: []
         };
     },
-
     // 🔹 Shift Details/List
     getShifts: async () => {
         const response = await fetch(`${API_BASE}/attendance/shifts`, {
@@ -178,6 +175,42 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) return [];
+        return response.json();
+    },
+    getShiftAssignments: async () => {
+        const response = await fetch(`${API_BASE}/attendance/shift-assignments`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) return [];
+        return response.json();
+    },
+
+    // 🔸 ID Card View - Manager/Admin
+    getIDCards: async () => {
+        const response = await fetch(`${API_BASE}/id-card/list`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    createIDCard: async (data) => {
+        const response = await fetch(`${API_BASE}/id-card/create`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    reissueIDCard: async (data) => {
+        const response = await fetch(`${API_BASE}/id-card/reissue`, {
+            method: "POST",
+            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
         return response.json();
     },
 
@@ -200,9 +233,17 @@ export const attendanceService = {
         return response.json();
     },
 
-    // 🔸 Regularization
-    getRegularizationRequests: async () => {
-        const response = await fetch(`${API_BASE}/attendance/features/regularization/request`, {
+    // 🔸 Regularization - Management APIs
+    getRegularizationStats: async () => {
+        const response = await fetch(`${API_BASE}/attendance/regularization/stats`, {
+            method: "GET",
+            ...authHeader()
+        });
+        if (!response.ok) return { total: 0, pending: 0, approved: 0, rejected: 0 };
+        return response.json();
+    },
+    getRegularizationRequests: async (status = 'PENDING') => {
+        const response = await fetch(`${API_BASE}/attendance/regularization/pending?status=${status}`, {
             method: "GET",
             ...authHeader()
         });
@@ -210,7 +251,7 @@ export const attendanceService = {
         return response.json();
     },
     submitRegularization: async (data) => {
-        const response = await fetch(`${API_BASE}/attendance/features/regularization/request`, {
+        const response = await fetch(`${API_BASE}/attendance/regularization/request`, {
             method: "POST",
             body: JSON.stringify(data),
             ...authHeader('employee')
@@ -218,10 +259,18 @@ export const attendanceService = {
         if (!response.ok) throw new Error(await response.text());
         return response.json();
     },
-    reviewRegularization: async (id, data) => {
-        const response = await fetch(`${API_BASE}/attendance/features/regularization/request/${id}/review`, {
+    approveRegularization: async (id) => {
+        const response = await fetch(`${API_BASE}/attendance/regularization/${id}/approve`, {
             method: "POST",
-            body: JSON.stringify(data),
+            ...authHeader()
+        });
+        if (!response.ok) throw new Error(await response.text());
+        return response.json();
+    },
+    rejectRegularization: async (id, reason) => {
+        const response = await fetch(`${API_BASE}/attendance/regularization/${id}/reject`, {
+            method: "POST",
+            body: JSON.stringify({ reason }),
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());

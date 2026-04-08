@@ -1,8 +1,8 @@
 import { API_BASE, getAuthHeader } from '../../../config';
 
-const authHeader = () => {
+const authHeader = (role = 'hr') => {
     return {
-        headers: getAuthHeader('hr'),
+        headers: getAuthHeader(role),
     };
 };
 
@@ -12,11 +12,13 @@ export const teamService = {
         try {
             const url = role === 'employee' 
                 ? `${API_BASE}/team/employee/dashboard` 
+                : role === 'manager'
+                ? `${API_BASE}/manager/team/dashboard`
                 : `${API_BASE}/superadmin/team/dashboard`;
                 
             const response = await fetch(url, {
                 method: "GET",
-                ...authHeader()
+                ...authHeader(role)
             });
             if (!response.ok) throw new Error("Failed to fetch team dashboard stats");
             const data = await response.json();
@@ -32,11 +34,13 @@ export const teamService = {
         try {
             const url = role === 'employee' 
                 ? `${API_BASE}/team/employee/superstars` 
+                : role === 'manager'
+                ? `${API_BASE}/manager/team/superstars`
                 : `${API_BASE}/superadmin/team/superstars`;
 
             const response = await fetch(url, {
                 method: "GET",
-                ...authHeader()
+                ...authHeader(role)
             });
             if (!response.ok) throw new Error("Failed to fetch team superstars");
             const data = await response.json();
@@ -52,11 +56,13 @@ export const teamService = {
         try {
             const url = role === 'employee' 
                 ? `${API_BASE}/team/employee/resilience` 
+                : role === 'manager'
+                ? `${API_BASE}/manager/team/resilience`
                 : `${API_BASE}/superadmin/team/resilience`;
 
             const response = await fetch(url, {
                 method: "GET",
-                ...authHeader()
+                ...authHeader(role)
             });
             if (!response.ok) throw new Error("Failed to fetch team resilience data");
             const data = await response.json();

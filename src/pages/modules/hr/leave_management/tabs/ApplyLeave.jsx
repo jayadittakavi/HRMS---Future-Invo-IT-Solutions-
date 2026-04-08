@@ -20,10 +20,37 @@ const ApplyLeave = () => {
         const fetchBalances = async () => {
             try {
                 const data = await leaveService.getBalance();
-                // data might be an array or object, based on current service it returns response.json()
-                // assuming backend returns { "Sick Leave": { avail: 5, color: "#..." }, ... }
-                // or we might need to transform it. Let's assume it matches the structure expected by the UI.
-                if (data && typeof data === 'object') setBalances(data);
+                // Handle both object { "Sick Leave": { avail: 5 } } and array [{ leave_type: "Sick Leave", remaining: 5 }] formats
+                if (Array.isArray(data)) {
+                    const balanceObj = {};
+                    data.forEach(item => {
+                        const typeName = item.leave_type || item.type || item.label;
+                        balanceObj[typeName] = {
+                            avail: item.remaining ?? item.avail ?? item.count ?? 0,
+                            total: item.total || 0,
+                            color: item.color || '#4f46e5'
+                        };
+                    });
+                    setBalances(balanceObj);
+                } else if (data && typeof data === 'object') {
+                    // Try to find if data contains a nested 'data' or 'balances' array
+                    const actualData = data.data || data.balances || data;
+                    if (Array.isArray(actualData)) {
+                        // Recurse or handle here
+                        const balanceObj = {};
+                        actualData.forEach(item => {
+                             const typeName = item.leave_type || item.type || item.label;
+                             balanceObj[typeName] = {
+                                 avail: item.remaining ?? item.avail ?? item.count ?? 0,
+                                 total: item.total || 0,
+                                 color: item.color || '#4f46e5'
+                             };
+                        });
+                        setBalances(balanceObj);
+                    } else {
+                        setBalances(actualData);
+                    }
+                }
             } catch (err) {
                 console.error("Failed to fetch leave balances", err);
             }
@@ -37,21 +64,25 @@ const ApplyLeave = () => {
             if (formData.startDate && formData.endDate) {
                 try {
                     const result = await leaveService.calculateDays({
-                        startDate: formData.startDate,
-                        endDate: formData.endDate,
-                        halfDay: formData.halfDay
+                        leave_type: formData.type,
+                        from_date: formData.startDate,
+                        to_date: formData.endDate,
+                        is_half_day: formData.halfDay
                     });
-                    setCalculatedDays(result.days || 0);
+                    const days = result.days || result.count || 0;
+                    setCalculatedDays(days);
                 } catch (err) {
                     console.error("Failed to calculate days", err);
                     // Fallback to manual if API fails
                     const d = Math.max(0, Math.round((new Date(formData.endDate) - new Date(formData.startDate)) / 86400000) + 1);
                     setCalculatedDays(formData.halfDay ? 0.5 : d);
                 }
+            } else {
+                setCalculatedDays(0);
             }
         };
         calculate();
-    }, [formData.startDate, formData.endDate, formData.halfDay]);
+    }, [formData.startDate, formData.endDate, formData.halfDay, formData.type]);
 
     const handle = (e) => setFormData({ ...formData, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
@@ -60,10 +91,18 @@ const ApplyLeave = () => {
         setLoading(true);
 
         try {
-            const result = await leaveService.applyLeave({
-                ...formData,
-                days: calculatedDays
-            });
+            // Mapping fields to align with backend expectations
+            const payload = {
+                leave_type: formData.type,
+                from_date: formData.startDate,
+                to_date: formData.endDate,
+                reason: formData.reason,
+                count: formData.halfDay ? 0.5 : calculatedDays,
+                is_half_day: formData.halfDay,
+                half_day_type: formData.halfDay ? formData.halfDayType : null
+            };
+
+            const result = await leaveService.applyLeave(payload);
 
             if (result) {
                 setSubmitted(true);

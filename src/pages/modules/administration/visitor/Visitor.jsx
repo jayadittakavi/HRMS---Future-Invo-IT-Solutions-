@@ -28,7 +28,45 @@ export const VisitorContent = () => {
         host: ''
     });
 
-    // Mock Data reflecting the requested flow
+    const [stats, setStats] = useState({ total_expected: 0, inside_premise: 0, completed: 0 });
+    const [requestForm, setRequestForm] = useState({
+        visitor_name: '',
+        organization: '',
+        phone_number: '',
+        visit_date: new Date().toISOString().split('T')[0],
+        preferred_time: '14:00',
+        meeting_with_employee_id: '',
+        purpose: ''
+    });
+    const [staffList, setStaffList] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const [vData, sData] = await Promise.all([
+                visitorService.getVisitors(),
+                visitorService.getStats()
+            ]);
+            if (vData) setVisitors(vData);
+            if (sData) setStats(sData);
+        } catch (error) {
+            console.error("Fetch Error:", error);
+        }
+    };
+
+    const fetchStaff = async () => {
+        try {
+            const data = await visitorService.getStaffList();
+            setStaffList(data || []);
+        } catch (error) {
+            console.error("Staff Fetch Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+        fetchStaff();
+    }, []);
+
     const [visitors, setVisitors] = useState([
         {
             id: 1,
@@ -108,6 +146,29 @@ export const VisitorContent = () => {
             'Checked-Out': 'bg-secondary-subtle text-secondary border-secondary'
         };
         return <span className={`badge rounded-pill border px-3 py-1 ${styles[status] || 'bg-light text-dark'}`}>{status}</span>;
+    };
+
+    const handleSubmitRequest = async (e) => {
+        if (e) e.preventDefault();
+        try {
+            const res = await visitorService.submitRequest(requestForm);
+            if (res.success) {
+                alert("Visitor request submitted successfully!");
+                setShowModal(false);
+                fetchData();
+                setRequestForm({
+                    visitor_name: '',
+                    organization: '',
+                    phone_number: '',
+                    visit_date: new Date().toISOString().split('T')[0],
+                    preferred_time: '14:00',
+                    meeting_with_employee_id: '',
+                    purpose: ''
+                });
+            }
+        } catch (error) {
+            alert("Submission failed: " + error.message);
+        }
     };
 
     const handleAction = async (id, action) => {

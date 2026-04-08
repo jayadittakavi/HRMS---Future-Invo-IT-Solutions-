@@ -20,7 +20,7 @@ const statusBadge = (s) => ({
 
 const avatarColor = (i) => ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'][i % 5];
 
-const LeaveDashboard = () => {
+const LeaveDashboard = ({ personal = false }) => {
     const [summary, setSummary] = useState(null);
     const [trends, setTrends] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -28,9 +28,14 @@ const LeaveDashboard = () => {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                // For this management-style view, we use the plural 'leaves' management endpoints
-                const summaryData = await leaveService.getManagementSummary();
-                const trendsData = await leaveService.getManagementTrends();
+                // Toggle between Personal and Management data suites
+                const summaryData = personal 
+                    ? await leaveService.getDashboardSummary() 
+                    : await leaveService.getManagementSummary();
+                
+                const trendsData = personal 
+                    ? await leaveService.getDashboardTrends() 
+                    : await leaveService.getManagementTrends();
                 
                 if (summaryData) setSummary(summaryData);
                 if (trendsData) setTrends(trendsData);
@@ -41,7 +46,7 @@ const LeaveDashboard = () => {
             }
         };
         fetchDashboardData();
-    }, []);
+    }, [personal]);
 
     if (loading) return <div className="p-4 text-center">Loading dashboard...</div>;
 

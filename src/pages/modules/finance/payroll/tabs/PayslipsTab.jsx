@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaEye, FaPrint, FaFilePdf, FaEdit, FaPlus, FaCalculator, FaTimes, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import { payrollService } from '../payrollService';
+import { payrollService } from '../../../../../services/payrollService';
 
 const PayslipsTab = ({ personal = false, onTabChange }) => {
     const [payrolls, setPayrolls] = useState([]);
@@ -10,8 +10,8 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
         setLoading(true);
         try {
             const data = personal 
-                ? await payrollService.getEmployeePayslips() 
-                : await payrollService.getPayslips();
+                ? await payrollService.getPayslips() 
+                : []; // Management view handles separately if needed
             setPayrolls(data || []);
         } catch (error) {
             console.error("Failed to fetch payslips", error);
@@ -21,7 +21,7 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
     };
 
     useEffect(() => {
-        fetchPayslips();
+        if (personal) fetchPayslips();
     }, [personal]);
 
     // Modal States
@@ -48,9 +48,7 @@ const PayslipsTab = ({ personal = false, onTabChange }) => {
     // Handlers
     const handleDownloadPdf = async (slip) => {
         try {
-            const blob = personal 
-                ? await payrollService.getEmployeePayslipPdf(slip.id)
-                : await payrollService.getPayslipPdf(slip.id);
+            const blob = await payrollService.downloadPayslip(slip.id);
             
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');

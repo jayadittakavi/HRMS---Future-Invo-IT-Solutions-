@@ -61,10 +61,31 @@ const MyAssets = () => {
                                         </div>
                                         
                                         <h5 className="fw-bold mb-2" style={{ color: '#0f172a' }}>{asset.asset_name || asset.name}</h5>
-                                        <p className="text-muted small mb-4">{asset.serial_number || asset.model || 'Unknown Model'}</p>
+                                        <p className="text-muted small mb-4">{asset.asset_type || asset.category || 'Hardware Asset'}</p>
                                         
-                                        <div className="d-flex flex-column gap-3">
-                                            <div className="d-flex align-items-center gap-2 text-secondary small">
+                                        <div className="row g-3 mb-4">
+                                            <div className="col-6">
+                                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Asset ID</div>
+                                                <div className="fw-bold" style={{ fontSize: '0.85rem', color: '#334155' }}>{asset.asset_id || `AST-${asset.id || 'N/A'}`}</div>
+                                            </div>
+                                            <div className="col-6">
+                                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Brand / Model</div>
+                                                <div className="fw-bold text-truncate" style={{ fontSize: '0.85rem', color: '#334155' }}>{asset.brand || '—'} / {asset.model || '—'}</div>
+                                            </div>
+                                            <div className="col-6">
+                                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Serial Number</div>
+                                                <div className="fw-bold" style={{ fontSize: '0.85rem', color: '#334155' }}>{asset.serial_number || 'N/A'}</div>
+                                            </div>
+                                            <div className="col-6">
+                                                <div style={{ fontSize: '0.7rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Condition</div>
+                                                <div className="fw-bold" style={{ fontSize: '0.85rem', color: asset.condition?.toLowerCase() === 'excellent' ? '#059669' : '#334155' }}>
+                                                    {asset.condition || 'Good'}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-3 border-top">
+                                            <div className="d-flex align-items-center gap-2 text-secondary small mb-2">
                                                 <FaCalendarAlt className="opacity-50" />
                                                 <span>Assigned on: <strong>{asset.allocation_date || asset.created_at || 'Jan 01, 2024'}</strong></span>
                                             </div>

@@ -95,7 +95,7 @@ const TeamDashboard = ({ role }) => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    {role !== 'employee' && (
+                    {(role === 'superadmin' || role === 'admin') && (
                         <>
                             <button
                                 className="btn btn-primary rounded-pill px-4 btn-sm fw-bold d-flex align-items-center gap-2 shadow-sm"

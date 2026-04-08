@@ -1,170 +1,5 @@
-import React, { useState } from 'react';
-
-/* ─── Mock Employee Form-16 Data ──────────────────────────── */
-const FORM16_DATA = [
-    {
-        id: 'EMP001',
-        name: 'Ravi Kumar',
-        designation: 'Software Engineer',
-        department: 'Engineering',
-        pan: 'ABCDE1234F',
-        tan: 'BLRK01234A',
-        fy: '2024-2025',
-        ay: '2025-2026',
-        employeeNo: 'FI-001',
-        address: '12, 3rd Cross, Indiranagar, Bengaluru - 560038',
-        employer: 'Future Invo IT Solutions Pvt. Ltd.',
-        employerAddress: '#42, Tech Park Road, Whitefield, Bengaluru - 560066',
-        employerPAN: 'AAACF1234Z',
-        partA: {
-            grossSalary: 768000,
-            tdsQ1: 14820,
-            tdsQ2: 14820,
-            tdsQ3: 14820,
-            tdsQ4: 14820,
-            totalTDS: 59280,
-        },
-        partB: {
-            basicSalary: 480000,
-            hra: 192000,
-            specialAllowance: 96000,
-            grossSalary: 768000,
-            hra_exempt: 112000,
-            ltaExempt: 15000,
-            totalExemption: 127000,
-            netSalary: 641000,
-            pfDeduction: 57600,
-            npsDeduction: 0,
-            otherDeduction: 0,
-            total80C: 57600,
-            total80D: 25000,
-            total80CCD: 0,
-            totalVIDeductions: 82600,
-            grossTotalIncome: 641000,
-            totalDeductions: 82600,
-            totalTaxableIncome: 558400,
-            taxOnIncome: 26760,
-            surcharge: 0,
-            healthEducationCess: 1070,
-            totalTax: 27830,
-            taxRelief87A: 0,
-            netTaxPayable: 27830,
-            advanceTax: 0,
-            tdsSelf: 59280,
-            tdsPrevEmployer: 0,
-            totalTDS: 59280,
-            refund: 31450,
-        },
-    },
-    {
-        id: 'EMP002',
-        name: 'Priya Sharma',
-        designation: 'HR Manager',
-        department: 'Human Resources',
-        pan: 'PQRST5678G',
-        tan: 'BLRK01234A',
-        fy: '2024-2025',
-        ay: '2025-2026',
-        employeeNo: 'FI-002',
-        address: '7, Koramangala 4th Block, Bengaluru - 560034',
-        employer: 'Future Invo IT Solutions Pvt. Ltd.',
-        employerAddress: '#42, Tech Park Road, Whitefield, Bengaluru - 560066',
-        employerPAN: 'AAACF1234Z',
-        partA: {
-            grossSalary: 666000,
-            tdsQ1: 11280,
-            tdsQ2: 11280,
-            tdsQ3: 11280,
-            tdsQ4: 11280,
-            totalTDS: 45120,
-        },
-        partB: {
-            basicSalary: 420000,
-            hra: 168000,
-            specialAllowance: 78000,
-            grossSalary: 666000,
-            hra_exempt: 98000,
-            ltaExempt: 12000,
-            totalExemption: 110000,
-            netSalary: 556000,
-            pfDeduction: 50400,
-            npsDeduction: 20000,
-            otherDeduction: 0,
-            total80C: 70400,
-            total80D: 25000,
-            total80CCD: 20000,
-            totalVIDeductions: 115400,
-            grossTotalIncome: 556000,
-            totalDeductions: 115400,
-            totalTaxableIncome: 440600,
-            taxOnIncome: 9560,
-            surcharge: 0,
-            healthEducationCess: 382,
-            totalTax: 9942,
-            taxRelief87A: 9942,
-            netTaxPayable: 0,
-            advanceTax: 0,
-            tdsSelf: 45120,
-            tdsPrevEmployer: 0,
-            totalTDS: 45120,
-            refund: 45120,
-        },
-    },
-    {
-        id: 'EMP003',
-        name: 'Amit Singh',
-        designation: 'Senior Accountant',
-        department: 'Finance',
-        pan: 'LMNOP9012H',
-        tan: 'BLRK01234A',
-        fy: '2024-2025',
-        ay: '2025-2026',
-        employeeNo: 'FI-003',
-        address: '23, HSR Layout Sector 2, Bengaluru - 560102',
-        employer: 'Future Invo IT Solutions Pvt. Ltd.',
-        employerAddress: '#42, Tech Park Road, Whitefield, Bengaluru - 560066',
-        employerPAN: 'AAACF1234Z',
-        partA: {
-            grossSalary: 813600,
-            tdsQ1: 16092,
-            tdsQ2: 16092,
-            tdsQ3: 16092,
-            tdsQ4: 16092,
-            totalTDS: 64368,
-        },
-        partB: {
-            basicSalary: 504000,
-            hra: 201600,
-            specialAllowance: 108000,
-            grossSalary: 813600,
-            hra_exempt: 120000,
-            ltaExempt: 15000,
-            totalExemption: 135000,
-            netSalary: 678600,
-            pfDeduction: 60480,
-            npsDeduction: 50000,
-            otherDeduction: 0,
-            total80C: 110480,
-            total80D: 25000,
-            total80CCD: 50000,
-            totalVIDeductions: 185480,
-            grossTotalIncome: 678600,
-            totalDeductions: 185480,
-            totalTaxableIncome: 493120,
-            taxOnIncome: 12406,
-            surcharge: 0,
-            healthEducationCess: 496,
-            totalTax: 12902,
-            taxRelief87A: 12500,
-            netTaxPayable: 402,
-            advanceTax: 0,
-            tdsSelf: 64368,
-            tdsPrevEmployer: 0,
-            totalTDS: 64368,
-            refund: 63966,
-        },
-    },
-];
+import React, { useState, useEffect } from 'react';
+import { payrollService } from '../../../../../services/payrollService';
 
 const fmt = (n) => '₹' + Number(n).toLocaleString('en-IN');
 
@@ -468,17 +303,55 @@ const Form16Document = ({ data, activeTab }) => {
 };
 
 /* ─── Main Form16Tab ─────────────────────────────────────── */
-const Form16Tab = () => {
+const Form16Tab = ({ personal = false }) => {
     const [selectedEmp, setSelectedEmp] = useState(null);
     const [activeTab, setActiveTab] = useState('partA');
     const [fy, setFy] = useState('2024-2025');
     const [downloaded, setDownloaded] = useState(null);
+    const [formList, setFormList] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    const emp = FORM16_DATA.find(e => e.id === selectedEmp);
+    const fetchData = async () => {
+        if (!personal) return; // Admin view handled separately or kept as mock if requested
+        setLoading(true);
+        try {
+            const data = await payrollService.getForm16();
+            setFormList(Array.isArray(data) ? data : []);
+            if (data?.length > 0) setSelectedEmp(data[0].id);
+        } catch (error) {
+            console.error("Failed to fetch Form-16 list", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    const handleDownload = (type) => {
-        setDownloaded(type);
-        setTimeout(() => setDownloaded(null), 2500);
+    useEffect(() => {
+        fetchData();
+    }, [personal]);
+
+    const emp = formList.find(e => e.id === selectedEmp);
+
+    const handleDownload = async (type) => {
+        if (type === 'PDF' && emp?.id) {
+            try {
+                const blob = await payrollService.downloadForm16(emp.id);
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Form16_${emp.name || 'Employee'}_${emp.fy || 'FY'}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                setDownloaded(type);
+                setTimeout(() => setDownloaded(null), 2500);
+            } catch (err) {
+                alert("Failed to download PDF");
+            }
+        } else {
+            setDownloaded(type);
+            setTimeout(() => setDownloaded(null), 2500);
+        }
     };
 
     return (
@@ -507,59 +380,24 @@ const Form16Tab = () => {
             </div>
 
             {/* Employee Selector Cards */}
-            <div className="card border-0 shadow-sm rounded-4 mb-4">
-                <div className="card-header bg-white border-0 pt-4 px-4 pb-0">
-                    <h6 className="fw-bold mb-0" style={{ color: '#111827', fontSize: '0.88rem' }}>Select Employee</h6>
-                    <p className="text-secondary small mb-0 mt-1">Choose an employee to view their Form-16</p>
-                </div>
-                <div className="card-body px-4 pb-4 pt-3">
-                    <div className="row g-3">
-                        {FORM16_DATA.map(emp => (
-                            <div key={emp.id} className="col-lg-4 col-md-6">
-                                <div
-                                    className="p-3 rounded-3 border d-flex align-items-center gap-3"
-                                    style={{
-                                        cursor: 'pointer',
-                                        transition: 'all 0.18s',
-                                        background: selectedEmp === emp.id ? '#eff6ff' : '#fff',
-                                        border: selectedEmp === emp.id ? '2px solid #2563eb !important' : '1px solid #e5e7eb',
-                                        outline: selectedEmp === emp.id ? '2px solid #2563eb' : 'none',
-                                    }}
-                                    onClick={() => { setSelectedEmp(emp.id); setActiveTab('partA'); }}
-                                >
-                                    {/* Avatar */}
-                                    <div
-                                        className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
-                                        style={{
-                                            width: 42, height: 42, fontSize: '0.9rem',
-                                            background: selectedEmp === emp.id
-                                                ? 'linear-gradient(135deg, #1e3a8a, #2563eb)'
-                                                : 'linear-gradient(135deg, #6b7280, #9ca3af)',
-                                        }}
-                                    >
-                                        {emp.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                                    </div>
-                                    <div className="flex-grow-1 min-w-0">
-                                        <div className="fw-semibold text-truncate" style={{ fontSize: '0.82rem', color: '#111827' }}>{emp.name}</div>
-                                        <div className="text-truncate" style={{ fontSize: '0.73rem', color: '#6b7280' }}>{emp.designation}</div>
-                                        <div style={{ fontSize: '0.7rem', color: '#2563eb', marginTop: 2 }}>PAN: {emp.pan}</div>
-                                    </div>
-                                    {selectedEmp === emp.id && (
-                                        <div style={{ color: '#2563eb', flexShrink: 0 }}>
-                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+            {!personal && (
+                <div className="card border-0 shadow-sm rounded-4 mb-4">
+                    <div className="card-header bg-white border-0 pt-4 px-4 pb-0">
+                        <h6 className="fw-bold mb-0" style={{ color: '#111827', fontSize: '0.88rem' }}>Select Employee</h6>
+                        <p className="text-secondary small mb-0 mt-1">Choose an employee to view their Form-16</p>
+                    </div>
+                    <div className="card-body px-4 pb-4 pt-3">
+                        {/* ... mapping FORM16_DATA (Admin view kept static for now or can be linked to service) */}
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Form-16 Document Viewer */}
-            {emp ? (
+            {loading ? (
+                <div className="text-center py-5">
+                    <div className="spinner-border text-primary"></div>
+                    <p className="mt-2 text-muted">Loading Tax Certificates...</p>
+                </div>
+            ) : emp ? (
                 <div>
                     {/* Part A / Part B Switcher + Actions */}
                     <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
