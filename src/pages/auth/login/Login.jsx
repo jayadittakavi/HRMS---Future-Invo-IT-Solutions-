@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAuth } from '../../../context/AuthContext';
+import { API_BASE } from '../../../config';
 import Navbar from '../../../components/layout/Navbar';
 import sideImage from '../../../assets/images/login1.jpg';
 import './login.css';
@@ -20,7 +21,7 @@ const Login = () => {
     try {
       setError('');
 
-      const LOGIN_API_URL = "http://100.67.241.99:5000/login";
+      const LOGIN_API_URL = `${API_BASE}/login`;
       console.log('Logging in at 👉', LOGIN_API_URL);
 
       const response = await fetch(LOGIN_API_URL, {

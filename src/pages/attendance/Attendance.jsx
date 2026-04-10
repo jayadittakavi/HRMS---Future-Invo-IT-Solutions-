@@ -26,7 +26,7 @@ import AttendancePolicy from './tabs/AttendancePolicy';
 
 export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }) => {
     const { user } = useAuth();
-    const role = user?.role?.toLowerCase();
+    const role = (user?.role || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
     // Default tab based on role or personal mode
     const [activeTab, setActiveTab] = useState(personal ? 'my-attendance' : 'dashboard');

@@ -4,9 +4,9 @@ const authHeader = (role = 'employee') => ({ headers: getAuthHeader(role) });
 
 export const visitorService = {
     // 1. Host (Employee) List
-    getStaffList: async () => {
+    getStaffList: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/visitor/staff-list`, authHeader());
+            const response = await fetch(`${API_BASE}/visitor/staff-list`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
             return data.data || data;
@@ -17,14 +17,11 @@ export const visitorService = {
     },
 
     // 2. Submit New Request
-    submitRequest: async (requestData) => {
+    submitRequest: async (requestData, role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/visitor/request`, {
                 method: 'POST',
-                headers: {
-                    ...authHeader().headers,
-                    'Content-Type': 'application/json'
-                },
+                headers: authHeader(role).headers,
                 body: JSON.stringify(requestData)
             });
             return await response.json();
@@ -35,10 +32,10 @@ export const visitorService = {
     },
 
     // 3. Visitor Logs & Requests
-    getVisitorList: async (params = {}) => {
+    getVisitorList: async (params = {}, role = 'employee') => {
         try {
             const query = new URLSearchParams(params).toString();
-            const response = await fetch(`${API_BASE}/visitor/list${query ? `?${query}` : ""}`, authHeader());
+            const response = await fetch(`${API_BASE}/visitor/list${query ? `?${query}` : ""}`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
             return data.data || data;
@@ -49,14 +46,11 @@ export const visitorService = {
     },
 
     // 4. Visitor Actions (Approve/Reject/Log)
-    takeAction: async (requestId, action) => {
+    takeAction: async (requestId, action, role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/visitor/action/${requestId}`, {
                 method: 'POST',
-                headers: {
-                    ...authHeader().headers,
-                    'Content-Type': 'application/json'
-                },
+                headers: authHeader(role).headers,
                 body: JSON.stringify({ action })
             });
             return await response.json();
@@ -67,9 +61,9 @@ export const visitorService = {
     },
 
     // 5. Daily Summary (Dashboard)
-    getStats: async () => {
+    getStats: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/visitor/stats`, authHeader());
+            const response = await fetch(`${API_BASE}/visitor/stats`, authHeader(role));
             if (!response.ok) return null;
             const data = await response.json();
             return data.data || data;
@@ -80,9 +74,9 @@ export const visitorService = {
     },
 
     // 6. Print Pass Data
-    getPrintData: async (requestId) => {
+    getPrintData: async (requestId, role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/visitor/print/${requestId}`, authHeader());
+            const response = await fetch(`${API_BASE}/visitor/print/${requestId}`, authHeader(role));
             if (!response.ok) return null;
             const data = await response.json();
             return data.data || data;

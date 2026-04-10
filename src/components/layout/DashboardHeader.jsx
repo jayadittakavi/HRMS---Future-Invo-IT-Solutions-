@@ -58,127 +58,135 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
 
             {/* Right Side: Search & Icons */}
             <div className="d-flex align-items-center gap-4">
-                {/* Search Bar */}
-                <div className="position-relative d-none d-md-block">
-                    <input
-                        type="text"
-                        placeholder="Search anything..."
-                        className="form-control border-0 rounded-pill ps-5 text-main"
-                        style={{
-                            width: '260px',
-                            fontSize: '0.88rem',
-                            backgroundColor: '#ffffff',
-                            height: '42px',
-                            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-                            border: '1px solid #f1f5f9'
-                        }}
-                        value={globalSearchTerm}
-                        onChange={(e) => setGlobalSearchTerm(e.target.value)}
-                    />
-                    <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ opacity: 0.7 }}>
-                        <FaSearch size={14} />
-                    </span>
-                </div>
+                {/* Search Bar - only if logged in */}
+                {user && (
+                    <div className="position-relative d-none d-md-block">
+                        <input
+                            type="text"
+                            placeholder="Search anything..."
+                            className="form-control border-0 rounded-pill ps-5 text-main"
+                            style={{
+                                width: '260px',
+                                fontSize: '0.88rem',
+                                backgroundColor: '#ffffff',
+                                height: '42px',
+                                boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+                                border: '1px solid #f1f5f9'
+                            }}
+                            value={globalSearchTerm}
+                            onChange={(e) => setGlobalSearchTerm(e.target.value)}
+                        />
+                        <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ opacity: 0.7 }}>
+                            <FaSearch size={14} />
+                        </span>
+                    </div>
+                )}
 
                 <div className="d-flex align-items-center gap-2">
-                    <button className="header-icon-circle-premium" title="Settings" onClick={() => navigate('/settings')}>
-                        <FaCog size={15} />
-                    </button>
-                    <button className="header-icon-circle-premium notify position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
-                        <FaBell size={15} />
-                        {unreadCount > 0 && (
-                            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style={{ fontSize: '0.55rem', padding: '0.25rem 0.4rem', marginTop: '5px', marginLeft: '-5px' }}>
-                                {unreadCount}
-                            </span>
-                        )}
-                    </button>
+                    {user && (
+                        <>
+                            <button className="header-icon-circle-premium" title="Settings" onClick={() => navigate('/settings')}>
+                                <FaCog size={15} />
+                            </button>
+                            <button className="header-icon-circle-premium notify position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
+                                <FaBell size={15} />
+                                {unreadCount > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style={{ fontSize: '0.55rem', padding: '0.25rem 0.4rem', marginTop: '5px', marginLeft: '-5px' }}>
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                        </>
+                    )}
 
-                    <div className="vr mx-2 d-none d-md-block" style={{ height: '30px', opacity: 0.1 }}></div>
+                    {user && <div className="vr mx-2 d-none d-md-block" style={{ height: '30px', opacity: 0.1 }}></div>}
 
                     {/* Profile Toggle */}
-                    <div className="position-relative ps-1">
-                        <button
-                            className="profile-trigger border-0 bg-transparent p-0 d-flex align-items-center gap-2"
-                            onClick={() => setShowProfileMenu(!showProfileMenu)}
-                        >
-                            <div className="profile-img-container shadow-sm border border-2 border-white">
-                                {user?.profilePic ? (
-                                    <img src={user.profilePic} alt="profile" />
-                                ) : (
-                                    <div className="profile-placeholder">
-                                        <FiUser size={18} />
-                                    </div>
-                                )}
-                            </div>
-                            <div className="text-start d-none d-xl-block me-1">
-                                <div className="fw-bold text-main x-small-text leading-tight">{user?.name?.split(' ')[0] || 'Member'}</div>
-                                <div className="text-muted smaller-text leading-tight">{user?.role || 'Staff'}</div>
-                            </div>
-                        </button>
-
-                        {showProfileMenu && (
-                            <div className="profile-dropdown-menu-premium position-absolute end-0 bg-white"
-                                style={{
-                                    width: '280px',
-                                    top: '130%',
-                                    zIndex: 1050
-                                }}>
-                                <div className="p-4 dropdown-profile-header">
-                                    <div className="d-flex align-items-center gap-3 mb-1">
-                                        <div className="profile-img-preview">
-                                            {user?.profilePic ? (
-                                                <img src={user.profilePic} alt="profile" />
-                                            ) : (
-                                                <FiUser size={24} />
-                                            )}
+                    {user && (
+                        <div className="position-relative ps-1">
+                            <button
+                                className="profile-trigger border-0 bg-transparent p-0 d-flex align-items-center gap-2"
+                                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                            >
+                                <div className="profile-img-container shadow-sm border border-2 border-white">
+                                    {user?.profilePic ? (
+                                        <img src={user.profilePic} alt="profile" />
+                                    ) : (
+                                        <div className="profile-placeholder">
+                                            <FiUser size={18} />
                                         </div>
-                                        <div className="overflow-hidden">
-                                            <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>{user?.name || 'User Profile'}</div>
-                                            <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>{user?.email || 'user@example.com'}</div>
-                                        </div>
-                                    </div>
-                                    <span className="role-badge mt-2">{user?.role?.toUpperCase() || 'EMPLOYEE'}</span>
+                                    )}
                                 </div>
+                                <div className="text-start d-none d-xl-block me-1">
+                                    <div className="fw-bold text-main x-small-text leading-tight">{user?.name?.split(' ')[0] || 'Member'}</div>
+                                    <div className="text-muted smaller-text leading-tight">{user?.role || 'Staff'}</div>
+                                </div>
+                            </button>
 
-                                <div className="dropdown-divider-luxury"></div>
-
-                                <div className="py-2 px-2">
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/profile')}>
-                                        <div className="icon-wrapper"><FiUser /></div>
-                                        <span>Personal Profile</span>
-                                    </div>
-
-                                    {/* Hide Company Hubs for HR, Employee, Manager */}
-                                    {(() => {
-                                        const r = user?.role?.toLowerCase() || '';
-                                        if (r.includes('hr') || r.includes('employee') || r.includes('manager') || r.includes('fulltime')) {
-                                            return null;
-                                        }
-                                        return (
-                                            <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
-                                                <div className="icon-wrapper"><FiMapPin /></div>
-                                                <span>Company Hubs</span>
+                            {showProfileMenu && (
+                                <div className="profile-dropdown-menu-premium position-absolute end-0 bg-white"
+                                    style={{
+                                        width: '280px',
+                                        top: '130%',
+                                        zIndex: 1050
+                                    }}>
+                                    <div className="p-4 dropdown-profile-header">
+                                        <div className="d-flex align-items-center gap-3 mb-1">
+                                            <div className="profile-img-preview">
+                                                {user?.profilePic ? (
+                                                    <img src={user.profilePic} alt="profile" />
+                                                ) : (
+                                                    <FiUser size={24} />
+                                                )}
                                             </div>
-                                        );
-                                    })()}
+                                            <div className="overflow-hidden">
+                                                <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>{user?.name || 'User Profile'}</div>
+                                                <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>{user?.email || 'user@example.com'}</div>
+                                            </div>
+                                        </div>
+                                        <span className="role-badge mt-2">{user?.role?.toUpperCase() || 'EMPLOYEE'}</span>
+                                    </div>
 
-                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/privacy')}>
-                                        <div className="icon-wrapper"><FiShield /></div>
-                                        <span>Legal & Privacy</span>
+                                    <div className="dropdown-divider-luxury"></div>
+
+                                    <div className="py-2 px-2">
+                                        <div className="premium-dropdown-item" onClick={() => handleMenuClick('/profile')}>
+                                            <div className="icon-wrapper"><FiUser /></div>
+                                            <span>Personal Profile</span>
+                                        </div>
+
+                                        {/* Hide Company Hubs for HR, Employee, Manager */}
+                                        {(() => {
+                                            const r = user?.role?.toLowerCase() || '';
+                                            if (r.includes('hr') || r.includes('employee') || r.includes('manager') || r.includes('fulltime')) {
+                                                return null;
+                                            }
+                                            return (
+                                                <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
+                                                    <div className="icon-wrapper"><FiMapPin /></div>
+                                                    <span>Company Hubs</span>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        <div className="premium-dropdown-item" onClick={() => handleMenuClick('/privacy')}>
+                                            <div className="icon-wrapper"><FiShield /></div>
+                                            <span>Legal & Privacy</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="dropdown-divider-luxury"></div>
+
+                                    <div className="py-2 px-2">
+                                        <div className="premium-dropdown-item logout" onClick={handleLogout}>
+                                            <div className="icon-wrapper"><FiLogOut /></div>
+                                            <span>Logout Account</span>
+                                        </div>
                                     </div>
                                 </div>
-
-                                <div className="dropdown-divider-luxury"></div>
-
-                                <div className="py-2 px-2">
-                                    <div className="premium-dropdown-item logout" onClick={handleLogout}>
-                                        <div className="icon-wrapper"><FiLogOut /></div>
-                                        <span>Logout Account</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

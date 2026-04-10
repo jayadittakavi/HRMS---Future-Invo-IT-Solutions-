@@ -4,9 +4,9 @@ const authHeader = (role = 'employee') => ({ headers: getAuthHeader(role) });
 
 export const deskService = {
     // 1. Desk Inventory Stats
-    getStats: async () => {
+    getStats: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/desk/stats`, authHeader());
+            const response = await fetch(`${API_BASE}/desk/stats`, authHeader(role));
             if (!response.ok) return null;
             const data = await response.json();
             return data.data || data;
@@ -17,9 +17,9 @@ export const deskService = {
     },
 
     // 2. Live Desk List
-    getDeskList: async () => {
+    getDeskList: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/desk/list`, authHeader());
+            const response = await fetch(`${API_BASE}/desk/list`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
             return data.data || data;
@@ -30,9 +30,9 @@ export const deskService = {
     },
 
     // 3. Floor Occupancy Overview
-    getOccupancy: async () => {
+    getOccupancy: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/desk/occupancy`, authHeader());
+            const response = await fetch(`${API_BASE}/desk/occupancy`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
             return data.data || data;
@@ -43,12 +43,12 @@ export const deskService = {
     },
 
     // 4. Create Desk Booking
-    bookDesk: async (bookingData) => {
+    bookDesk: async (bookingData, role = 'employee') => {
         try {
             const response = await fetch(`${API_BASE}/desk/book`, {
                 method: 'POST',
                 headers: {
-                    ...authHeader().headers,
+                    ...authHeader(role).headers,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(bookingData)
@@ -61,9 +61,9 @@ export const deskService = {
     },
 
     // 5. Personal Bookings
-    getMyBookings: async () => {
+    getMyBookings: async (role = 'employee') => {
         try {
-            const response = await fetch(`${API_BASE}/desk/my-bookings`, authHeader());
+            const response = await fetch(`${API_BASE}/desk/my-bookings`, authHeader(role));
             if (!response.ok) return [];
             const data = await response.json();
             return data.data || data;

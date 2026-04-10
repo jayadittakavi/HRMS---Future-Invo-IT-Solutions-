@@ -3,6 +3,7 @@ import { useAuth } from '../../../../context/AuthContext';
 import { useSearch } from '../../../../context/SearchContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { visitorService } from '../../../../services/visitorService';
+import { API_BASE } from '../../../../config';
 import {
     MdPersonAdd, MdAssignment, MdHistory, MdBarChart,
     MdCheckCircle, MdCancel, MdLogin, MdLogout, MdPrint,
@@ -42,9 +43,14 @@ export const VisitorContent = () => {
 
     const fetchData = async () => {
         try {
+            const params = {
+                tab: activeTab === 'reports' ? 'log' : activeTab,
+                search: searchTerm,
+                status: filters.status !== 'All' ? filters.status : ''
+            };
             const [vData, sData] = await Promise.all([
-                visitorService.getVisitors(),
-                visitorService.getStats()
+                visitorService.getVisitorList(params, role),
+                visitorService.getStats(role)
             ]);
             if (vData) setVisitors(vData);
             if (sData) setStats(sData);
@@ -55,7 +61,7 @@ export const VisitorContent = () => {
 
     const fetchStaff = async () => {
         try {
-            const data = await visitorService.getStaffList();
+            const data = await visitorService.getStaffList(role);
             setStaffList(data || []);
         } catch (error) {
             console.error("Staff Fetch Error:", error);
@@ -65,7 +71,7 @@ export const VisitorContent = () => {
     useEffect(() => {
         fetchData();
         fetchStaff();
-    }, []);
+    }, [activeTab]); // Refetch when tab changes
 
     const [visitors, setVisitors] = useState([
         {
@@ -151,7 +157,7 @@ export const VisitorContent = () => {
     const handleSubmitRequest = async (e) => {
         if (e) e.preventDefault();
         try {
-            const res = await visitorService.submitRequest(requestForm);
+            const res = await visitorService.submitRequest(requestForm, role);
             if (res.success) {
                 alert("Visitor request submitted successfully!");
                 setShowModal(false);
@@ -176,13 +182,25 @@ export const VisitorContent = () => {
             const apiAction = action === 'Approved' ? 'APPROVE' : 
                              action === 'Rejected' ? 'REJECT' : 
                              action === 'Checked-In' ? 'CHECK_IN' : 'CHECK_OUT';
-            const res = await visitorService.takeAction(id, apiAction);
+            const res = await visitorService.takeAction(id, apiAction, role);
             if (res.success) {
                 alert(`Action ${action} successful!`);
                 fetchData();
             }
         } catch (error) {
             alert("Action failed: " + error.message);
+        }
+    };
+
+    const handlePrint = async (id) => {
+        try {
+            const data = await visitorService.getPrintData(id, role);
+            if (data) {
+                alert("Pass data fetched for printing: " + (data.visitor_name || data.name || "Visitor"));
+                // Trigger browser print or custom print logic
+            }
+        } catch (error) {
+            alert("Print fetch failed: " + error.message);
         }
     };
 
@@ -296,7 +314,12 @@ export const VisitorContent = () => {
                         )}
                         {activeTab === 'reports' ? (
                             <div className="p-4 bg-white rounded-4">
-                                <h6 className="fw-bold mb-4 text-primary">Operational Performance Report</h6>
+                                <div className="d-flex justify-content-between align-items-center mb-4">
+                                    <h6 className="fw-bold mb-0 text-primary">Operational Performance Report</h6>
+                                    <button className="btn btn-outline-primary btn-sm rounded-pill px-3" onClick={() => window.open(`${API_BASE}/visitor/list?tab=log&export=true`, '_blank')}>
+                                        Export Data
+                                    </button>
+                                </div>
                                 <div className="row g-4">
                                     <div className="col-md-6">
                                         <div className="p-4 border rounded-4 bg-light text-center">
@@ -387,7 +410,7 @@ export const VisitorContent = () => {
                                                                 <MdLogout /> Check-Out
                                                             </button>
                                                         )}
-                                                        <button className="btn btn-light btn-sm border-0 rounded-circle" title="Print Pass"><MdPrint /></button>
+                                                        <button className="btn btn-light btn-sm border-0 rounded-circle" title="Print Pass" onClick={() => handlePrint(v.id)}><MdPrint /></button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -433,14 +456,18 @@ export const VisitorContent = () => {
                             <div className="card border-0 shadow-sm rounded-4 p-4 bg-white">
                                 <h6 className="fw-bold text-dark mb-4">Quick Alerts</h6>
                                 <div className="d-flex flex-column gap-3">
-                                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                                        <div className="bg-warning p-2 rounded-circle"></div>
-                                        <div className="small"><strong>John Doe</strong> has been inside for over 4 hours.</div>
-                                    </div>
-                                    <div className="d-flex align-items-center gap-3 p-3 bg-light rounded-3">
-                                        <div className="bg-info p-2 rounded-circle"></div>
-                                        <div className="small">Interview scheduled in 15 mins for <strong>Alice</strong>.</div>
-                                    </div>
+                                    {(stats.alerts || []).length > 0 ? (
+                                        stats.alerts.map((alert, idx) => (
+                                            <div key={idx} className="d-flex align-items-center gap-3 p-3 bg-light rounded-3 animate__animated animate__fadeIn">
+                                                <div className={`p-2 rounded-circle ${alert.type === 'warning' ? 'bg-warning' : 'bg-info'}`}></div>
+                                                <div className="small">{alert.message}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-4">
+                                            <p className="text-muted small mb-0 font-italic">No active alerts at this time.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

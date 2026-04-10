@@ -1,17 +1,18 @@
 import React from 'react';
-import { FaTrash, FaCheckCircle, FaEdit, FaSyncAlt, FaClipboardList } from 'react-icons/fa';
+import { FaTrash, FaCheckCircle, FaEdit, FaSyncAlt, FaClipboardList, FaInfoCircle, FaTimesCircle } from 'react-icons/fa';
 
 const AuditLogTable = ({ logs }) => {
     return (
         <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
             <div className="table-responsive">
-                <table className="table table-hover align-middle mb-0" style={{ minWidth: '800px' }}>
+                <table className="table table-hover align-middle mb-0" style={{ minWidth: '1000px' }}>
                     <thead className="bg-light">
                         <tr>
                             <th className="small fw-bold text-secondary ps-4 py-3 border-0 text-uppercase">Action</th>
+                            <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Module</th>
                             <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Entity</th>
-                            <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Entity ID</th>
                             <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Performed By</th>
+                            <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Status</th>
                             <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Date & Time</th>
                             <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">IP Address</th>
                             <th className="small fw-bold text-secondary py-3 border-0 text-uppercase">Details</th>
@@ -20,14 +21,14 @@ const AuditLogTable = ({ logs }) => {
                     <tbody>
                         {logs.length === 0 ? (
                             <tr>
-                                <td colSpan="7" className="text-center p-5 text-muted">
+                                <td colSpan="8" className="text-center p-5 text-muted">
                                     <div className="py-5">
                                         <p className="mb-0">No audit logs found matching your criteria.</p>
                                     </div>
                                 </td>
                             </tr>
                         ) : (
-                            logs.map((log) => {
+                            logs.map((log, index) => {
                                 const getActionConfig = (action) => {
                                     const act = (action || '').toLowerCase();
                                     if (act.includes('delete')) return { color: 'danger', icon: <FaTrash className="me-1" />, label: 'Delete' };
@@ -39,27 +40,39 @@ const AuditLogTable = ({ logs }) => {
                                 };
 
                                 const config = getActionConfig(log.action);
+                                const statusColor = (log.status || '').toLowerCase() === 'failed' ? 'danger' : 'success';
 
                                 return (
-                                    <tr key={log.id}>
+                                    <tr key={log.id || index}>
                                         <td className="ps-4">
                                             <span className={`badge bg-${config.color} bg-opacity-10 text-${config.color} px-2 py-1 rounded-pill d-inline-flex align-items-center fw-medium`} style={{ fontSize: '11px' }}>
                                                 {config.icon}
                                                 {config.label}
                                             </span>
                                         </td>
-                                        <td className="small fw-medium text-dark">{log.entity}</td>
-                                        <td className="small text-muted font-monospace">{log.entityId}</td>
+                                        <td className="small">
+                                            <span className="badge bg-light text-dark border fw-normal">{log.module || 'System'}</span>
+                                        </td>
+                                        <td className="small fw-medium text-dark">
+                                            {log.entity}
+                                            {log.entityId && <div className="text-muted font-monospace x-small" style={{ fontSize: '10px' }}>ID: {log.entityId}</div>}
+                                        </td>
                                         <td className="small fw-bold text-dark d-flex align-items-center gap-2">
                                             <div className="bg-light rounded-circle d-flex align-items-center justify-content-center text-primary fw-bold" style={{ width: '28px', height: '28px', fontSize: '11px' }}>
-                                                {(log.performedBy || 'U').charAt(0)}
+                                                {(log.performedBy || 'U').charAt(0).toUpperCase()}
                                             </div>
-                                            {log.performedBy}
+                                            {log.performedBy || 'Unknown User'}
                                         </td>
-                                        <td className="small text-muted">{log.date}</td>
-                                        <td className="small text-muted font-monospace">{log.ipAddress}</td>
+                                        <td>
+                                            <span className={`text-${statusColor} small d-flex align-items-center gap-1`}>
+                                                {statusColor === 'danger' ? <FaTimesCircle size={10} /> : <FaCheckCircle size={10} />}
+                                                {log.status || 'SUCCESS'}
+                                            </span>
+                                        </td>
+                                        <td className="small text-muted">{log.date || log.timestamp || 'N/A'}</td>
+                                        <td className="small text-muted font-monospace">{log.ipAddress || '0.0.0.0'}</td>
                                         <td className="small text-dark" title={log.details}>
-                                            {log.details}
+                                            <div className="text-truncate" style={{ maxWidth: '200px' }}>{log.details}</div>
                                         </td>
                                     </tr>
                                 );

@@ -8,6 +8,8 @@ import { NotificationProvider } from "./context/NotificationContext"; // Added
 import { AutomationProvider } from "./context/AutomationContext";
 import { SearchProvider } from "./context/SearchContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TeamMembers from './pages/modules/manager/components/TeamMembers';
+import { AttendanceContent } from "./pages/attendance/Attendance";
 
 /* Public Pages */
 import Welcome from "./pages/public/welcome/Welcome";
@@ -98,6 +100,7 @@ import ChangePassword from "./pages/settings/ChangePassword";
 import Settings from "./pages/settings/Settings";
 import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
+import AccessDenied from "./pages/common/AccessDenied";
 import WhatsAppChat from "./components/common/WhatsAppChat";
 import Helpdesk from "./pages/modules/helpdesk/Helpdesk";
 import SupportTicket from "./pages/user/SupportTicket";
@@ -107,6 +110,7 @@ import AutomationCenter from "./pages/modules/administration/automation/Automati
 import KnowledgeBase from "./pages/user/KnowledgeBase";
 import Feedback from "./pages/user/Feedback";
 import UserPrivacy from "./pages/user/Privacy";
+import MyLogs from "./pages/user/MyLogs";
 
 function AppContent() {
   const location = useLocation();
@@ -172,7 +176,7 @@ function AppContent() {
         <Route
           path="/attendance"
           element={
-            <ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}>
+            <ProtectedRoute requiredPermission={{ module: 'Attendance', action: 'VIEW' }}>
               <Attendance />
             </ProtectedRoute>
           }
@@ -180,9 +184,9 @@ function AppContent() {
 
         <Route path="/daily-task" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><DailyTask /></ProtectedRoute>} />
         <Route path="/tasks" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Tasks" /></ProtectedRoute>} />
-        <Route path="/loans" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Loans /></ProtectedRoute>} />
-        <Route path="/travel-expenses" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><TravelExpenses /></ProtectedRoute>} />
-        <Route path="/leave-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><LeaveManagement /></ProtectedRoute>} />
+        <Route path="/loans" element={<ProtectedRoute requiredPermission={{ module: 'Loan', action: 'VIEW' }}><Loans /></ProtectedRoute>} />
+        <Route path="/travel-expenses" element={<ProtectedRoute requiredPermission={{ module: 'Travel & Expenses', action: 'VIEW' }}><TravelExpenses /></ProtectedRoute>} />
+        <Route path="/leave-management" element={<ProtectedRoute requiredPermission={{ module: 'Requests', action: 'VIEW' }}><LeaveManagement /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute requiredRoles={['superadmin']}><UserManagement /></ProtectedRoute>} />
 
         {/* Administration - Delegation, Visitor, Desk */}
@@ -221,22 +225,22 @@ function AppContent() {
         <Route path="/onboarding" element={<ProtectedRoute requiredRoles={['superadmin', 'hr']}><Onboarding /></ProtectedRoute>} />
 
         {/* Manager Routes */}
-        <Route path="/team-members" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Members" /></ProtectedRoute>} />
-        <Route path="/team-attendance" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Attendance" /></ProtectedRoute>} />
-        <Route path="/leave-approvals" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Leave Approvals" /></ProtectedRoute>} />
-        <Route path="/performance-feedback" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Performance Feedback" /></ProtectedRoute>} />
+        <Route path="/team-members" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><TeamMembers /></ProtectedRoute>} />
+        <Route path="/team-attendance" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><Attendance /></ProtectedRoute>} />
+        <Route path="/leave-approvals" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><LeaveManagement /></ProtectedRoute>} />
+        <Route path="/performance-feedback" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><PerformanceReviews /></ProtectedRoute>} />
         <Route path="/goals" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Goals & Targets" /></ProtectedRoute>} />
-        <Route path="/my-team" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="My Team" /></ProtectedRoute>} />
+        <Route path="/my-team" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><MyTeam /></ProtectedRoute>} />
         <Route path="/projects" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Projects" /></ProtectedRoute>} />
-        <Route path="/performance" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Performance" /></ProtectedRoute>} />
-        <Route path="/team-reports" element={<ProtectedRoute requiredRoles={['manager']}><PlaceholderPage title="Team Reports" /></ProtectedRoute>} />
+        <Route path="/performance" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><PerformanceReviews /></ProtectedRoute>} />
+        <Route path="/team-reports" element={<ProtectedRoute requiredRoles={['manager', 'superadmin', 'hr', 'admin']}><AdminAuditLogs /></ProtectedRoute>} />
 
         {/* Accountant & Manager Payroll Routes */}
         <Route path="/payroll-processing" element={<ProtectedRoute requiredRoles={['accountant', 'manager']}><PlaceholderPage title="Payroll Processing" /></ProtectedRoute>} />
         <Route path="/salary-structure" element={<ProtectedRoute requiredRoles={['accountant', 'manager']}><PlaceholderPage title="Salary Structure" /></ProtectedRoute>} />
         <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
-        <Route path="/payroll-dashboard" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><Payroll /></ProtectedRoute>} />
-        <Route path="/payslips" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'accountant', 'manager']}><Payroll /></ProtectedRoute>} />
+        <Route path="/payroll-dashboard" element={<ProtectedRoute requiredPermission={{ module: 'Payroll', action: 'VIEW' }}><Payroll /></ProtectedRoute>} />
+        <Route path="/payslips" element={<ProtectedRoute requiredPermission={{ module: 'Payroll', action: 'VIEW' }}><Payroll /></ProtectedRoute>} />
         <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
         <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />
         <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
@@ -252,6 +256,7 @@ function AppContent() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/my-activity" element={<ProtectedRoute><MyLogs /></ProtectedRoute>} />
 
         {/* Admin & Manager Management Routes */}
         <Route path="/designations" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><PlaceholderPage title="Designations" /></ProtectedRoute>} />
@@ -267,6 +272,7 @@ function AppContent() {
         <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
         <Route path="/privacy" element={<ProtectedRoute><UserPrivacy /></ProtectedRoute>} />
 
+        <Route path="/unauthorized" element={<AccessDenied />} />
         <Route path="*" element={<Login />} />
       </Routes>
       <SettingsDrawer />

@@ -36,13 +36,14 @@ import {
     MdExpandLess,
     MdExpandMore,
     MdChevronLeft,
-    MdChevronRight
+    MdChevronRight,
+    MdHistory
 } from 'react-icons/md';
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
-    const { user, logout } = useAuth(); // Assuming logout function exists in context
+    const { user, logout, hasPermission } = useAuth();
     const navigate = useNavigate();
-    const role = user?.role?.toLowerCase().replace(/\s/g, '') || 'new_user'; // Default to new_user if undefined
+    const role = user?.role?.toLowerCase().replace(/\s/g, '') || 'new_user';
     const [openDropdowns, setOpenDropdowns] = useState({});
 
     const toggleDropdown = (name) => {
@@ -63,8 +64,6 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     };
 
     const renderLinks = () => {
-        let links = [];
-
         // Helper to generate the Dashboard link structure
         const getDashboardLink = (userRole) => {
             const commonIcon = <MdDashboard size={20} />;
@@ -78,100 +77,63 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 newuser: '/dashboard/new-user'
             };
             const path = paths[userRole] || '/dashboard';
-            return { name: 'Dashboard', icon: commonIcon, path: path };
+            return { name: 'Dashboard', icon: commonIcon, path: path, perm: 'Dashboard' };
         };
 
         const dashboardLink = getDashboardLink(role);
-        const myTeamLink = { name: 'My Team', icon: <MdGroups size={20} />, path: '/dashboard/my-team' };
 
-        // Global Access: Give all roles access to all modules
-        links = [
+        // Core sidebar definition with permission keys
+        const allLinks = [
             dashboardLink,
-            myTeamLink,
-            { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies' },
-            { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments' },
-            { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory' },
-            { name: 'Attendance', icon: <MdFactCheck size={20} />, path: '/attendance' },
+            { name: 'My Team', icon: <MdGroups size={20} />, path: '/dashboard/my-team', perm: 'My Team' },
+            { name: 'Companies', icon: <MdBusiness size={20} />, path: '/companies', perm: 'Companies' },
+            { name: 'Departments', icon: <MdGroups size={20} />, path: '/departments', perm: 'Departments' },
+            { name: 'Employees', icon: <MdPeople size={20} />, path: '/employee-directory', perm: 'Employees' },
+            { name: 'Attendance', icon: <MdFactCheck size={20} />, path: role === 'employee' ? '/my-attendance' : '/attendance', perm: 'Attendance' },
             {
                 name: 'Requests',
                 icon: <MdEventBusy size={20} />,
-                children: [
+                perm: 'Requests',
+                children: role === 'employee' ? [
+                    { name: 'Apply Leave', path: '/my-leaves' },
+                    { name: 'WFH', path: '/wfh-requests' }
+                ] : [
                     { name: 'Leave Mgmt', path: '/leave-management' },
                     { name: 'WFH', path: '/wfh-requests' }
                 ]
             },
-            { name: 'Payroll & Salary', icon: <MdAttachMoney size={20} />, path: '/payroll-dashboard' },
-            { name: 'Loans & Advances', icon: <MdMoney size={20} />, path: '/loans' },
-            { name: 'Travel & Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses' },
-            { name: 'Financial Reports', icon: <MdBarChart size={20} />, path: '/financial-reports' },
+            { name: 'Payroll & Salary', icon: <MdAttachMoney size={20} />, path: role === 'employee' ? '/my-payslips' : '/payroll-dashboard', perm: 'Payroll' },
+            { name: 'Loans & Advances', icon: <MdMoney size={20} />, path: '/loans', perm: 'Loan' },
+            { name: 'Travel & Expenses', icon: <MdFlight size={20} />, path: '/travel-expenses', perm: 'Travel & Expenses' },
+            { name: 'Financial Reports', icon: <MdBarChart size={20} />, path: '/financial-reports', perm: 'Financial Reports' },
             {
                 name: 'Administration',
                 icon: <MdGridView size={20} />,
+                perm: 'Administration',
                 children: [
                     { name: 'Delegation', path: '/delegation' },
                     { name: 'Visitor Mgmt', path: '/visitors' },
                     { name: 'Desk Mgmt', path: '/desk-management' }
                 ]
             },
-            { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents' },
+            { name: 'Documents', icon: <MdDescription size={20} />, path: '/documents', perm: 'Documents' },
         ];
 
-        // Filter out specific modules based on remaining roles if needed
-        // Filter and Map links for Employee role
-        if (role === 'employee') {
-            const allowedForEmployee = [
-                'Dashboard',
-                'My Team',
-                'Attendance',
-                'Requests',
-                'Payroll & Salary',
-                'Loans & Advances',
-                'Travel & Expenses',
-                'Administration',
-                'Documents'
-            ];
-            links = links
-                .filter(link => allowedForEmployee.includes(link.name))
-                .map(link => {
-                    if (link.name === 'Attendance') return { ...link, path: '/my-attendance' };
-                    if (link.name === 'Payroll & Salary') return { ...link, path: '/my-payslips' };
-                    if (link.name === 'Requests') {
-                        return {
-                            ...link,
-                            children: [
-                                { name: 'Apply Leave', path: '/my-leaves' },
-                                { name: 'WFH', path: '/wfh-requests' }
-                            ]
-                        };
-                    }
-                    return link;
-                });
-        }
-
-        if (role === 'manager') {
-            const forbiddenForManager = ['Companies'];
-            links = links.filter(link => !forbiddenForManager.includes(link.name));
-        }
-        else if (role.includes('hr') || role.includes('fulltime')) {
-            const forbiddenPathsForHR = [
-                '/financial-reports',
-                '/employee-directory',
-                '/companies',
-                '/branches',
-                '/departments',
-            ];
-            links = links.filter(link => !forbiddenPathsForHR.includes(link.path));
-        }
-
-        links = [...links];
+        // Filter links based on permissions
+        const filteredLinks = allLinks.filter(link => {
+            // Superadmin sees everything
+            if (role === 'superadmin') return true;
+            
+            // If no permission key is defined, assume public-ish or common
+            if (!link.perm) return true;
+            
+            // Check for VIEW permission
+            return hasPermission(link.perm, 'VIEW');
+        });
 
         return (
             <div className="d-flex flex-column gap-1 pt-2">
-
-                {links.map((link) => {
-                    if (link.type === 'divider') {
-                        return <div key={link.name} className="sidebar-divider mx-3 my-2 border-top border-secondary border-opacity-10"></div>;
-                    }
+                {filteredLinks.map((link) => {
                     if (link.children) {
                         const isDropdownOpen = openDropdowns[link.name];
                         return (

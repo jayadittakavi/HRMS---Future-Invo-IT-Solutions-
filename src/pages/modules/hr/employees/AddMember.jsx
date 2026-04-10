@@ -10,7 +10,7 @@ import { coreService } from '../../../../services/coreService';
 const AddMember = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const newMember = location.state?.newMember || { name: 'sandhya', email: 'sandhya@23gmail.com', password: '' };
 
     const [selectedRole, setSelectedRole] = useState('');
@@ -273,6 +273,16 @@ const AddMember = () => {
                 user_id: selectedUserId 
             };
             await permissionService.inviteMemberWithPermissions(payload, user?.role || 'admin');
+            
+            // Sync global state if the edited user is the logged-in user
+            const currentUserId = user?.id || user?.user_id;
+            if (selectedUserId && String(selectedUserId) === String(currentUserId)) {
+                updateProfile({
+                    role: selectedRole.toLowerCase().replace(' ', ''),
+                    permissions: formattedPermissions
+                });
+            }
+
             const msg = selectedUserId ? `Permissions updated successfully!` : `✅ User "${newMember.name}" has been invited!`;
             alert(msg);
             navigate('/roles-list');

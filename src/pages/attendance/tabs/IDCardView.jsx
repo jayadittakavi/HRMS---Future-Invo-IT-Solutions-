@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaPlus, FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { idCardService } from '../../../services/idCardService';
 import { useAuth } from '../../../context/AuthContext';

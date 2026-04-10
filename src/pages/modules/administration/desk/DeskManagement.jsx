@@ -29,13 +29,7 @@ export const DeskManagementContent = () => {
 
     const [loading, setLoading] = useState(false);
     const [desks, setDesks] = useState([]);
-    const [bookings, setBookings] = useState([]);
-    const [stats, setStats] = useState({
-        total: 0,
-        available: 0,
-        booked: 0,
-        assigned: 0
-    });
+    const [occupancyData, setOccupancyData] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -44,15 +38,17 @@ export const DeskManagementContent = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [dData, sData] = await Promise.all([
-                deskService.getDeskList(),
-                deskService.getStats()
+            const [dData, sData, oData] = await Promise.all([
+                deskService.getDeskList(role),
+                deskService.getStats(role),
+                deskService.getOccupancy(role)
             ]);
             setDesks(dData || []);
             setStats(sData || stats);
+            setOccupancyData(oData || []);
 
-            if (activeTab === 'my-bookings') {
-                const bData = await deskService.getMyBookings();
+            if (activeTab === 'my-bookings' || activeTab === 'all-bookings') {
+                const bData = await deskService.getMyBookings(role);
                 setBookings(bData || []);
             }
         } catch (error) {
@@ -65,7 +61,7 @@ export const DeskManagementContent = () => {
     const handleAction = async (action, data) => {
         try {
             if (action === 'Booking') {
-                await deskService.bookDesk({ desk_id: data.id, date: new Date().toISOString().split('T')[0] });
+                await deskService.bookDesk({ desk_id: data.id, date: new Date().toISOString().split('T')[0] }, role);
             }
             alert(`${action} successful!`);
             fetchData();
@@ -239,36 +235,42 @@ export const DeskManagementContent = () => {
                     <div className="p-4 text-center">
                         <h5 className="fw-bold mb-4">Floor Occupancy Overview</h5>
                         <div className="row g-4">
-                            {['1st Floor', '2nd Floor', '3rd Floor'].map(floor => (
-                                <div key={floor} className="col-md-4">
-                                    <div
-                                        className="p-4 border rounded-4 bg-white shadow-sm floor-card cursor-pointer transition-all h-100"
-                                        onClick={() => {
-                                            setSelectedFloor(floor);
-                                            setFloorModalView('options');
-                                            setShowFloorModal(true);
-                                        }}
-                                    >
-                                        <div className="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 className="fw-bold mb-0 text-main">{floor}</h6>
-                                            <span className="badge bg-primary-subtle text-primary border border-primary small">Manage</span>
-                                        </div>
-                                        <div className="progress mb-3" style={{ height: '10px', borderRadius: '5px' }}>
-                                            <div
-                                                className={`progress-bar progress-bar-striped progress-bar-animated ${floor === '1st Floor' ? 'bg-primary' : floor === '2nd Floor' ? 'bg-success' : 'bg-warning'}`}
-                                                role="progressbar"
-                                                style={{ width: floor === '1st Floor' ? '70%' : floor === '2nd Floor' ? '30%' : '42%' }}
-                                            ></div>
-                                        </div>
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <small className="text-secondary fw-medium">
-                                                {floor === '1st Floor' ? '28 / 40 occupied' : floor === '2nd Floor' ? '12 / 40 occupied' : '17 / 40 occupied'}
-                                            </small>
-                                            <button className="btn btn-sm btn-link text-decoration-none p-0 fw-bold">Open View</button>
+                            {occupancyData.length > 0 ? (
+                                occupancyData.map(floor => (
+                                    <div key={floor.id || floor.name} className="col-md-4">
+                                        <div
+                                            className="p-4 border rounded-4 bg-white shadow-sm floor-card cursor-pointer transition-all h-100"
+                                            onClick={() => {
+                                                setSelectedFloor(floor.name);
+                                                setFloorModalView('options');
+                                                setShowFloorModal(true);
+                                            }}
+                                        >
+                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                <h6 className="fw-bold mb-0 text-main">{floor.name}</h6>
+                                                <span className="badge bg-primary-subtle text-primary border border-primary small">Manage</span>
+                                            </div>
+                                            <div className="progress mb-3" style={{ height: '10px', borderRadius: '5px' }}>
+                                                <div
+                                                    className={`progress-bar progress-bar-striped progress-bar-animated bg-primary`}
+                                                    role="progressbar"
+                                                    style={{ width: `${floor.occupancy_percentage || floor.occupancy || 0}%` }}
+                                                ></div>
+                                            </div>
+                                            <div className="d-flex justify-content-between align-items-center">
+                                                <small className="text-secondary fw-medium">
+                                                    {floor.occupied_count} / {floor.total_capacity} occupied ({floor.occupancy_percentage}% )
+                                                </small>
+                                                <button className="btn btn-sm btn-link text-decoration-none p-0 fw-bold">Open View</button>
+                                            </div>
                                         </div>
                                     </div>
+                                ))
+                            ) : (
+                                <div className="col-12 text-center py-5 text-muted">
+                                    No occupancy data available at this time.
                                 </div>
-                            ))}
+                            )}
                         </div>
                     </div>
                 )}

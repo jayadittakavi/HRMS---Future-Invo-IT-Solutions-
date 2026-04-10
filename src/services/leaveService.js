@@ -1,7 +1,7 @@
 import { API_BASE, getAuthHeader } from '../config';
 
-// Role-based auth header helper. Defaults to superadmin for management, employee for personal space.
-const authHeader = (role = 'superadmin') => ({ headers: getAuthHeader(role) });
+// Role-based auth header helper. Defaults to the current user's role in the session.
+const authHeader = (role = '') => ({ headers: getAuthHeader(role) });
 
 export const leaveService = {
     // 1. Dashboard Overview (Personalized for Employee Dashboard)

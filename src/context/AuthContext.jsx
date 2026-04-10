@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     const [token, setToken] = useState(() => localStorage.getItem('authToken') || null);
-    const [loading, setLoading] = useState(false); // Add loading state if needed by ProtectedRoute
+    const [loading, setLoading] = useState(false);
 
     // Login function to update context + localStorage
     const login = (userData, authToken) => {
@@ -37,9 +37,57 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem('token');
     };
 
-    // Check if user has permission to view a specific dashboard
-    const canAccess = (requiredRoles) => {
-        return true; // Bypassed: All roles have full access to all pages
+    /**
+     * Check if user has permission for a specific module and action
+     * @param {string} module - Module name (e.g., 'Attendance', 'Payroll')
+     * @param {string} action - Action (e.g., 'VIEW', 'CREATE', 'EDIT', 'DELETE', 'EXPORT')
+     * @returns {boolean}
+     */
+    const hasPermission = (module, action = 'VIEW') => {
+        if (!user) return false;
+        
+        const role = user.role?.toLowerCase();
+        if (role === 'superadmin') return true;
+
+        const permissions = user.permissions || {};
+        const modulePerms = permissions[module] || [];
+        
+        // Support both array of strings and object-based permissions if needed
+        if (Array.isArray(modulePerms)) {
+            return modulePerms.some(p => p.toUpperCase() === action.toUpperCase());
+        }
+        
+        return false;
+    };
+
+    /**
+     * Check if user matches any of the required roles OR has a specific permission
+     * @param {string[]} requiredRoles - Array of roles that can access
+     * @param {object} requiredPermission - { module, action }
+     */
+    const canAccess = (requiredRoles = [], requiredPermission = null) => {
+        if (!user) return false;
+        
+        const userRole = user.role?.toLowerCase();
+        
+        // Superadmin bypass
+        if (userRole === 'superadmin') return true;
+
+        // Check Roles first if provided
+        if (requiredRoles.length > 0) {
+            const hasRole = requiredRoles.some(r => r.toLowerCase() === userRole);
+            if (hasRole) return true;
+        }
+
+        // Check specific permission if provided
+        if (requiredPermission) {
+            return hasPermission(requiredPermission.module, requiredPermission.action);
+        }
+
+        // If no roles or permissions specified, but user is logged in
+        if (requiredRoles.length === 0 && !requiredPermission) return true;
+
+        return false;
     };
 
     // Update profile function
@@ -52,7 +100,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, canAccess, loading, updateProfile }}>
+        <AuthContext.Provider value={{ user, token, login, logout, canAccess, hasPermission, loading, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

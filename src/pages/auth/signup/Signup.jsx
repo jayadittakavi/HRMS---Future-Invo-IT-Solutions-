@@ -42,9 +42,11 @@ const Signup = () => {
         password: formData.password
       };
 
-      console.log('Sending Signup Attempt:', payload);
+      // Use API_BASE from config
+      const endpoint = "/api/auth/super-admin/signup"; 
+      console.log('Sending Signup Attempt to:', endpoint, payload);
 
-      const response = await fetch("/api/auth/super-admin/signup", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -53,6 +55,8 @@ const Signup = () => {
       });
 
       const responseText = await response.text();
+      console.log('Signup Raw Response:', responseText);
+      
       let data = {};
       try {
         data = responseText ? JSON.parse(responseText) : {};

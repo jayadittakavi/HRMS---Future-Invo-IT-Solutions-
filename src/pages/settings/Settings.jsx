@@ -61,6 +61,16 @@ const Settings = () => {
             path: '/admin/audit-logs'
         },
         {
+            title: 'My Activity',
+            desc: 'View your personal activity history, login sessions, and module interactions.',
+            icon: <FaHistory size={18} />,
+            iconBg: '#eff6ff',
+            iconColor: '#2563eb',
+            status: 'PERSONAL LOGS',
+            statusColor: '#2563eb',
+            path: '/my-activity'
+        },
+        {
             title: 'Help Desk',
             desc: 'Raise support tickets, view knowledge base, and get help from admin.',
             icon: <FaHeadset size={18} />,

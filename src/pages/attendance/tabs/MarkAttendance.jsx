@@ -6,6 +6,8 @@ import { attendanceService } from '../service/service';
 const MarkAttendance = () => {
     const { triggerEvent } = useAutomation();
     const [shifts, setShifts] = useState([]);
+    const [submitting, setSubmitting] = useState(false);
+    const [loadingDetails, setLoadingDetails] = useState(false);
 
     useEffect(() => {
         const loadShifts = async () => {
