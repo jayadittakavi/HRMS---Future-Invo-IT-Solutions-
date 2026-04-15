@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import './Features.css';
 import Navbar from '../home/Navbar';
-import featuresBg from '../../assets/images/features.jpg';
-import { FaCheckCircle, FaTimesCircle, FaCrown, FaClock } from 'react-icons/fa';
+import featuresBg from '../../../assets/images/features.jpg';
+import { FaCheckCircle, FaTimesCircle, FaCrown, FaClock, FaUsers, FaCalendarCheck, FaMoneyBillWave, FaSuitcaseRolling, FaLaptop, FaChartLine, FaShieldAlt, FaMobileAlt, FaChartPie, FaRocket, FaExchangeAlt, FaCog } from 'react-icons/fa';
 
 const Features = () => {
     // Mock Admin Mode (In real app, derive from useAuth)
@@ -19,15 +19,15 @@ const Features = () => {
 
     // Initial Features Data with "Configuration" state
     const [features, setFeatures] = useState([
-        { id: 'emp_db', icon: "👥", title: "Employee Database", desc: "Securely store and manage comprehensive employee records.", enabled: true, mode: 'paid' },
-        { id: 'attendance', icon: "📅", title: "Attendance Tracking", desc: "Real-time attendance monitoring with geofencing.", enabled: true, mode: 'paid' },
-        { id: 'payroll', icon: "💰", title: "Payroll Processing", desc: "Automate salary calculations and tax deductions.", enabled: false, mode: 'trial' },
-        { id: 'leave', icon: "🏝️", title: "Leave Management", desc: "Streamline leave requests and approvals.", enabled: true, mode: 'paid' },
-        { id: 'assets', icon: "💻", title: "Asset Management", desc: "Track company assets and assignments.", enabled: false, mode: 'paid' },
-        { id: 'reviews', icon: "📈", title: "Performance Reviews", desc: "Conduct 360-degree performance appraisals.", enabled: false, mode: 'paid' },
-        { id: 'access', icon: "🔒", title: "Role-Based Access", desc: "Granular permission controls for data security.", enabled: true, mode: 'paid' },
-        { id: 'mobile', icon: "📱", title: "Mobile Friendly", desc: "Access the HRMS on the go with responsive design.", enabled: true, mode: 'trial' },
-        { id: 'analytics', icon: "📊", title: "Smart Analytics", desc: "Gain actionable insights with interactive dashboards.", enabled: false, mode: 'paid' }
+        { id: 'emp_db', icon: <FaUsers />, title: "Employee Database", desc: "Securely store and manage comprehensive employee records, documents, and history in one place.", enabled: true, mode: 'paid', color: '#534789' },
+        { id: 'attendance', icon: <FaCalendarCheck />, title: "Attendance Tracking", desc: "Real-time attendance monitoring with geofencing, biometric integration support, and detailed reports.", enabled: true, mode: 'paid', color: '#434777' },
+        { id: 'payroll', icon: <FaMoneyBillWave />, title: "Payroll Processing", desc: "Automate salary calculations, tax deductions, and payslip generation with zero errors.", enabled: false, mode: 'trial', color: '#405580' },
+        { id: 'leave', icon: <FaSuitcaseRolling />, title: "Leave Management", desc: "Streamline leave requests and approvals with automated balance tracking and calendar views.", enabled: true, mode: 'paid', color: '#657DAA' },
+        { id: 'assets', icon: <FaLaptop />, title: "Asset Management", desc: "Track company assets, assign them to employees, and monitor their condition and return dates.", enabled: false, mode: 'paid', color: '#65B1C9' },
+        { id: 'reviews', icon: <FaChartLine />, title: "Performance Reviews", desc: "Conduct 360-degree performance appraisals and set goals to boost employee growth.", enabled: false, mode: 'paid', color: '#87DDDD' },
+        { id: 'access', icon: <FaShieldAlt />, title: "Role-Based Access", desc: "Granular permission controls ensure data security and appropriate access levels for every role.", enabled: true, mode: 'paid', color: '#534789' },
+        { id: 'mobile', icon: <FaMobileAlt />, title: "Mobile Friendly", desc: "Access the HRMS on the go with our fully responsive mobile-first design interface.", enabled: true, mode: 'trial', color: '#65B1C9' },
+        { id: 'analytics', icon: <FaChartPie />, title: "Smart Analytics", desc: "Gain actionable insights into your workforce trends with interactive dashboards and custom reports.", enabled: false, mode: 'paid', color: '#405580' }
     ]);
 
     // Handlers
@@ -138,24 +138,28 @@ const Features = () => {
                                         </div>
                                     )}
 
-                                    <div className="p-4 pt-3">
-                                        <div className="d-flex justify-content-between align-items-start mb-3">
-                                            <div className="feature-icon-box" style={{
-                                                fontSize: '2rem',
-                                                filter: feature.enabled ? 'none' : 'grayscale(100%)'
+                                    <div className="p-4 pt-4">
+                                        <div className="d-flex justify-content-between align-items-start mb-4">
+                                            <div className="feature-icon-wrapper" style={{
+                                                background: feature.enabled ? `${feature.color}15` : '#f1f5f9',
+                                                color: feature.enabled ? feature.color : '#94a3b8'
                                             }}>
-                                                <span role="img" aria-label={feature.title}>{feature.icon}</span>
+                                                {feature.icon}
                                             </div>
-                                            {feature.enabled ? (
-                                                <FaCheckCircle className="text-success fs-4" title="Active" />
-                                            ) : (
-                                                <FaTimesCircle className="text-secondary fs-4" title="Inactive" />
-                                            )}
+                                            <div className="status-badge-container">
+                                                {feature.enabled ? (
+                                                    <div className="badge-glow scale-in">
+                                                        <FaCheckCircle className="text-success" />
+                                                    </div>
+                                                ) : (
+                                                    <FaTimesCircle className="text-muted opacity-25" />
+                                                )}
+                                            </div>
                                         </div>
-                                        <h3 className={`h5 fw-bold mb-2 ${feature.enabled ? 'text-white' : 'text-secondary'}`}>
+                                        <h3 className={`h5 fw-bold mb-3 ${feature.enabled ? 'text-dark' : 'text-secondary'}`} style={{ letterSpacing: '-0.02em' }}>
                                             {feature.title}
                                         </h3>
-                                        <p className={`mb-0 ${feature.enabled ? 'text-white-50' : 'text-secondary opacity-50'}`}>
+                                        <p className={`mb-0 lh-base ${feature.enabled ? 'text-secondary' : 'text-muted opacity-50'}`} style={{ fontSize: '0.92rem' }}>
                                             {feature.desc}
                                         </p>
                                     </div>
@@ -177,7 +181,7 @@ const Features = () => {
 
             <footer className="bg-dark text-white py-4 mt-auto opacity-90 border-top border-secondary">
                 <div className="container text-center">
-                    <small>© 2026 Future Invo HRMS. All rights reserved.</small>
+                    <small>© 2026 WorkSphrer HRMS. All rights reserved.</small>
                 </div>
             </footer>
         </div>

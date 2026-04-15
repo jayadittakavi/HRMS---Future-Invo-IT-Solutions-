@@ -1,12 +1,10 @@
 /* Floating Panel Layout Implementation */
 .glass-dashboard-bg {
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%) !important;
-    /* Soft Purple/Indigo Dashboard BG */
+    background: linear-gradient(135deg, var(--cp-purple-dark) 0%, var(--cp-deep-navy) 100%) !important;
 }
 
 .main-dashboard-container {
-    background: #f5f3ff;
-    /* Soft Lavender panel */
+    background: var(--bg-body);
     margin: 0.5rem 0.5rem 0.5rem 0;
     /* Further reduced margin to increase panel size */
     border-radius: 1.25rem;
@@ -27,14 +25,14 @@
 }
 
 .main-dashboard-container .glass-header {
-    background: #f5f3ff !important;
+    background: var(--bg-body) !important;
     border-bottom: 1px solid #f1f5f9 !important;
     box-shadow: none !important;
 }
 
 /* Ensure the scrollable area inside the panel looks clean */
 .main-dashboard-container .overflow-auto {
-    background-color: #f5f3ff;
+    background-color: var(--bg-body);
     /* Soft Lavender for the main content area */
 }
 
@@ -194,7 +192,7 @@
 /* Custom Card Styles to match Glass Design */
 .dashboard-card {
     border: 1px solid rgba(0, 0, 0, 0.05);
-    background: #f5f3ff;
+    background: #ffffff;
     box-shadow: 0 2px 40px rgba(0, 0, 0, 0.02);
     border-radius: 1.25rem;
     height: 100%;
@@ -311,10 +309,10 @@
 }
 
 .calendar-day.active {
-    background: linear-gradient(135deg, #6d28d9, #4c1d95);
+    background: linear-gradient(135deg, var(--cp-purple-main), var(--cp-purple-dark));
     color: white;
     font-weight: 700;
-    box-shadow: 0 4px 15px rgba(109, 40, 217, 0.3);
+    box-shadow: 0 4px 15px rgba(83, 71, 137, 0.3);
 }
 
 .calendar-day.empty {

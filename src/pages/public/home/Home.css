@@ -1,32 +1,57 @@
 /* 
-  FUTURE INVO HRMS - UNIVERSAL THEMATIC HOME
+  WorkSphrer HRMS - UNIVERSAL THEMATIC HOME
   Strict Light Mode Design
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --home-bg: #f5f3ff;
-    --home-text: #0f172a;
+    --home-bg: #f8fafc;
+    --home-text: #1e293b;
     --home-text-muted: #64748b;
-    --home-primary: #6366f1;
-    --home-accent: #8b5cf6;
-    --home-glass: rgba(248, 250, 252, 0.8);
+    --home-primary: #534789;
+    --home-accent: #65B1C9;
+    --home-glass: rgba(255, 255, 255, 0.8);
     --home-glass-border: rgba(99, 102, 241, 0.1);
     --home-card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
 }
 
 .text-dark-blue {
-    color: #0f172a !important;
+    color: #405580 !important;
 }
 
 .glass-navbar {
-    background: rgba(248, 250, 252, 0.7) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
 }
+
+.glass-navbar .nav-link {
+    color: var(--cp-deep-navy) !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease;
+}
+
+.glass-navbar .nav-link:hover {
+    color: var(--cp-purple-main) !important;
+    transform: translateY(-1px);
+}
+
+.glass-navbar .navbar-brand span.text-primary {
+    color: var(--cp-purple-main) !important;
+}
+
+.modern-search::placeholder {
+    color: var(--cp-slate-blue);
+    opacity: 0.6;
+}
+
+.nav-icon-circle.bg-purple-soft:hover { background: var(--cp-purple-main) !important; color: white !important; }
+.nav-icon-circle.bg-pink-soft:hover { background: #db2777 !important; color: white !important; }
+.nav-icon-circle.bg-orange-soft:hover { background: #ea580c !important; color: white !important; }
+.nav-icon-circle.bg-blue-soft:hover { background: var(--cp-sky-blue) !important; color: white !important; }
 
 .home-container {
     background: var(--home-bg);
@@ -117,9 +142,9 @@
 }
 
 .btn-indigo {
-    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    background: linear-gradient(135deg, var(--cp-sky-blue) 0%, var(--cp-purple-main) 100%);
     color: white !important;
-    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 10px 25px -5px rgba(83, 71, 137, 0.3);
 }
 
 .btn-glass {
@@ -191,7 +216,7 @@
 .stat-number {
     font-size: clamp(2.5rem, 5vw, 4rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #818cf8, #6366f1);
+    background: linear-gradient(135deg, var(--cp-sky-blue), var(--cp-purple-main));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -238,8 +263,8 @@
 .glass-card:hover {
     transform: translateY(-12px);
     background: rgba(255, 255, 255, 0.9);
-    border-color: #818cf8;
-    box-shadow: 0 20px 45px rgba(129, 140, 248, 0.12);
+    border-color: var(--cp-sky-blue);
+    box-shadow: 0 20px 45px rgba(101, 177, 201, 0.12);
 }
 
 .glass-card:hover::before {
@@ -309,13 +334,13 @@
     top: -15px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, #818cf8, #6366f1);
+    background: linear-gradient(135deg, var(--cp-sky-blue), var(--cp-purple-main));
     color: white;
     padding: 6px 16px;
     border-radius: 50px;
     font-size: 0.85rem;
     font-weight: 700;
-    box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 5px 15px rgba(83, 71, 137, 0.3);
 }
 
 .pricing-card h4 {

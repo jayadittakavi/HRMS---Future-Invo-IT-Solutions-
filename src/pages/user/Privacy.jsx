@@ -85,7 +85,7 @@ const Privacy = () => {
                             <div>
                                 <h6 style={{ fontWeight: 800, marginBottom: '4px' }}>Our Privacy Commitment</h6>
                                 <div style={{ fontSize: '0.95rem', opacity: 0.8, lineHeight: 1.6 }}>
-                                    Future Invo IT Solutions is strictly committed to protecting your personal information. We maintain high standards of data integrity and transparency in all our HRMS operations.
+                                    WorkSphrer IT Solutions is strictly committed to protecting your personal information. We maintain high standards of data integrity and transparency in all our HRMS operations.
                                 </div>
                             </div>
                         </div>
@@ -127,9 +127,9 @@ const Privacy = () => {
                             <p style={{ color: '#64748b', fontSize: '0.9rem', maxWidth: '600px', margin: '0 auto' }}>
                                 For detailed information or specific inquiries about your data rights, please contact our Data Protection Office at:
                                 <br />
-                                <a href="mailto:privacy@futureinvo.com"
+                                <a href="mailto:privacy@worksphrer.com"
                                     style={{ color: '#818cf8', fontWeight: 700, textDecoration: 'none', display: 'inline-block', marginTop: '8px' }}>
-                                    privacy@futureinvo.com
+                                    privacy@worksphrer.com
                                 </a>
                             </p>
                         </div>

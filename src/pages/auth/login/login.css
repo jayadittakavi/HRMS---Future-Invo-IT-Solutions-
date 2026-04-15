@@ -90,7 +90,7 @@
 }
 
 .login-title {
-  color: #1e40af;
+  color: var(--cp-deep-navy);
   font-weight: 700;
   font-size: 1.5rem;
   /* Smaller font */
@@ -141,14 +141,14 @@
 }
 
 .login-btn {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  background: linear-gradient(135deg, var(--cp-purple-main) 0%, var(--cp-purple-dark) 100%);
   color: white !important;
   padding: 0.85rem;
   border-radius: 16px !important;
   /* Extra rounded buttons */
   font-weight: 700;
   border: none;
-  box-shadow: 0 10px 15px -3px rgba(109, 40, 217, 0.3);
+  box-shadow: 0 10px 15px -3px rgba(83, 71, 137, 0.3); /* Adjusted to match --cp-purple-main */
   transition: all 0.3s ease;
   width: 100%;
   margin-top: 1.2rem;
@@ -159,12 +159,12 @@
 
 .login-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 25px -5px rgba(109, 40, 217, 0.4);
-  background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+  box-shadow: 0 20px 25px -5px rgba(67, 71, 119, 0.4); /* Adjusted to match --cp-purple-dark */
+  background: linear-gradient(135deg, var(--cp-purple-dark) 0%, var(--cp-deep-navy) 100%);
 }
 
 .forgot-password-link {
-  color: #1e40af;
+  color: var(--cp-deep-navy);
   font-weight: 600;
   font-size: 0.85rem;
   text-decoration: none;
@@ -172,7 +172,7 @@
 }
 
 .forgot-password-link:hover {
-  color: #3b82f6;
+  color: var(--cp-sky-blue);
   text-decoration: none;
 }
 

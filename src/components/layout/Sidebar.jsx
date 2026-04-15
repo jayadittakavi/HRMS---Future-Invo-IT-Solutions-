@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import logo from '../../assets/images/fislogo1.png';
+import logo from '../../assets/images/logo.jpg';
 import './Sidebar.css';
 import {
     MdDashboard,
@@ -43,6 +43,10 @@ import {
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     const { user, logout, hasPermission } = useAuth();
     const navigate = useNavigate();
+
+    // If no user is logged in, hide sidebar (Safety check)
+    if (!user) return null;
+
     const role = user?.role?.toLowerCase().replace(/\s/g, '') || 'new_user';
     const [openDropdowns, setOpenDropdowns] = useState({});
 
@@ -213,7 +217,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 </div>
                 {isOpen && (
                     <div>
-                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>Future Invo HRMS</h5>
+                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>WorkSphrer HRMS</h5>
                     </div>
                 )}
             </div>
@@ -267,7 +271,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
 
                 {isOpen && (
                     <div className="text-center text-white small opacity-50 mt-1">
-                        © 2026 Future Invo
+                        © 2026 WorkSphrer
                     </div>
                 )}
             </div>

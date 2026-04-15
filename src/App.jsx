@@ -147,7 +147,6 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/setup-organization" element={<SetupOrganization />} />
-        <Route path="/calendar" element={<Calendar />} />
 
         {/* Dashboard Routes - Nested under DashboardLayout */}
         <Route path="/dashboard" element={

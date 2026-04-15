@@ -21,9 +21,9 @@ const Footer = () => {
 
                     {/* Column 2: Discover */}
                     <div className="col-lg-3 col-6">
-                        <h5 className="fw-bold mb-4">Discover Future Invo</h5>
+                        <h5 className="fw-bold mb-4">Discover WorkSphere</h5>
                         <ul className="list-unstyled text-muted small">
-                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">What is Future Invo?</Link></li>
+                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">What is WorkSphere?</Link></li>
                             <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">Success Stories</Link></li>
                             <li className="mb-2"><Link to="/features" className="text-white-50 text-decoration-none hover-white">Compare Competitors</Link></li>
                             <li className="mb-2"><Link to="/contact" className="text-white-50 text-decoration-none hover-white">Client Locations</Link></li>
@@ -74,12 +74,12 @@ const Footer = () => {
                 <div className="row align-items-center justify-content-between pt-3 pb-2">
                     <div className="col-md-4 mb-3 mb-md-0">
                         <p className="small text-white-50 m-0">
-                            © 2026 Future Invo HRMS. All rights reserved.
+                            © 2026 WorkSphere HRMS. All rights reserved.
                         </p>
                     </div>
                     <div className="col-md-4 text-center mb-3 mb-md-0">
                         <div className="d-flex align-items-center justify-content-center gap-2">
-                            <span className="fw-bold fs-5">⚡ Future Invo</span>
+                            <span className="fw-bold fs-5">⚡ WorkSphere</span>
                         </div>
                     </div>
                     <div className="col-md-4 text-center text-md-end">

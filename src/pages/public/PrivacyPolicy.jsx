@@ -15,7 +15,7 @@ const PrivacyPolicy = () => {
                     <section className="mb-5">
                         <h2 className="h4 fw-bold mb-3">1. Introduction</h2>
                         <p className="text-secondary">
-                            Future Invo HRMS respects your privacy and is committed to protecting your personal data.
+                            WorkSphrer HRMS respects your privacy and is committed to protecting your personal data.
                             This privacy policy will inform you as to how we look after your personal data when you visit our website
                             and tell you about your privacy rights and how the law protects you.
                         </p>

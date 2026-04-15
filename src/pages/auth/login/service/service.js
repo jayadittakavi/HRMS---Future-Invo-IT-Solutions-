@@ -1,5 +1,5 @@
-const BASE_URL = "http://100.67.241.99:5000/api/auth";
-export const LOGIN_URL = `http://100.67.241.99:5000/api/auth/login`;
+const BASE_URL = "http://localhost:5000/api/auth";
+export const LOGIN_URL = `http://localhost:5000/api/auth/login`;
 
 export const loginService = {
     login: async (email, password) => {

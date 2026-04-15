@@ -1,8 +1,10 @@
 // src/config.js
 
 // Utilizing the Vite proxy configured in vite.config.js
-// This ensures requests go to http://100.67.241.99:5000/api via the local dev server
+// This ensures requests go to http://localhost:5000/api via the local dev server
 export const API_BASE = "/api";
+export const LOGIN_URL = "http://localhost:5000/api/auth/login";
+export const RESET_PASSWORD_URL = "http://localhost:5000/api/auth/reset-password";
 
 // Latest Tokens provided by the user (as of April 10, 2026)
 export const TEST_TOKENS = {
@@ -15,28 +17,20 @@ export const TEST_TOKENS = {
 
 /**
  * Standard Auth Header helper to keep consistent token usage.
- * Prioritizes localStorage actual logged-in user, then falls back to test tokens if role matches.
- * @param {string} role - The role for which to get the test token if localStorage is empty.
+ * Strictly uses localStorage token for security.
  */
-export const getAuthHeader = (role = '') => {
+export const getAuthHeader = () => {
     const token = localStorage.getItem("token") || localStorage.getItem("authToken");
-    
-    // Choose appropriate fallback token
-    const normalizedRole = (role || '').toLowerCase().replace(/_/g, '');
-    let tokenKey = normalizedRole;
-    if (normalizedRole.includes('hr') || normalizedRole.includes('fulltime')) tokenKey = 'hr';
-    if (normalizedRole.includes('employee')) tokenKey = 'employee';
-    if (normalizedRole.includes('manager')) tokenKey = 'manager';
-    if (normalizedRole.includes('superadmin')) tokenKey = 'superadmin';
-    
-    const fallbackToken = TEST_TOKENS[tokenKey] || TEST_TOKENS.superadmin;
-    
-    // Prioritize the actual token from localStorage. 
-    // Only use fallback if NO token is found in localStorage.
-    const tokenToUse = token || (role === 'superadmin' ? TEST_TOKENS.superadmin : fallbackToken);
+
+    // "No token = No data access"
+    if (!token) {
+        return {
+            "Content-Type": "application/json"
+        };
+    }
 
     return {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${tokenToUse}`
+        "Authorization": `Bearer ${token}`
     };
 };

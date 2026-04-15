@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'; // Splash screen with theme-specific background
 import { useNavigate } from 'react-router-dom';
 import './welcome.css';
-import logo from "../../../assets/images/fislogo1.png";
+import logo from "../../../assets/images/logo.jpg";
 import bgImage from "../../../assets/images/hrms_splash_bg_1772781261664.png";
 
 const Welcome = () => {
@@ -22,7 +22,7 @@ const Welcome = () => {
           <div className="logo-wrapper">
             <img src={logo} alt="HRMS Logo" className="welcome-logo" />
           </div>
-          <h1 className="welcome-title">Future Invo HRMS</h1>
+          <h1 className="welcome-title">WorkSphere HRMS</h1>
           <p className="welcome-subtitle">Empowering Your Workforce</p>
 
           <div className="loader-line"></div>

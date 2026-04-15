@@ -1,43 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* --- 1. THEME CONFIGURATION (Strict Light Mode) --- */
-    --primary-color: #6d28d9;
-    /* Deep Purple */
-    --primary-dark: #5b21b6;
-    --primary-light: #ede9fe;
-    --accent-color: #8b5cf6;
+    /* --- 1. NEW COLOR PALETTE CONFIGURATION --- */
+    --cp-deep-navy: #405580;
+    --cp-purple-dark: #434777;
+    --cp-purple-main: #534789;
+    --cp-slate-blue: #657DAA;
+    --cp-sky-blue: #65B1C9;
+    --cp-cyan-teal: #87DDDD;
 
-    --bg-body: #f5f3ff;
-    /* Soft Lavender */
-    --bg-card: #f5f3ff;
-    --bg-sidebar: #ffffff;
+    /* Semantic Primary Mapping */
+    --primary-color: var(--cp-purple-main);
+    --primary-dark: var(--cp-purple-dark);
+    --primary-light: #f0f1ff; /* Scaled light version */
+    --accent-color: var(--cp-sky-blue);
+    --secondary-color: var(--cp-slate-blue);
 
+    /* Backgrounds */
+    --bg-body: #f8fafc;
+    --bg-card: #ffffff;
+    --bg-sidebar: var(--cp-purple-dark);
+
+    /* Text */
     --text-main: #1e293b;
-    /* Slate 800 - Clear Dark Text */
-    --text-secondary: #475569;
-    /* Slate 600 */
+    --text-secondary: var(--cp-slate-blue);
     --text-muted: #64748b;
-    /* Slate 500 */
     --text-on-primary: #ffffff;
     --text-white: #ffffff;
-    --text-purple: #7c3aed;
-
-    /* ALIASES */
-    --bg-color: var(--bg-body);
-    --card-bg: var(--bg-card);
-    --text-primary: var(--text-main);
-
-    --border-color: #e2e8f0;
-    --sidebar-width: 260px;
+    --text-purple: var(--cp-purple-main);
 
     /* Elements */
+    --border-color: #e2e8f0;
+    --sidebar-width: 260px;
     --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    --radius-card: 16px;
-
-    /* Bootstrap Overrides */
-    --bs-body-bg: var(--bg-body);
-    --bs-body-color: var(--text-main);
+    --radius-card: 20px;
 
     /* Glass Effect Vars */
     --glass-bg: rgba(255, 255, 255, 0.85);
@@ -155,7 +151,19 @@ div {
 }
 
 .bg-light {
-    background-color: #f5f3ff !important;
+    background-color: #f8fafc !important;
+}
+
+.bg-accent {
+    background-color: var(--accent-color) !important;
+}
+
+.bg-teal-light {
+    background-color: var(--cp-cyan-teal) !important;
+}
+
+.bg-navy {
+    background-color: var(--cp-deep-navy) !important;
 }
 
 /* Button Overrides */
@@ -164,10 +172,10 @@ div {
 .btn-info,
 .btn-warning,
 .btn-danger {
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+    background: linear-gradient(135deg, var(--cp-purple-main) 0%, var(--cp-purple-dark) 100%) !important;
     border: none !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.2);
+    box-shadow: 0 4px 12px rgba(67, 71, 119, 0.2);
     transition: all 0.3s ease;
 }
 
@@ -176,9 +184,9 @@ div {
 .btn-info:hover,
 .btn-warning:hover,
 .btn-danger:hover {
-    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%) !important;
+    background: linear-gradient(135deg, var(--cp-purple-dark) 0%, var(--cp-deep-navy) 100%) !important;
     transform: translateY(-1px);
-    box-shadow: 0 6px 15px rgba(109, 40, 217, 0.3);
+    box-shadow: 0 6px 15px rgba(64, 85, 128, 0.3);
 }
 
 .btn-outline-primary {

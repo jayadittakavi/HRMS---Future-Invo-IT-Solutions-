@@ -3,9 +3,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Navbar from '../../../components/layout/Navbar';
-import sideImage from '../../../assets/images/sigupbg.png';
-import logo from '../../../assets/images/fislogo1.png';
-import scholarlyBg from '../../../assets/images/scholarly_bg.png';
 import './Signup.css';
 
 const Signup = () => {
@@ -66,7 +63,7 @@ const Signup = () => {
 
       if (!response.ok) {
         // If it's a 403, the server specifically rejected this request structure
-        const serverMsg = data.message || data.error || (responseText.trim() || `Forbidden (403): Check backend permissions`);
+        const serverMsg = data.message || data.error || (responseText.trim() ? responseText : `Connection Error (Status: ${response.status})`);
         throw new Error(serverMsg);
       }
 
@@ -84,110 +81,116 @@ const Signup = () => {
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100 overflow-hidden">
+    <div className="signup-wrapper">
       <Navbar />
-      <div className="container-fluid signup-container flex-grow-1" style={{ backgroundImage: `url(${scholarlyBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="d-flex flex-column align-items-center w-100">
-          <div className="card signup-card shadow-lg border-0 py-4 px-2" style={{ maxWidth: '500px', borderRadius: '1.5rem' }}>
-            <div className="card-body p-4">
-              <div className="mb-4 text-center">
-                <h3 className="signup-title mb-1">Create an account</h3>
-                <p className="text-secondary small">Join our HRMS platform to manage your workforce seamlessly.</p>
-              </div>
+      
+      {/* Animated Background Elements */}
+      <div className="animated-bg">
+        <div className="circle circle-1"></div>
+        <div className="circle circle-2"></div>
+        <div className="circle circle-3"></div>
+      </div>
 
-              {error && <div className="alert alert-danger py-2" role="alert">{error}</div>}
+      <div className="signup-container-modern">
+        <div className="signup-card-glass animate__animated animate__zoomIn">
+          <div className="card-body p-0">
+            <div className="mb-4 text-center">
+              <h3 className="signup-title mb-1">Create an account</h3>
+              <p className="signup-subtitle">Join our HRMS platform to manage your workforce seamlessly.</p>
+            </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <input
-                      type="text"
-                      name="firstName"
-                      className="form-control signup-input"
-                      placeholder="First Name"
-                      required
-                      value={formData.firstName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  <div className="col-md-6 mt-3 mt-md-0">
-                    <input
-                      type="text"
-                      name="lastName"
-                      className="form-control signup-input"
-                      placeholder="Last Name"
-                      required
-                      value={formData.lastName}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
+            {error && <div className="alert glass-alert py-2 text-center" role="alert">{error}</div>}
 
-                <div className="mb-3">
+            <form onSubmit={handleSubmit}>
+              <div className="row mb-3">
+                <div className="col-md-6">
                   <input
-                    type="email"
-                    name="email"
-                    className="form-control signup-input"
-                    placeholder="Email Address"
+                    type="text"
+                    name="firstName"
+                    className="form-control signup-input-modern"
+                    placeholder="First Name"
                     required
-                    value={formData.email}
+                    value={formData.firstName}
                     onChange={handleChange}
                   />
                 </div>
-
-                <div className="mb-3">
-                  <div className="input-group">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      className="form-control signup-input"
-                      placeholder="Password"
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
-                    />
-                    <button
-                      className="btn btn-outline-light text-secondary border-start-0 border-top border-bottom border-end password-toggle-btn"
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
+                <div className="col-md-6 mt-3 mt-md-0">
+                  <input
+                    type="text"
+                    name="lastName"
+                    className="form-control signup-input-modern"
+                    placeholder="Last Name"
+                    required
+                    value={formData.lastName}
+                    onChange={handleChange}
+                  />
                 </div>
+              </div>
 
-                <div className="mb-4">
-                  <div className="input-group">
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      className="form-control signup-input"
-                      placeholder="Confirm Password"
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                    />
-                    <button
-                      className="btn btn-outline-light text-secondary border-start-0 border-top border-bottom border-end password-toggle-btn"
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
+              <div className="mb-3">
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control signup-input-modern"
+                  placeholder="Email Address"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="mb-3">
+                <div className="input-group">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    className="form-control signup-input-modern border-end-0"
+                    placeholder="Password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                  />
+                  <button
+                    className="btn password-toggle-glass border-start-0"
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
+              </div>
 
-                <button type="submit" className="btn btn-primary signup-btn mb-3">
-                  Sign Up
-                </button>
-
-                <div className="text-center">
-                  <span className="text-secondary small">
-                    Already have an account? <Link to="/login" className="login-link fw-bold">Login here</Link>
-                  </span>
+              <div className="mb-4">
+                <div className="input-group">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    className="form-control signup-input-modern border-end-0"
+                    placeholder="Confirm Password"
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                  />
+                  <button
+                    className="btn password-toggle-glass border-start-0"
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
-              </form>
-            </div>
+              </div>
+
+              <button type="submit" className="btn signup-btn-premium mb-4">
+                Sign Up
+              </button>
+
+              <div className="text-center">
+                <span className="small" style={{ color: '#475569' }}>
+                  Already have an account? <Link to="/login" className="login-link-modern fw-bold">Login here</Link>
+                </span>
+              </div>
+            </form>
           </div>
         </div>
       </div>

@@ -10,9 +10,9 @@ const About = () => {
                 <div className="container py-5 my-5">
                     <div className="row align-items-center gx-5">
                         <div className="col-lg-6 mb-5 mb-lg-0">
-                            <h1 className="display-4 fw-bold text-primary mb-4">About Future Invo</h1>
+                            <h1 className="display-4 fw-bold text-primary mb-4">About WorkSphrer</h1>
                             <p className="lead text-muted mb-4">
-                                Future Invo IT Solutions is a forward-thinking technology company dedicated to simplifying business operations through innovative software solutions.
+                                WorkSphrer IT Solutions is a forward-thinking technology company dedicated to simplifying business operations through innovative software solutions.
                             </p>
                             <p className="text-muted mb-4">
                                 Founded in 2024, our mission is to empower organizations of all sizes with tools that enhance productivity, foster employee engagement, and drive growth. We believe that technology should be an enabler, not a barrier.
@@ -58,7 +58,7 @@ const About = () => {
 
             <footer className="bg-dark text-white py-4 mt-auto">
                 <div className="container text-center">
-                    <small>© 2024 Future Invo HRMS. All rights reserved.</small>
+                    <small>© 2024 WorkSphrer HRMS. All rights reserved.</small>
                 </div>
             </footer>
         </div>

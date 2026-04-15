@@ -148,7 +148,7 @@ const KnowledgeBase = () => {
                                     <div className="fs-4">📧</div>
                                     <div>
                                         <div style={{ fontSize: '0.8rem', opacity: 0.6, fontWeight: 700, textTransform: 'uppercase' }}>Email Support</div>
-                                        <div style={{ fontWeight: 700 }}>support@futureinvo.com</div>
+                                        <div style={{ fontWeight: 700 }}>support@worksphrer.com</div>
                                     </div>
                                 </div>
                             </div>

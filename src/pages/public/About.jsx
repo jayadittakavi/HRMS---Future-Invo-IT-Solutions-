@@ -6,16 +6,16 @@ import Footer from "../../components/layout/Footer";
 
 const About = () => {
     return (
-        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f5f3ff' }}>
+        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f8fafc' }}>
             <Navbar isHome={true} />
 
             <main className="flex-grow-1 pt-5">
                 <div className="container py-5">
                     <div className="row align-items-center gx-5">
                         <div className="col-lg-6 mb-5 mb-lg-0">
-                            <h1 className="display-4 fw-bold text-primary mb-4">About Future Invo</h1>
+                            <h1 className="display-4 fw-bold text-primary mb-4">About WorkSphere</h1>
                             <p className="lead text-secondary mb-4">
-                                Future Invo IT Solutions is a forward-thinking technology company dedicated to simplifying business operations through innovative software solutions.
+                                WorkSphere IT Solutions is a forward-thinking technology company dedicated to simplifying business operations through innovative software solutions.
                             </p>
                             <p className="text-secondary mb-4">
                                 Founded in 2024, our mission is to empower organizations of all sizes with tools that enhance productivity, foster employee engagement, and drive growth. We believe that technology should be an enabler, not a barrier.
@@ -27,7 +27,7 @@ const About = () => {
                         <div className="col-lg-6 text-center">
                             <img
                                 src={hrmsImage}
-                                alt="Future Invo HRMS"
+                                alt="WorkSphere HRMS"
                                 className="img-fluid rounded-4 shadow-lg hover-scale"
                                 style={{ maxHeight: '400px', objectFit: 'cover' }}
                             />

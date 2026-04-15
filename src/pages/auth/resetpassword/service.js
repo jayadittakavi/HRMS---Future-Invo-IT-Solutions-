@@ -1,5 +1,5 @@
-const BASE_URL = "http://100.67.241.99:5000/api/auth";
-const API_URL = `http://100.67.241.99:5000/api/auth/reset-password`;
+const BASE_URL = "http://localhost:5000/api/auth";
+const API_URL = `http://localhost:5000/api/auth/reset-password`;
 
 export const resetPassword = async (email, token, new_password) => {
     try {

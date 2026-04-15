@@ -52,7 +52,7 @@ const Contact = () => {
                             <div className="mb-4">
                                 <h4 className="fw-bold mb-3">Contact Information</h4>
                                 <p className="text-secondary mb-1">📍 123 Innovation Drive, Tech City, TC 90210</p>
-                                <p className="text-secondary mb-1">📧 support@futureinvo.com</p>
+                                <p className="text-secondary mb-1">📧 support@worksphrer.com</p>
                                 <p className="text-secondary">📞 +1 (555) 123-4567</p>
                             </div>
 

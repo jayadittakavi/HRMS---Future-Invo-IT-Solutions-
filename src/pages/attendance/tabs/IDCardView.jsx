@@ -263,7 +263,7 @@ const IDCardView = () => {
                                                 </div>
                                                 <div className="col-md-6">
                                                     <label className="form-label small text-muted">Company Name</label>
-                                                    <input type="text" className="form-control" value={formData.company_name} onChange={e => setFormData({ ...formData, company_name: e.target.value })} placeholder="Future Invo" />
+                                                    <input type="text" className="form-control" value={formData.company_name} onChange={e => setFormData({ ...formData, company_name: e.target.value })} placeholder="WorkSphrer" />
                                                 </div>
                                                 <div className="col-md-6">
                                                     <label className="form-label small text-muted">Company Logo</label>

@@ -3,11 +3,11 @@ import Navbar from "../../components/layout/Navbar";
 import { FaUsers, FaCalendarCheck, FaMoneyBillWave, FaUmbrellaBeach, FaLaptop, FaChartLine, FaLock, FaMobileAlt, FaChartPie } from 'react-icons/fa';
 import Footer from "../../components/layout/Footer";
 
-import featuresBg from "../../assets/images/features.jpg";
+import featuresBg from "../../assets/images/featuresbg.jpg";
 
 const Features = () => {
     return (
-        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f5f3ff' }}>
+        <div className="min-vh-100 d-flex flex-column" style={{ background: '#f8fafc' }}>
             <Navbar isHome={true} />
 
             <main className="flex-grow-1 pt-4">
@@ -41,7 +41,7 @@ const Features = () => {
                             <div className="col-md-6 col-lg-4" key={index}>
                                 <div className="card h-100 border-0 shadow-sm rounded-4 hover-lift transition-all">
                                     <div className="card-body p-4">
-                                        <div className="display-6 mb-3" style={{ color: '#7b61ff' }}>{feature.icon}</div>
+                                        <div className="display-6 mb-3" style={{ color: 'var(--cp-purple-main)' }}>{feature.icon}</div>
                                         <h3 className="h5 fw-bold text-main mb-2">{feature.title}</h3>
                                         <p className="text-secondary mb-0">{feature.desc}</p>
                                     </div>

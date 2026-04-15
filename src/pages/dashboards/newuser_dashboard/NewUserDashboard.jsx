@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/images/fislogo1.png';
+import logo from '../assets/images/logo.jpg';
 
 const NewUserDashboard = () => {
     const { logout } = useAuth();

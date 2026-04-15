@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "vite",
+    "dev:all": "concurrently \"npm run backend\" \"npm run dev\"",
+    "backend": "cd \"../../HRMS-main (6)/HRMS-main/HRMS-main\" && .\\venv\\Scripts\\python.exe app.py",
+    "setup:backend": "cd \"../../HRMS-main (6)/HRMS-main/HRMS-main\" && py -m venv venv && .\\venv\\Scripts\\activate && pip install -r requirements.txt",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -27,6 +31,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",

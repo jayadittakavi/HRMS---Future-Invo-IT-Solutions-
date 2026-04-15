@@ -113,7 +113,7 @@ const Feedback = () => {
                         }}></div>
 
                         <h2 style={{ fontWeight: 800, marginBottom: '12px', fontSize: '2.5rem', letterSpacing: '-0.02em' }}>We value your feedback! 🚀</h2>
-                        <p style={{ opacity: 0.9, marginBottom: 0, fontSize: '1.1rem', fontWeight: 500 }}>Help us improve the Future Invo HRMS experience. Your ideas matter.</p>
+                        <p style={{ opacity: 0.9, marginBottom: 0, fontSize: '1.1rem', fontWeight: 500 }}>Help us improve the WorkSphrer HRMS experience. Your ideas matter.</p>
                     </div>
 
                     <div className="card-body p-5">

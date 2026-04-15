@@ -11,7 +11,7 @@ const TeamMembers = () => {
             name: 'Sarah Johnson',
             role: 'Senior Developer',
             status: 'Online',
-            email: 'sarah.j@futureinvo.com',
+            email: 'sarah.j@worksphrer.com',
             phone: '+1 (555) 123-4567',
             department: 'Engineering',
             avatar: null // Placeholder for now
@@ -21,7 +21,7 @@ const TeamMembers = () => {
             name: 'Michael Chen',
             role: 'UI/UX Designer',
             status: 'Away',
-            email: 'michael.c@futureinvo.com',
+            email: 'michael.c@worksphrer.com',
             phone: '+1 (555) 987-6543',
             department: 'Design',
             avatar: null
@@ -31,7 +31,7 @@ const TeamMembers = () => {
             name: 'Emily Davis',
             role: 'Product Manager',
             status: 'Offline',
-            email: 'emily.d@futureinvo.com',
+            email: 'emily.d@worksphrer.com',
             phone: '+1 (555) 456-7890',
             department: 'Product',
             avatar: null
@@ -41,7 +41,7 @@ const TeamMembers = () => {
             name: 'David Wilson',
             role: 'Backend Developer',
             status: 'Online',
-            email: 'david.w@futureinvo.com',
+            email: 'david.w@worksphrer.com',
             phone: '+1 (555) 789-0123',
             department: 'Engineering',
             avatar: null
@@ -51,7 +51,7 @@ const TeamMembers = () => {
             name: 'Jessica Lee',
             role: 'QA Engineer',
             status: 'On Leave',
-            email: 'jessica.l@futureinvo.com',
+            email: 'jessica.l@worksphrer.com',
             phone: '+1 (555) 234-5678',
             department: 'Quality Assurance',
             avatar: null

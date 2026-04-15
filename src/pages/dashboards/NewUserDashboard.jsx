@@ -4,7 +4,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useNavigate } from 'react-router-dom';
-import logo from "../../assets/images/fislogo1.png";
+import logo from "../../assets/images/logo.jpg";
 
 const NewUserDashboard = () => {
     const { logout } = useAuth();
@@ -20,7 +20,7 @@ const NewUserDashboard = () => {
             <div className="row justify-content-center">
                 <div className="col-12 text-center mb-5">
                     <img src={logo} alt="HRMS" className="rounded-circle shadow-sm mb-3" style={{ width: '80px', height: '80px', objectFit: 'cover' }} />
-                    <h2 className="display-6 fw-bold text-dark">Welcome to Future Invo HRMS!</h2>
+                    <h2 className="display-6 fw-bold text-dark">Welcome to WorkSphere HRMS!</h2>
                     <p className="lead text-secondary">Let's get you set up. Please complete the following steps to activate your full account.</p>
                 </div>
 

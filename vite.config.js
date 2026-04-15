@@ -6,9 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
+    port: 3000,
     proxy: {
       "/api": {
-        target: "http://192.168.1.16:5000/",
+        target: "http://100.67.174.54:5000/",
         changeOrigin: true,
         secure: false,
         timeout: 120000,

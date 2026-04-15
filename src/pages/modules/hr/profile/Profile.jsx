@@ -164,7 +164,7 @@ const ProfileContent = () => {
     };
 
     const handleSubscribe = () => {
-        const subscribeLink = "https://futureinvo.com/subscribe";
+        const subscribeLink = "https://worksphrer.com/subscribe";
         alert(`🔗 Link to subscribe: ${subscribeLink}\n\nSuccess! A subscription invite has been sent to your email: ${user?.email || 'your registered email'}.`);
         console.log(`Sending subscription link to ${user?.email}: ${subscribeLink}`);
     };

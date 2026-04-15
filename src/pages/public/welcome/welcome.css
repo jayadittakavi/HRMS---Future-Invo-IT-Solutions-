@@ -93,7 +93,7 @@
   left: 0;
   height: 100%;
   width: 0%;
-  background: #3464bc;
+  background: var(--cp-purple-main);
   /* Primary color */
   animation: loading 4s linear forwards;
 }

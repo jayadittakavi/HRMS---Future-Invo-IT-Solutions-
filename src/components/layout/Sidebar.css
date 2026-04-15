@@ -1,6 +1,6 @@
 .sidebar-container {
-    background: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%) !important;
-    /* Soft Deep Purple/Indigo Gradient */
+    background: linear-gradient(180deg, var(--cp-purple-main) 0%, var(--cp-purple-dark) 50%, var(--cp-deep-navy) 100%) !important;
+    /* New Theme Palette Gradient */
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     height: 100%;

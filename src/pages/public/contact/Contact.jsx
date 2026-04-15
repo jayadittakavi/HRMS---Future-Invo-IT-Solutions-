@@ -50,7 +50,7 @@ const Contact = () => {
                             <div className="mb-4">
                                 <h4 className="fw-bold mb-3">Contact Information</h4>
                                 <p className="text-muted mb-1">📍 123 Innovation Drive, Tech City, TC 90210</p>
-                                <p className="text-muted mb-1">📧 support@futureinvo.com</p>
+                                <p className="text-muted mb-1">📧 support@worksphere.com</p>
                                 <p className="text-muted">📞 +1 (555) 123-4567</p>
                             </div>
 
@@ -74,7 +74,7 @@ const Contact = () => {
 
             <footer className="bg-dark text-white py-4 mt-auto">
                 <div className="container text-center">
-                    <small>© 2024 Future Invo HRMS. All rights reserved.</small>
+                    <small>© 2026 WorkSphere HRMS. All rights reserved.</small>
                 </div>
             </footer>
         </div>

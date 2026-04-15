@@ -1,18 +1,21 @@
 import { API_BASE, getAuthHeader } from '../config';
 
 const authHeader = () => {
-    return {
-        headers: getAuthHeader('superadmin'), // Core functions typically require SuperAdmin permissions
-    };
+    const auth = getAuthHeader();
+    if (!auth.Authorization) return null;
+    return { headers: auth };
 };
 
 export const coreService = {
     // 🔹 Companies
     getCompanies: async () => {
         try {
+            const header = authHeader();
+            if (!header) return []; // Skip API call if unauthorized
+
             const response = await fetch(`${API_BASE}/superadmin/companies`, {
                 method: "GET",
-                ...authHeader()
+                ...header
             });
             if (!response.ok) throw new Error(await response.text());
             const data = await response.json();
@@ -26,9 +29,12 @@ export const coreService = {
     // 🔹 Dashboard Stats
     getDashboardStats: async () => {
         try {
+            const header = authHeader();
+            if (!header) return null;
+
             const response = await fetch(`${API_BASE}/dashboard/stats`, {
                 method: "GET",
-                ...authHeader()
+                ...header
             });
             if (!response.ok) throw new Error(await response.text());
             return await response.json();
@@ -40,9 +46,12 @@ export const coreService = {
 
     getSuperAdminDashboardStats: async () => {
         try {
+            const header = authHeader();
+            if (!header) return null;
+
             const response = await fetch(`${API_BASE}/superadmin/dashboard-stats`, {
                 method: "GET",
-                ...authHeader()
+                ...header
             });
             if (!response.ok) throw new Error(await response.text());
             return await response.json();
@@ -54,9 +63,12 @@ export const coreService = {
 
     getCompanyStats: async () => {
         try {
+            const header = authHeader();
+            if (!header) return null;
+
             const response = await fetch(`${API_BASE}/superadmin/companies/stats`, {
                 method: "GET",
-                ...authHeader()
+                ...header
             });
             if (!response.ok) throw new Error(await response.text());
             return await response.json();
@@ -84,9 +96,12 @@ export const coreService = {
     // 🔹 Branches
     getBranches: async () => {
         try {
+            const header = authHeader();
+            if (!header) return [];
+
             const response = await fetch(`${API_BASE}/superadmin/branches`, {
                 method: "GET",
-                ...authHeader()
+                ...header
             });
             if (!response.ok) throw new Error(await response.text());
             const data = await response.json();

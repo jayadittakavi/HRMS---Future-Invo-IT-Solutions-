@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { FaBuilding, FaUserCircle, FaTint, FaCalendarAlt, FaPhoneAlt, FaIdBadge, FaImage, FaUndoAlt } from 'react-icons/fa';
-import fisLogo from '../../assets/images/fislogo1.png';
+import fisLogo from '../../assets/images/logo.jpg';
 
 const IDCard = ({ employee, canEditLogo = false, onLogoUpdate }) => {
     const [isFlipped, setIsFlipped] = useState(false);
@@ -92,7 +92,7 @@ const IDCard = ({ employee, canEditLogo = false, onLogoUpdate }) => {
                             <img src={fisLogo} alt="Logo" style={{ height: '24px' }} />
                         )}
                         <span className="fw-bold text-dark small text-uppercase spacing-1" style={{ fontSize: '0.65rem' }}>
-                            {employee.company_name || 'Future Invo'}
+                            {employee.company_name || 'WorkSphrer'}
                         </span>
 
                         {canEditLogo && (
@@ -186,7 +186,7 @@ const IDCard = ({ employee, canEditLogo = false, onLogoUpdate }) => {
 
                     <div className="w-100 text-center border-top pt-2">
                         <small className="text-muted" style={{ fontSize: '0.65rem' }}>
-                            {employee.company_name || 'Future Invo IT Solutions'}<br />
+                            {employee.company_name || 'WorkSphrer IT Solutions'}<br />
                             Property of the company. If found, please return.
                         </small>
                     </div>

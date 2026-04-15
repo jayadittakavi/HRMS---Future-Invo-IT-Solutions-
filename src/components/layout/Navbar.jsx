@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useNotification } from "../../context/NotificationContext"; // Added
-import logo from "../../assets/images/fislogo1.png";
+import logo from "../../assets/images/logo.jpg";
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
 const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
@@ -23,7 +23,7 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
 
     return (
         <>
-            <nav className={`navbar navbar-expand-lg fixed-top ${isHome ? 'navbar-dark glass-navbar' : 'shadow-sm navbar-theme'}`}
+            <nav className={`navbar navbar-expand-lg fixed-top ${isHome ? 'navbar-dark glass-navbar' : 'bg-white shadow-sm'}`}
                 style={{ minHeight: '70px', zIndex: 1030 }}>
                 <div className="container-fluid px-4">
                     {/* Mobile Sidebar Toggle (only valid if functionality provided) */}
@@ -38,8 +38,8 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                     )}
                     {!hideLogo && (
                         <Link className="navbar-brand d-flex align-items-center" to="/">
-                            <img src={logo} alt="HRMS Logo" height="35" className="me-2 rounded-3" />
-                            <span className="fw-bold d-none d-sm-block" style={{ color: theme === 'dark' ? '#fff' : '#7b61ff', fontWeight: '800' }}>Future Invo HRMS</span>
+                            <img src={logo} alt="HRMS Logo" height="35" className="me-2 rounded-circle" style={{ width: '35px', objectFit: 'cover' }} />
+                            <span className="fw-bold d-none d-sm-block" style={{ color: theme === 'dark' ? '#fff' : 'var(--cp-purple-main)', fontWeight: '800' }}>WS HRMS</span>
                         </Link>
                     )}
 
@@ -99,11 +99,25 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                             <li className="nav-item d-flex align-items-center gap-2 ms-2">
                                 <div className="d-lg-none w-100 my-2 border-top"></div> {/* Divider for mobile */}
 
-                                <button className="header-icon-circle bg-purple-soft" title="Settings" onClick={() => navigate('/settings')}>
+                                <button 
+                                    className="header-icon-circle bg-purple-soft" 
+                                    title="Settings" 
+                                    onClick={() => {
+                                        if (user) navigate('/settings');
+                                        else navigate('/login');
+                                    }}
+                                >
                                     <FaCog size={16} />
                                 </button>
 
-                                <button className="header-icon-circle bg-pink-soft" title="Calendar" onClick={() => navigate('/calendar')}>
+                                <button 
+                                    className="header-icon-circle bg-pink-soft" 
+                                    title="Calendar" 
+                                    onClick={() => {
+                                        if (user) navigate('/calendar');
+                                        else navigate('/login');
+                                    }}
+                                >
                                     <FaRegCalendarAlt size={16} />
                                 </button>
 

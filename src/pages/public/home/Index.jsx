@@ -42,7 +42,7 @@ const Home = () => {
             <span className="section-tag text-start reveal">Intelligent Workforce Management</span>
             <h1 className="reveal">
               Empower Your Team with <br />
-              <span className="gradient-text">Future Invo HRMS</span>
+              <span className="gradient-text">WorkSphere HRMS</span>
             </h1>
             <p className="reveal">
               Modernize your HR processes with a fully automated, glass-styled ecosystem designed for growth. Manage payroll, performance, and presence from a single unified portal.
@@ -97,7 +97,7 @@ const Home = () => {
       {/* CORE VALUE SECTION */}
       <section className="why-hrms container">
         <span className="section-tag reveal">Next-Gen Capabilities</span>
-        <h2 className="section-title reveal">Why Choose Future Invo?</h2>
+        <h2 className="section-title reveal">Why Choose WorkSphere?</h2>
         <div className="row g-4">
           <div className="col-md-4 reveal">
             <div className="glass-card">

@@ -10,7 +10,7 @@ const INITIAL_VARS = [
     { id: 6, name: '{{last_working_day}}', description: 'Last date of employment', example: '28 February 2026', category: 'Date', usedIn: ['Relieving Letter'] },
     { id: 7, name: '{{ctc_annual}}', description: 'Annual Cost to Company (salary)', example: '₹ 8,40,000', category: 'Finance', usedIn: ['Offer Letter'] },
     { id: 8, name: '{{basic_salary}}', description: 'Monthly basic salary component', example: '₹ 35,000', category: 'Finance', usedIn: ['Appointment Letter', 'Increment Letter'] },
-    { id: 9, name: '{{company_name}}', description: 'Name of the organization', example: 'Future Invo IT Solutions', category: 'Company', usedIn: ['Offer Letter', 'Appointment Letter', 'Relieving Letter'] },
+    { id: 9, name: '{{company_name}}', description: 'Name of the organization', example: 'WorkSphrer IT Solutions', category: 'Company', usedIn: ['Offer Letter', 'Appointment Letter', 'Relieving Letter'] },
     { id: 10, name: '{{signatory_name}}', description: 'Name of the authorizing signatory', example: 'Rahul Gupta', category: 'Company', usedIn: ['Offer Letter', 'Appointment Letter'] },
     { id: 11, name: '{{notice_period}}', description: 'Notice period required per policy', example: '30 days', category: 'Policy', usedIn: ['Offer Letter', 'Relieving Letter'] },
     { id: 12, name: '{{increment_percent}}', description: 'Percentage of salary increment', example: '15%', category: 'Finance', usedIn: ['Increment Letter'] },

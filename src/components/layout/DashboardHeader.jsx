@@ -36,7 +36,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
             style={{
                 minHeight: '70px',
                 zIndex: 1020,
-                backgroundColor: 'rgba(245, 243, 255, 0.9)',
+                backgroundColor: 'var(--bg-body)',
                 backdropFilter: 'blur(12px)',
                 transition: 'all 0.3s ease'
             }}>
@@ -51,7 +51,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     <span className="fs-5 text-dark">☰</span>
                 </button>
 
-                <h1 className="fw-bold text-main fs-5 mb-0" style={{ color: '#1e293b', letterSpacing: '-0.3px' }}>
+                <h1 className="fw-bold fs-5 mb-0" style={{ color: 'var(--cp-deep-navy)', letterSpacing: '-0.3px' }}>
                     {title || 'Dashboard'}
                 </h1>
             </div>
@@ -205,17 +205,17 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     cursor: pointer;
                 }
                 .header-icon-circle-premium:hover {
-                    color: #4f46e5;
+                    color: var(--cp-purple-main);
                     background: #f5f3ff;
                     border-color: #e0e7ff;
                     transform: translateY(-2px);
                 }
                 .header-icon-circle-premium.calendar:hover { color: #db2777; background: #fff1f2; }
-                .header-icon-circle-premium.support:hover { color: #2563eb; background: #eff6ff; }
+                .header-icon-circle-premium.support:hover { color: var(--cp-sky-blue); background: #eff6ff; }
                 .header-icon-circle-premium.notify:hover { color: #ea580c; background: #fff7ed; }
 
                 .profile-trigger:hover .profile-img-container {
-                    border-color: #6366f1 !important;
+                    border-color: var(--cp-purple-main) !important;
                     transform: scale(1.05);
                 }
                 .profile-img-container {
@@ -279,8 +279,8 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 .role-badge {
                     font-size: 0.625rem;
                     font-weight: 800;
-                    background: #f5f3ff;
-                    color: #7c3aed;
+                    background: var(--primary-light);
+                    color: var(--cp-purple-main);
                     padding: 3px 10px;
                     border-radius: 6px;
                     display: inline-block;
@@ -304,8 +304,8 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                     color: #4b5563;
                 }
                 .premium-dropdown-item:hover {
-                    background: #f5f3ff;
-                    color: #6d28d9;
+                    background: var(--primary-light);
+                    color: var(--cp-purple-main);
                 }
                 .premium-dropdown-item .icon-wrapper {
                     font-size: 1.1rem;

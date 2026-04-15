@@ -2,6 +2,7 @@ import React from 'react';
 import { useNotification } from '../../context/NotificationContext';
 import { useTheme } from '../../context/ThemeContext';
 import { FaTimes, FaBell, FaCheckDouble, FaTimesCircle, FaInfoCircle, FaExclamationTriangle, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
 const NotificationDrawer = () => {
     const {
@@ -13,6 +14,8 @@ const NotificationDrawer = () => {
         deleteNotification,
         clearNotifications
     } = useNotification();
+
+    const { user } = useAuth();
 
     const { theme } = useTheme();
 
@@ -72,7 +75,24 @@ const NotificationDrawer = () => {
 
                 {/* Content */}
                 <div className="flex-grow-1 overflow-auto p-0">
-                    {notifications.length > 0 ? (
+                    {!user ? (
+                        <div className="d-flex flex-column align-items-center justify-content-center h-100 text-secondary p-4 text-center">
+                            <div className="bg-light p-4 rounded-circle mb-4 border shadow-sm">
+                                <FaBell size={50} className="text-secondary opacity-25" />
+                            </div>
+                            <h5 className="fw-bold text-dark mb-2">Authentication Required</h5>
+                            <p className="small mb-4 text-muted">Please login to view your notifications and stay updated with live alerts.</p>
+                            <button
+                                className="btn btn-primary rounded-pill px-4"
+                                onClick={() => {
+                                    toggleNotificationDrawer();
+                                    window.location.href = '/login';
+                                }}
+                            >
+                                Login Now
+                            </button>
+                        </div>
+                    ) : notifications.length > 0 ? (
                         <div className="list-group list-group-flush">
                             {notifications.map((notif) => (
                                 <div
