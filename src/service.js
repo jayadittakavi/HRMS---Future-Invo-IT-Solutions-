@@ -11,8 +11,8 @@ export const authService = {
         return response;
     },
 
-    signupSuperAdmin: async (userData) => {
-        const response = await fetch(`${BASE_URL}/auth/super-admin/signup`, {
+    signup: async (userData) => {
+        const response = await fetch(`${BASE_URL}/auth/signup`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(userData),

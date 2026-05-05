@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { verifySignupOtpService } from './service/service';
-import sideImage from '../../../../assets/images/loginimage.png';
+import sideImage from '../../../../assets/images/login1.jpg';
 import './SignupOtp.css';
 
 const SignupOtp = () => {
@@ -12,6 +12,15 @@ const SignupOtp = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email || 'your email';
+    const warning = location.state?.warning || null; // Set when OTP email failed on signup
+
+    // If email sending failed on signup, allow immediate resend
+    useEffect(() => {
+        if (warning) {
+            setCanResend(true);
+            setTimeLeft(0);
+        }
+    }, [warning]);
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -94,14 +103,7 @@ const SignupOtp = () => {
         try {
             setError('');
 
-            const response = await fetch("/api/auth/verify-signup-otp", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({ email, otp: otpValue }),
-            });
+            const response = await verifySignupOtpService.verify(email, otpValue);
 
             const responseText = await response.text();
             let data = {};
@@ -118,15 +120,23 @@ const SignupOtp = () => {
 
             // Connection to Dashboard established here
             if (data.token) {
-                // Auto-login logic
-                const userData = data.user || { role: 'superadmin', email };
+                // Auto-login logic - REQUIRE real user data from backend
+                if (!data.user) {
+                    alert('Account verified! Please login manually.');
+                    navigate('/login');
+                    return;
+                }
+                const userData = data.user;
                 localStorage.setItem('authToken', data.token);
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(userData));
 
                 alert('Account verified successfully! Redirecting to dashboard...');
-                // Force page reload to ensure all states (like AuthContext) are refreshed from localStorage
-                window.location.href = '/dashboard/super-admin';
+                // Direct based on role returned from backend
+                const role = (userData.role || 'employee').toLowerCase().replace('_', '');
+                if (role === 'superadmin') window.location.href = '/dashboard/super-admin';
+                else if (role === 'admin') window.location.href = '/dashboard/admin';
+                else window.location.href = '/dashboard/employee';
             } else {
                 // Fallback if no token returned
                 alert('Account verified successfully! Please login.');
@@ -153,6 +163,12 @@ const SignupOtp = () => {
                             <h3 className="otp-title">Verify Signup OTP</h3>
                             <p className="otp-description">Enter the 6-digit code sent to <strong>{email}</strong></p>
                         </div>
+
+                        {warning && (
+                            <div className="alert alert-warning text-center p-2 small" role="alert">
+                                ⚠️ {warning}
+                            </div>
+                        )}
 
                         {error && <div className="alert alert-danger text-center p-2 small" role="alert">{error}</div>}
 

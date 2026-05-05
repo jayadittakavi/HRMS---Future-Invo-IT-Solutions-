@@ -1,6 +1,6 @@
 // Using native fetch available in Node v24
 
-const BASE_URL = 'http://192.168.1.6:5000/api';
+const BASE_URL = 'http://192.168.1.19:5000';
 const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo0LCJyb2xlIjoiQURNSU4iLCJjb21wYW55X2lkIjoxLCJleHAiOjE3NzMyMDk1Nzh9.3KPXmEizQSI1qxuRVivDYCy2daOC4GBTBzLM17bdHco';
 
 async function testLeaves() {

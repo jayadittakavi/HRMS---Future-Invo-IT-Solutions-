@@ -1,99 +1,233 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaGooglePlay, FaWhatsapp } from 'react-icons/fa';
+import { FaGooglePlay, FaWhatsapp, FaFacebookF, FaTwitter, FaLinkedinIn, FaGithub } from 'react-icons/fa';
+
+/* ── Palette from screenshot ──────────────────────────────────────────────────
+   Background   : #1e2530  (dark charcoal navy)
+   Heading      : #5ec9c0  (teal / cyan-blue)
+   Link default : #8fa3b1  (muted slate grey)
+   Link hover   : #ffffff  (white)
+   Divider      : #2d3748  (subtle separator)
+   Bottom text  : #6b7d8d  (dim grey)
+─────────────────────────────────────────────────────────────────────────────*/
+
+const PALETTE = {
+  bg:         '#1e2530',
+  heading:    '#5ec9c0',
+  link:       '#8fa3b1',
+  linkHover:  '#ffffff',
+  divider:    '#2d3748',
+  dimText:    '#6b7d8d',
+  brand:      '#ffffff',
+};
+
+const footerStyle = {
+  background:  PALETTE.bg,
+  color:       PALETTE.link,
+  borderTop:  `1px solid ${PALETTE.divider}`,
+  padding:    '3rem 0 1.5rem',
+};
+
+const headingStyle = {
+  color:        PALETTE.heading,
+  fontWeight:   700,
+  fontSize:     '0.95rem',
+  letterSpacing:'0.08em',
+  textTransform:'uppercase',
+  marginBottom: '1.25rem',
+};
+
+const linkStyle = {
+  color:          PALETTE.link,
+  textDecoration: 'none',
+  fontSize:       '0.88rem',
+  transition:     'color 0.2s',
+  display:        'block',
+  marginBottom:   '0.6rem',
+};
+
+const LinkItem = ({ to, href, children }) => {
+  const handleHover   = e => (e.target.style.color = PALETTE.linkHover);
+  const handleUnhover = e => (e.target.style.color = PALETTE.link);
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        style={linkStyle}
+        onMouseEnter={handleHover}
+        onMouseLeave={handleUnhover}
+      >
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <a
+      href={href || '#!'}
+      style={linkStyle}
+      onMouseEnter={handleHover}
+      onMouseLeave={handleUnhover}
+    >
+      {children}
+    </a>
+  );
+};
+
+const socialBtnStyle = {
+  background:     'transparent',
+  border:         `1px solid ${PALETTE.divider}`,
+  color:          PALETTE.link,
+  borderRadius:   '50%',
+  width:          '34px',
+  height:         '34px',
+  display:        'flex',
+  alignItems:     'center',
+  justifyContent: 'center',
+  cursor:         'pointer',
+  transition:     'all 0.2s',
+  fontSize:       '0.85rem',
+};
+
+const SocialBtn = ({ icon, href }) => (
+  <a
+    href={href || '#!'}
+    style={socialBtnStyle}
+    onMouseEnter={e => {
+      e.currentTarget.style.color   = PALETTE.linkHover;
+      e.currentTarget.style.borderColor = PALETTE.heading;
+    }}
+    onMouseLeave={e => {
+      e.currentTarget.style.color   = PALETTE.link;
+      e.currentTarget.style.borderColor = PALETTE.divider;
+    }}
+  >
+    {icon}
+  </a>
+);
 
 const Footer = () => {
-    return (
-        <footer className="py-5 bg-dark text-white border-top border-secondary">
-            <div className="container px-5 pt-4">
-                <div className="row g-4 mb-5">
-                    {/* Column 1: Quick Links */}
-                    <div className="col-lg-3 col-6">
-                        <h5 className="fw-bold mb-4">Quick Links</h5>
-                        <ul className="list-unstyled text-muted small">
-                            <li className="mb-2"><Link to="/" className="text-white text-decoration-none">Home</Link></li>
-                            <li className="mb-2"><Link to="/docs" className="text-white-50 text-decoration-none hover-white">Documentation</Link></li>
-                            <li className="mb-2"><Link to="/features" className="text-white-50 text-decoration-none hover-white">Features</Link></li>
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Blog</a></li>
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">Sitemap</a></li>
-                        </ul>
-                    </div>
+  return (
+    <footer style={footerStyle}>
+      <div className="container px-4">
+        <div className="row g-5 mb-5">
 
-                    {/* Column 2: Discover */}
-                    <div className="col-lg-3 col-6">
-                        <h5 className="fw-bold mb-4">Discover WorkSphere</h5>
-                        <ul className="list-unstyled text-muted small">
-                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">What is WorkSphere?</Link></li>
-                            <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none hover-white">Success Stories</Link></li>
-                            <li className="mb-2"><Link to="/features" className="text-white-50 text-decoration-none hover-white">Compare Competitors</Link></li>
-                            <li className="mb-2"><Link to="/contact" className="text-white-50 text-decoration-none hover-white">Client Locations</Link></li>
-                            <li className="mb-2"><Link to="/contact" className="text-white-50 text-decoration-none hover-white">Support</Link></li>
-                        </ul>
-                    </div>
+          {/* Column 1: Quick Links */}
+          <div className="col-lg-3 col-6">
+            <h5 style={headingStyle}>Quick Links</h5>
+            <LinkItem to="/">Home</LinkItem>
+            <LinkItem to="/docs">Documentation</LinkItem>
+            <LinkItem to="/features">Features</LinkItem>
+            <LinkItem href="#!">Blog</LinkItem>
+            <LinkItem href="#!">Sitemap</LinkItem>
+          </div>
 
-                    {/* Column 3: Features (Already Updated) */}
-                    <div className="col-lg-3 col-6">
-                        <h5 className="fw-bold mb-4">Features</h5>
-                        <ul className="list-unstyled text-muted small">
-                            <li className="mb-2"><Link to="/assets" className="text-white-50 text-decoration-none hover-white">Assets</Link></li>
-                            <li className="mb-2"><Link to="/feature/attendance" className="text-white-50 text-decoration-none hover-white">Attendance</Link></li>
-                            <li className="mb-2"><Link to="/employees" className="text-white-50 text-decoration-none hover-white">Employee</Link></li>
-                            <li className="mb-2"><Link to="/leaves" className="text-white-50 text-decoration-none hover-white">Leave</Link></li>
-                            <li className="mb-2"><Link to="/feature/onboarding" className="text-white-50 text-decoration-none hover-white">Onboarding</Link></li>
-                            <li className="mb-2"><Link to="/payroll" className="text-white-50 text-decoration-none hover-white">Payroll</Link></li>
-                        </ul>
-                    </div>
+          {/* Column 2: Discover */}
+          <div className="col-lg-3 col-6">
+            <h5 style={headingStyle}>Discover WorkSphere</h5>
+            <LinkItem to="/about">What is WorkSphere?</LinkItem>
+            <LinkItem to="/about">Success Stories</LinkItem>
+            <LinkItem to="/features">Compare Competitors</LinkItem>
+            <LinkItem to="/contact">Client Locations</LinkItem>
+            <LinkItem to="/contact">Support</LinkItem>
+          </div>
 
-                    {/* Column 4: Source & Legal */}
-                    <div className="col-lg-3 col-6">
-                        <h5 className="fw-bold mb-4">Source</h5>
-                        <ul className="list-unstyled text-muted small mb-4">
-                            <li className="mb-2"><a href="#!" className="text-white-50 text-decoration-none hover-white">GitHub</a></li>
-                        </ul>
+          {/* Column 3: Features */}
+          <div className="col-lg-3 col-6">
+            <h5 style={headingStyle}>Features</h5>
+            <LinkItem to="/assets">Assets</LinkItem>
+            <LinkItem to="/feature/attendance">Attendance</LinkItem>
+            <LinkItem to="/employees">Employee</LinkItem>
+            <LinkItem to="/leaves">Leave</LinkItem>
+            <LinkItem to="/feature/onboarding">Onboarding</LinkItem>
+            <LinkItem to="/payroll">Payroll</LinkItem>
+          </div>
 
-                        <h5 className="fw-bold mb-4">Legal</h5>
-                        <ul className="list-unstyled text-muted small mb-4">
-                            <li className="mb-2"><Link to="/privacy-policy" className="text-white-50 text-decoration-none hover-white">Privacy Policy</Link></li>
-                        </ul>
+          {/* Column 4: Source, Legal & App */}
+          <div className="col-lg-3 col-6">
+            <h5 style={headingStyle}>Source</h5>
+            <LinkItem href="#!">GitHub</LinkItem>
 
-                        {/* App Store Buttons Placeholder */}
-                        <div className="d-flex flex-column gap-2 mt-4">
-                            <button className="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" style={{ width: '140px', opacity: 0.8 }}>
-                                <FaGooglePlay className="me-2" /> Google Play
-                            </button>
-                            <button className="btn btn-outline-light btn-sm d-flex align-items-center justify-content-center" style={{ width: '140px', opacity: 0.8 }}>
-                                <FaWhatsapp className="me-2" /> WhatsApp
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <h5 style={{ ...headingStyle, marginTop: '1.5rem' }}>Legal</h5>
+            <LinkItem to="/privacy-policy">Privacy Policy</LinkItem>
 
-                <hr className="border-secondary opacity-25" />
-
-                {/* Bottom Bar */}
-                <div className="row align-items-center justify-content-between pt-3 pb-2">
-                    <div className="col-md-4 mb-3 mb-md-0">
-                        <p className="small text-white-50 m-0">
-                            © 2026 WorkSphere HRMS. All rights reserved.
-                        </p>
-                    </div>
-                    <div className="col-md-4 text-center mb-3 mb-md-0">
-                        <div className="d-flex align-items-center justify-content-center gap-2">
-                            <span className="fw-bold fs-5">⚡ WorkSphere</span>
-                        </div>
-                    </div>
-                    <div className="col-md-4 text-center text-md-end">
-                        <div className="d-flex justify-content-center justify-content-md-end gap-3 text-white-50">
-                            <a href="#!" className="text-white-50 hover-white"><i className="fab fa-facebook"></i> FB</a>
-                            <a href="#!" className="text-white-50 hover-white"><i className="fab fa-twitter"></i> X</a>
-                            <a href="#!" className="text-white-50 hover-white"><i className="fab fa-linkedin"></i> IN</a>
-                            <a href="#!" className="text-white-50 hover-white"><i className="fab fa-github"></i> GH</a>
-                        </div>
-                    </div>
-                </div>
+            {/* App Buttons */}
+            <div className="d-flex flex-column gap-2 mt-4">
+              <button
+                className="d-flex align-items-center gap-2"
+                style={{
+                  background:    'transparent',
+                  border:        `1px solid ${PALETTE.divider}`,
+                  color:         PALETTE.link,
+                  borderRadius:  '8px',
+                  padding:       '6px 14px',
+                  fontSize:      '0.82rem',
+                  cursor:        'pointer',
+                  width:         '145px',
+                  transition:    'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color       = PALETTE.linkHover;
+                  e.currentTarget.style.borderColor = PALETTE.heading;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color       = PALETTE.link;
+                  e.currentTarget.style.borderColor = PALETTE.divider;
+                }}
+              >
+                <FaGooglePlay /> Google Play
+              </button>
+              <button
+                className="d-flex align-items-center gap-2"
+                style={{
+                  background:    'transparent',
+                  border:        `1px solid ${PALETTE.divider}`,
+                  color:         PALETTE.link,
+                  borderRadius:  '8px',
+                  padding:       '6px 14px',
+                  fontSize:      '0.82rem',
+                  cursor:        'pointer',
+                  width:         '145px',
+                  transition:    'all 0.2s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.color       = PALETTE.linkHover;
+                  e.currentTarget.style.borderColor = PALETTE.heading;
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.color       = PALETTE.link;
+                  e.currentTarget.style.borderColor = PALETTE.divider;
+                }}
+              >
+                <FaWhatsapp /> WhatsApp
+              </button>
             </div>
-        </footer>
-    );
+          </div>
+        </div>
+
+        {/* Divider */}
+        <hr style={{ borderColor: PALETTE.divider, opacity: 0.5, margin: '0 0 1.25rem' }} />
+
+        {/* Bottom Bar */}
+        <div className="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 pb-2">
+          <p style={{ color: PALETTE.dimText, fontSize: '0.82rem', margin: 0 }}>
+            © 2026 WorkSphere HRMS. All rights reserved.
+          </p>
+
+          <span style={{ color: PALETTE.brand, fontWeight: 700, fontSize: '1rem' }}>
+            ⚡ WorkSphere
+          </span>
+
+          <div className="d-flex gap-2">
+            <SocialBtn icon={<FaFacebookF />} />
+            <SocialBtn icon={<FaTwitter />} />
+            <SocialBtn icon={<FaLinkedinIn />} />
+            <SocialBtn icon={<FaGithub />} />
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

@@ -10,11 +10,7 @@ export const teamService = {
     // 1. Team Dashboard Stats
     getStats: async (role = 'admin') => {
         try {
-            const url = role === 'employee' 
-                ? `${API_BASE}/team/employee/dashboard` 
-                : role === 'manager'
-                ? `${API_BASE}/manager/team/dashboard`
-                : `${API_BASE}/superadmin/team/dashboard`;
+            const url = `${API_BASE}/team/dashboard`;
                 
             const response = await fetch(url, {
                 method: "GET",
@@ -32,11 +28,7 @@ export const teamService = {
     // 2. Team Superstars
     getSuperstars: async (role = 'admin') => {
         try {
-            const url = role === 'employee' 
-                ? `${API_BASE}/team/employee/superstars` 
-                : role === 'manager'
-                ? `${API_BASE}/manager/team/superstars`
-                : `${API_BASE}/superadmin/team/superstars`;
+            const url = `${API_BASE}/team/superstars`;
 
             const response = await fetch(url, {
                 method: "GET",
@@ -54,11 +46,7 @@ export const teamService = {
     // 3. Team Resilience
     getResilience: async (role = 'admin') => {
         try {
-            const url = role === 'employee' 
-                ? `${API_BASE}/team/employee/resilience` 
-                : role === 'manager'
-                ? `${API_BASE}/manager/team/resilience`
-                : `${API_BASE}/superadmin/team/resilience`;
+            const url = `${API_BASE}/team/resilience`;
 
             const response = await fetch(url, {
                 method: "GET",
@@ -106,7 +94,7 @@ export const teamService = {
     // 6. Manage Squads (Listing)
     getSquads: async () => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/squads`, {
+            const response = await fetch(`${API_BASE}/team/squads`, {
                 method: "GET",
                 ...authHeader()
             });
@@ -121,7 +109,7 @@ export const teamService = {
     // 7. Build New Squad (Create)
     createSquad: async (squadData) => {
         try {
-            const response = await fetch(`${API_BASE}/superadmin/squads`, {
+            const response = await fetch(`${API_BASE}/team/squads`, {
                 method: "POST",
                 ...authHeader(),
                 body: JSON.stringify(squadData)

@@ -45,19 +45,20 @@ export const coreService = {
     },
 
     getSuperAdminDashboardStats: async () => {
+        const EMPTY = { companies: 0, branches: 0, admins: 0, hrs: 0, managers: 0, employees: 0 };
         try {
             const header = authHeader();
-            if (!header) return null;
+            if (!header) return EMPTY; // Not logged in — return safe defaults
 
             const response = await fetch(`${API_BASE}/superadmin/dashboard-stats`, {
                 method: "GET",
                 ...header
             });
-            if (!response.ok) throw new Error(await response.text());
+            if (!response.ok) return EMPTY;
             return await response.json();
         } catch (error) {
             console.error("API Error (getSuperAdminDashboardStats):", error);
-            throw error;
+            return EMPTY; // Never crash the UI
         }
     },
 

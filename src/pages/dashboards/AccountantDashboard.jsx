@@ -34,7 +34,7 @@ const AccountantDashboard = () => {
                 <>
                     {/* Accountant Dashboard Overview */}
                     <div className="mb-4">
-                        <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Accountant'}!</h2>
+                        <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.firstName} {user?.lastName}!</h2>
                         <div className="d-flex align-items-center gap-2">
                             <span className="text-secondary fw-medium">Financial Overview:</span>
                             <span className="badge bg-success text-white fw-bold">HEALTHY</span>

@@ -24,18 +24,6 @@ const SuperAdminDashboard = () => {
     const navigate = useNavigate();
     const [activeView, setActiveView] = useState('dashboard');
 
-    // Initialize dashboardType based on URL param 'tab'
-    // If ?tab=myspace, show My Space. Else show Overall.
-    const tabParam = searchParams.get('tab');
-    const [dashboardType, setDashboardType] = useState('overall');
-
-    useEffect(() => {
-        if (tabParam === 'myspace') {
-            setDashboardType('myspace');
-        } else {
-            setDashboardType('overall');
-        }
-    }, [tabParam]);
 
     const handleNavigate = (path) => {
         const view = path.replace('/', '');
@@ -49,38 +37,12 @@ const SuperAdminDashboard = () => {
                     {/* Welcome & Dashboard Title */}
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.firstName} {user?.lastName}</h2>
                             <p className="text-secondary small mb-0">Here's what's happening today.</p>
                         </div>
                     </div>
 
-                    {/* Dashboard Tabs */}
-                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('overall');
-                                navigate('/dashboard/super-admin?tab=overall');
-                            }}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('myspace');
-                                navigate('/dashboard/super-admin?tab=myspace');
-                            }}
-                        >
-                            My Space
-                        </button>
-                    </div>
-
-                    {dashboardType === 'overall' ? (
-                        <OverallStats />
-                    ) : (
-                        <MySpace role="superadmin" onNavigate={handleNavigate} />
-                    )}
+                    <OverallStats />
                 </>
             )}
 

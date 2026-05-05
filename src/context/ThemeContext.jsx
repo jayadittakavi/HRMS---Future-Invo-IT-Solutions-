@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getThemeCookie, setThemeCookie, getSidebarState, setSidebarState } from '../utils/cookieAuth';
 
 const ThemeContext = createContext();
 
@@ -7,10 +8,10 @@ export const useTheme = () => {
 };
 
 export const ThemeProvider = ({ children }) => {
-    // Core Theme State
-    const [theme, setTheme] = useState('light'); // Always 'light'
+    const [theme, setTheme] = useState(() => getThemeCookie());
     const [skin, setSkin] = useState('blue');
-    const [sidebarType, setSidebarType] = useState('white'); // 'white' or 'dark' (mapped to sidebar styles)
+    const [sidebarType, setSidebarType] = useState('white');
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(() => getSidebarState() === 'collapsed');
 
     // Additional Settings State
     const [settings, setSettings] = useState({
@@ -28,11 +29,23 @@ export const ThemeProvider = ({ children }) => {
         setShowSettingsDrawer(prev => !prev);
     };
 
-    // Change Skin
     const changeSkin = (skinId) => {
         setSkin(skinId);
-        // In a real app, you would apply skin classes to body here
         document.body.setAttribute('data-skin', skinId);
+    };
+
+    const changeTheme = (newTheme) => {
+        setTheme(newTheme);
+        setThemeCookie(newTheme);
+        document.body.setAttribute('data-theme', newTheme);
+    };
+
+    const toggleSidebar = () => {
+        setSidebarCollapsed(prev => {
+            const next = !prev;
+            setSidebarState(next ? 'collapsed' : 'expanded');
+            return next;
+        });
     };
 
     // Change Sidebar Type
@@ -48,17 +61,20 @@ export const ThemeProvider = ({ children }) => {
         }));
     };
 
-    // Effect to apply dark mode class (always light now)
+    // Apply theme class on load/change
     useEffect(() => {
-        document.body.removeAttribute('data-theme');
-    }, []);
+        document.body.setAttribute('data-theme', theme);
+    }, [theme]);
 
     const value = {
         theme,
+        changeTheme,
         skin,
         changeSkin,
         sidebarType,
         changeSidebarType,
+        sidebarCollapsed,
+        toggleSidebar,
         settings,
         toggleSetting,
         showSettingsDrawer,

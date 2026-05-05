@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaEllipsisV, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaEllipsisV, FaCheckCircle, FaTimesCircle, FaEnvelope } from "react-icons/fa";
 import DashboardLayout from "../../../../components/layout/DashboardLayout";
 import { companyService } from "./service.js";
+import { useAuth } from "../../../../context/AuthContext";
 import "./Companies.css";
 
 export const CompaniesContent = () => {
@@ -22,6 +23,7 @@ export const CompaniesContent = () => {
         state: "",
         city_branch: "",
         timezone: "",
+        email: "",
     });
 
     const fetchCompanies = async () => {
@@ -68,18 +70,31 @@ export const CompaniesContent = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const { user } = useAuth();
+
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
             console.log("Creating company with data:", formData);
-            await companyService.createCompany(formData);
+            // Include user context for the service to use
+            await companyService.createCompany({
+                ...formData,
+                super_admin_id: user?.id
+            });
             setShowAdd(false);
             resetForm();
             fetchCompanies();
             alert("Company created successfully!");
         } catch (err) {
             console.error("Create company error:", err);
-            alert("Failed to create company: " + (err.message || "Unknown error"));
+            const msg = err.message || "Unknown error";
+            if (msg.includes("Failed to fetch")) {
+                alert("The company was likely created (status 200), but the browser had trouble receiving the response. Refreshing the list...");
+                fetchCompanies();
+                setShowAdd(false);
+            } else {
+                alert("Failed to create company: " + msg);
+            }
         }
     };
 
@@ -116,6 +131,7 @@ export const CompaniesContent = () => {
             state: "",
             city_branch: "",
             timezone: "",
+            email: "",
         });
     };
 
@@ -270,6 +286,7 @@ export const CompaniesContent = () => {
                                                         state: c.state || "",
                                                         city_branch: c.city_branch || "",
                                                         timezone: c.timezone || "",
+                                                        email: c.email || c.company_email || "",
                                                     });
                                                     setShowEdit(true);
                                                 }}>
@@ -373,6 +390,15 @@ export const CompaniesContent = () => {
                                     <div className="premium-input-group">
                                         <label>City / Branch</label>
                                         <input name="city_branch" placeholder="Primary Branch" onChange={handleChange} value={formData.city_branch} className="premium-input ps-3" />
+                                    </div>
+                                </div>
+                                <div className="col-md-12">
+                                    <div className="premium-input-group">
+                                        <label>Company Email</label>
+                                        <div className="input-relative">
+                                            <FaEnvelope className="input-icon-left" />
+                                            <input type="email" name="email" required placeholder="contact@company.com" onChange={handleChange} value={formData.email} className="premium-input" />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-12">

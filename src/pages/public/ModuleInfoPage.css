@@ -1,0 +1,201 @@
+/* ── ModuleInfoPage.css ──────────────────────────────────────────────────────
+   Uses the HRMS global palette (defined in index.css):
+     --cp-purple-main : #534789
+     --cp-purple-dark : #434777
+     --cp-deep-navy   : #405580
+     --cp-sky-blue    : #65B1C9
+     --cp-cyan-teal   : #87DDDD
+─────────────────────────────────────────────────────────────────────────── */
+
+.mip-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.mip-main {
+  flex: 1;
+  padding-top: 70px; /* Navbar height */
+}
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.mip-hero {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--cp-purple-dark)  0%,
+    var(--cp-purple-main)  40%,
+    var(--cp-deep-navy)    70%,
+    var(--cp-slate-blue)  100%
+  );
+  padding: 5rem 1.5rem 4.5rem;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+/* Animated floating circles in the hero */
+.mip-hero-bg-circles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.mip-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  animation: mipFloat 18s ease-in-out infinite;
+}
+
+.mip-c1 { width: 380px; height: 380px; top: -120px; right: -80px; animation-duration: 20s; }
+.mip-c2 { width: 260px; height: 260px; bottom: -80px; left: -60px; animation-duration: 26s; animation-delay: -6s; }
+.mip-c3 { width: 180px; height: 180px; top: 30%;   left: 12%;  animation-duration: 22s; animation-delay: -3s; }
+
+@keyframes mipFloat {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33%  { transform: translate(24px, -40px) rotate(8deg); }
+  66%  { transform: translate(-16px, 18px) rotate(-8deg); }
+}
+
+.mip-hero-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  color: var(--cp-cyan-teal);
+  filter: drop-shadow(0 4px 12px rgba(135, 221, 221, 0.4));
+}
+
+.mip-hero-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  letter-spacing: -0.03em;
+}
+
+.mip-hero-subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 540px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* ── CTA Button ──────────────────────────────────────────────────────────── */
+.mip-cta-btn {
+  display: inline-block;
+  background: var(--cp-cyan-teal);
+  color: var(--cp-purple-dark) !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(135, 221, 221, 0.35);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  letter-spacing: 0.02em;
+}
+
+.mip-cta-btn:hover {
+  background: #ffffff;
+  color: var(--cp-purple-main) !important;
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 14px 30px rgba(135, 221, 221, 0.4);
+}
+
+.mip-cta-btn--lg {
+  font-size: 1.05rem;
+  padding: 0.9rem 2.5rem;
+}
+
+/* ── Description ─────────────────────────────────────────────────────────── */
+.mip-desc-section {
+  padding: 4rem 1.5rem 2rem;
+}
+
+.mip-description {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+/* ── Feature Cards ───────────────────────────────────────────────────────── */
+.mip-features-section {
+  padding: 1.5rem 1.5rem 5rem;
+}
+
+.mip-feature-card {
+  background: #ffffff;
+  border: 1px solid #e8eaf0;
+  border-radius: 20px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  height: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(67, 71, 119, 0.06);
+}
+
+.mip-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(83, 71, 137, 0.14);
+  border-color: var(--cp-sky-blue);
+}
+
+.mip-feature-icon {
+  font-size: 2.2rem;
+  color: var(--cp-purple-main);
+  margin-bottom: 1rem;
+  transition: color 0.3s;
+}
+
+.mip-feature-card:hover .mip-feature-icon {
+  color: var(--cp-sky-blue);
+}
+
+.mip-feature-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.mip-feature-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Bottom CTA Strip ───────────────────────────────────────────────────── */
+.mip-bottom-cta {
+  background: linear-gradient(
+    135deg,
+    var(--cp-deep-navy)    0%,
+    var(--cp-purple-main) 60%,
+    var(--cp-sky-blue)   100%
+  );
+  padding: 5rem 1.5rem;
+  color: #ffffff;
+}
+
+.mip-cta-heading {
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 0.75rem;
+}
+
+.mip-cta-sub {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 520px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .mip-hero { padding: 4rem 1rem 3rem; }
+  .mip-hero-title { font-size: 1.75rem; }
+  .mip-feature-card { padding: 1.5rem 1rem; }
+}

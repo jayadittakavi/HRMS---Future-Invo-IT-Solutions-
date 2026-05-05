@@ -143,10 +143,14 @@ const SquadManagement = () => {
                     {filteredSquads.length > 0 ? (
                         filteredSquads.map(squad => (
                             <div className="col-md-4" key={squad.id}>
-                                <div className="squad-card glass-card">
+                                <div 
+                                    className="squad-card glass-card" 
+                                    style={{ cursor: 'pointer', transition: 'transform 0.2s', ':hover': { transform: 'translateY(-5px)' } }}
+                                    onClick={() => navigate(`/dashboard/squad-details/${squad.id}`)}
+                                >
                                     <div className="card-top">
                                         <div className="type-badge">{squad.type}</div>
-                                        <button className="more-btn"><MdMoreVert /></button>
+                                        <button className="more-btn" onClick={(e) => e.stopPropagation()}><MdMoreVert /></button>
                                     </div>
                                     <div className="card-main">
                                         <h4 className="mb-1" style={{ color: '#1e293b', fontWeight: 700 }}>{squad.name}</h4>

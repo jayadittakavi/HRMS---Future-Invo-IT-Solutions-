@@ -42,7 +42,7 @@ export const leaveService = {
     // 1b. Administration Dashboard (Management Control)
     getManagementSummary: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/dashboard-stats`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/dashboard-stats`, authHeader());
             if (!response.ok) return { total: 0, pending: 0, approved: 0 };
             return await response.json();
         } catch (error) {
@@ -53,7 +53,7 @@ export const leaveService = {
     getManagementTrends: async () => {
         try {
             // Reusing dashboard-stats endpoint as it returns weekly/monthly analytics
-            const response = await fetch(`${API_BASE}/leave/dashboard-stats`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/dashboard-stats`, authHeader());
             if (!response.ok) return { labels: [], data: [] };
             const data = await response.json();
             return data?.trends || data?.data?.trends || { labels: [], data: [] };
@@ -64,7 +64,7 @@ export const leaveService = {
     },
     getManagementRecentRequests: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/control/recent-requests`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/control/recent-requests`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -77,7 +77,7 @@ export const leaveService = {
     // 2. Pending & Bulk Approvals
     getPendingApprovals: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/pending-approvals`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/pending-approvals`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -88,7 +88,7 @@ export const leaveService = {
     },
     bulkAction: async (ids, action) => {
         try {
-            const response = await fetch(`${API_BASE}/leave/control/bulk-action`, {
+            const response = await fetch(`${API_BASE}/leaves/control/bulk-action`, {
                 method: "POST",
                 headers: {
                     ...authHeader().headers,
@@ -106,7 +106,7 @@ export const leaveService = {
     // 3. Leave Policy Configuration (Rules)
     getUiPolicies: async () => {
         try {
-            const response = await fetch(`${API_BASE}/leave/control/policies`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/control/policies`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -117,7 +117,7 @@ export const leaveService = {
     },
     createUiPolicy: async (policyData) => {
         try {
-            const response = await fetch(`${API_BASE}/leave/control/policies`, {
+            const response = await fetch(`${API_BASE}/leaves/control/policies`, {
                 method: "POST",
                 headers: {
                     ...authHeader().headers,
@@ -164,7 +164,7 @@ export const leaveService = {
     getHistory: async (filters = {}) => {
         try {
             const queryParams = new URLSearchParams(filters).toString();
-            const response = await fetch(`${API_BASE}/leave/control/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
+            const response = await fetch(`${API_BASE}/leaves/control/history${queryParams ? `?${queryParams}` : ""}`, authHeader());
             if (!response.ok) return [];
             const data = await response.json();
             return Array.isArray(data) ? data : (data.data || []);
@@ -177,7 +177,7 @@ export const leaveService = {
         try {
             const queryParams = new URLSearchParams(filters).toString();
             // This endpoint handles CSV generation and returns the downloadable stream
-            window.location.href = `${API_BASE}/leave/control/history/export${queryParams ? `?${queryParams}` : ""}`;
+            window.location.href = `${API_BASE}/leaves/control/history/export${queryParams ? `?${queryParams}` : ""}`;
         } catch (error) {
             console.error("API Error (exportHistory):", error);
         }

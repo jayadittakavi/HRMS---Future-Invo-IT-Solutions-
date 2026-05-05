@@ -55,7 +55,7 @@ const AdminDashboard = () => {
                     {/* Welcome & Dashboard Title */}
                     <div className="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.name || 'Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-main mb-1">Welcome {user?.firstName} {user?.lastName}!</h2>
                             <p className="text-secondary small mb-0">Here's what's happening today.</p>
                         </div>
                     </div>

@@ -118,7 +118,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                     )}
                                 </div>
                                 <div className="text-start d-none d-xl-block me-1">
-                                    <div className="fw-bold text-main x-small-text leading-tight">{user?.name?.split(' ')[0] || 'Member'}</div>
+                                    <div className="fw-bold text-main x-small-text leading-tight">{user?.firstName} {user?.lastName}</div>
                                     <div className="text-muted smaller-text leading-tight">{user?.role || 'Staff'}</div>
                                 </div>
                             </button>
@@ -140,7 +140,7 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                                 )}
                                             </div>
                                             <div className="overflow-hidden">
-                                                <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>{user?.name || 'User Profile'}</div>
+                                                <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>{user?.firstName} {user?.lastName}</div>
                                                 <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>{user?.email || 'user@example.com'}</div>
                                             </div>
                                         </div>

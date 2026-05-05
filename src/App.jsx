@@ -34,6 +34,8 @@ import Otp from "./pages/auth/otp/Otp";
 import ResetOtp from "./pages/auth/otp/ResetOtp";
 import ForgetPassword from "./pages/auth/forgetpassword/ForgetPassword";
 import ResetPassword from "./pages/auth/resetpassword/ResetPassword";
+import GoogleCallback from "./pages/auth/oauth/GoogleCallback";
+import OutlookCallback from "./pages/auth/oauth/OutlookCallback";
 
 /* Dashboard Layout & Manager */
 import DashboardManager from "./pages/dashboards/DashboardManager";
@@ -41,6 +43,7 @@ import DashboardLayout from "./components/layout/DashboardLayout";
 import MySpace from "./pages/dashboards/components/MySpace";
 import MyTeam from "./pages/dashboards/components/MyTeam";
 import SquadManagement from "./pages/dashboards/components/SquadManagement";
+import SquadDetails from "./pages/dashboards/components/SquadDetails";
 import BuildSquad from "./pages/dashboards/components/BuildSquad";
 
 /* Audit Logs */
@@ -146,7 +149,16 @@ function AppContent() {
         <Route path="/reset-otp" element={<ResetOtp />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/oauth/google/callback" element={<GoogleCallback />} />
+        <Route path="/oauth/outlook/callback" element={<OutlookCallback />} />
         <Route path="/setup-organization" element={<SetupOrganization />} />
+
+        {/* Role Specific Top-level Dashboards */}
+        <Route path="/superadmin-dashboard" element={<ProtectedRoute requiredRoles={['superadmin']}><DashboardLayout title="Super Admin Dashboard"><SuperAdminDashboard /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/admin-dashboard" element={<ProtectedRoute requiredRoles={['admin', 'superadmin']}><DashboardLayout title="Admin Dashboard"><AdminDashboard /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/hr-dashboard" element={<ProtectedRoute requiredRoles={['hr', 'admin', 'superadmin']}><DashboardLayout title="HR Dashboard"><HRDashboard /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/manager-dashboard" element={<ProtectedRoute requiredRoles={['manager', 'admin', 'superadmin']}><DashboardLayout title="Manager Dashboard"><ManagerDashboard /></DashboardLayout></ProtectedRoute>} />
+        <Route path="/employee-dashboard" element={<ProtectedRoute requiredRoles={['employee', 'hr', 'manager', 'admin', 'superadmin']}><DashboardLayout title="Employee Dashboard"><EmployeeDashboard /></DashboardLayout></ProtectedRoute>} />
 
         {/* Dashboard Routes - Nested under DashboardLayout */}
         <Route path="/dashboard" element={
@@ -160,6 +172,7 @@ function AppContent() {
           <Route path="my-space" element={<MySpace />} />
           <Route path="my-team" element={<MyTeam />} />
           <Route path="manage-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadManagement /></ProtectedRoute>} />
+          <Route path="squad-details/:id" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadDetails /></ProtectedRoute>} />
           <Route path="build-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><BuildSquad /></ProtectedRoute>} />
 
           {/* Role Specific Dashboards */}

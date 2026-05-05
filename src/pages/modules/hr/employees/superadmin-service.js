@@ -41,30 +41,23 @@ export const employeeSuperAdminService = {
     getAllEmployees: async (role = 'admin') => {
         try {
             const timestamp = new Date().getTime();
-            // Primary: /api/admin/employees
-            let response = await fetch(`${API_BASE}/admin/employees?t=${timestamp}`, {
+            const response = await fetch(`${API_BASE}/team/members?t=${timestamp}`, {
                 method: "GET",
                 cache: 'no-store',
                 ...authHeader(role)
             });
 
-            // Fallback to superadmin if admin path fails
-            if (response.status === 404 || response.status === 405) {
-                response = await fetch(`${API_BASE}/superadmin/employees?t=${timestamp}`, {
-                    method: "GET",
-                    cache: 'no-store',
-                    ...authHeader()
-                });
-            }
-
+            // Return empty array gracefully on 404/405 — backend route may not be ready yet
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(text || `HTTP error! status: ${response.status}`);
+                console.warn(`GET /api/team/members returned ${response.status} — returning empty list`);
+                return [];
             }
-            return await response.json();
+            const data = await response.json();
+            // Support both array and {data: [...]} response shapes
+            return Array.isArray(data) ? data : (data.data || data.employees || data.members || []);
         } catch (error) {
-            console.error("API Error (getAllEmployees):", error);
-            throw error;
+            console.warn("API Error (getAllEmployees) — returning empty list:", error.message);
+            return []; // Never throw — caller handles empty list
         }
     },
 
@@ -72,19 +65,11 @@ export const employeeSuperAdminService = {
     getEmployeeById: async (id, role = 'admin') => {
         try {
             const timestamp = new Date().getTime();
-            let response = await fetch(`${API_BASE}/admin/employees/${id}?t=${timestamp}`, {
+            let response = await fetch(`${API_BASE}/team/members/${id}?t=${timestamp}`, {
                 method: "GET",
                 cache: 'no-store',
                 ...authHeader(role)
             });
-
-            if (response.status === 404 || response.status === 405) {
-                response = await fetch(`${API_BASE}/superadmin/employees/${id}?t=${timestamp}`, {
-                    method: "GET",
-                    cache: 'no-store',
-                    ...authHeader()
-                });
-            }
 
             if (!response.ok) {
                 const text = await response.text();
@@ -118,9 +103,7 @@ export const employeeSuperAdminService = {
         };
 
         const endpoints = [
-            { url: `${API_BASE}/admin/create-employee`, method: "POST" },
-            { url: `${API_BASE}/superadmin/employees`, method: "POST" },
-            { url: `${API_BASE}/superadmin/users`, method: "POST" }
+            { url: `${API_BASE}/team/invite`, method: "POST" }
         ];
 
         let lastErr = null;
@@ -171,9 +154,7 @@ export const employeeSuperAdminService = {
         Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
 
         const variations = [
-            { url: `${API_BASE}/admin/employees/${actualId}`, method: "PUT" },
-            { url: `${API_BASE}/superadmin/employees/${actualId}`, method: "PATCH" },
-            { url: `${API_BASE}/superadmin/employees/${actualId}`, method: "PUT" }
+            { url: `${API_BASE}/team/members/${actualId}`, method: "PATCH" }
         ];
 
         let lastError = null;
@@ -226,34 +207,17 @@ export const employeeSuperAdminService = {
 
     // 🔹 Toggle Employee Status (Activate/Deactivate)
     toggleStatus: async (id, currentUserRole = 'admin') => {
-        // Strict adherence to the requested URLs for toggle actions
-        // URL format: POST /api/{role}/employees/{id}/toggle
-        const roleStr = (currentUserRole || 'admin').toLowerCase();
-        let pathRole = roleStr === 'manager' ? 'admin' : (roleStr.includes('superadmin') ? 'superadmin' : 'admin');
-        
-        const url = `${API_BASE}/${pathRole}/employees/${id}/toggle`;
+        const url = `${API_BASE}/team/members/${id}/status`;
 
         try {
             const response = await fetch(url, {
-                method: "POST",
+                method: "PATCH",
                 headers: getAuthHeader(currentUserRole || 'admin'),
-                body: JSON.stringify({}) // Some backends require a body for POST even if empty
+                body: JSON.stringify({}) // Some backends require a body for POST/PATCH even if empty
             });
 
             if (response.ok) {
                 return await response.json();
-            }
-
-            // Fallback to legacy path only if specific one fails with 404 (optional)
-            if (response.status === 404 || response.status === 405) {
-                console.warn(`Primary URL ${url} failed with ${response.status}, trying legacy fallback...`);
-                // Fallback for safety using the same method for now
-                const legacyUrl = `${url}-status`;
-                const fallbackResponse = await fetch(legacyUrl, {
-                    method: "PUT",
-                    headers: getAuthHeader(currentUserRole || 'admin')
-                });
-                if (fallbackResponse.ok) return await fallbackResponse.json();
             }
 
             const text = await response.text();

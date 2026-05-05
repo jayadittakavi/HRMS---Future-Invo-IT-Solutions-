@@ -1,5 +1,4 @@
-const BASE_URL = "http://localhost:5000/api/auth";
-const API_URL = `http://localhost:5000/api/auth/reset-password`;
+const API_URL = `${window.location.origin}/api/auth/reset-password`;
 
 export const resetPassword = async (email, token, new_password) => {
     try {

@@ -18,7 +18,7 @@ export const companyService = {
 
             // If not found or error, try the creation endpoint as fallback (some backends share)
             if (!response.ok) {
-                console.warn(`Endpoint http://192.168.1.6:5000/api/superadmin/companies returned ${response.status}, trying fallback...`);
+                console.warn(`Endpoint ${API_BASE}/superadmin/companies returned ${response.status}, trying fallback...`);
                 response = await fetch(`${API_BASE}/superadmin/companies`, {
                     method: "GET",
                     ...authHeader()
@@ -67,11 +67,25 @@ export const companyService = {
     // 🔹 Create New Company
     createCompany: async (data) => {
         try {
-            // Map common fields to ensure backend compatibility
+            // Map fields to match the exact backend list provided by the user
             const payload = {
                 ...data,
                 company_name: data.name || data.company_name,
-                company_id: data.company_id || data.corporate_id,
+                company_code: data.company_id || data.company_code,
+                company_uid: data.company_id || data.company_uid,
+                subdomain: (data.name || data.company_id || 'company').toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                db_name: `company_${(data.company_id || 'new').toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+                company_prefix: data.company_prefix || (data.company_id?.substring(0, 3)?.toUpperCase() || "CMP"),
+                attendance_enabled: data.attendance_enabled ?? true,
+                leave_enabled: data.leave_enabled ?? true,
+                payroll_enabled: data.payroll_enabled ?? true,
+                super_admin_id: data.super_admin_id || 1, // Default or passed from caller
+                address: data.address || `${data.city_branch || ''}, ${data.state || ''}`.trim() || '—',
+                phone: data.phone || '—',
+                website: data.website || '—',
+                latitude: data.latitude || "0",
+                longitude: data.longitude || "0",
+                timezone: data.timezone || "Asia/Kolkata"
             };
 
             const response = await fetch(`${API_BASE}/superadmin/companies`, {
@@ -86,9 +100,6 @@ export const companyService = {
             try {
                 const json = JSON.parse(text);
                 errorMessage = json.message || json.error || json.msg || errorMessage;
-                if (typeof errorMessage === 'object' && errorMessage.message) {
-                    errorMessage = errorMessage.message;
-                }
             } catch (e) {
                 errorMessage = text || errorMessage;
             }
@@ -101,7 +112,7 @@ export const companyService = {
             try {
                 return JSON.parse(text);
             } catch(e) {
-                return { success: true };
+                return { success: true, message: text };
             }
         } catch (error) {
             console.error("API Error (createCompany):", error);

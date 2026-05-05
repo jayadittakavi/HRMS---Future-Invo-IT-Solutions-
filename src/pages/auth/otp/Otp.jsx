@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import sideImage from '../../../assets/images/loginimage.png';
+import sideImage from '../../../assets/images/login1.jpg';
 
 
 const ResetOtp = () => {

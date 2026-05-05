@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
-import sideImage from '../../../assets/images/loginimage.png';
+import sideImage from '../../../assets/images/login1.jpg';
 
 
 const ResetPassword = () => {

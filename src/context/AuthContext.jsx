@@ -1,109 +1,181 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  setAuthCookies,
+  clearAuthCookies,
+  getAuthToken,
+  getStoredUser,
+  getStoredPermissions,
+  attemptTokenRefresh,
+  isAuthenticated,
+  setLastActiveModule,
+  getLastActiveModule,
+  getLastLoginTime,
+} from '../utils/cookieAuth';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    // Safe user state initialization
-    const [user, setUser] = useState(() => {
-        try {
-            const storedUser = localStorage.getItem('user');
-            return storedUser ? JSON.parse(storedUser) : null;
-        } catch (err) {
-            console.error('Invalid user data in localStorage:', err);
-            localStorage.removeItem('user');
-            return null;
+  const [user, setUser] = useState(() => getStoredUser());
+  const [token, setToken] = useState(() => getAuthToken());
+
+  const [loading, setLoading] = useState(true);
+
+  // ── On mount: validate session via cookie / attempt refresh ──────────────
+  useEffect(() => {
+    const initSession = async () => {
+      const existingToken = getAuthToken();
+
+      if (existingToken) {
+        // Token present — restore user from cookie
+        const storedUser = getStoredUser();
+        if (storedUser) {
+          setUser(storedUser);
+          setToken(existingToken);
         }
+      } else {
+        // No auth_token — try refresh
+        const refreshed = await attemptTokenRefresh();
+        if (refreshed) {
+          const storedUser = getStoredUser();
+          setUser(storedUser);
+          setToken(refreshed);
+        } else {
+          // No valid session — clear state
+          setUser(null);
+          setToken(null);
+        }
+      }
+
+      setLoading(false);
+    };
+
+    initSession();
+  }, []);
+
+  // ── Auto-logout on token expiry (check every 5 minutes) ──────────────────
+  useEffect(() => {
+    if (!user) return;
+
+    const interval = setInterval(async () => {
+      const currentToken = getAuthToken();
+      if (!currentToken) {
+        // Try refresh before logging out
+        const refreshed = await attemptTokenRefresh();
+        if (!refreshed) {
+          logout();
+        } else {
+          setToken(refreshed);
+        }
+      }
+    }, 5 * 60 * 1000); // every 5 minutes
+
+    return () => clearInterval(interval);
+  }, [user]);
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+  const login = useCallback((userData, authToken, refreshToken = null) => {
+    // Normalize role
+    const normalized = {
+      ...userData,
+      role: (userData.role || 'employee').toLowerCase().replace('_', ''),
+    };
+
+    // Set cookies (auth + role + user data + tracking)
+    setAuthCookies(authToken, refreshToken, normalized);
+
+    setUser(normalized);
+    setToken(authToken);
+  }, []);
+
+  // ── Logout ────────────────────────────────────────────────────────────────
+  const logout = useCallback(() => {
+    clearAuthCookies();
+    setUser(null);
+    setToken(null);
+  }, []);
+
+  // ── Update Profile ────────────────────────────────────────────────────────
+  const updateProfile = useCallback((updates) => {
+    setUser(prev => {
+      const updated = { ...prev, ...updates };
+      // Re-save to cookie
+      setAuthCookies(getAuthToken(), null, updated);
+      return updated;
     });
+  }, []);
 
-    const [token, setToken] = useState(() => localStorage.getItem('authToken') || null);
-    const [loading, setLoading] = useState(false);
+  // ── Permission Helpers ────────────────────────────────────────────────────
+  const hasPermission = useCallback((module, action = 'VIEW') => {
+    if (!user) return false;
 
-    // Login function to update context + localStorage
-    const login = (userData, authToken) => {
-        setUser(userData);
-        setToken(authToken);
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('authToken', authToken);
-        localStorage.setItem('token', authToken); // Also save as 'token' for compatibility
-    };
+    const role = user.role?.toLowerCase();
+    if (role === 'superadmin') return true;
 
-    // Logout function
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem('user');
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('token');
-    };
+    // Get live permissions (from cookie or user object)
+    const permissions = getStoredPermissions() || user.permissions || {};
+    const modulePerms = permissions[module] || [];
 
-    /**
-     * Check if user has permission for a specific module and action
-     * @param {string} module - Module name (e.g., 'Attendance', 'Payroll')
-     * @param {string} action - Action (e.g., 'VIEW', 'CREATE', 'EDIT', 'DELETE', 'EXPORT')
-     * @returns {boolean}
-     */
-    const hasPermission = (module, action = 'VIEW') => {
-        if (!user) return false;
-        
-        const role = user.role?.toLowerCase();
-        if (role === 'superadmin') return true;
+    if (Array.isArray(modulePerms)) {
+      return modulePerms.some(p => p.toUpperCase() === action.toUpperCase());
+    }
 
-        const permissions = user.permissions || {};
-        const modulePerms = permissions[module] || [];
-        
-        // Support both array of strings and object-based permissions if needed
-        if (Array.isArray(modulePerms)) {
-            return modulePerms.some(p => p.toUpperCase() === action.toUpperCase());
-        }
-        
-        return false;
-    };
+    return false;
+  }, [user]);
 
-    /**
-     * Check if user matches any of the required roles OR has a specific permission
-     * @param {string[]} requiredRoles - Array of roles that can access
-     * @param {object} requiredPermission - { module, action }
-     */
-    const canAccess = (requiredRoles = [], requiredPermission = null) => {
-        if (!user) return false;
-        
-        const userRole = user.role?.toLowerCase();
-        
-        // Superadmin bypass
-        if (userRole === 'superadmin') return true;
+  const canAccess = useCallback((requiredRoles = [], requiredPermission = null) => {
+    if (!user) return false;
 
-        // Check Roles first if provided
-        if (requiredRoles.length > 0) {
-            const hasRole = requiredRoles.some(r => r.toLowerCase() === userRole);
-            if (hasRole) return true;
-        }
+    const userRole = user.role?.toLowerCase();
 
-        // Check specific permission if provided
-        if (requiredPermission) {
-            return hasPermission(requiredPermission.module, requiredPermission.action);
-        }
+    // SuperAdmin bypasses everything
+    if (userRole === 'superadmin') return true;
 
-        // If no roles or permissions specified, but user is logged in
-        if (requiredRoles.length === 0 && !requiredPermission) return true;
+    // Role check
+    if (requiredRoles.length > 0) {
+      const hasRole = requiredRoles.some(r => r.toLowerCase() === userRole);
+      if (hasRole) return true;
+    }
 
-        return false;
-    };
+    // Permission check
+    if (requiredPermission) {
+      return hasPermission(requiredPermission.module, requiredPermission.action);
+    }
 
-    // Update profile function
-    const updateProfile = (updates) => {
-        setUser((prevUser) => {
-            const newUser = { ...prevUser, ...updates };
-            localStorage.setItem('user', JSON.stringify(newUser));
-            return newUser;
-        });
-    };
+    // No restriction specified — authenticated user passes
+    if (requiredRoles.length === 0 && !requiredPermission) return true;
 
-    return (
-        <AuthContext.Provider value={{ user, token, login, logout, canAccess, hasPermission, loading, updateProfile }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return false;
+  }, [user, hasPermission]);
+
+  // ── Activity Tracking ─────────────────────────────────────────────────────
+  const trackModule = useCallback((moduleName) => {
+    setLastActiveModule(moduleName);
+  }, []);
+
+  const getActivityInfo = useCallback(() => ({
+    lastLogin:  getLastLoginTime(),
+    lastModule: getLastActiveModule(),
+  }), []);
+
+  // ─────────────────────────────────────────────────────────────────────────
+  return (
+    <AuthContext.Provider value={{
+      user,
+      token,
+      loading,
+      login,
+      logout,
+      updateProfile,
+      hasPermission,
+      canAccess,
+      trackModule,
+      getActivityInfo,
+      isAuthenticated: !!user,
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

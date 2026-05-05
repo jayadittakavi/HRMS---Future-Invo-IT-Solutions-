@@ -34,9 +34,9 @@ const RolesList = () => {
 
                 // Fetch from all sources with superadmin privilege
                 const [rolesRes, usersRes, empRes] = await Promise.all([
-                    fetchWithSA(`${API_BASE}/admin/access-control/roles`),
-                    fetchWithSA(`${API_BASE}/admin/access-control/users`),
-                    fetchWithSA(`${API_BASE}/admin/employees`) // Fallback handled by service but we want SA here
+                    fetchWithSA(`${API_BASE}/roles`),
+                    fetchWithSA(`${API_BASE}/team/members`),
+                    fetchWithSA(`${API_BASE}/team/members`) // Same endpoint to satisfy Promise.all array length
                 ]);
                 
                 // Get employees data (either as array or nested in data field)

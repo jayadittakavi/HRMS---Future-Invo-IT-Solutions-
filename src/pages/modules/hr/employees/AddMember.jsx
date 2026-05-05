@@ -6,6 +6,7 @@ import { permissionService } from './permission-service';
 import { useAuth } from '../../../../context/AuthContext';
 import { companyService } from '../../core/companies/service';
 import { coreService } from '../../../../services/coreService';
+import { employeeSuperAdminService } from './superadmin-service';
 
 const AddMember = () => {
     const navigate = useNavigate();
@@ -15,6 +16,7 @@ const AddMember = () => {
 
     const [selectedRole, setSelectedRole] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [toastMsg, setToastMsg] = useState(null); // { type: 'success'|'error', text: string }
     
     // Dropdown Data
     const [companies, setCompanies] = useState([]);
@@ -98,7 +100,7 @@ const AddMember = () => {
 
         const fetchExistingMembers = async () => {
             try {
-                const users = await coreService.getUsers();
+                const users = await employeeSuperAdminService.getAllEmployees();
                 const mapped = (users || []).map(u => ({
                     user_id: u.id,
                     name: u.name || u.username,
@@ -246,9 +248,14 @@ const AddMember = () => {
         }));
     };
 
+    const showToast = (type, text) => {
+        setToastMsg({ type, text });
+        setTimeout(() => setToastMsg(null), 5000);
+    };
+
     const handleAdd = async () => {
         if (!selectedRole && !selectedUserId) {
-            alert("Please select a role name.");
+            showToast('error', 'Please select a role name before submitting.');
             return;
         }
         try {
@@ -283,11 +290,19 @@ const AddMember = () => {
                 });
             }
 
-            const msg = selectedUserId ? `Permissions updated successfully!` : `✅ User "${newMember.name}" has been invited!`;
-            alert(msg);
-            navigate('/roles-list');
+            const isPending = result?.pending === true;
+            const msg = isPending
+                ? `⏳ Backend route not ready yet. Invite for "${newMember.name}" saved locally and will sync once the backend team adds /api/team/invite.`
+                : selectedUserId ? `Permissions updated successfully!` : `✅ User "${newMember.name}" has been invited!`;
+            showToast(isPending ? 'error' : 'success', msg);
+            if (!isPending) setTimeout(() => navigate('/roles-list'), 1500);
         } catch (error) {
-            alert(`Failed to assign role: ${error.message || error}`);
+            // Strip raw HTML from error messages (e.g. Flask 404 HTML page)
+            let msg = error.message || String(error);
+            if (msg.includes('<html') || msg.includes('<!doctype')) {
+                msg = 'The server could not process this request (404). The backend route "/api/team/invite" is not yet registered on the Flask server. Please contact your backend developer.';
+            }
+            showToast('error', msg);
         }
     };
 
@@ -317,7 +332,7 @@ const AddMember = () => {
             console.error("Error loading user permissions", err);
             // Don't alert if we just navigated here, maybe it's a new user with no perms yet
             if (!location.state?.newMember) {
-                alert("The system could not retrieve specific permissions for this user. You can still assign new permissions manually.");
+                showToast('error', 'Could not retrieve permissions for this user. You can assign new permissions manually.');
             }
         } finally {
             setLoading(false);
@@ -326,6 +341,22 @@ const AddMember = () => {
 
     return (
         <DashboardLayout title="">
+            {/* Toast Notification */}
+            {toastMsg && (
+                <div
+                    style={{
+                        position: 'fixed', top: '20px', right: '24px', zIndex: 9999,
+                        maxWidth: '480px', padding: '14px 20px', borderRadius: '12px',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+                        backgroundColor: toastMsg.type === 'success' ? '#dcfce7' : '#fee2e2',
+                        borderLeft: `5px solid ${toastMsg.type === 'success' ? '#16a34a' : '#dc2626'}`,
+                        color: toastMsg.type === 'success' ? '#15803d' : '#991b1b',
+                        fontWeight: '600', fontSize: '0.9rem', lineHeight: '1.5'
+                    }}
+                >
+                    {toastMsg.type === 'error' ? '⚠️ ' : '✅ '}{toastMsg.text}
+                </div>
+            )}
             <div className="container-fluid p-0 assign-role-page" style={{ backgroundColor: '#e2e8f0', minHeight: '100vh' }}>
                 
                 <div style={{ backgroundColor: '#e2e8f0', padding: '24px 32px' }}>

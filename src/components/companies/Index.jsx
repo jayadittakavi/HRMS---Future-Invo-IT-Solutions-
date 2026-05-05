@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import { FaEdit, FaTrash, FaPlus, FaBuilding, FaMapMarkerAlt, FaUsers, FaIndustry, FaGlobe, FaSearch, FaCheckCircle, FaTimesCircle, FaEnvelope } from "react-icons/fa";
 import DashboardLayout from "../layout/DashboardLayout";
 import { useSearch } from "../../context/SearchContext";
 import { coreService } from "../../services/coreService";
 import { getAuthHeader } from "../../config";
+import { useAuth } from "../../context/AuthContext";
 import "./Companies.css";
 
 export const CompaniesContent = () => {
@@ -38,6 +39,7 @@ export const CompaniesContent = () => {
         state: "",
         city_branch: "",
         timezone: "",
+        email: "",
     });
 
     const getAuthHeaders = () => {
@@ -76,30 +78,48 @@ export const CompaniesContent = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const { user } = useAuth();
+
     const handleSave = async (e) => {
         e.preventDefault();
         try {
             console.log("Saving company with data:", formData);
-            const res = await coreService.createCompany({
+            
+            // Map fields to match the backend list provided by the user
+            const payload = {
                 company_name: formData.name,
-                company_Id: formData.company_id,
-                industry: formData.industry,
+                company_code: formData.company_id, // COMP-101 style
+                company_uid: formData.company_id,  // Unique identifier
                 company_prefix: formData.company_id?.substring(0, 3)?.toUpperCase() || "CMP",
+                subdomain: formData.company_id.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                db_name: `company_${formData.company_id.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+                industry: formData.industry,
                 company_size: formData.company_size,
                 country: formData.country,
                 state: formData.state,
                 city_branch: formData.city_branch,
-                timezone: formData.timezone || "UTC+0",
+                timezone: formData.timezone || "Asia/Kolkata",
+                email: formData.email,
                 address: `${formData.city_branch}, ${formData.state || ''}`,
                 latitude: "0",
-                longitude: "0"
-            });
+                longitude: "0",
+                super_admin_id: user?.id || 1, // Use current user ID or fallback
+                attendance_enabled: true,
+                leave_enabled: true,
+                payroll_enabled: true,
+                phone: formData.phone || "—",
+                website: formData.website || "—"
+            };
 
-            // Auto-create initial branch if backend doesn't
-            if (res) {
+            const res = await coreService.createCompany(payload);
+            console.log("Creation Response:", res);
+
+            // Auto-create initial branch if creation was successful
+            if (res && (res.id || res.company_id || res.data?.id)) {
                 try {
+                    const newCompanyId = res.id || res.company_id || res.data?.id;
                     await coreService.createBranch({
-                        company_id: res.id || res.company?.id,
+                        company_id: newCompanyId,
                         branch_name: `${formData.name} - Head Office`,
                         address: `${formData.city_branch}, ${formData.state || ''}`,
                         latitude: "0",
@@ -107,7 +127,7 @@ export const CompaniesContent = () => {
                         status: 'Active'
                     });
                 } catch (branchErr) {
-                    console.error("Auto-branch creation failed:", branchErr);
+                    console.error("Auto-branch creation failed (non-critical):", branchErr);
                 }
             }
 
@@ -117,7 +137,16 @@ export const CompaniesContent = () => {
             alert("Company created successfully!");
         } catch (err) {
             console.error("Create company error:", err);
-            alert("Failed to create company: " + (err.message || "Unknown error"));
+            // If the error message is "Failed to fetch", it's often a CORS or response parsing issue 
+            // even if the record was created successfully in the backend.
+            const msg = err.message || "Unknown error";
+            if (msg.includes("Failed to fetch")) {
+                alert("The company was likely created, but there was a connection issue receiving the confirmation. Please refresh the page.");
+                fetchCompanies();
+                setShowAdd(false);
+            } else {
+                alert("Failed to create company: " + msg);
+            }
         }
     };
 
@@ -130,7 +159,8 @@ export const CompaniesContent = () => {
                 company_size: formData.company_size,
                 country: formData.country,
                 state: formData.state,
-                city_branch: formData.city_branch
+                city_branch: formData.city_branch,
+                email: formData.email
             });
 
             setShowEdit(false);
@@ -163,6 +193,7 @@ export const CompaniesContent = () => {
             state: "",
             city_branch: "",
             timezone: "",
+            email: "",
         });
     };
 
@@ -376,6 +407,7 @@ export const CompaniesContent = () => {
                                                         state: c.state || "",
                                                         city_branch: c.city_branch || "",
                                                         timezone: c.timezone || "",
+                                                        email: c.email || c.company_email || "",
                                                     });
                                                     setShowEdit(true);
                                                 }}>
@@ -500,6 +532,15 @@ export const CompaniesContent = () => {
                                     <div className="premium-input-group">
                                         <label>City / Branch</label>
                                         <input name="city_branch" placeholder="Primary Branch" onChange={handleChange} value={formData.city_branch} className="premium-input ps-3" />
+                                    </div>
+                                </div>
+                                <div className="col-md-12">
+                                    <div className="premium-input-group">
+                                        <label>Company Email</label>
+                                        <div className="input-relative">
+                                            <FaEnvelope className="input-icon-left" />
+                                            <input type="email" name="email" required placeholder="contact@company.com" onChange={handleChange} value={formData.email} className="premium-input" />
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="col-12">

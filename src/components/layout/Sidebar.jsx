@@ -212,12 +212,12 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         >
             {/* Logo Area */}
             <div className={`sidebar-header d-flex align-items-center mb-4 ps-2 ${!isOpen ? 'justify-content-center ps-0' : ''}`}>
-                <div className="bg-white p-1 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px', marginRight: isOpen ? '12px' : '0', minWidth: '40px' }}>
-                    <img src={logo} alt="HRMS Logo" style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '50%' }} />
+                <div className="bg-white p-0 rounded-circle d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '40px', height: '40px', marginRight: isOpen ? '12px' : '0', minWidth: '40px' }}>
+                    <img src={logo} alt="HRMS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 {isOpen && (
                     <div>
-                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '16px' }}>WorkSphrer HRMS</h5>
+                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '18px' }}>WS HRMS</h5>
                     </div>
                 )}
             </div>
@@ -238,17 +238,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                 {renderLinks()}
             </div>
 
-            {/* Logout Section & Collapse Action */}
+            {/* Bottom Section & Collapse Action */}
             <div className="p-2 border-top border-secondary border-opacity-25 mt-auto">
-                <button
-                    onClick={handleLogout}
-                    className="sidebar-link w-100 border-0 text-start d-flex align-items-center mb-2"
-                    style={{ cursor: 'pointer', color: '#ef4444 !important', margin: isOpen ? '0 0.86rem' : '0 auto', justifyContent: isOpen ? 'flex-start' : 'center' }}
-                >
-                    <span className="sidebar-icon m-0"><MdLogout size={20} /></span>
-                    {isOpen && <span className="ms-3">Logout</span>}
-                </button>
-
                 {/* Sidebar Collapse Action */}
                 <div className={`d-flex ${isOpen ? 'justify-content-end pe-3' : 'justify-content-center'} py-2 mt-1`}>
                     <button

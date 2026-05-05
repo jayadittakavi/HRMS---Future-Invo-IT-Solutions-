@@ -20,6 +20,7 @@ const EmployeeDashboard = () => {
     const [activeView, setActiveView] = useState('dashboard');
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState({
+        employeeStatus: user?.status || 'Onboarding', // Added employee status
         nextPayDate: 'JUNE 30, 2026',
         atAGlance: {
             date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -52,6 +53,7 @@ const EmployeeDashboard = () => {
             if (data) {
                 setDashboardData(prev => ({
                     ...prev,
+                    employeeStatus: data.employee_status || user?.status || prev.employeeStatus,
                     nextPayDate: data.next_pay_date || prev.nextPayDate,
                     atAGlance: {
                         ...prev.atAGlance,
@@ -123,11 +125,20 @@ const EmployeeDashboard = () => {
                     {/* Welcome Header */}
                     <div className="d-flex justify-content-between align-items-end mb-4 pb-2">
                         <div>
-                            <div className="d-flex align-items-center gap-2 mb-1">
-                                <h3 className="fw-bold text-dark mb-0">
+                            <div className="d-flex align-items-center gap-3 mb-1 flex-wrap">
+                                <h3 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
                                     <MdOutlineWavingHand className="text-warning me-2" />
-                                    Hey, {user?.name || 'Employee'}!
+                                    Hey, {user?.firstName} {user?.lastName}!
                                 </h3>
+                                <span className={`badge rounded-pill shadow-sm align-middle`} style={{ 
+                                    backgroundColor: dashboardData.employeeStatus?.toLowerCase() === 'active' ? '#10b981' : 
+                                                     dashboardData.employeeStatus?.toLowerCase() === 'under review' ? '#f59e0b' : '#3b82f6',
+                                    fontSize: '0.8rem',
+                                    padding: '0.5em 1em',
+                                    fontWeight: '600'
+                                }}>
+                                    {dashboardData.employeeStatus || 'Onboarding'}
+                                </span>
                             </div>
                             <p className="text-secondary small mb-0">Here's what's happening with your work profile today.</p>
                         </div>
