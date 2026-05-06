@@ -1,6 +1,5 @@
 .sidebar-container {
     background: linear-gradient(180deg, var(--cp-purple-main) 0%, var(--cp-purple-dark) 50%, var(--cp-deep-navy) 100%) !important;
-    /* New Theme Palette Gradient */
     border-right: 1px solid rgba(255, 255, 255, 0.1);
     color: #ffffff;
     height: 100%;
@@ -9,7 +8,7 @@
     overflow: hidden !important;
 }
 
-/* Sparkle and Bubbles for Sidebar */
+/* Decorative elements */
 .sidebar-container::before {
     content: "✦";
     position: absolute;
@@ -34,7 +33,6 @@
     z-index: 0;
 }
 
-/* Second Bubble */
 .sidebar-container .flex-grow-1::after {
     content: "";
     position: absolute;
@@ -48,7 +46,6 @@
     z-index: 0;
 }
 
-/* Bottom Area Bubble */
 .sidebar-container .p-2.border-top::after {
     content: "";
     position: absolute;
@@ -62,6 +59,7 @@
     z-index: 0;
 }
 
+/* ── Header ──────────────────────────────────────────────── */
 .sidebar-header {
     padding: 1.5rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -69,6 +67,11 @@
     z-index: 1;
 }
 
+.sidebar-text-logo {
+    color: #ffffff !important;
+}
+
+/* ── Role Label ──────────────────────────────────────────── */
 .sidebar-role-label {
     font-size: 0.85rem;
     font-weight: 500;
@@ -83,73 +86,140 @@
     z-index: 1;
 }
 
+/* ── Section Label ───────────────────────────────────────── */
 .sidebar-nav-label {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     opacity: 0.8;
-    margin-top: 1.5rem;
+    margin-top: 0.5rem;
     margin-bottom: 0.75rem;
     padding-left: 1.5rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.5);
 }
 
+/* ── Sidebar Links (Parent) ──────────────────────────────── */
 .sidebar-link {
     background: transparent;
     color: rgba(255, 255, 255, 0.8) !important;
     text-decoration: none;
-    padding: 0.75rem 1rem;
+    padding: 0.7rem 1rem;
     display: flex;
     align-items: center;
-    border-radius: 8px;
-    margin: 0 0.8rem 0.4rem 0.8rem;
+    border-radius: 10px;
+    margin: 0 0.6rem 0.2rem 0.6rem;
     transition: all 0.2s ease-in-out;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     border: 1px solid transparent;
+    position: relative;
+    z-index: 1;
+    cursor: pointer;
 }
 
 .sidebar-link:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
     color: #ffffff !important;
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateX(3px);
 }
 
 .sidebar-link.active {
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.2);
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     font-weight: 600;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.sidebar-text-logo {
-    color: #ffffff !important;
-}
-
-/* Ensure logo text is always white in this blue theme */
-[data-theme="dark"] .sidebar-text-logo {
-    color: #ffffff;
-}
-
-.sidebar-icon {
-    width: 24px;
-    margin-right: 12px;
-    display: inline-flex;
-    justify-content: center;
-    color: inherit;
-    /* Inherit text color */
-}
-
-/* Active Dropdown Parent */
 .sidebar-link.active-dropdown {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff !important;
+    border-radius: 10px 10px 4px 4px;
 }
 
-/* Collapse Button Styles */
+.sidebar-link.has-active-child {
+    border-left: 3px solid rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-icon {
+    width: 22px;
+    margin-right: 10px;
+    display: inline-flex;
+    justify-content: center;
+    color: inherit;
+    flex-shrink: 0;
+}
+
+.sidebar-dropdown-arrow {
+    opacity: 0.6;
+    transition: transform 0.25s ease;
+}
+
+/* ── Dropdown Content (Smooth Animation) ─────────────────── */
+.sidebar-dropdown-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    opacity: 0;
+    margin: 0 0.6rem 0.2rem 0.6rem;
+    background: rgba(0, 0, 0, 0.12);
+    border-radius: 0 0 10px 10px;
+}
+
+.sidebar-dropdown-content.open {
+    max-height: 400px;
+    opacity: 1;
+    padding: 0.3rem 0;
+}
+
+/* ── Child Links (Dropdown Items) ────────────────────────── */
+.sidebar-child-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.55rem 1rem 0.55rem 1.2rem;
+    color: rgba(255, 255, 255, 0.65) !important;
+    text-decoration: none;
+    font-size: 0.84rem;
+    font-weight: 400;
+    border-radius: 6px;
+    margin: 0.1rem 0.4rem;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sidebar-child-link:hover {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1);
+    padding-left: 1.4rem;
+}
+
+.sidebar-child-link.active {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.18);
+    font-weight: 600;
+}
+
+/* Dot indicator for child items */
+.sidebar-child-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.sidebar-child-link:hover .sidebar-child-dot,
+.sidebar-child-link.active .sidebar-child-dot {
+    background: #ffffff;
+    width: 6px;
+    height: 6px;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+/* ── Collapse Button ─────────────────────────────────────── */
 .sidebar-collapse-btn:hover {
     opacity: 1 !important;
     transform: scale(1.15);
@@ -159,7 +229,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Scrollbar refinement */
+/* ── Scrollbar ───────────────────────────────────────────── */
 .sidebar-container * {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
@@ -168,7 +238,6 @@
 .sidebar-container ::-webkit-scrollbar {
     width: 4px;
     height: 0px;
-    /* Hide horizontal scrollbar */
 }
 
 .sidebar-container ::-webkit-scrollbar-thumb {
@@ -176,10 +245,10 @@
     border-radius: 10px;
 }
 
-/* Collapsed State Optimization */
+/* ── Collapsed State ─────────────────────────────────────── */
 .sidebar-closed .sidebar-link {
-    margin: 0 0.5rem 0.4rem 0.5rem;
-    padding: 0.75rem 0;
+    margin: 0 0.5rem 0.3rem 0.5rem;
+    padding: 0.7rem 0;
     justify-content: center;
 }
 
@@ -194,7 +263,6 @@
 
 .sidebar-closed .sidebar-link:hover {
     transform: none;
-    /* Disable horizontal slide when collapsed */
 }
 
 .sidebar-closed .sidebar-collapse-btn {
@@ -202,7 +270,15 @@
     padding-right: 0;
 }
 
-/* Remove any accidental overflow-x */
+.sidebar-closed .sidebar-dropdown-content {
+    display: none;
+}
+
+.sidebar-closed .sidebar-child-dot {
+    display: none;
+}
+
+/* ── Prevent overflow ────────────────────────────────────── */
 .glass-sidebar-wrapper,
 .sidebar-container,
 .flex-grow-1.overflow-auto {

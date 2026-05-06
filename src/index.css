@@ -32,7 +32,8 @@
     /* Elements */
     --border-color: #e2e8f0;
     --sidebar-width: 260px;
-    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 12px 28px rgba(0, 0, 0, 0.1), 0 20px 40px rgba(0, 0, 0, 0.04);
     --radius-card: 20px;
 
     /* Glass Effect Vars */
@@ -226,6 +227,12 @@ div {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-card);
     overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-card-hover);
 }
 
 .table {
@@ -311,4 +318,85 @@ h6 {
 .badge-soft-info {
     background: #e0f2fe;
     color: #075985;
+}
+
+/* ── Premium Shadows for All Panels & Windows ───────────── */
+
+/* Bootstrap modal dialogs */
+.modal-content {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 20px 48px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-radius: 1.25rem !important;
+}
+
+/* Override Bootstrap .shadow-sm to be richer */
+.shadow-sm {
+    box-shadow: var(--shadow-card) !important;
+}
+
+.shadow {
+    box-shadow: var(--shadow-card-hover) !important;
+}
+
+/* List groups used as panel containers */
+.list-group {
+    box-shadow: var(--shadow-card);
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+/* Accordion panels */
+.accordion {
+    box-shadow: var(--shadow-card);
+    border-radius: 1rem !important;
+    overflow: hidden;
+}
+
+.accordion-item {
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-item:last-child {
+    border-bottom: none;
+}
+
+/* Alert boxes */
+.alert {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border-radius: 0.75rem;
+}
+
+/* Nav pill containers (tab bars) */
+.nav-pills {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 1rem;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    border-radius: 1rem !important;
+}
+
+/* Tables wrapped in card-like containers */
+.table-responsive {
+    box-shadow: var(--shadow-card);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: white;
+}
+
+/* Form panels and input groups */
+.input-group {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.input-group .form-control,
+.input-group .form-select,
+.input-group .btn {
+    box-shadow: none !important;
 }

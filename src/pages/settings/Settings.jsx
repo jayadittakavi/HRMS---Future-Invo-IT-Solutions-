@@ -11,36 +11,6 @@ const Settings = () => {
 
     const settingsItems = [
         {
-            title: 'My Space Dashboard',
-            desc: 'View your personal dashboard, stats, and individual performance metrics.',
-            icon: <FaUserAstronaut size={18} />,
-            iconBg: '#eff6ff',
-            iconColor: '#3b82f6',
-            status: 'DASHBOARD',
-            statusColor: '#3b82f6',
-            path: '/dashboard/my-space'
-        },
-        {
-            title: 'My Attendance',
-            desc: 'Monitor your clock-in/out history, regularize attendance, and view monthly logs.',
-            icon: <FaCalendarCheck size={18} />,
-            iconBg: '#f0fdf4',
-            iconColor: '#16a34a',
-            status: 'LIVE LOGS',
-            statusColor: '#16a34a',
-            path: '/my-attendance'
-        },
-        {
-            title: 'My Leave',
-            desc: 'Apply for leaves, check balance, and track status of your leave requests.',
-            icon: <FaWalking size={18} />,
-            iconBg: '#fef2f2',
-            iconColor: '#ef4444',
-            status: 'MANAGE',
-            statusColor: '#ef4444',
-            path: '/my-leaves'
-        },
-        {
             title: 'Assigned Assets',
             desc: 'Track your assigned company hardware, laptops, and devices.',
             icon: <FaLaptop size={18} />,
@@ -79,16 +49,6 @@ const Settings = () => {
             status: 'SUPPORT',
             statusColor: '#8b5cf6',
             path: '/helpdesk'
-        },
-        {
-            title: 'Payroll & Salary',
-            desc: 'View your payslips, salary structure, tax declarations, and financial documents.',
-            icon: <FaMoneyBillWave size={18} />,
-            iconBg: '#ecfdf5',
-            iconColor: '#10b981',
-            status: 'FINANCE',
-            statusColor: '#10b981',
-            path: '/payroll-dashboard'
         },
         {
             title: 'User Management',

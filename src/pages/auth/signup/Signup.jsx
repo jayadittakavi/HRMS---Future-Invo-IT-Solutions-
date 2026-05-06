@@ -24,6 +24,9 @@ const Signup = () => {
     if (error) setError(''); // Clear any error when user starts typing again
   };
 
+  // ── Check if mock mode is enabled via .env ──
+  const isMockMode = import.meta.env.VITE_MOCK_MODE === 'true';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password.trim() !== formData.confirmPassword.trim()) {
@@ -32,6 +35,19 @@ const Signup = () => {
 
     try {
       setError('');
+
+      // ══════════════════════════════════════════════════════════
+      // MOCK MODE — skip backend, simulate success
+      // ══════════════════════════════════════════════════════════
+      if (isMockMode) {
+        alert('Account created successfully! (Mock Mode) Redirecting to login...');
+        navigate('/login');
+        return;
+      }
+
+      // ══════════════════════════════════════════════════════════
+      // REAL API MODE — original backend call (kept for future)
+      // ══════════════════════════════════════════════════════════
 
       // Create payload matching what the backend expects
       const payload = {
@@ -94,6 +110,7 @@ const Signup = () => {
 
     } catch (err) {
       console.error('Signup Error Detailed:', err);
+      if (isMockMode) return; // suppress errors in mock mode
       if (err instanceof TypeError && err.message === 'Failed to fetch') {
         setError('Connection Error: Backend server unreachable.');
       } else {

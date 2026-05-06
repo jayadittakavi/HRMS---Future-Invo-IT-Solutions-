@@ -18,14 +18,51 @@ const Login = () => {
   
   const from = location.state?.from?.pathname || null;
 
+  // ── Check if mock mode is enabled via .env ──
+  const isMockMode = import.meta.env.VITE_MOCK_MODE === 'true';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     
     setLoading(true);
+    setError('');
+
     try {
-      setError('');
-      
+      // ══════════════════════════════════════════════════════════
+      // MOCK MODE — skip backend, create a fake session
+      // ══════════════════════════════════════════════════════════
+      if (isMockMode) {
+        const mockUser = {
+          firstName: "Niharika",
+          lastName: "Thota",
+          email: email.trim() || "test@gmail.com",
+          role: "superadmin",
+        };
+        const mockToken = "mock-jwt-token-" + Date.now();
+
+        // Persist to localStorage
+        localStorage.setItem("token", mockToken);
+        localStorage.setItem("role", mockUser.role);
+        localStorage.setItem("user", JSON.stringify(mockUser));
+
+        // Update AuthContext global state
+        login(mockUser, mockToken);
+
+        // Role-based redirect
+        const r = mockUser.role;
+        if (r === "superadmin")      navigate("/superadmin-dashboard");
+        else if (r === "admin")      navigate("/admin-dashboard");
+        else if (r === "hr")         navigate("/hr-dashboard");
+        else if (r === "manager")    navigate("/manager-dashboard");
+        else if (r === "employee")   navigate("/employee-dashboard");
+        else                         navigate("/dashboard");
+        return;  // done — skip everything below
+      }
+
+      // ══════════════════════════════════════════════════════════
+      // REAL API MODE — original backend call (kept for future)
+      // ══════════════════════════════════════════════════════════
       const API_URL = window.location.origin;
       const LOGIN_ENDPOINT = `${API_URL}/api/auth/login`;
       
@@ -49,7 +86,6 @@ const Login = () => {
         data = responseText ? JSON.parse(responseText) : {};
       } catch (e) {
         console.error("Backend returned non-JSON response:", responseText);
-        // If it's a 401, we already know it's unauthorized
         if (res.status === 401) {
           setError("Invalid credentials. Please check your email and password.");
           return;
@@ -71,11 +107,8 @@ const Login = () => {
       const token = data.token || data.access_token;
       const user = data.user || { ...data };
       
-      // 1. EXTRACT NAME AGGRESSIVELY
-      // Check both nested 'user' object and top-level 'data'
+      // EXTRACT NAME AGGRESSIVELY
       const nameData = { ...data, ...user }; 
-      
-      // Ensure firstName and lastName are explicitly set for the UI
       user.firstName = nameData.first_name || nameData.firstName || nameData.fname || '';
       user.lastName = nameData.last_name || nameData.lastName || nameData.lname || '';
       
@@ -84,14 +117,12 @@ const Login = () => {
       const roleValue = user.role || data.role || 'employee';
 
       if (token) {
-        // 1. Store token and role in localStorage as requested
         localStorage.setItem("token", token);
         localStorage.setItem("role", roleValue);
+        localStorage.setItem("user", JSON.stringify(user));
         
-        // Integration with existing AuthContext to update app state
         login(user, token);
 
-        // 2. Role-based navigation
         const normalizedRole = roleValue.toString().toLowerCase().replace(/[^a-z]/g, '');
         
         if (normalizedRole === "superadmin") navigate("/superadmin-dashboard");
@@ -99,7 +130,7 @@ const Login = () => {
         else if (normalizedRole === "hr") navigate("/hr-dashboard");
         else if (normalizedRole === "manager") navigate("/manager-dashboard");
         else if (normalizedRole === "employee") navigate("/employee-dashboard");
-        else navigate("/dashboard"); // Fallback
+        else navigate("/dashboard");
       } else {
         console.error("Login failed: Token missing in response", data);
         setError("Invalid response from server: Token missing");
@@ -107,6 +138,8 @@ const Login = () => {
 
     } catch (err) {
       console.error('Login Error:', err);
+      // In mock mode this block won't run, but guard anyway
+      if (isMockMode) return;
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);

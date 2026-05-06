@@ -96,6 +96,7 @@ import DeskManagement from "./pages/modules/administration/desk/DeskManagement";
 import Payroll from "./pages/modules/finance/payroll/Payroll";
 import Loans from "./pages/modules/finance/loans/Loans";
 import TravelExpenses from "./pages/modules/finance/travel_expenses/TravelExpenses";
+import FinancialReports from "./pages/modules/finance/financial_reports/FinancialReports";
 import Calendar from "./pages/modules/operations/calendar/Calendar";
 import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
@@ -256,7 +257,7 @@ function AppContent() {
         <Route path="/invoices" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Invoices" /></ProtectedRoute>} />
         <Route path="/expenses" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Expenses" /></ProtectedRoute>} />
         <Route path="/tax-deductions" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Tax & Deductions" /></ProtectedRoute>} />
-        <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['accountant']}><PlaceholderPage title="Financial Reports" /></ProtectedRoute>} />
+        <Route path="/financial-reports" element={<ProtectedRoute requiredRoles={['superadmin', 'admin']}><FinancialReports /></ProtectedRoute>} />
 
         {/* Employee Personal Routes */}
         <Route path="/my-leaves" element={<ProtectedRoute><LeaveManagement personal={true} /></ProtectedRoute>} />
