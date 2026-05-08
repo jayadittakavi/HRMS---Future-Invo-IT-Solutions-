@@ -318,7 +318,7 @@ export const BranchesContent = () => {
             {/* Modals Implementation */}
             {(showAdd || showEdit) && (
                 <div className="modal fade show d-block" style={{ background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(8px)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-lg">
+                    <div className="modal-dialog modal-dialog-centered">
                         <div className="modal-content border-0 shadow-2xl rounded-4 overflow-hidden">
                             <div style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', padding: '32px', color: 'white' }}>
                                 <div className="d-flex justify-content-between align-items-center">

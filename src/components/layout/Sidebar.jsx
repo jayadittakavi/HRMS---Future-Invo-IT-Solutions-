@@ -140,8 +140,6 @@ const getSidebarConfig = (role) => {
         },
 
         // ─── Operations ─────────────────────────────────────────
-        { id: 'daily-task', label: 'Daily Task', icon: <MdTask size={20} />, path: '/daily-task', roles: MGMT_ROLES },
-        { id: 'calendar', label: 'Calendar', icon: <MdCalendarMonth size={20} />, path: '/calendar', roles: ALL_ROLES },
         { id: 'documents', label: 'Documents', icon: <MdDescription size={20} />, path: '/documents', roles: ALL_ROLES },
 
         // ─── Administration ─────────────────────────────────────
@@ -160,7 +158,7 @@ const getSidebarConfig = (role) => {
         },
 
         // ─── Support ────────────────────────────────────────────
-        { id: 'helpdesk', label: 'Helpdesk', icon: <MdSupportAgent size={20} />, path: '/helpdesk', roles: ALL_ROLES },
+        // Helpdesk removed per user request
     ];
 };
 
@@ -235,24 +233,18 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             className={`sidebar-container h-100 d-flex flex-column transition-width ${isOpen ? 'sidebar-open' : 'sidebar-closed'}`}
             style={{ width: '100%', overflow: 'hidden' }}
         >
-            {/* Logo */}
+            {/* Logo and Role */}
             <div className={`sidebar-header d-flex align-items-center mb-4 ps-2 ${!isOpen ? 'justify-content-center ps-0' : ''}`}>
                 <div className="bg-white p-0 rounded-circle d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '40px', height: '40px', marginRight: isOpen ? '12px' : '0', minWidth: '40px' }}>
                     <img src={logo} alt="HRMS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 {isOpen && (
-                    <div>
+                    <div className="d-flex flex-column">
                         <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '18px' }}>WS HRMS</h5>
+                        <span className="text-white opacity-75 mt-1" style={{ fontSize: '12px', fontWeight: '500' }}>Role : {displayRole}</span>
                     </div>
                 )}
             </div>
-
-            {/* Role badge */}
-            {isOpen && (
-                <div className="sidebar-role-label text-white my-3">
-                    Role : <span className="fw-bold text-white">{displayRole}</span>
-                </div>
-            )}
 
             {/* Section label */}
             {isOpen && (
@@ -280,11 +272,11 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                             return (
                                 <div key={item.id}>
                                     <div
-                                        className={`sidebar-link d-flex justify-content-between align-items-center ${isDropdownOpen ? 'active-dropdown' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
+                                        className={`sidebar-link d-flex ${isOpen ? 'justify-content-between' : 'justify-content-center'} align-items-center ${isDropdownOpen ? 'active-dropdown' : ''} ${hasActiveChild ? 'has-active-child' : ''}`}
                                         onClick={() => toggleDropdown(item.id)}
                                         style={{ cursor: 'pointer' }}
                                     >
-                                        <div className="d-flex align-items-center gap-3">
+                                        <div className={`d-flex align-items-center ${isOpen ? 'gap-3' : ''}`}>
                                             <span className="sidebar-icon">{item.icon}</span>
                                             {isOpen && <span>{item.label}</span>}
                                         </div>
@@ -330,30 +322,28 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             </div>
 
             {/* Bottom collapse & copyright */}
-            <div className="p-2 border-top border-secondary border-opacity-25 mt-auto">
-                <div className={`d-flex ${isOpen ? 'justify-content-end pe-3' : 'justify-content-center'} py-2 mt-1`}>
+            <div className="mt-auto d-flex align-items-center justify-content-between p-2 border-top border-secondary border-opacity-25" style={{ minHeight: '45px' }}>
+                {isOpen ? (
+                    <>
+                        <div className="text-white opacity-50 ms-2" style={{ fontSize: '11px' }}>
+                            © 2026 WorkSphrer
+                        </div>
+                        <button
+                            onClick={toggleSidebar}
+                            className="sidebar-collapse-btn d-none d-md-flex align-items-center justify-content-center border-0 text-white opacity-75 hover-opacity-100"
+                            style={{ cursor: 'pointer', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}
+                        >
+                            <MdChevronLeft size={20} />
+                        </button>
+                    </>
+                ) : (
                     <button
                         onClick={toggleSidebar}
-                        className="sidebar-collapse-btn d-none d-md-flex align-items-center justify-content-center border-0 bg-transparent text-white opacity-60 hover-opacity-100"
-                        style={{
-                            cursor: 'pointer',
-                            transition: 'all 0.3s ease',
-                            width: '40px',
-                            height: '40px',
-                            borderRadius: '50%',
-                            outline: 'none',
-                            boxShadow: 'none'
-                        }}
-                        title={isOpen ? "Collapse" : "Expand"}
+                        className="sidebar-collapse-btn d-none d-md-flex align-items-center justify-content-center border-0 text-white opacity-75 hover-opacity-100 mx-auto"
+                        style={{ cursor: 'pointer', width: '28px', height: '28px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%' }}
                     >
-                        {isOpen ? <MdChevronLeft size={24} /> : <MdChevronRight size={24} />}
+                        <MdChevronRight size={20} />
                     </button>
-                </div>
-
-                {isOpen && (
-                    <div className="text-center text-white small opacity-50 mt-1">
-                        © 2026 WorkSphrer
-                    </div>
                 )}
             </div>
         </div>

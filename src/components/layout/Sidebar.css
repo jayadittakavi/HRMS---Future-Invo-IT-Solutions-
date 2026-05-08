@@ -8,17 +8,7 @@
     overflow: hidden !important;
 }
 
-/* Decorative elements */
-.sidebar-container::before {
-    content: "✦";
-    position: absolute;
-    left: 20px;
-    top: 60px;
-    font-size: 2.5rem;
-    color: rgba(255, 255, 255, 0.1);
-    pointer-events: none;
-    z-index: 0;
-}
+/* Decorative elements removed as per user request */
 
 .sidebar-container::after {
     content: "";
@@ -245,20 +235,19 @@
     border-radius: 10px;
 }
 
-/* ── Collapsed State ─────────────────────────────────────── */
 .sidebar-closed .sidebar-link {
     margin: 0 0.5rem 0.3rem 0.5rem;
     padding: 0.7rem 0;
-    justify-content: center;
+    justify-content: center !important;
 }
 
 .sidebar-closed .sidebar-icon {
-    margin-right: 0;
+    margin-right: 0 !important;
 }
 
 .sidebar-closed .sidebar-header {
     padding: 1.5rem 0.5rem;
-    justify-content: center;
+    justify-content: center !important;
 }
 
 .sidebar-closed .sidebar-link:hover {

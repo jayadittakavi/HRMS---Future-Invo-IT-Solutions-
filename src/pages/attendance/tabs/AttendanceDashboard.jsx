@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaUserCheck, FaUserTimes, FaHome, FaClock, FaCalendarDay } from 'react-icons/fa';
+import { FaUserCheck, FaUserTimes, FaHome, FaClock, FaCalendarDay, FaClipboardList } from 'react-icons/fa';
+import { MdDashboard } from 'react-icons/md';
 import { Bar, Line } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -51,11 +52,11 @@ const AttendanceDashboard = ({ onTabChange }) => {
 
     // Helper to map stats to summary cards
     const summaryCards = [
-        { title: 'Present', value: stats?.summary?.PRESENT || 0, icon: <FaUserCheck />, color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', tab: 'bulk' },
-        { title: 'Absent', value: stats?.summary?.ABSENT || 0, icon: <FaUserTimes />, color: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', tab: 'bulk' },
-        { title: 'Half Day', value: stats?.summary?.['HALF DAY'] || 0, icon: <FaClock />, color: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', tab: 'bulk' },
-        { title: 'Late', value: stats?.summary?.LATE || 0, icon: <FaCalendarDay />, color: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', tab: 'bulk' },
-        { title: 'WFH', value: stats?.summary?.WFH || 0, icon: <FaHome />, color: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', tab: 'bulk' },
+        { title: 'Present', value: stats?.summary?.PRESENT || 0, icon: <FaUserCheck />, color: '#10b981', tab: 'bulk' },
+        { title: 'Absent', value: stats?.summary?.ABSENT || 0, icon: <FaUserTimes />, color: '#ef4444', tab: 'bulk' },
+        { title: 'Half Day', value: stats?.summary?.['HALF DAY'] || 0, icon: <FaClock />, color: '#f59e0b', tab: 'bulk' },
+        { title: 'Late', value: stats?.summary?.LATE || 0, icon: <FaCalendarDay />, color: '#6366f1', tab: 'bulk' },
+        { title: 'WFH', value: stats?.summary?.WFH || 0, icon: <FaHome />, color: '#3b82f6', tab: 'bulk' },
     ];
 
     // Map shift distribution data
@@ -146,41 +147,76 @@ const AttendanceDashboard = ({ onTabChange }) => {
 
             {/* Summary Cards */}
             <div className="row g-4 mb-4">
-                {summaryCards.map((card, index) => (
-                    <div key={index} className="col-md-2 col-sm-4 col-6" style={{ minWidth: '160px' }}>
-                        <div
-                            className="card border-0 shadow-sm text-white h-100 dash-card-hover"
-                            style={{
-                                background: card.color,
-                                borderRadius: '15px',
-                                cursor: 'pointer',
-                                transition: 'transform 0.3s ease'
-                            }}
-                            onClick={() => onTabChange ? onTabChange(card.tab) : null}
-                        >
-                            <div className="card-body p-3 d-flex flex-column align-items-center justify-content-center text-center">
-                                <div className="fs-2 mb-2 opacity-75">{card.icon}</div>
-                                <h3 className="fw-bold mb-0">{card.value}</h3>
-                                <small className="text-white-50 fw-bold text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>{card.title}</small>
+                {summaryCards.map((card, index) => {
+                    const baseColor = card.color || '#7c3aed';
+                    const Icon = card.icon;
+                    
+                    return (
+                        <div key={index} className="col-md-4 col-lg-2" style={{ flex: '1 0 18%' }}>
+                            <div 
+                                className="card border-0 shadow-sm h-100 dash-card-hover"
+                                style={{ 
+                                    borderRadius: '20px', 
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    backgroundColor: '#ffffff',
+                                    overflow: 'hidden'
+                                }}
+                                onClick={() => onTabChange ? onTabChange(card.tab) : null}
+                            >
+                                <div className="card-body p-3 d-flex flex-column">
+                                    <div className="d-flex align-items-center justify-content-between mb-3">
+                                        <div 
+                                            className="p-2 rounded-3 d-flex align-items-center justify-content-center"
+                                            style={{ backgroundColor: `${baseColor}15`, color: baseColor }}
+                                        >
+                                            {Icon && React.isValidElement(Icon) ? React.cloneElement(Icon, { size: 20 }) : null}
+                                        </div>
+                                        <div className="small fw-bold" style={{ color: baseColor, fontSize: '0.65rem' }}>
+                                            Live
+                                        </div>
+                                    </div>
+                                    <div className="mt-auto">
+                                        <h3 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px' }}>{card.value}</h3>
+                                        <p className="text-secondary smaller mb-0 fw-bold text-uppercase" style={{ fontSize: '0.6rem', opacity: 0.7 }}>
+                                            {card.title}
+                                        </p>
+                                    </div>
+                                    {/* Subtle progress bar at bottom */}
+                                    <div 
+                                        style={{ 
+                                            position: 'absolute', 
+                                            bottom: 0, 
+                                            left: 0, 
+                                            height: '4px', 
+                                            width: '100%', 
+                                            background: `linear-gradient(90deg, ${baseColor} 0%, ${baseColor}20 100%)` 
+                                        }} 
+                                    />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {/* Charts Row */}
             <div className="row g-4 mb-4">
                 <div className="col-md-6">
-                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '15px' }}>
-                        <h6 className="fw-bold text-secondary mb-3">Shift-wise Distribution</h6>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '20px' }}>
+                        <h6 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                            <MdDashboard className="text-primary" /> Shift-wise Distribution
+                        </h6>
                         <div style={{ height: '300px', cursor: 'pointer' }}>
                             <Bar data={shiftData} options={{ ...options, maintainAspectRatio: false }} />
                         </div>
                     </div>
                 </div>
                 <div className="col-md-6">
-                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '15px' }}>
-                        <h6 className="fw-bold text-secondary mb-3">Attendance Trend (This Week)</h6>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '20px' }}>
+                        <h6 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                            <FaCalendarDay className="text-primary" /> Attendance Trend (This Week)
+                        </h6>
                         <div style={{ height: '300px', cursor: 'pointer' }}>
                             <Line data={dailyTrendData} options={{ ...options, maintainAspectRatio: false }} />
                         </div>
@@ -189,11 +225,13 @@ const AttendanceDashboard = ({ onTabChange }) => {
             </div>
 
             {/* Recent Attendance Table */}
-            <div className="card border-0 shadow-sm" style={{ borderRadius: '15px' }}>
-                <div className="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                    <h6 className="mb-0 fw-bold text-secondary">Today's Attendance Overview</h6>
-                    <button className="btn btn-sm btn-outline-primary rounded-pill px-3" onClick={() => onTabChange ? onTabChange('mark') : null}>
-                        Mark New
+            <div className="card border-0 shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden' }}>
+                <div className="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                        <FaClipboardList className="text-primary" /> Today's Attendance Overview
+                    </h6>
+                    <button className="btn btn-sm btn-primary rounded-pill px-4 shadow-sm" onClick={() => onTabChange ? onTabChange('mark') : null}>
+                        + Mark New
                     </button>
                 </div>
                 <div className="table-responsive">

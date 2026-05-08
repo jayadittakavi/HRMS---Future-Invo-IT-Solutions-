@@ -29,7 +29,16 @@ export const EmployeesContent = () => {
     // Modal States
     const [showAdd, setShowAdd] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
+    const [showFilter, setShowFilter] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+    // Filter States
+    const [filters, setFilters] = useState({
+        role: '',
+        department: '',
+        company: '',
+        status: ''
+    });
 
     // Form Data
     const [formData, setFormData] = useState({
@@ -243,12 +252,19 @@ export const EmployeesContent = () => {
 
     const filteredEmployees = employees.filter(emp => {
         const query = searchTerm.toLowerCase();
-        return (
+        const matchesSearch = (
             (emp.full_name || emp.name || emp.first_name || '').toLowerCase().includes(query) ||
             (emp.personal_email || emp.company_email || emp.email || '').toLowerCase().includes(query) ||
             (emp.designation || '').toLowerCase().includes(query) ||
             (emp.company_name || '').toLowerCase().includes(query)
         );
+
+        const matchesRole = !filters.role || (emp.role || '').toLowerCase() === filters.role.toLowerCase();
+        const matchesDept = !filters.department || (emp.department || '').toLowerCase() === filters.department.toLowerCase();
+        const matchesCompany = !filters.company || (emp.company_name || emp.company || '').toLowerCase() === filters.company.toLowerCase();
+        const matchesStatus = !filters.status || (emp.status || 'Active').toLowerCase() === filters.status.toLowerCase();
+
+        return matchesSearch && matchesRole && matchesDept && matchesCompany && matchesStatus;
     });
 
     const currentMonth = new Date().getMonth();
@@ -326,17 +342,17 @@ export const EmployeesContent = () => {
                             </div>
                         </div>
                         <div className="col-md-6 text-end d-flex gap-3 justify-content-end">
-                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm border-0"
+                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm border-0 position-relative"
+                                onClick={() => setShowFilter(true)}
                                 style={{ background: 'white', color: '#64748b', fontWeight: 700 }}>
                                 <FaFilter /> Filters
+                                {(filters.role || filters.department || filters.company || filters.status) && (
+                                    <span className="position-absolute top-0 start-100 translate-middle p-1 bg-primary border border-light rounded-circle">
+                                        <span className="visually-hidden">New alerts</span>
+                                    </span>
+                                )}
                             </button>
-                            {canAddEmployee && (
-                                <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-lg border-0"
-                                    onClick={() => navigate('/invite-member')}
-                                    style={{ background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', color: 'white', fontWeight: 700 }}>
-                                    <FaUserPlus /> Invite Member
-                                </button>
-                            )}
+
                         </div>
                     </div>
                 </div>
@@ -586,6 +602,68 @@ export const EmployeesContent = () => {
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Filter Modal */}
+            {showFilter && (
+                <div className="modal fade show d-block" style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1060 }}>
+                    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '450px' }}>
+                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                            <div className="p-4 border-bottom border-light d-flex justify-content-between align-items-center bg-light">
+                                <h5 className="fw-bold mb-0 text-dark">Filter Members</h5>
+                                <button onClick={() => setShowFilter(false)} className="btn-close shadow-none"></button>
+                            </div>
+                            <div className="modal-body p-4">
+                                <div className="row g-3">
+                                    <div className="col-12">
+                                        <label className="form-label fw-bold small text-muted text-uppercase">Role</label>
+                                        <select className="form-select rounded-3 bg-light border-0" value={filters.role} onChange={(e) => setFilters({...filters, role: e.target.value})}>
+                                            <option value="">All Roles</option>
+                                            <option value="superadmin">Super Admin</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="hr">HR</option>
+                                            <option value="manager">Manager</option>
+                                            <option value="employee">Employee</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label fw-bold small text-muted text-uppercase">Department</label>
+                                        <select className="form-select rounded-3 bg-light border-0" value={filters.department} onChange={(e) => setFilters({...filters, department: e.target.value})}>
+                                            <option value="">All Departments</option>
+                                            <option value="IT">IT</option>
+                                            <option value="NON IT">NON IT</option>
+                                            <option value="Sales">Sales</option>
+                                            <option value="Marketing">Marketing</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label fw-bold small text-muted text-uppercase">Company</label>
+                                        <select className="form-select rounded-3 bg-light border-0" value={filters.company} onChange={(e) => setFilters({...filters, company: e.target.value})}>
+                                            <option value="">All Companies</option>
+                                            {companies.map((c, idx) => (
+                                                <option key={idx} value={c.name || c.company_name}>{c.name || c.company_name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="col-12">
+                                        <label className="form-label fw-bold small text-muted text-uppercase">Status</label>
+                                        <select className="form-select rounded-3 bg-light border-0" value={filters.status} onChange={(e) => setFilters({...filters, status: e.target.value})}>
+                                            <option value="">All Status</option>
+                                            <option value="Active">Active</option>
+                                            <option value="Inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div className="mt-4 d-flex gap-2">
+                                    <button className="btn btn-light rounded-pill w-100 fw-bold py-2" onClick={() => {
+                                        setFilters({ role: '', department: '', company: '', status: '' });
+                                        setShowFilter(false);
+                                    }}>Reset All</button>
+                                    <button className="btn btn-primary rounded-pill w-100 fw-bold py-2" style={{ background: '#6366f1' }} onClick={() => setShowFilter(false)}>Apply Filters</button>
+                                </div>
                             </div>
                         </div>
                     </div>

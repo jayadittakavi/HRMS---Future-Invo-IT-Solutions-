@@ -3,12 +3,12 @@ import { financialData } from "./mockData";
 import Filters from "./components/Filters";
 import ReportTable from "./components/ReportTable";
 import ExportButtons from "./components/ExportButtons";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, LineElement, PointElement } from 'chart.js';
+import { Pie, Bar, Chart } from 'react-chartjs-2';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import "./FinancialReports.css";
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title, LineElement, PointElement);
 
 const FinancialReports = () => {
   const [data, setData] = useState([]);
@@ -84,9 +84,25 @@ const FinancialReports = () => {
     labels: data.map(item => item.name),
     datasets: [
       {
-        label: 'Net Pay',
+        type: 'bar',
+        label: 'Net Pay (Salary)',
         data: data.map(item => item.netPay),
-        backgroundColor: '#36A2EB',
+        backgroundColor: '#4338ca', // Indigo bars
+        borderRadius: 8,
+        order: 2,
+      },
+      {
+        type: 'line',
+        label: 'Trend line',
+        data: data.map(item => item.netPay),
+        borderColor: '#10b981', // Emerald line
+        borderWidth: 3,
+        pointBackgroundColor: '#f59e0b', // Amber points
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        order: 1,
       }
     ]
   };
@@ -125,11 +141,37 @@ const FinancialReports = () => {
       <div className="charts-section">
         <div className="chart-container">
           <h4>Salary Distribution by Department</h4>
-          {data.length > 0 ? <Pie data={pieData} /> : <p>No data</p>}
+          {data.length > 0 ? (
+            <Pie 
+              data={pieData} 
+              options={{
+                maintainAspectRatio: true,
+                plugins: {
+                  legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                }
+              }} 
+            />
+          ) : <p>No data</p>}
         </div>
         <div className="chart-container">
-          <h4>Net Pay by Employee</h4>
-          {data.length > 0 ? <Bar data={barData} /> : <p>No data</p>}
+          <h4>Net Pay by Employee (Composite)</h4>
+          {data.length > 0 ? (
+            <Chart 
+              type="bar" 
+              data={barData} 
+              options={{
+                responsive: true,
+                plugins: {
+                  legend: { position: 'top' },
+                  tooltip: { mode: 'index', intersect: false },
+                },
+                scales: {
+                  y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                  x: { grid: { display: false } }
+                }
+              }}
+            />
+          ) : <p>No data</p>}
         </div>
       </div>
 

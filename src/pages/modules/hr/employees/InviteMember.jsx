@@ -12,7 +12,7 @@ const InviteMember = () => {
     return (
         <DashboardLayout title="Invite Member">
             <div className="container-fluid p-0 d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
-                <div className="custom-invite-card shadow-lg" style={{ backgroundColor: '#f8fafc', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '480px' }}>
+                <div className="custom-invite-card shadow-lg" style={{ backgroundColor: '#f8fafc', borderRadius: '16px', padding: '40px', width: '100%', maxWidth: '420px' }}>
                     <h4 className="fw-bolder mb-4 custom-modal-title" style={{ fontFamily: 'Georgia, serif', color: '#0f172a' }}>Add / Invite New Member</h4>
                     
                     <div className="mb-4">

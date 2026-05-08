@@ -32,10 +32,30 @@ const MyAttendanceList = () => {
         if (showIdCard && !myIdCard && user) {
             // Fetch ID card for current user
             idCardService.getAllIDCards().then(cards => {
-                const card = cards.find(c => c.user_id === user.id) ||
+                let card = cards.find(c => c.user_id === user.id) ||
                     cards.find(c => c.role === user.role) ||
                     cards[0];
+                
+                if (!card) {
+                    // Fallback for Demo Mode / Missing Data
+                    card = {
+                        name: user?.firstName ? `${user.firstName} ${user.lastName}` : "Demo Employee",
+                        role: user?.role || "Employee",
+                        department: "Management",
+                        emp_id: "EMP-001",
+                        blood_group: "O+",
+                        photo: user?.profilePic || null
+                    };
+                }
                 setMyIdCard(card);
+            }).catch(() => {
+                setMyIdCard({
+                    name: "Demo Employee",
+                    role: "Employee",
+                    department: "Management",
+                    emp_id: "EMP-001",
+                    blood_group: "O+"
+                });
             });
         }
     }, [showIdCard, user, myIdCard]);

@@ -27,7 +27,7 @@ export const CompaniesContent = () => {
         { id: 2, title: "New Policy Update", content: "Please review the updated remote work policy in the documents section.", date: "Oct 22, 2024" }
     ]);
 
-    const [postData, setPostData] = useState({ title: "", content: "" });
+    const [postData, setPostData] = useState({ title: "", content: "", company_name: "" });
     const [selectedCompany, setSelectedCompany] = useState(null);
     const [branches, setBranches] = useState([]); // Added branches state
     const [formData, setFormData] = useState({
@@ -205,7 +205,7 @@ export const CompaniesContent = () => {
             date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         };
         setPosts([newPost, ...posts]);
-        setPostData({ title: "", content: "" });
+        setPostData({ title: "", content: "", company_name: "" });
         setShowPostModal(false);
     };
 
@@ -442,7 +442,10 @@ export const CompaniesContent = () => {
                     {posts.map(post => (
                         <div className="col-md-6" key={post.id}>
                             <div className="announcement-glass-card">
-                                <span className="post-date text-primary small fw-bold">{post.date}</span>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <span className="post-date text-primary small fw-bold">{post.date}</span>
+                                    {post.company_name && <span className="badge border-0 rounded-pill px-3 py-1 extra-small fw-bold" style={{ backgroundColor: 'rgba(83, 71, 137, 0.1)', color: '#534789' }}>{post.company_name}</span>}
+                                </div>
                                 <h5 className="mt-2 fw-bold text-dark">{post.title}</h5>
                                 <p className="text-muted mb-0">{post.content}</p>
                             </div>
@@ -562,7 +565,7 @@ export const CompaniesContent = () => {
 
             {showPostModal && (
                 <div className="modern-modal-overlay">
-                    <div className="modern-modal-card">
+                    <div className="modern-modal-card" style={{ maxWidth: '650px' }}>
                         <div className="modal-header-premium">
                             <div className="d-flex align-items-center gap-3">
                                 <div className="modal-icon-circle">
@@ -577,6 +580,20 @@ export const CompaniesContent = () => {
                         </div>
                         <form onSubmit={handlePostSubmit} className="modal-body-premium">
                             <div className="row g-4">
+                                <div className="col-12">
+                                    <div className="premium-input-group">
+                                        <label>Select Company</label>
+                                        <div className="input-relative">
+                                            <FaBuilding className="input-icon-left" />
+                                            <select required className="premium-select" value={postData.company_name} onChange={(e) => setPostData({ ...postData, company_name: e.target.value })}>
+                                                <option value="">Select Company</option>
+                                                {companies.map((c, idx) => (
+                                                    <option key={idx} value={c.name || c.company_name}>{c.name || c.company_name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div className="col-12">
                                     <div className="premium-input-group">
                                         <label>Announcement Title</label>

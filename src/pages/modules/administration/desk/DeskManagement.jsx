@@ -30,6 +30,8 @@ export const DeskManagementContent = () => {
     const [loading, setLoading] = useState(false);
     const [desks, setDesks] = useState([]);
     const [occupancyData, setOccupancyData] = useState([]);
+    const [stats, setStats] = useState({ total: 0, available: 0, booked: 0, assigned: 0 });
+    const [bookings, setBookings] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -105,50 +107,24 @@ export const DeskManagementContent = () => {
 
             {/* Stats Overview */}
             <div className="row g-4 mb-4">
-                <div className="col-md-3">
-                    <div className="card shadow-sm border-0 rounded-4 p-3 bg-white">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="bg-primary-subtle p-3 rounded-4 text-primary"><MdWindow size={24} /></div>
-                            <div>
-                                <h3 className="fw-bold mb-0">{stats.total}</h3>
-                                <p className="text-secondary small mb-0">Total Desks</p>
+                {[
+                    { label: 'Total Desks', val: stats.total, icon: <MdWindow size={24} />, color: 'primary' },
+                    { label: 'Available Now', val: stats.available, icon: <MdCheckCircle size={24} />, color: 'success' },
+                    { label: 'Today\'s Bookings', val: stats.booked, icon: <MdEventAvailable size={24} />, color: 'info' },
+                    { label: 'Permanent Seats', val: stats.assigned, icon: <MdPeople size={24} />, color: 'primary' },
+                ].map((s, i) => (
+                    <div className="col-md-3" key={i}>
+                        <div className={`dashboard-card p-3 shadow-sm ${i % 2 === 0 ? 'animate-float' : 'animate-float-delayed'}`} style={{ borderRadius: '20px', background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255, 255, 255, 0.3)' }}>
+                            <div className="d-flex align-items-center gap-3">
+                                <div className={`bg-${s.color}-subtle p-3 rounded-4 text-${s.color}`}>{s.icon}</div>
+                                <div>
+                                    <h3 className="fw-bold mb-0">{s.val}</h3>
+                                    <p className="text-secondary small mb-0">{s.label}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card shadow-sm border-0 rounded-4 p-3 bg-white">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="bg-success-subtle p-3 rounded-4 text-success"><MdCheckCircle size={24} /></div>
-                            <div>
-                                <h3 className="fw-bold mb-0">{stats.available}</h3>
-                                <p className="text-secondary small mb-0">Available Now</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card shadow-sm border-0 rounded-4 p-3 bg-white">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="bg-info-subtle p-3 rounded-4 text-info"><MdEventAvailable size={24} /></div>
-                            <div>
-                                <h3 className="fw-bold mb-0">{stats.booked}</h3>
-                                <p className="text-secondary small mb-0">Today's Bookings</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card shadow-sm border-0 rounded-4 p-3 bg-white">
-                        <div className="d-flex align-items-center gap-3">
-                            <div className="bg-primary-subtle p-3 rounded-4 text-primary"><MdPeople size={24} /></div>
-                            <div>
-                                <h3 className="fw-bold mb-0">{stats.assigned}</h3>
-                                <p className="text-secondary small mb-0">Permanent Seats</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Navigation Tabs */}
@@ -239,7 +215,8 @@ export const DeskManagementContent = () => {
                                 occupancyData.map(floor => (
                                     <div key={floor.id || floor.name} className="col-md-4">
                                         <div
-                                            className="p-4 border rounded-4 bg-white shadow-sm floor-card cursor-pointer transition-all h-100"
+                                            className="dashboard-card animate-float p-4 shadow-sm floor-card cursor-pointer transition-all h-100"
+                                            style={{ borderRadius: '24px', background: '#fff' }}
                                             onClick={() => {
                                                 setSelectedFloor(floor.name);
                                                 setFloorModalView('options');

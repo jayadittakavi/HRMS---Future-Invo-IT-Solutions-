@@ -175,7 +175,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) return [];
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     getShiftAssignments: async () => {
         const response = await fetch(`${API_BASE}/attendance/shift-assignments`, {
@@ -183,7 +184,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) return [];
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
 
     // 🔸 ID Card View - Manager/Admin
@@ -193,7 +195,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     createIDCard: async (data) => {
         const response = await fetch(`${API_BASE}/id-card/create`, {
@@ -221,7 +224,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     registerDevice: async (data) => {
         const response = await fetch(`${API_BASE}/attendance/features/device/register`, {
@@ -248,7 +252,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     submitRegularization: async (data) => {
         const response = await fetch(`${API_BASE}/attendance/regularization/request`, {
@@ -284,7 +289,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     triggerSync: async () => {
         const response = await fetch(`${API_BASE}/attendance/features/sync/trigger`, {
@@ -300,7 +306,8 @@ export const attendanceService = {
             ...authHeader()
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
 
     // 🔸 Mobile Attendance
@@ -310,7 +317,8 @@ export const attendanceService = {
             ...authHeader('employee')
         });
         if (!response.ok) throw new Error(await response.text());
-        return response.json();
+        const result = await response.json();
+        return Array.isArray(result) ? result : (result.data || []);
     },
     mobilePunch: async (data) => {
         const response = await fetch(`${API_BASE}/attendance/features/punch/mobile`, {

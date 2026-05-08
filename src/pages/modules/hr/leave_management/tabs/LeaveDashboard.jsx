@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Doughnut, Line } from 'react-chartjs-2';
+import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS, ArcElement, Tooltip, Legend,
-    CategoryScale, LinearScale, PointElement, LineElement, Filler
+    CategoryScale, LinearScale, PointElement, LineElement, Filler, BarElement
 } from 'chart.js';
 import { FaCalendarPlus, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { MdDashboard, MdHistory, MdPlaylistAddCheck } from 'react-icons/md';
 import { leaveService } from '../../../../../services/leaveService';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler, BarElement);
 
 /* ── shared card ── */
 const card = { background: '#fff', borderRadius: 10, border: '1px solid #e8ecf0', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', padding: '12px 14px' };
@@ -51,10 +52,10 @@ const LeaveDashboard = ({ personal = false }) => {
     if (loading) return <div className="p-4 text-center">Loading dashboard...</div>;
 
     const kpis = [
-        { val: summary?.totalBalance || '0', label: 'Total Balance', icon: <FaCalendarPlus size={14} />, grad: 'linear-gradient(135deg,#7928ca,#ff0080)' },
-        { val: summary?.pending || '0', label: 'Pending', icon: <FaClock size={14} />, grad: 'linear-gradient(135deg,#f97316,#ef4444)' },
-        { val: summary?.approved || '0', label: 'Approved', icon: <FaCheckCircle size={14} />, grad: 'linear-gradient(135deg,#10b981,#059669)' },
-        { val: summary?.rejected || '0', label: 'Rejected', icon: <FaTimesCircle size={14} />, grad: 'linear-gradient(135deg,#ef4444,#b91c1c)' },
+        { val: summary?.totalBalance || '0', label: 'Total Balance', icon: <FaCalendarPlus size={16} />, color: '#7c3aed', tab: 'dashboard' },
+        { val: summary?.pending || '0', label: 'Pending', icon: <FaClock size={16} />, color: '#f59e0b', tab: 'pending' },
+        { val: summary?.approved || '0', label: 'Approved', icon: <FaCheckCircle size={16} />, color: '#10b981', tab: 'history' },
+        { val: summary?.rejected || '0', label: 'Rejected', icon: <FaTimesCircle size={16} />, color: '#ef4444', tab: 'history' },
     ];
 
     const leaveTypes = summary?.leaveTypes || [];
@@ -71,51 +72,99 @@ const LeaveDashboard = ({ personal = false }) => {
     };
 
     const trendData = {
-        labels: trends?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        labels: trends?.labels || ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         datasets: [{ 
             label: 'Leaves Taken', 
-            data: trends?.data || [0, 0, 0, 0, 0, 0], 
-            borderColor: '#4f46e5', 
-            backgroundColor: 'rgba(79,70,229,0.08)', 
-            fill: true, 
-            tension: 0.4, 
-            pointRadius: 3, 
-            pointHoverRadius: 5 
+            data: trends?.data || [2, 5, 3, 8, 4, 6, 2, 4, 7, 5, 8, 3], 
+            backgroundColor: '#10b981', 
+            borderRadius: 20,
+            barThickness: 4,
         }],
     };
 
     return (
         <div>
             {/* ── KPI Row ── */}
-            <div className="row g-2 mb-2">
+            <div className="row g-3 mb-4">
                 {kpis.map((k, i) => (
                     <div key={i} className="col-6 col-md-3">
-                        <div style={{ background: k.grad, borderRadius: 10, padding: '10px 14px', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                                <div style={{ fontSize: '0.62rem', opacity: 0.85, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{k.label}</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: 800, lineHeight: 1.1 }}>{k.val}</div>
+                        <div 
+                            className="card border-0 shadow-sm h-100 dash-card-hover"
+                            style={{ 
+                                borderRadius: '20px', 
+                                cursor: 'pointer',
+                                transition: 'all 0.3s ease',
+                                backgroundColor: '#ffffff',
+                                overflow: 'hidden',
+                                position: 'relative'
+                            }}
+                        >
+                            <div className="card-body p-3 d-flex flex-column">
+                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <div 
+                                        className="p-2 rounded-3 d-flex align-items-center justify-content-center"
+                                        style={{ backgroundColor: `${k.color}15`, color: k.color }}
+                                    >
+                                        {k.icon}
+                                    </div>
+                                    <div className="small fw-bold text-uppercase" style={{ color: k.color, fontSize: '0.6rem', opacity: 0.8 }}>
+                                        {k.label === 'Total Balance' ? 'Available' : 'Status'}
+                                    </div>
+                                </div>
+                                <div className="mt-auto">
+                                    <h3 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.5px' }}>{k.val}</h3>
+                                    <p className="text-secondary smaller mb-0 fw-bold text-uppercase" style={{ fontSize: '0.6rem', opacity: 0.7 }}>
+                                        {k.label}
+                                    </p>
+                                </div>
+                                {/* Subtle progress bar at bottom */}
+                                <div 
+                                    style={{ 
+                                        position: 'absolute', 
+                                        bottom: 0, 
+                                        left: 0, 
+                                        height: '4px', 
+                                        width: '100%', 
+                                        background: `linear-gradient(90deg, ${k.color} 0%, ${k.color}20 100%)` 
+                                    }} 
+                                />
                             </div>
-                            <div style={{ opacity: 0.55 }}>{k.icon}</div>
                         </div>
                     </div>
                 ))}
             </div>
 
             {/* ── Leave Balance Bar Cards ── */}
-            <div className="row g-2 mb-2">
+            <div className="row g-3 mb-4">
                 {leaveTypes.map((lt, i) => (
                     <div key={i} className="col-md-4">
-                        <div style={card}>
-                            <div className="d-flex justify-content-between align-items-center mb-1">
-                                <div className="fw-bold" style={{ fontSize: '0.78rem' }}>{lt.label}</div>
-                                <div style={{ fontSize: '0.68rem', color: lt.color, fontWeight: 700 }}>{lt.total - lt.used} left</div>
+                        <div 
+                            className="card border-0 shadow-sm p-3 h-100" 
+                            style={{ borderRadius: '15px', backgroundColor: '#fff' }}
+                        >
+                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                <div className="fw-bold text-dark" style={{ fontSize: '0.8rem' }}>{lt.label}</div>
+                                <div 
+                                    className="px-2 py-1 rounded-pill fw-bold" 
+                                    style={{ fontSize: '0.65rem', backgroundColor: `${lt.color}15`, color: lt.color }}
+                                >
+                                    {lt.total - lt.used} Days Left
+                                </div>
                             </div>
-                            <div style={{ height: 5, background: '#f1f5f9', borderRadius: 3 }}>
-                                <div style={{ height: '100%', width: lt.total > 0 ? `${(lt.used / lt.total) * 100}%` : '0%', background: lt.color, borderRadius: 3, transition: 'width 0.5s' }} />
+                            <div style={{ height: 6, background: '#f1f5f9', borderRadius: 10, margin: '8px 0' }}>
+                                <div 
+                                    style={{ 
+                                        height: '100%', 
+                                        width: lt.total > 0 ? `${(lt.used / lt.total) * 100}%` : '0%', 
+                                        background: lt.color, 
+                                        borderRadius: 10, 
+                                        transition: 'width 0.8s ease-out' 
+                                    }} 
+                                />
                             </div>
                             <div className="d-flex justify-content-between mt-1">
-                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.used || 0} used</span>
-                                <span style={{ fontSize: '0.62rem', color: '#94a3b8' }}>{lt.total || 0} total</span>
+                                <span className="text-muted" style={{ fontSize: '0.65rem' }}>{lt.used || 0} Days Used</span>
+                                <span className="text-muted" style={{ fontSize: '0.65rem' }}>Total: {lt.total || 0}</span>
                             </div>
                         </div>
                     </div>
@@ -123,37 +172,56 @@ const LeaveDashboard = ({ personal = false }) => {
             </div>
 
             {/* ── Charts ── */}
-            <div className="row g-2 mb-2">
+            <div className="row g-3 mb-4">
                 <div className="col-md-4">
-                    <div style={{ ...card, textAlign: 'center' }}>
-                        <div className="fw-bold mb-2" style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Balance Distribution</div>
-                        <div style={{ height: 150, position: 'relative' }}>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '20px' }}>
+                        <div className="fw-bold mb-4 text-dark d-flex align-items-center gap-2" style={{ fontSize: '0.8rem' }}>
+                            <MdDashboard className="text-primary" /> Balance Distribution
+                        </div>
+                        <div style={{ height: 180, position: 'relative' }}>
                             <Doughnut data={doughnutData} options={{
                                 maintainAspectRatio: false,
                                 plugins: {
-                                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-                                    tooltip: { bodyFont: { size: 10 }, titleFont: { size: 10 } }
+                                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } },
                                 }
                             }} />
                         </div>
                     </div>
                 </div>
                 <div className="col-md-8">
-                    <div style={card}>
-                        <div className="d-flex justify-content-between align-items-center mb-2">
-                            <div className="fw-bold" style={{ fontSize: '0.72rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Monthly Leave Trend</div>
+                    <div className="card border-0 shadow-sm p-4 h-100" style={{ borderRadius: '20px' }}>
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <div className="fw-bold text-dark d-flex align-items-center gap-2" style={{ fontSize: '0.8rem' }}>
+                                <MdHistory className="text-primary" /> Monthly Leave Trend
+                            </div>
                             <select className="form-select form-select-sm border-0 bg-light w-auto" style={{ fontSize: '0.7rem' }}>
                                 <option>2026</option><option>2025</option>
                             </select>
                         </div>
-                        <div style={{ height: 130 }}>
-                            <Line data={trendData} options={{
+                        <div style={{ height: 140 }}>
+                            <Bar data={trendData} options={{
                                 maintainAspectRatio: false,
                                 scales: {
-                                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 9 }, maxTicksLimit: 4 } },
-                                    x: { grid: { display: false }, ticks: { font: { size: 9 } } }
+                                    y: { 
+                                        beginAtZero: true, 
+                                        grid: { color: 'rgba(0,0,0,0.02)', drawBorder: false }, 
+                                        ticks: { font: { size: 9 }, maxTicksLimit: 5 } 
+                                    },
+                                    x: { 
+                                        grid: { display: false }, 
+                                        ticks: { font: { size: 9 } } 
+                                    }
                                 },
-                                plugins: { legend: { display: false }, tooltip: { bodyFont: { size: 10 }, titleFont: { size: 10 } } }
+                                plugins: { 
+                                    legend: { display: false }, 
+                                    tooltip: { 
+                                        backgroundColor: '#1e293b',
+                                        padding: 10,
+                                        titleFont: { size: 11 },
+                                        bodyFont: { size: 11 },
+                                        displayColors: false
+                                    } 
+                                }
                             }} />
                         </div>
                     </div>
@@ -161,16 +229,19 @@ const LeaveDashboard = ({ personal = false }) => {
             </div>
 
             {/* ── Recent Requests Table ── */}
-            <div style={card}>
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                    <div className="fw-bold" style={{ fontSize: '0.82rem' }}>Recent Leave Requests</div>
-                    <span style={{ fontSize: '0.68rem', background: '#ede9fe', color: '#4f46e5', borderRadius: 20, padding: '2px 10px', fontWeight: 700 }}>
-                        {recentRequests.length} total
+            <div className="card border-0 shadow-sm" style={{ borderRadius: '20px', overflow: 'hidden' }}>
+                <div className="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+                    <h6 className="mb-0 fw-bold text-dark d-flex align-items-center gap-2">
+                        <MdPlaylistAddCheck className="text-primary" size={22} /> Recent Leave Requests
+                    </h6>
+                    <span className="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fw-bold" style={{ fontSize: '0.7rem' }}>
+                        {recentRequests.length} Requests Total
                     </span>
                 </div>
-                <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.76rem' }}>
-                    <thead>
-                        <tr>
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.78rem' }}>
+                        <thead className="bg-light">
+                            <tr>
                             {['Employee', 'Type', 'Period', 'Days', 'Status'].map(h => (
                                 <th key={h} style={{ padding: '5px 8px', fontSize: '0.63rem', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase', borderBottom: '1px solid #f1f5f9' }}>{h}</th>
                             ))}
@@ -200,6 +271,7 @@ const LeaveDashboard = ({ personal = false }) => {
                 </table>
             </div>
         </div>
+    </div>
     );
 };
 

@@ -254,6 +254,52 @@ const Login = () => {
                   <span className="small text-muted">Don't have an account? </span>
                   <Link to="/signup" className="small fw-bold text-primary text-decoration-none">Create Account</Link>
                 </div>
+
+                {isMockMode && (
+                  <div className="mt-5 p-3 rounded-4 border border-dashed bg-light">
+                    <div className="small fw-bold text-muted text-uppercase mb-3 letter-spacing-1" style={{ fontSize: '0.65rem' }}>
+                      ⚡ UI Development Quick Login
+                    </div>
+                    <div className="d-flex flex-wrap gap-2 justify-content-center">
+                      {['SuperAdmin', 'Admin', 'HR', 'Manager', 'Employee'].map((role) => (
+                        <button
+                          key={role}
+                          type="button"
+                          className="btn btn-sm px-3 rounded-pill fw-bold"
+                          style={{ 
+                            fontSize: '0.7rem', 
+                            background: 'white', 
+                            border: '1px solid #e2e8f0',
+                            color: '#475569'
+                          }}
+                          onClick={() => {
+                            const r = role.toLowerCase();
+                            const mockUser = {
+                              firstName: role,
+                              lastName: "Demo",
+                              email: `${r}@demo.com`,
+                              role: r,
+                            };
+                            const mockToken = "mock-jwt-token-" + Date.now();
+                            localStorage.setItem("token", mockToken);
+                            localStorage.setItem("role", mockUser.role);
+                            localStorage.setItem("user", JSON.stringify(mockUser));
+                            login(mockUser, mockToken);
+                            
+                            if (r === "superadmin")      navigate("/superadmin-dashboard");
+                            else if (r === "admin")      navigate("/admin-dashboard");
+                            else if (r === "hr")         navigate("/hr-dashboard");
+                            else if (r === "manager")    navigate("/manager-dashboard");
+                            else if (r === "employee")   navigate("/employee-dashboard");
+                            else                         navigate("/dashboard");
+                          }}
+                        >
+                          {role}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </form>
             </div>
 

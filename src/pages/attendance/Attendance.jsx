@@ -60,20 +60,31 @@ export const AttendanceContent = ({ personal = false, initialTab = 'dashboard' }
     ];
 
     const renderContent = () => {
-        switch (activeTab) {
-            case 'dashboard': return <AttendanceDashboard onTabChange={setActiveTab} />;
-            case 'my-attendance': return <MyAttendanceList />;
-            case 'mark': return <MarkAttendance />;
-            case 'bulk': return <BulkAttendance />;
-            case 'shift': return <ShiftView />;
-            case 'idcard': return <IDCardView />;
-            case 'devices': return <AddDevice />;
-            case 'regularization': return <Regularization />;
-            case 'sync': return <SyncUI />;
-            case 'sync-logs': return <SyncLogs />;
-            case 'mobile': return <MobileAttendance />;
-            case 'policy': return <AttendancePolicy />;
-            default: return <AttendanceDashboard />;
+        console.log(`Attendance: Rendering tab [${activeTab}]`);
+        try {
+            switch (activeTab) {
+                case 'dashboard': return <AttendanceDashboard onTabChange={setActiveTab} />;
+                case 'my-attendance': return <MyAttendanceList />;
+                case 'mark': return <MarkAttendance />;
+                case 'bulk': return <BulkAttendance />;
+                case 'shift': return <ShiftView />;
+                case 'idcard': return <IDCardView />;
+                case 'devices': return <AddDevice />;
+                case 'regularization': return <Regularization />;
+                case 'sync': return <SyncUI />;
+                case 'sync-logs': return <SyncLogs />;
+                case 'mobile': return <MobileAttendance />;
+                case 'policy': return <AttendancePolicy />;
+                default: return <AttendanceDashboard />;
+            }
+        } catch (error) {
+            console.error(`Attendance: Crash in tab [${activeTab}]:`, error);
+            return (
+                <div className="alert alert-danger m-3 p-4 rounded-4 shadow-sm">
+                    <h5 className="fw-bold">Component Error</h5>
+                    <p className="mb-0">The <strong>{activeTab}</strong> page failed to load. Please try refreshing or select another tab.</p>
+                </div>
+            );
         }
     };
 

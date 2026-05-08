@@ -14,6 +14,7 @@ import {
     LineElement
 } from 'chart.js';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import { MultiAreaChart, PremiumDonutChart } from '../../../components/charts/CustomCharts';
 
 ChartJS.register(
     CategoryScale,
@@ -47,12 +48,12 @@ const ManagerOverallStats = ({ onNavigate }) => {
     }, []);
 
     const summaryCards = [
-        { label: 'Total Team', value: statsData?.totalMembers || '12', icon: <FaUsers />, color: 'bg-gradient-purple', sub: 'Full Strength' },
-        { label: 'Present Today', value: statsData?.presentToday || '9', icon: <FaCalendarCheck />, color: 'bg-gradient-green', sub: '75% Attendance' },
-        { label: 'Pending Tasks', value: statsData?.pendingTasks || '5', icon: <FaClipboardList />, color: 'bg-gradient-orange', sub: 'Needs Review' },
-        { label: 'Avg. Efficiency', value: statsData?.avgEfficiency || '85%', icon: <FaChartLine />, color: 'bg-gradient-blue', sub: 'Top Performance' },
-        { label: 'Clocked Hours', value: statsData?.clockedHours || '42h', icon: <FaPlusCircle />, color: 'bg-gradient-cyan', sub: 'This Week' },
-        { label: 'Active Goals', value: statsData?.activeGoals || '3', icon: <FaChartLine />, color: 'bg-gradient-pink', sub: 'On Track' },
+        { label: 'TOTAL TEAM', value: statsData?.totalMembers || '12', icon: <FaUsers />, color: '#8b5cf6', sub: 'Full Strength' },
+        { label: 'PRESENT TODAY', value: statsData?.presentToday || '9', icon: <FaCalendarCheck />, color: '#10b981', sub: '75% Attendance' },
+        { label: 'PENDING TASKS', value: statsData?.pendingTasks || '5', icon: <FaClipboardList />, color: '#f59e0b', sub: 'Needs Review' },
+        { label: 'AVG. EFFICIENCY', value: statsData?.avgEfficiency || '85%', icon: <FaChartLine />, color: '#3b82f6', sub: 'Top Performance' },
+        { label: 'CLOCKED HOURS', value: statsData?.clockedHours || '42h', icon: <FaPlusCircle />, color: '#06b6d4', sub: 'This Week' },
+        { label: 'ACTIVE GOALS', value: statsData?.activeGoals || '3', icon: <FaChartLine />, color: '#ec4899', sub: 'On Track' },
     ];
 
     const teamAttendance = {
@@ -168,32 +169,40 @@ const ManagerOverallStats = ({ onNavigate }) => {
             </div>
 
             {/* Top Stats Row with Gradients */}
-            <div className="row g-4 mb-4">
+            <div className="row g-4 mb-5">
                 {summaryCards.map((stat, index) => (
                     <div className="col-md-2 col-6" key={index}>
                         <div
-                            className={`dashboard-card ${stat.color} hover-lift text-white p-3 h-100 shadow-sm border-0`}
+                            className={`dashboard-card hover-lift p-3 h-100 shadow-sm ${index % 2 === 0 ? 'animate-float' : 'animate-float-delayed'}`}
                             style={{
                                 borderRadius: '24px',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                                background: 'rgba(255, 255, 255, 0.75)',
+                                backdropFilter: 'blur(12px)',
+                                border: '1px solid rgba(255, 255, 255, 0.4)',
+                                borderLeft: `5px solid ${stat.color}`,
+                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                position: 'relative',
+                                overflow: 'hidden'
                             }}
                         >
                             <div className="d-flex align-items-center mb-3">
                                 <div className="rounded-circle d-flex align-items-center justify-content-center"
                                     style={{
-                                        width: '52px',
-                                        height: '52px',
-                                        background: 'rgba(255, 255, 255, 0.15)',
-                                        backdropFilter: 'blur(8px)',
-                                        border: '1px solid rgba(255, 255, 255, 0.2)',
-                                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
+                                        width: '44px',
+                                        height: '44px',
+                                        background: `${stat.color}15`,
+                                        color: stat.color,
+                                        border: `1px solid ${stat.color}30`
                                     }}>
-                                    <span style={{ fontSize: '1.4rem', color: '#ffffff' }}>{stat.icon}</span>
+                                    <span style={{ fontSize: '1.2rem' }}>{stat.icon}</span>
                                 </div>
                             </div>
-                            <h6 className="dashboard-card-title text-white mb-1 opacity-90 fw-bold" style={{ fontSize: '0.65rem', letterSpacing: '0.05em' }}>{stat.label}</h6>
-                            <h3 className="dashboard-value text-white mb-0 fw-bold" style={{ fontSize: '1.75rem', letterSpacing: '-0.02em' }}>{stat.value}</h3>
-                            <p className="small mb-0 opacity-75 mt-1" style={{ fontSize: '0.6rem' }}>{stat.sub}</p>
+                            <h6 className="mb-1 fw-bold text-muted" style={{ fontSize: '0.62rem', letterSpacing: '0.08em' }}>{stat.label}</h6>
+                            <h3 className="mb-0 fw-bold text-dark" style={{ fontSize: '1.6rem', letterSpacing: '-0.02em' }}>{stat.value}</h3>
+                            <div className="d-flex align-items-center gap-1 mt-1">
+                                <span className="fw-bold" style={{ fontSize: '0.65rem', color: stat.color }}>●</span>
+                                <p className="text-secondary small mb-0" style={{ fontSize: '0.65rem', fontWeight: 600 }}>{stat.sub}</p>
+                            </div>
                         </div>
                     </div>
                 ))}
@@ -202,7 +211,7 @@ const ManagerOverallStats = ({ onNavigate }) => {
             <div className="row g-4 mb-4">
                 {/* Team Attendance Trends (Line Chart) */}
                 <div className="col-md-8">
-                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                    <div className="dashboard-card animate-float bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
                         <div className="d-flex justify-content-between align-items-center mb-4">
                             <h6 className="dashboard-card-title mb-0 fw-bold">Team Attendance Trends (This Week)</h6>
                             <select className="form-select form-select-sm w-auto border-0 bg-light">
@@ -211,17 +220,37 @@ const ManagerOverallStats = ({ onNavigate }) => {
                             </select>
                         </div>
                         <div style={{ height: '300px' }}>
-                            <Line data={attendanceTrendData} options={attendanceTrendOptions} />
+                            <MultiAreaChart 
+                                datasets={[
+                                    { label: 'Present', data: [10, 11, 10, 9, 8, 10, 11], color: '#6366f1' },
+                                    { label: 'Absent', data: [1, 0, 1, 2, 3, 1, 0], color: '#10b981' }
+                                ]}
+                                labels={['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']}
+                                height="280px"
+                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Team Attendance Breakdown (Donut) */}
                 <div className="col-md-4">
-                    <div className="dashboard-card bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
+                    <div className="dashboard-card animate-float-delayed bg-white h-100 p-4 shadow-sm border-0" style={{ borderRadius: '16px' }}>
                         <h6 className="dashboard-card-title mb-3 fw-bold">Today's Status</h6>
-                        <div className="py-3 d-flex justify-content-center" style={{ height: '250px' }}>
-                            <Doughnut data={teamAttendance} options={teamAttendanceOptions} />
+                        <div className="py-3">
+                            <PremiumDonutChart 
+                                summaries={[
+                                    { label: 'Active', value: '74' },
+                                    { label: 'Pending', value: '05' },
+                                    { label: 'Away', value: '10' }
+                                ]}
+                                segments={[
+                                    { value: 65, color: '#10b981', label: 'Active' },
+                                    { value: 15, color: '#f59e0b', label: 'Pending' },
+                                    { value: 10, color: '#3b82f6', label: 'Away' },
+                                    { value: 10, color: '#ef4444', label: 'Absent' }
+                                ]}
+                                size="200px"
+                            />
                         </div>
                     </div>
                 </div>

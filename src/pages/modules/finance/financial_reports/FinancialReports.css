@@ -163,14 +163,15 @@
 /* Charts Section */
 .charts-section {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 1.2fr;
   gap: 24px;
-  margin-bottom: 24px;
+  margin: 0 auto 24px auto;
+  max-width: 800px;
 }
 
 .chart-container {
   background: #ffffff;
-  padding: 20px;
+  padding: 16px;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
   display: flex;
@@ -178,6 +179,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid #e2e8f0;
+  max-height: 380px;
 }
 
 .chart-container h4 {

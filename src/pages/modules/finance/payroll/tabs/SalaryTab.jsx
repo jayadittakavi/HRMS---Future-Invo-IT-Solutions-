@@ -3,6 +3,8 @@ import { payrollService } from '../payrollService';
 import { useSearch } from '../../../../../context/SearchContext';
 import SalaryStructureAssignment from './SalaryStructureAssignment';
 import SalarySlip from './SalarySlip';
+import SalaryStructure from './SalaryStructure';
+import SalaryComponent from './SalaryComponent';
 
 /* ─── Sub-navigation items in the Salary UI ─────────── */
 const SALARY_SECTIONS = [
@@ -101,7 +103,15 @@ const SalaryTab = ({ onTabChange }) => {
         return <SalarySlip onBack={() => setActiveSection(null)} />;
     }
 
-    if (activeSection && !['salary-structure-assignment', 'salary-slip'].includes(activeSection)) {
+    if (activeSection === 'salary-structure') {
+        return <SalaryStructure onBack={() => setActiveSection(null)} />;
+    }
+
+    if (activeSection === 'salary-component') {
+        return <SalaryComponent onBack={() => setActiveSection(null)} />;
+    }
+
+    if (activeSection && !['salary-structure-assignment', 'salary-structure', 'salary-component', 'salary-slip'].includes(activeSection)) {
         const section = SALARY_SECTIONS.find(s => s.id === activeSection);
         return (
             <PlaceholderSection
@@ -131,7 +141,7 @@ const SalaryTab = ({ onTabChange }) => {
     }, []);
 
     const handleEditComponent = (name) => {
-        alert(`Opening Edit Modal for Salary Component: ${name}`);
+        setActiveSection('salary-component');
     };
 
     const handleCreateAssignment = () => {
@@ -139,7 +149,7 @@ const SalaryTab = ({ onTabChange }) => {
     };
 
     const handleCreateComponent = () => {
-        alert('Opening Create Salary Component Modal...');
+        setActiveSection('salary-component');
     };
 
     /* ── Default: Show Salary UI grid ───────────────── */
@@ -297,9 +307,9 @@ const SalaryTab = ({ onTabChange }) => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    components.filter(row =>
-                                        (row.name || row.component_name || "").toLowerCase().includes(search.toLowerCase()) ||
-                                        (row.type || "").toLowerCase().includes(search.toLowerCase())
+                                    (Array.isArray(components) ? components : []).filter(row =>
+                                        (row.name || row.component_name || "").toLowerCase().includes((search || '').toLowerCase()) ||
+                                        (row.type || "").toLowerCase().includes((search || '').toLowerCase())
                                     ).map((row, i) => (
                                         <tr key={i} style={{ cursor: 'pointer' }} onClick={() => handleEditComponent(row.name || row.component_name)}>
                                             <td className="px-3 fw-semibold" style={{ color: '#111827' }}>{row.name || row.component_name}</td>

@@ -102,6 +102,7 @@ import DailyTask from "./pages/modules/operations/daily_task/DailyTask";
 
 import ChangePassword from "./pages/settings/ChangePassword";
 import Settings from "./pages/settings/Settings";
+import SettingsDetail from "./pages/settings/SettingsDetail";
 import PlaceholderPage from "./pages/public/PlaceholderPage";
 import NotificationsPage from "./pages/common/NotificationsPage"; // Added
 import AccessDenied from "./pages/common/AccessDenied";
@@ -269,6 +270,7 @@ function AppContent() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/settings/:type" element={<ProtectedRoute><SettingsDetail /></ProtectedRoute>} />
         <Route path="/my-activity" element={<ProtectedRoute><MyLogs /></ProtectedRoute>} />
 
         {/* Admin & Manager Management Routes */}

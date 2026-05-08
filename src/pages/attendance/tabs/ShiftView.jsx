@@ -10,9 +10,10 @@ const ShiftView = () => {
         const fetchShifts = async () => {
             try {
                 const data = await attendanceService.getShifts();
-                // Ensure data is an array
-                const shiftsData = Array.isArray(data) ? data : (data.data || []);
-                if (shiftsData.length > 0) {
+                // Extremely defensive parsing
+                const shiftsData = Array.isArray(data) ? data : (data?.data && Array.isArray(data.data) ? data.data : []);
+                
+                if (shiftsData && shiftsData.length > 0) {
                     setShifts(shiftsData);
                 } else {
                     // Fallback to demo data if nothing is on backend, so it's not totally empty

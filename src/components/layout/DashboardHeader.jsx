@@ -155,18 +155,18 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                             <span>Personal Profile</span>
                                         </div>
 
-                                        {/* Hide Company Hubs for HR, Employee, Manager */}
+                                        {/* Show Company Hubs ONLY for Superadmin and Admin */}
                                         {(() => {
-                                            const r = user?.role?.toLowerCase() || '';
-                                            if (r.includes('hr') || r.includes('employee') || r.includes('manager') || r.includes('fulltime')) {
-                                                return null;
+                                            const r = user?.role?.toLowerCase().replace(/\s/g, '') || '';
+                                            if (r === 'superadmin' || r === 'admin') {
+                                                return (
+                                                    <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
+                                                        <div className="icon-wrapper"><FiMapPin /></div>
+                                                        <span>Company Hubs</span>
+                                                    </div>
+                                                );
                                             }
-                                            return (
-                                                <div className="premium-dropdown-item" onClick={() => handleMenuClick('/branches')}>
-                                                    <div className="icon-wrapper"><FiMapPin /></div>
-                                                    <span>Company Hubs</span>
-                                                </div>
-                                            );
+                                            return null;
                                         })()}
 
                                         <div className="premium-dropdown-item" onClick={() => handleMenuClick('/privacy')}>

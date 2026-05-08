@@ -43,6 +43,23 @@
     --glass-blur: blur(10px);
 }
 
+/* --- ANIMATIONS --- */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+    100% { transform: translateY(0px); }
+}
+
+.animate-float {
+    animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+    animation: float 6s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+
 /* --- SKIN PRESETS --- */
 [data-skin="purple"] {
     --primary-color: #8b5cf6;
@@ -327,6 +344,18 @@ h6 {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 20px 48px rgba(0, 0, 0, 0.08) !important;
     border: 1px solid rgba(0, 0, 0, 0.06) !important;
     border-radius: 1.25rem !important;
+    max-height: 95vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.modal-content::-webkit-scrollbar {
+    display: none;
+}
+
+.modal-lg {
+    max-width: 650px !important;
 }
 
 /* Override Bootstrap .shadow-sm to be richer */

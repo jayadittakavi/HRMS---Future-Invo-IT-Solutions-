@@ -9,7 +9,7 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
     const maxValue = Math.max(...data.map(d => d.value || 0)) || 100;
 
     return (
-        <div style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', padding: '30px 5px 10px' }}>
+        <div className="animate-float" style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', padding: '30px 5px 10px' }}>
             {data.map((item, index) => (
                 <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
 
@@ -57,7 +57,74 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
  * @param {string} size - Diameter of the donut
  * @param {string} centerText - Text to display in the center
  */
+/**
+ * Premium Animated Donut Chart
+ * @param {Array} segments - Array of { value, color, label }
+ * @param {Array} summaries - Array of { label, value }
+ * @param {string} size - Diameter
+ */
+export const PremiumDonutChart = ({ segments = [], summaries = [], size = '220px' }) => {
+    const total = segments.reduce((sum, s) => sum + s.value, 0);
+    const radius = 80;
+    const circumference = 2 * Math.PI * radius;
+    
+    let currentOffset = 0;
+
+    return (
+        <div className="premium-donut-container animate-float" style={{ width: '100%', textAlign: 'center' }}>
+            {/* Summary Headers */}
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '25px' }}>
+                {summaries.map((s, i) => (
+                    <div key={i}>
+                        <h4 style={{ fontWeight: '800', marginBottom: '2px', color: '#334155' }}>{s.value}</h4>
+                        <p style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600' }}>{s.label}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* SVG Donut */}
+            <div style={{ position: 'relative', width: size, height: size, margin: '0 auto' }}>
+                <svg viewBox="0 0 200 200" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                    {segments.map((seg, i) => {
+                        const strokeDasharray = (seg.value / total) * circumference;
+                        const dashOffset = circumference - currentOffset;
+                        currentOffset += strokeDasharray;
+
+                        return (
+                            <circle
+                                key={i}
+                                cx="100"
+                                cy="100"
+                                r={radius}
+                                fill="transparent"
+                                stroke={seg.color}
+                                strokeWidth="30"
+                                strokeDasharray={`${strokeDasharray} ${circumference - strokeDasharray}`}
+                                strokeDashoffset={- (currentOffset - strokeDasharray)}
+                                style={{ transition: 'stroke-dashoffset 1s ease-out' }}
+                            />
+                        );
+                    })}
+                </svg>
+                {/* Center Hole Content (Optional) */}
+                <div style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '65%',
+                    height: '65%',
+                    backgroundColor: 'white',
+                    borderRadius: '50%',
+                    boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.05)'
+                }}></div>
+            </div>
+        </div>
+    );
+};
+
 export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '' }) => {
+
     const total = segments.reduce((sum, seg) => sum + (seg.value || 0), 0);
 
     let currentDeg = 0;
@@ -70,7 +137,7 @@ export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '
     }).join(', ');
 
     return (
-        <div style={{ position: 'relative', width: size, height: size, margin: '0 auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
+        <div className="animate-float" style={{ position: 'relative', width: size, height: size, margin: '0 auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
             {/* Donut Circle */}
             <div style={{
                 width: '100%',
@@ -126,7 +193,7 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
     }).join(' ');
 
     return (
-        <div style={{ width: '100%', height, overflow: 'hidden', position: 'relative' }}>
+        <div className="animate-float" style={{ width: '100%', height, overflow: 'hidden', position: 'relative' }}>
             {/* Background Grid Lines */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: '20px', zIndex: 0 }}>
                 {[1, 2, 3, 4].map(i => <div key={i} style={{ borderBottom: '1px dashed var(--border-color)', width: '100%', height: '1px' }}></div>)}
@@ -187,7 +254,80 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
     );
 };
 
+/**
+ * Multi-Series Area Chart
+ * @param {Array} datasets - Array of { label, data, color }
+ * @param {Array} labels - X-axis labels
+ * @param {string} height - Chart height
+ */
+export const MultiAreaChart = ({ datasets = [], labels = [], height = '300px' }) => {
+    const allValues = datasets.flatMap(d => d.data);
+    const max = Math.max(...allValues) || 100;
+    const width = 500;
+    const h = 250;
+
+    return (
+        <div className="animate-float" style={{ width: '100%', height, position: 'relative', overflow: 'hidden' }}>
+            <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                <defs>
+                    {datasets.map((ds, i) => (
+                        <linearGradient key={`grad-${i}`} id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stopColor={ds.color} stopOpacity="0.5" />
+                            <stop offset="100%" stopColor={ds.color} stopOpacity="0" />
+                        </linearGradient>
+                    ))}
+                </defs>
+
+                {/* Grid Lines */}
+                {[0, 1, 2, 3, 4].map(i => (
+                    <line 
+                        key={i} 
+                        x1="0" 
+                        y1={(i / 4) * (h - 40) + 20} 
+                        x2={width} 
+                        y2={(i / 4) * (h - 40) + 20} 
+                        stroke="rgba(0,0,0,0.03)" 
+                        strokeWidth="1" 
+                    />
+                ))}
+
+                {datasets.map((ds, dsIdx) => {
+                    const points = ds.data.map((val, i) => {
+                        const x = (i / (ds.data.length - 1)) * width;
+                        const y = h - 20 - ((val / max) * (h - 60));
+                        return { x, y };
+                    });
+
+                    const pathData = points.map((p, i) => i === 0 ? `M ${p.x},${p.y}` : `L ${p.x},${p.y}`).join(' ');
+                    const areaData = `${pathData} L ${width},${h} L 0,${h} Z`;
+
+                    return (
+                        <g key={dsIdx}>
+                            <path d={areaData} fill={`url(#grad-${dsIdx})`} />
+                            <path d={pathData} fill="none" stroke={ds.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                            {points.map((p, pIdx) => (
+                                <circle key={pIdx} cx={p.x} cy={p.y} r="3" fill="white" stroke={ds.color} strokeWidth="1.5" />
+                            ))}
+                        </g>
+                    );
+                })}
+            </svg>
+            
+            {/* Legend */}
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '10px' }}>
+                {datasets.map((ds, i) => (
+                    <div key={i} style={{ display: 'flex', alignContent: 'center', gap: '6px', fontSize: '0.7rem', fontWeight: 700, color: '#64748b' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '3px', background: ds.color, marginTop: '2px' }}></div>
+                        {ds.label}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export const SimpleAreaChart = SimpleLineChart; // Alias for now
+
 
 /**
  * Modern Trend Chart with Bezier Curves
@@ -221,7 +361,7 @@ export const ModernTrendChart = ({ data = [], color = '#6366f1', height = '200px
     })();
 
     return (
-        <div style={{ width: '100%', height, overflow: 'visible', position: 'relative' }}>
+        <div className="animate-float" style={{ width: '100%', height, overflow: 'visible', position: 'relative' }}>
             <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
                 <defs>
                     <linearGradient id="modernGradient" x1="0" x2="0" y1="0" y2="1">

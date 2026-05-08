@@ -70,33 +70,7 @@ const ManagerDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Dashboard Tabs */}
-                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('overall');
-                                navigate('/dashboard/manager?tab=overall');
-                            }}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('myspace');
-                                navigate('/dashboard/manager?tab=myspace');
-                            }}
-                        >
-                            My Space
-                        </button>
-                    </div>
-
-                    {dashboardType === 'overall' ? (
-                        <ManagerOverallStats onNavigate={handleNavigate} />
-                    ) : (
-                        <MySpace role="manager" onNavigate={handleNavigate} />
-                    )}
+                    <ManagerOverallStats onNavigate={handleNavigate} />
                 </>
             )}
 

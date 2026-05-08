@@ -268,9 +268,9 @@ const SalaryStructureAssignment = ({ onBack }) => {
     );
 
 
-    const filtered = assignments
+    const filtered = (Array.isArray(assignments) ? assignments : [])
         .filter(a => {
-            const q = search.toLowerCase();
+            const q = (search || '').toLowerCase();
             const empId = a.employee_id || a.employeeId || '';
             const empName = a.employee_name || a.employeeName || '';
             const salStruct = a.salary_structure || a.salaryStructure || '';
@@ -302,7 +302,7 @@ const SalaryStructureAssignment = ({ onBack }) => {
             return dir * String(valA || '').localeCompare(String(valB || ''));
         });
 
-    const departments = [...new Set(MOCK_EMPLOYEES.map(e => e.department))];
+    const departments = [...new Set((Array.isArray(assignments) ? assignments : []).map(e => e.department).filter(Boolean))];
 
     return (
         <div className="container-fluid p-0">

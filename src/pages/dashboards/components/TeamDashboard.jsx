@@ -119,7 +119,7 @@ const TeamDashboard = ({ role }) => {
             <div className="row g-4 mb-5">
                 {stats.map((stat, i) => (
                     <div className="col-md-3 col-sm-6" key={i}>
-                        <div className="stat-card-premium">
+                        <div className={`stat-card-premium ${i % 2 === 0 ? 'animate-float' : 'animate-float-delayed'}`}>
                             <div className="d-flex justify-content-between align-items-start mb-2">
                                 <div className="stat-icon-wrapper shadow-sm" style={{ backgroundColor: stat.bg, color: stat.color }}>
                                     {stat.icon}
@@ -208,7 +208,7 @@ const TeamDashboard = ({ role }) => {
                 {/* Performance & Events */}
                 <div className="col-lg-4">
                     {/* Team Engagement Chart */}
-                    <div className="stat-card-premium mb-4">
+                    <div className="stat-card-premium animate-float mb-4">
                         <h5 className="section-title"><MdOutlineAutoGraph /> Team Resilience</h5>
                         <p className="text-secondary small mb-4">Consistency score over the last month.</p>
                         <div className="py-2">
@@ -231,7 +231,7 @@ const TeamDashboard = ({ role }) => {
                     </div>
 
                     {/* Upcoming Section */}
-                    <div className="stat-card-premium">
+                    <div className="stat-card-premium animate-float-delayed">
                         <h5 className="section-title"><MdOutlineEmojiEvents /> Team Highlights</h5>
                         <div className="events-list">
                             {upcomingHolidays().map((event, i) => (
@@ -252,52 +252,7 @@ const TeamDashboard = ({ role }) => {
                 </div>
             </div>
 
-            {/* Recent Team Activity */}
-            <div className="stat-card-premium mb-4">
-                <h4 className="section-title"><MdOutlineWavingHand /> Recent Activity Feed</h4>
-                <div className="table-responsive">
-                    <table className="table premium-table align-middle">
-                        <tbody>
-                            <tr>
-                                <td width="50">
-                                    <div className="avatar px-1 bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>JD</div>
-                                </td>
-                                <td>
-                                    <span className="fw-bold">John Doe</span> completed the <span className="text-primary">Q3 Performance Milestone</span>
-                                </td>
-                                <td className="text-secondary small">2 hours ago</td>
-                                <td className="text-end">
-                                    <span className="badge-soft badge-soft-success">Milestone</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div className="avatar px-1 bg-success-light text-success rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>SW</div>
-                                </td>
-                                <td>
-                                    <span className="fw-bold">Sarah Wilson</span> started working from <span className="text-blue">Zonal Office (Remote)</span>
-                                </td>
-                                <td className="text-secondary small">4 hours ago</td>
-                                <td className="text-end">
-                                    <span className="badge-soft badge-soft-info">Remote</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div className="avatar px-1 bg-warning-light text-warning rounded-circle d-flex align-items-center justify-content-center" style={{ width: '40px', height: '40px' }}>AK</div>
-                                </td>
-                                <td>
-                                    <span className="fw-bold">Aisha Khan</span> reached a <span className="text-orange">2 Year Anniversary</span> with the team!
-                                </td>
-                                <td className="text-secondary small">Yesterday</td>
-                                <td className="text-end">
-                                    <span className="badge-soft badge-soft-warning">Celebration</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
 
             {/* Invite Member Custom Modal */}
             {showInviteModal && (
