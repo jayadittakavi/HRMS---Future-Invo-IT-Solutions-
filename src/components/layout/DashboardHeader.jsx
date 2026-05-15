@@ -50,33 +50,28 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 >
                     <span className="fs-5 text-dark">☰</span>
                 </button>
-
-                <h1 className="fw-bold fs-5 mb-0" style={{ color: 'var(--cp-deep-navy)', letterSpacing: '-0.3px' }}>
-                    {title || 'Dashboard'}
-                </h1>
             </div>
 
             {/* Right Side: Search & Icons */}
-            <div className="d-flex align-items-center gap-4">
+            <div className="d-flex align-items-center gap-3">
                 {/* Search Bar - only if logged in */}
                 {user && (
-                    <div className="position-relative d-none d-md-block">
+                    <div className="position-relative d-none d-md-block me-2">
                         <input
                             type="text"
                             placeholder="Search anything..."
-                            className="form-control border-0 rounded-pill ps-5 text-main"
+                            className="form-control border-0 rounded-4 ps-5 text-main"
                             style={{
-                                width: '260px',
-                                fontSize: '0.88rem',
-                                backgroundColor: '#ffffff',
+                                width: '280px',
+                                fontSize: '0.9rem',
+                                backgroundColor: '#f1f5f9',
                                 height: '42px',
-                                boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-                                border: '1px solid #f1f5f9'
+                                transition: 'all 0.3s ease'
                             }}
                             value={globalSearchTerm}
                             onChange={(e) => setGlobalSearchTerm(e.target.value)}
                         />
-                        <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style={{ opacity: 0.7 }}>
+                        <span className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted">
                             <FaSearch size={14} />
                         </span>
                     </div>
@@ -85,11 +80,11 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                 <div className="d-flex align-items-center gap-2">
                     {user && (
                         <>
-                            <button className="header-icon-circle-premium" title="Settings" onClick={() => navigate('/settings')}>
-                                <FaCog size={15} />
+                            <button className="header-icon-circle-premium shadow-none" title="Settings" onClick={() => navigate('/settings')} style={{ background: '#f8fafc' }}>
+                                <FaCog size={16} />
                             </button>
-                            <button className="header-icon-circle-premium notify position-relative" title="Notifications" onClick={toggleNotificationDrawer}>
-                                <FaBell size={15} />
+                            <button className="header-icon-circle-premium notify position-relative shadow-none" title="Notifications" onClick={toggleNotificationDrawer} style={{ background: '#f8fafc' }}>
+                                <FaBell size={16} />
                                 {unreadCount > 0 && (
                                     <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-white" style={{ fontSize: '0.55rem', padding: '0.25rem 0.4rem', marginTop: '5px', marginLeft: '-5px' }}>
                                         {unreadCount}
@@ -118,8 +113,10 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                     )}
                                 </div>
                                 <div className="text-start d-none d-xl-block me-1">
-                                    <div className="fw-bold text-main x-small-text leading-tight">{user?.firstName} {user?.lastName}</div>
-                                    <div className="text-muted smaller-text leading-tight">{user?.role || 'Staff'}</div>
+                                    <div className="fw-bold text-main x-small-text leading-tight">
+                                        {user?.firstName || user?.lastName ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() : user?.username || 'User'}
+                                    </div>
+                                    <div className="text-muted smaller-text leading-tight text-capitalize">{user?.role || 'Staff'}</div>
                                 </div>
                             </button>
 
@@ -140,7 +137,9 @@ const DashboardHeader = ({ toggleSidebar, onNavigate, title }) => {
                                                 )}
                                             </div>
                                             <div className="overflow-hidden">
-                                                <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>{user?.firstName} {user?.lastName}</div>
+                                                <div className="fw-bold text-dark text-truncate" style={{ fontSize: '1rem' }}>
+                                                    {user?.firstName || user?.lastName ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() : user?.username || 'User'}
+                                                </div>
                                                 <div className="text-muted text-truncate" style={{ fontSize: '0.75rem' }}>{user?.email || 'user@example.com'}</div>
                                             </div>
                                         </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import '../../components/layout/DashboardLayout.css';
 
 export const AssetsContent = () => {
     // Mock Data

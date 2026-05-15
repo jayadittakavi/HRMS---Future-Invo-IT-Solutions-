@@ -9,7 +9,7 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
     const maxValue = Math.max(...data.map(d => d.value || 0)) || 100;
 
     return (
-        <div className="animate-float" style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', padding: '30px 5px 10px' }}>
+        <div className="animate-in chart-tilt-effect" style={{ height, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '8px', padding: '30px 5px 10px' }}>
             {data.map((item, index) => (
                 <div key={index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1, height: '100%', justifyContent: 'flex-end', position: 'relative' }}>
 
@@ -26,7 +26,7 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
                     </div>
 
                     <div
-                        className="chart-bar-visual"
+                        className="chart-bar-visual animate-grow-y"
                         style={{
                             width: '45%',
                             minWidth: '10px',
@@ -34,9 +34,10 @@ export const SimpleBarChart = ({ data = [], height = '250px' }) => {
                             height: `${(item.value / maxValue) * 100}%`,
                             background: item.color ? `linear-gradient(180deg, ${item.color} 0%, ${item.color}90 100%)` : 'linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)',
                             borderRadius: '12px 12px 4px 4px',
-                            transition: 'height 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                            transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
                             position: 'relative',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                            cursor: 'pointer'
                         }}
                         title={`${item.label}: ${item.value}`}
                     ></div>
@@ -71,7 +72,7 @@ export const PremiumDonutChart = ({ segments = [], summaries = [], size = '220px
     let currentOffset = 0;
 
     return (
-        <div className="premium-donut-container animate-float" style={{ width: '100%', textAlign: 'center' }}>
+        <div className="premium-donut-container animate-in chart-tilt-effect" style={{ width: '100%', textAlign: 'center' }}>
             {/* Summary Headers */}
             <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '25px' }}>
                 {summaries.map((s, i) => (
@@ -137,7 +138,7 @@ export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '
     }).join(', ');
 
     return (
-        <div className="animate-float" style={{ position: 'relative', width: size, height: size, margin: '0 auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
+        <div className="animate-in hover-glow chart-tilt-effect" style={{ position: 'relative', width: size, height: size, margin: '0 auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.05))' }}>
             {/* Donut Circle */}
             <div style={{
                 width: '100%',
@@ -193,7 +194,7 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
     }).join(' ');
 
     return (
-        <div className="animate-float" style={{ width: '100%', height, overflow: 'hidden', position: 'relative' }}>
+        <div className="animate-in chart-tilt-effect" style={{ width: '100%', height, overflow: 'hidden', position: 'relative' }}>
             {/* Background Grid Lines */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', paddingBottom: '20px', zIndex: 0 }}>
                 {[1, 2, 3, 4].map(i => <div key={i} style={{ borderBottom: '1px dashed var(--border-color)', width: '100%', height: '1px' }}></div>)}
@@ -233,8 +234,8 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
                     const x = (i / (data.length - 1)) * width;
                     const y = 200 - ((val / max) * 180);
                     return (
-                        <g key={i}>
-                            <circle cx={x} cy={y} r="5" fill="var(--bg-card)" stroke={color} strokeWidth="3" />
+                        <g key={i} className="chart-marker">
+                            <circle cx={x} cy={y} r="5" fill="var(--bg-card)" stroke={color} strokeWidth="3" style={{ transition: 'r 0.3s ease' }} />
                             <text
                                 x={x}
                                 y={y - 12}
@@ -267,7 +268,7 @@ export const MultiAreaChart = ({ datasets = [], labels = [], height = '300px' })
     const h = 250;
 
     return (
-        <div className="animate-float" style={{ width: '100%', height, position: 'relative', overflow: 'hidden' }}>
+        <div className="animate-in chart-tilt-effect" style={{ width: '100%', height, position: 'relative', overflow: 'hidden' }}>
             <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
                 <defs>
                     {datasets.map((ds, i) => (
@@ -326,6 +327,82 @@ export const MultiAreaChart = ({ datasets = [], labels = [], height = '300px' })
     );
 };
 
+/**
+ * Premium Multi-Series Area Chart with Bezier Curves
+ */
+export const PremiumMultiAreaChart = ({ datasets = [], labels = [], height = '300px' }) => {
+    const allValues = datasets.flatMap(d => d.data);
+    const max = Math.max(...allValues) || 100;
+    const width = 500;
+    const h = 250;
+
+    return (
+        <div className="animate-in chart-tilt-effect" style={{ width: '100%', height, position: 'relative', overflow: 'visible' }}>
+            <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
+                <defs>
+                    {datasets.map((ds, i) => (
+                        <linearGradient key={`pgrad-${i}`} id={`pgrad-${i}`} x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stopColor={ds.color} stopOpacity="0.4" />
+                            <stop offset="100%" stopColor={ds.color} stopOpacity="0" />
+                        </linearGradient>
+                    ))}
+                </defs>
+
+                {/* Horizontal Grid Lines */}
+                {[0, 1, 2, 3, 4].map(i => (
+                    <line 
+                        key={i} 
+                        x1="0" 
+                        y1={(i / 4) * (h - 40) + 20} 
+                        x2={width} 
+                        y2={(i / 4) * (h - 40) + 20} 
+                        stroke="rgba(0,0,0,0.03)" 
+                        strokeWidth="1" 
+                    />
+                ))}
+
+                {datasets.map((ds, dsIdx) => {
+                    const points = ds.data.map((val, i) => ({
+                        x: (i / (ds.data.length - 1)) * width,
+                        y: h - 20 - ((val / max) * (h - 60))
+                    }));
+
+                    if (points.length < 2) return null;
+
+                    // Generate Bezier path
+                    const curvePath = points.reduce((acc, p, i, a) => {
+                        if (i === 0) return `M ${p.x},${p.y}`;
+                        const prev = a[i - 1];
+                        const cp1x = (prev.x + p.x) / 2;
+                        return `${acc} C ${cp1x},${prev.y} ${cp1x},${p.y} ${p.x},${p.y}`;
+                    }, "");
+
+                    const areaPath = `${curvePath} L ${width},${h} L 0,${h} Z`;
+
+                    return (
+                        <g key={dsIdx} style={{ mixBlendMode: 'multiply', opacity: 0.85 }}>
+                            <path d={areaPath} fill={`url(#pgrad-${dsIdx})`} />
+                            <path d={curvePath} fill="none" stroke={ds.color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                        </g>
+                    );
+                })}
+
+                {/* X-Axis Labels */}
+                <g>
+                    {labels.map((label, i) => {
+                        const x = (i / (labels.length - 1)) * width;
+                        return (
+                            <text key={i} x={x} y={h} textAnchor="middle" fontSize="10" fontWeight="700" fill="#94a3b8">
+                                {label}
+                            </text>
+                        );
+                    })}
+                </g>
+            </svg>
+        </div>
+    );
+};
+
 export const SimpleAreaChart = SimpleLineChart; // Alias for now
 
 
@@ -361,7 +438,7 @@ export const ModernTrendChart = ({ data = [], color = '#6366f1', height = '200px
     })();
 
     return (
-        <div className="animate-float" style={{ width: '100%', height, overflow: 'visible', position: 'relative' }}>
+        <div className="animate-in chart-tilt-effect" style={{ width: '100%', height, overflow: 'visible', position: 'relative' }}>
             <svg viewBox={`0 0 ${width} ${h}`} preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
                 <defs>
                     <linearGradient id="modernGradient" x1="0" x2="0" y1="0" y2="1">

@@ -7,6 +7,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { NotificationProvider } from "./context/NotificationContext"; // Added
 import { AutomationProvider } from "./context/AutomationContext";
 import { SearchProvider } from "./context/SearchContext";
+import { PermissionsProvider } from './context/PermissionsContext';
 import ProtectedRoute from "./components/ProtectedRoute";
 import TeamMembers from './pages/modules/manager/components/TeamMembers';
 import { AttendanceContent } from "./pages/attendance/Attendance";
@@ -90,6 +91,7 @@ import Onboarding from "./pages/modules/hr/onboarding/Onboarding";
 /* Administration */
 import Delegation from "./pages/modules/administration/delegation/Delegation";
 import Visitor from "./pages/modules/administration/visitor/Visitor";
+import VisitorApprovalsPage from "./pages/modules/administration/visitor/VisitorApprovalsPage";
 import DeskManagement from "./pages/modules/administration/desk/DeskManagement";
 
 /* Finance */
@@ -171,7 +173,6 @@ function AppContent() {
           <Route index element={<DashboardManager />} />
 
           {/* Shared Views */}
-          <Route path="my-space" element={<MySpace />} />
           <Route path="my-team" element={<MyTeam />} />
           <Route path="manage-squad" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadManagement /></ProtectedRoute>} />
           <Route path="squad-details/:id" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><SquadDetails /></ProtectedRoute>} />
@@ -206,6 +207,7 @@ function AppContent() {
         {/* Administration - Delegation, Visitor, Desk */}
         <Route path="/delegation" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'manager', 'hr']}><Delegation /></ProtectedRoute>} />
         <Route path="/visitors" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><Visitor /></ProtectedRoute>} />
+        <Route path="/visitor-approvals" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager']}><VisitorApprovalsPage /></ProtectedRoute>} />
         <Route path="/desk-management" element={<ProtectedRoute requiredRoles={['superadmin', 'admin', 'hr', 'manager', 'employee']}><DeskManagement /></ProtectedRoute>} />
 
         {/* Helpdesk & Automation */}
@@ -304,9 +306,11 @@ export default function App() {
         <NotificationProvider>
           <AutomationProvider>
             <SearchProvider>
-              <BrowserRouter>
-                <AppContent />
-              </BrowserRouter>
+              <PermissionsProvider>
+                <BrowserRouter>
+                  <AppContent />
+                </BrowserRouter>
+              </PermissionsProvider>
             </SearchProvider>
           </AutomationProvider>
         </NotificationProvider>

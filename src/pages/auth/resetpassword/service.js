@@ -1,4 +1,4 @@
-const API_URL = `${window.location.origin}/api/auth/reset-password`;
+const API_URL = `/api/auth/reset-password`;
 
 export const resetPassword = async (email, token, new_password) => {
     try {

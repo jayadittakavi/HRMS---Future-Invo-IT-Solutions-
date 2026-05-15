@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import '../../components/layout/DashboardLayout.css';
 
 export const LeaveManagementContent = () => {
     // Mock Data

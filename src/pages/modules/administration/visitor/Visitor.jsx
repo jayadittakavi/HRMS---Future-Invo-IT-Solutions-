@@ -6,9 +6,11 @@ import { visitorService } from '../../../../services/visitorService';
 import { API_BASE } from '../../../../config';
 import {
     MdPersonAdd, MdAssignment, MdHistory, MdBarChart,
-    MdCheckCircle, MdCancel, MdLogin, MdLogout, MdPrint,
-    MdSearch, MdFilterList, MdTimer, MdMeetingRoom
+    MdCheckCircle, MdSearch, MdFilterList, MdTimer
 } from 'react-icons/md';
+import VisitorRequest from './tabs/VisitorRequest';
+import VisitorLog from './tabs/VisitorLog';
+import VisitorReports from './tabs/VisitorReports';
 
 export const VisitorContent = () => {
     const { user } = useAuth();
@@ -73,49 +75,7 @@ export const VisitorContent = () => {
         fetchStaff();
     }, [activeTab]); // Refetch when tab changes
 
-    const [visitors, setVisitors] = useState([
-        {
-            id: 1,
-            name: 'John Doe',
-            company: 'Tech Corp',
-            purpose: 'Software Demo',
-            host: 'Rahul Sharma',
-            host_id: 'emp123',
-            manager: 'Suresh Kumar',
-            date: '2026-02-24',
-            time: '02:00 PM',
-            status: 'Pending', // Flow: Pending -> Approved -> Checked-In -> Checked-Out
-            requested_by: 'Rahul Sharma'
-        },
-        {
-            id: 2,
-            name: 'Alice Smith',
-            company: 'Self',
-            purpose: 'Interview',
-            host: 'Priya HR',
-            host_id: 'hr456',
-            manager: 'Admin',
-            date: '2026-02-24',
-            time: '11:00 AM',
-            status: 'Approved',
-            requested_by: 'Priya HR'
-        },
-        {
-            id: 3,
-            name: 'Robert C.',
-            company: 'Logistics Inc',
-            purpose: 'Delivery',
-            host: 'Front Desk',
-            host_id: 'reception',
-            manager: 'Suresh Kumar',
-            date: '2026-02-23',
-            time: '04:15 PM',
-            status: 'Checked-Out',
-            check_in: '04:15 PM',
-            check_out: '04:45 PM',
-            requested_by: 'Suresh Kumar'
-        }
-    ]);
+    const [visitors, setVisitors] = useState([]);
 
     // Unified filtering logic based on Tab, Search, and Filters
     const filteredVisitors = visitors.filter(v => {
@@ -130,7 +90,6 @@ export const VisitorContent = () => {
         if (filters.host && !v.host.toLowerCase().includes(filters.host.toLowerCase())) return false;
 
         // Tab-specific status filtering (acts as an additional constraint)
-        if (activeTab === 'approvals') return v.status === 'Pending';
         if (activeTab === 'log') return ['Checked-In', 'Checked-Out'].includes(v.status);
         if (activeTab === 'request') return true;
         if (activeTab === 'reports') return true;
@@ -217,30 +176,31 @@ export const VisitorContent = () => {
                 </button>
             </div>
 
-            {/* Navigation Tabs */}
+            {/* Navigation Tabs - Redesigned to match image */}
             <div className="mb-4">
-                <ul className="nav nav-pills bg-white p-2 rounded-4 shadow-sm" style={{ display: 'inline-flex', gap: '8px' }}>
-                    <li className="nav-item">
-                        <button className={`nav-link rounded-3 px-4 ${activeTab === 'request' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('request')}>
-                            <MdAssignment className="me-2" /> Visitor Request
-                        </button>
-                    </li>
-                    <li className="nav-item">
-                        <button className={`nav-link rounded-3 px-4 ${activeTab === 'approvals' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('approvals')}>
-                            <MdCheckCircle className="me-2" /> Approvals
-                        </button>
-                    </li>
-                    <li className="nav-item">
-                        <button className={`nav-link rounded-3 px-4 ${activeTab === 'log' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('log')}>
-                            <MdHistory className="me-2" /> Visitor Log
-                        </button>
-                    </li>
-                    <li className="nav-item">
-                        <button className={`nav-link rounded-3 px-4 ${activeTab === 'reports' ? 'active shadow-sm' : 'text-secondary'}`} onClick={() => setActiveTab('reports')}>
-                            <MdBarChart className="me-2" /> Reports
-                        </button>
-                    </li>
-                </ul>
+                <div className="bg-white p-2 rounded-5 shadow-sm d-inline-flex align-items-center gap-2 border">
+                    <button 
+                        className={`btn d-flex align-items-center gap-2 px-4 py-2 rounded-4 transition-all ${activeTab === 'request' ? 'btn-primary shadow-sm' : 'btn-link text-secondary text-decoration-none'}`} 
+                        onClick={() => setActiveTab('request')}
+                    >
+                        <MdAssignment size={18} /> <span className="fw-bold small">Visitor Request</span>
+                    </button>
+
+                    <button 
+                        className={`btn d-flex align-items-center gap-2 px-4 py-2 rounded-4 transition-all ${activeTab === 'log' ? 'active-tab-secondary' : 'btn-link text-secondary text-decoration-none'}`} 
+                        onClick={() => setActiveTab('log')}
+                        style={{ background: activeTab === 'log' ? '#f1f5f9' : 'transparent', color: activeTab === 'log' ? '#334155' : '' }}
+                    >
+                        <MdHistory size={18} className={activeTab === 'log' ? 'text-primary' : ''} /> <span className="fw-bold small">Visitor Log</span>
+                    </button>
+                    <button 
+                        className={`btn d-flex align-items-center gap-2 px-4 py-2 rounded-4 transition-all ${activeTab === 'reports' ? 'active-tab-secondary' : 'btn-link text-secondary text-decoration-none'}`} 
+                        onClick={() => setActiveTab('reports')}
+                        style={{ background: activeTab === 'reports' ? '#f1f5f9' : 'transparent', color: activeTab === 'reports' ? '#334155' : '' }}
+                    >
+                        <MdBarChart size={18} className={activeTab === 'reports' ? 'text-primary' : ''} /> <span className="fw-bold small">Reports</span>
+                    </button>
+                </div>
             </div>
 
             {/* Search & Statistics */}
@@ -312,126 +272,47 @@ export const VisitorContent = () => {
                                 </div>
                             </div>
                         )}
-                        {activeTab === 'reports' ? (
-                            <div className="p-4 bg-white rounded-4">
-                                <div className="d-flex justify-content-between align-items-center mb-4">
-                                    <h6 className="fw-bold mb-0 text-primary">Operational Performance Report</h6>
-                                    <button className="btn btn-outline-primary btn-sm rounded-pill px-3" onClick={() => window.open(`${API_BASE}/visitor/list?tab=log&export=true`, '_blank')}>
-                                        Export Data
-                                    </button>
-                                </div>
-                                <div className="row g-4">
-                                    <div className="col-md-6">
-                                        <div className="p-4 border rounded-4 bg-light text-center">
-                                            <h2 className="fw-bold text-dark">85%</h2>
-                                            <p className="text-secondary small mb-0">Check-in Efficiency</p>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-6">
-                                        <div className="p-4 border rounded-4 bg-light text-center">
-                                            <h2 className="fw-bold text-dark">18 mins</h2>
-                                            <p className="text-secondary small mb-0">Avg. Meeting Duration</p>
-                                        </div>
-                                    </div>
-                                    <div className="col-md-12">
-                                        <div className="p-3 border-start border-primary border-4 rounded bg-primary-subtle mt-2">
-                                            <small className="fw-bold d-block">Monthly Insight</small>
-                                            <span className="small">Visitor traffic increased by 12% this week compared to last week.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr className="my-4" />
-                                <div className="table-responsive mt-3">
-                                    <h6 className="small fw-bold text-uppercase text-secondary mb-3">All Visitor Data Export View</h6>
-                                    <table className="table table-sm border">
-                                        <thead className="bg-light">
-                                            <tr className="small">
-                                                <th>Ref ID</th>
-                                                <th>Visitor</th>
-                                                <th>Date</th>
-                                                <th>Status</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {visitors.map(v => (
-                                                <tr key={v.id} className="small">
-                                                    <td>#VST-00{v.id}</td>
-                                                    <td>{v.name}</td>
-                                                    <td>{v.date}</td>
-                                                    <td>{v.status}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="table-responsive">
-                                <table className="table border-0 mb-0 align-middle">
-                                    <thead className="bg-light">
-                                        <tr className="small text-secondary fw-bold text-uppercase">
-                                            <th className="px-4 py-3 border-0">Visitor</th>
-                                            <th className="py-3 border-0">Purpose</th>
-                                            <th className="py-3 border-0">Host / Meeting With</th>
-                                            <th className="py-3 border-0">Time</th>
-                                            <th className="py-3 border-0">Status</th>
-                                            <th className="pe-4 py-3 border-0 text-end">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredVisitors.map(v => (
-                                            <tr key={v.id} className="border-bottom-light">
-                                                <td className="px-4 py-3">
-                                                    <div className="fw-bold">{v.name}</div>
-                                                    <div className="text-muted small">{v.company}</div>
-                                                </td>
-                                                <td className="py-3 small fw-medium">{v.purpose}</td>
-                                                <td className="py-3">
-                                                    <div className="fw-bold small">{v.host}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.7rem' }}>{v.date}</div>
-                                                </td>
-                                                <td className="py-3 small">{v.time}</td>
-                                                <td className="py-3">{getStatusBadge(v.status)}</td>
-                                                <td className="pe-4 py-3 text-end">
-                                                    <div className="d-flex justify-content-end gap-2">
-                                                        {v.status === 'Pending' && (
-                                                            <>
-                                                                <button className="btn btn-sm btn-success rounded-pill px-3" onClick={() => handleAction(v.id, 'Approved')}>Approve</button>
-                                                                <button className="btn btn-sm btn-outline-danger rounded-pill px-3" onClick={() => handleAction(v.id, 'Rejected')}>Reject</button>
-                                                            </>
-                                                        )}
-                                                        {v.status === 'Approved' && (
-                                                            <button className="btn btn-sm btn-primary rounded-pill px-3 d-flex align-items-center gap-1" onClick={() => handleAction(v.id, 'Checked-In')}>
-                                                                <MdLogin /> Check-In
-                                                            </button>
-                                                        )}
-                                                        {v.status === 'Checked-In' && (
-                                                            <button className="btn btn-sm btn-danger rounded-pill px-3 d-flex align-items-center gap-1" onClick={() => handleAction(v.id, 'Checked-Out')}>
-                                                                <MdLogout /> Check-Out
-                                                            </button>
-                                                        )}
-                                                        <button className="btn btn-light btn-sm border-0 rounded-circle" title="Print Pass" onClick={() => handlePrint(v.id)}><MdPrint /></button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {filteredVisitors.length === 0 && (
-                                            <tr>
-                                                <td colSpan="6" className="text-center py-5 text-muted small">No visitor records found for this category.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        
+                        {/* Tab Content Rendering */}
+                        <div className="bg-white">
+                            {activeTab === 'request' && (
+                                <VisitorRequest 
+                                    visitors={filteredVisitors} 
+                                    onAction={handleAction} 
+                                    onPrint={handlePrint} 
+                                    getStatusBadge={getStatusBadge} 
+                                />
+                            )}
+
+                            {activeTab === 'log' && (
+                                <VisitorLog 
+                                    visitors={filteredVisitors} 
+                                    onPrint={handlePrint} 
+                                    getStatusBadge={getStatusBadge} 
+                                />
+                            )}
+                            {activeTab === 'reports' && (
+                                <VisitorReports 
+                                    visitors={visitors} 
+                                    stats={stats} 
+                                    API_BASE={API_BASE} 
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
 
-                {/* Side Stats */}
+            {/* Side Stats */}
                 <div className="col-md-4">
                     <div className="row g-4">
                         <div className="col-12">
-                            <div className="card border-0 shadow-sm rounded-4 p-4" style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', color: '#fff' }}>
+                            <div 
+                                className="card border-0 shadow-sm rounded-4 p-4" 
+                                style={{ 
+                                    background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)', 
+                                    color: '#fff' 
+                                }}
+                            >
                                 <div className="d-flex justify-content-between align-items-center mb-3">
                                     <h6 className="fw-bold mb-0">Daily Summary</h6>
                                     <MdTimer size={24} className="opacity-50" />

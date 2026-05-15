@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSearch } from '../../../../context/SearchContext';
 import { useAuth } from '../../../../context/AuthContext';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { SimpleLineChart } from '../../../../components/charts/CustomCharts';
+import { SimpleLineChart, PremiumMultiAreaChart } from '../../../../components/charts/CustomCharts';
 import { expenseService } from './service';
-import { FaPlaneDeparture, FaReceipt, FaWallet, FaArrowTrendUp, FaEllipsisVertical, FaPlus } from 'react-icons/fa6';
+import { FaPlaneDeparture, FaReceipt, FaWallet, FaArrowTrendUp, FaEllipsisVertical, FaPlus, FaRocket } from 'react-icons/fa6';
 import { MdOutlineHistory, MdFilterList, MdFileDownload } from 'react-icons/md';
 
 export const TravelExpensesContent = () => {
@@ -117,7 +117,7 @@ export const TravelExpensesContent = () => {
             {/* Header / Actions */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 className="fw-bold text-dark mb-1">{isEmployee ? 'My Space' : 'Travel & Expenses'}</h4>
+                    <h4 className="fw-bold text-dark mb-1">{isEmployee ? 'My Expenses' : 'Travel & Expenses'}</h4>
                     <p className="text-secondary small mb-0">{isEmployee ? 'Track your active travel requests and personal reimbursements.' : 'Track employee travel requests and expense reimbursements.'}</p>
                 </div>
                 <div className="d-flex gap-2">
@@ -135,53 +135,53 @@ export const TravelExpensesContent = () => {
             <div className="row g-4 mb-4">
                 {/* BLUE CARD */}
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-blue-solid h-100">
+                    <div className="card hrms-card hrms-card-blue h-100">
                         <div className="card-body p-4 position-relative">
                             <div className="d-flex justify-content-between align-items-start mb-4">
-                                <div className="icon-box-solid text-primary">
+                                <div className="icon-box-solid" style={{ color: '#3b82f6', background: 'rgba(59, 130, 246, 0.1)' }}>
                                     <FaWallet size={20} />
                                 </div>
-                                <span className="badge bg-white text-success rounded-pill px-3 py-2 small d-flex align-items-center gap-1 shadow-sm border border-success border-opacity-25" style={{ fontSize: '0.75rem' }}>
+                                <span className="badge bg-white text-primary rounded-pill px-3 py-2 small d-flex align-items-center gap-1 shadow-sm border" style={{ fontSize: '0.75rem' }}>
                                     <FaArrowTrendUp size={10} /> +12%
                                 </span>
                             </div>
-                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#475569' }}>Total Expenses (YTD)</h6>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1 text-muted">Total Expenses (YTD)</h6>
                             <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#0f172a' }}>{stats.totalExpenses || "$45,200"}</h2>
-                            <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#64748b' }}>Updated 2h ago</p>
+                            <p className="smaller mt-2 mb-0 fw-medium text-muted">Updated 2h ago</p>
                             <div className="card-bg-icon text-primary"><FaWallet /></div>
                         </div>
                     </div>
                 </div>
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-amber-solid h-100">
+                    <div className="card hrms-card hrms-card-orange h-100">
                         <div className="card-body p-4 position-relative">
                             <div className="d-flex justify-content-between align-items-start mb-4">
-                                <div className="icon-box-solid text-warning" style={{ background: '#fef3c7' }}>
+                                <div className="icon-box-solid" style={{ color: '#d97706', background: 'rgba(217, 119, 6, 0.1)' }}>
                                     <FaReceipt size={20} />
                                 </div>
                                 <div className="tall-pill-icon text-secondary cursor-pointer hover-shadow transition-all">
                                     <FaEllipsisVertical size={14} />
                                 </div>
                             </div>
-                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#78350f' }}>Pending Claims</h6>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#92400e' }}>Pending Claims</h6>
                             <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>{stats.pendingClaims || "08"}</h2>
-                            <p className="smaller mt-2 mb-0 fw-bold" style={{ color: '#d97706' }}>Requires approval action</p>
+                            <p className="smaller mt-2 mb-0 fw-bold" style={{ color: '#b45309' }}>Requires approval action</p>
                             <div className="card-bg-icon text-warning"><FaReceipt /></div>
                         </div>
                     </div>
                 </div>
                 <div className="col-md-4">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden premium-card premium-card-green-solid h-100">
+                    <div className="card hrms-card hrms-card-green h-100">
                         <div className="card-body p-4 position-relative">
                             <div className="d-flex justify-content-between align-items-start mb-4">
-                                <div className="icon-box-solid text-success" style={{ background: '#dcfce7' }}>
+                                <div className="icon-box-solid" style={{ color: '#059669', background: 'rgba(16, 185, 129, 0.1)' }}>
                                     <FaPlaneDeparture size={20} />
                                 </div>
                                 <div className="tall-pill-icon text-secondary cursor-pointer hover-shadow transition-all">
                                     <MdOutlineHistory size={16} />
                                 </div>
                             </div>
-                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#064e3b' }}>Approved Trips</h6>
+                            <h6 className="small fw-bold text-uppercase mb-2 ls-1" style={{ color: '#065f46' }}>Approved Trips</h6>
                             <h2 className="fw-bolder mb-0" style={{ fontSize: '2.5rem', letterSpacing: '-0.05rem', color: '#1e293b' }}>{stats.approvedTrips || "15"}</h2>
                             <p className="smaller mt-2 mb-0 fw-medium" style={{ color: '#047857' }}>Next: NYC Client Meeting (Tomorrow)</p>
                             <div className="card-bg-icon text-success"><FaPlaneDeparture /></div>
@@ -197,85 +197,85 @@ export const TravelExpensesContent = () => {
                         <div className="card-body p-4">
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <div>
-                                    <h6 className="fw-bold text-dark mb-1">Expense Trends (Last 6 Months)</h6>
-                                    {(() => {
-                                        if (!trends || trends.length < 2) return null;
-                                        const last = trends[trends.length - 1];
-                                        const prev = trends[trends.length - 2];
-                                        const diff = last - prev;
-                                        const percent = prev && prev !== 0 ? ((diff / prev) * 100).toFixed(1) : "0.0";
-                                        const isUp = diff > 0;
-                                        return (
-                                            <div className="d-flex align-items-center gap-2">
-                                                <span className={`smaller fw-bold ${isUp ? 'text-danger' : 'text-success'}`}>
-                                                    {isUp ? '+' : ''}${Math.abs(diff)}
-                                                    <span className="ms-1">({isUp ? '+' : ''}{percent}%)</span>
-                                                </span>
-                                                <span className="smallest text-muted text-uppercase fw-bold ls-1">vs Last Month</span>
-                                            </div>
-                                        );
-                                    })()}
+                                    <h6 className="fw-bold text-dark mb-1">Area Chart</h6>
+                                    <div className="d-flex gap-4 mt-3">
+                                        <div>
+                                            <h5 className="fw-bold mb-0" style={{ color: '#0f172a' }}>86541</h5>
+                                            <span className="smaller text-muted fw-bold">Activated</span>
+                                        </div>
+                                        <div>
+                                            <h5 className="fw-bold mb-0" style={{ color: '#0f172a' }}>2541</h5>
+                                            <span className="smaller text-muted fw-bold">Pending</span>
+                                        </div>
+                                        <div>
+                                            <h5 className="fw-bold mb-0" style={{ color: '#0f172a' }}>102030</h5>
+                                            <span className="smaller text-muted fw-bold">Deactivated</span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <select className="form-select form-select-sm border-0 bg-light w-auto rounded-3 px-3 fw-bold">
                                     <option>2025 Overview</option>
                                     <option>2024 Overview</option>
                                 </select>
                             </div>
-                             <div className="px-2" style={{ marginTop: '-10px' }}>
-                                <SimpleLineChart data={trends} height="300px" color="#3b82f6" />
+                             <div className="px-2">
+                                <PremiumMultiAreaChart 
+                                    datasets={[
+                                        { label: 'Activated', data: [100, 150, 200, 180, 250, 350, 280], color: '#4fd1c5' },
+                                        { label: 'Pending', data: [80, 120, 180, 140, 220, 280, 240], color: '#38b2ac' },
+                                        { label: 'Deactivated', data: [50, 80, 140, 110, 180, 230, 200], color: '#9f7aea' }
+                                    ]}
+                                    labels={['2012', '2013', '2014', '2015', '2016', '2017', '2018']}
+                                    height="350px"
+                                />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="col-lg-4">
-                    <div className="card border-0 shadow-sm rounded-4 h-100 text-white position-relative overflow-hidden"
-                        style={{
-                            background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 50%, #06b6d4 100%)',
-                            boxShadow: '0 15px 35px rgba(59, 130, 246, 0.3)'
-                        }}>
+                    <div className="card hrms-card hrms-card-indigo h-100">
                         <div className="card-body p-4 position-relative z-1">
-                            <h6 className="small fw-bold text-uppercase text-white-50 mb-4 ls-1">Budget Utilization</h6>
+                            <h6 className="small fw-bold text-uppercase text-muted mb-4 ls-1">Budget Utilization</h6>
                             {budget.length > 0 ? budget.map((b, i) => (
                                 <div className="mb-4" key={i}>
                                     <div className="d-flex justify-content-between mb-1">
-                                        <span className="small">{b.label}</span>
-                                        <span className="small fw-bold">{b.value}%</span>
+                                        <span className="small text-dark fw-medium">{b.label}</span>
+                                        <span className="small fw-bold text-dark">{b.value}%</span>
                                     </div>
-                                    <div className="progress bg-white-10" style={{ height: '6px' }}>
-                                        <div className="progress-bar bg-white" style={{ width: `${b.value}%` }}></div>
+                                    <div className="progress bg-light" style={{ height: '6px' }}>
+                                        <div className="progress-bar" style={{ width: `${b.value}%`, background: '#6366f1' }}></div>
                                     </div>
                                 </div>
                             )) : (
                                 <>
                                     <div className="mb-4">
                                         <div className="d-flex justify-content-between mb-1">
-                                            <span className="small">Marketing Dept</span>
-                                            <span className="small fw-bold">85%</span>
+                                            <span className="small text-dark fw-medium">Marketing Dept</span>
+                                            <span className="small fw-bold text-dark">85%</span>
                                         </div>
-                                        <div className="progress bg-white-10" style={{ height: '6px' }}>
-                                            <div className="progress-bar bg-white" style={{ width: '85%' }}></div>
+                                        <div className="progress bg-light" style={{ height: '6px' }}>
+                                            <div className="progress-bar" style={{ width: '85%', background: '#6366f1' }}></div>
                                         </div>
                                     </div>
                                     <div className="mb-4">
                                         <div className="d-flex justify-content-between mb-1">
-                                            <span className="small">Sales Operations</span>
-                                            <span className="small fw-bold">42%</span>
+                                            <span className="small text-dark fw-medium">Sales Operations</span>
+                                            <span className="small fw-bold text-dark">42%</span>
                                         </div>
-                                        <div className="progress bg-white-10" style={{ height: '6px' }}>
-                                            <div className="progress-bar bg-white" style={{ width: '42%' }}></div>
+                                        <div className="progress bg-light" style={{ height: '6px' }}>
+                                            <div className="progress-bar" style={{ width: '42%', background: '#6366f1' }}></div>
                                         </div>
                                     </div>
                                 </>
                             )}
                             <div className="mt-5 pt-3">
-                                <p className="small text-white-50 mb-2">Policy Compliance</p>
+                                <p className="small text-muted mb-2">Policy Compliance</p>
                                 <div className="d-flex align-items-center gap-2">
-                                    <div className="fs-3 fw-bold">98.4%</div>
-                                    <span className="badge bg-white text-primary rounded-pill smaller px-2">High</span>
+                                    <div className="fs-3 fw-bold text-dark">98.4%</div>
+                                    <span className="badge bg-primary-subtle text-primary rounded-pill smaller px-2">High</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="chart-bg-accent"></div>
                     </div>
                 </div>
             </div>

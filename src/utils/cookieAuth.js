@@ -259,7 +259,7 @@ export async function attemptTokenRefresh() {
   if (!refreshToken) return null;
 
   try {
-    const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+    const BASE = '';
     const response = await fetch(`${BASE}/api/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

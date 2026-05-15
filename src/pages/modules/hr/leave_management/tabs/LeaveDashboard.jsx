@@ -89,15 +89,12 @@ const LeaveDashboard = ({ personal = false }) => {
                 {kpis.map((k, i) => (
                     <div key={i} className="col-6 col-md-3">
                         <div 
-                            className="card border-0 shadow-sm h-100 dash-card-hover"
-                            style={{ 
-                                borderRadius: '20px', 
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                backgroundColor: '#ffffff',
-                                overflow: 'hidden',
-                                position: 'relative'
-                            }}
+                            className={`card hrms-card h-100 dash-card-hover ${
+                                k.label === 'Total Balance' ? 'hrms-card-purple' : 
+                                k.label === 'Pending' ? 'hrms-card-orange' : 
+                                k.label === 'Approved' ? 'hrms-card-green' : 'hrms-card-red'
+                            }`}
+                            style={{ cursor: 'pointer' }}
                         >
                             <div className="card-body p-3 d-flex flex-column">
                                 <div className="d-flex align-items-center justify-content-between mb-3">
@@ -117,17 +114,6 @@ const LeaveDashboard = ({ personal = false }) => {
                                         {k.label}
                                     </p>
                                 </div>
-                                {/* Subtle progress bar at bottom */}
-                                <div 
-                                    style={{ 
-                                        position: 'absolute', 
-                                        bottom: 0, 
-                                        left: 0, 
-                                        height: '4px', 
-                                        width: '100%', 
-                                        background: `linear-gradient(90deg, ${k.color} 0%, ${k.color}20 100%)` 
-                                    }} 
-                                />
                             </div>
                         </div>
                     </div>

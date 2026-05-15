@@ -1,10 +1,10 @@
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { CompaniesContent } from '../../modules/core/companies/Companies';
 import { BranchesContent } from '../../modules/core/branches/Branches';
 import { DepartmentsContent } from '../../modules/core/departments/Departments';
 import { AssetsContent } from '../../modules/operations/assets/Assets';
 import { AssetCategoriesContent } from '../../modules/operations/assets/AssetCategories';
-import { EmployeesContent } from '../../modules/hr/employees/Employees';
+import { EmployeesContent } from '../../employees/Employees';
 import { PayrollContent } from '../../modules/finance/payroll/Payroll';
 import { LeaveManagementContent } from '../../modules/hr/leave_management/LeaveManagement';
 import { AttendanceContent } from '../../attendance/Attendance';

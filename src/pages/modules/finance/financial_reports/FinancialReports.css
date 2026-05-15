@@ -163,10 +163,10 @@
 /* Charts Section */
 .charts-section {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.5fr;
   gap: 24px;
   margin: 0 auto 24px auto;
-  max-width: 800px;
+  max-width: 100%;
 }
 
 .chart-container {

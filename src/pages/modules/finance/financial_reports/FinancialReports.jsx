@@ -74,8 +74,10 @@ const FinancialReports = () => {
     datasets: [
       {
         data: Object.values(departmentData),
-        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
-        hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+        backgroundColor: ['#f472b6', '#3b82f6', '#fbbf24', '#2dd4bf'],
+        hoverBackgroundColor: ['#ec4899', '#2563eb', '#f59e0b', '#06b6d4'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
       }
     ]
   };
@@ -88,7 +90,8 @@ const FinancialReports = () => {
         label: 'Net Pay (Salary)',
         data: data.map(item => item.netPay),
         backgroundColor: '#4338ca', // Indigo bars
-        borderRadius: 8,
+        borderRadius: 6,
+        barThickness: 30, // Thinner bars
         order: 2,
       },
       {
@@ -120,19 +123,19 @@ const FinancialReports = () => {
       <Filters filters={filters} onFilterChange={handleFilterChange} />
 
       <div className="summary-cards">
-        <div className="card">
+        <div className="card hrms-card hrms-card-indigo">
           <h3>Total Salary Paid</h3>
           <p className="amount">${totalSalary.toLocaleString()}</p>
         </div>
-        <div className="card">
+        <div className="card hrms-card hrms-card-blue">
           <h3>Total Employees</h3>
           <p className="amount">{data.length}</p>
         </div>
-        <div className="card">
+        <div className="card hrms-card hrms-card-red">
           <h3>Total Deductions</h3>
           <p className="amount">${totalDeductions.toLocaleString()}</p>
         </div>
-        <div className="card">
+        <div className="card hrms-card hrms-card-green">
           <h3>Net Payroll</h3>
           <p className="amount">${totalNetPay.toLocaleString()}</p>
         </div>

@@ -22,7 +22,7 @@ ChartJS.register(
     Title, PointElement, LineElement, Filler
 );
 
-const MySpace = ({ role, onNavigate }) => {
+const MySpace = ({ role, onNavigate, compact = false }) => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [data, setData] = React.useState(null);
@@ -91,84 +91,88 @@ const MySpace = ({ role, onNavigate }) => {
     const go = (path) => onNavigate ? onNavigate(path) : navigate(`/${path}`);
 
     return (
-        <div className="container-fluid p-0">
-            {/* Header with Quick Actions */}
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 className="fw-bold text-dark mb-0">My Space</h5>
-                    <p className="text-secondary small mb-0">Overview of your attendance, leaves and activities.</p>
-                </div>
-                <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary px-3" onClick={() => go('my-attendance')}>
-                        <MdFactCheck className="me-1" /> Attendance
-                    </button>
-                    <button className="btn btn-sm btn-outline-primary px-3" onClick={() => go('my-leaves')}>
-                        <MdEventBusy className="me-1" /> Leave History
-                    </button>
-                    <button className="btn btn-sm btn-primary px-3 shadow-sm" onClick={() => go('request-leave')}>
-                        + Apply Leave
-                    </button>
-                </div>
-            </div>
+        <div className={`container-fluid p-0 ${compact ? '' : 'py-1'}`}>
+            {!compact && (
+                <>
+                    {/* Header with Quick Actions */}
+                    <div className="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h5 className="fw-bold text-dark mb-0">My Dashboard</h5>
+                            <p className="text-secondary small mb-0">Overview of your attendance, leaves and activities.</p>
+                        </div>
+                        <div className="d-flex gap-2">
+                            <button className="btn btn-sm btn-outline-primary px-3" onClick={() => go('my-attendance')}>
+                                <MdFactCheck className="me-1" /> Attendance
+                            </button>
+                            <button className="btn btn-sm btn-outline-primary px-3" onClick={() => go('my-leaves')}>
+                                <MdEventBusy className="me-1" /> Leave History
+                            </button>
+                            <button className="btn btn-sm btn-primary px-3 shadow-sm" onClick={() => go('request-leave')}>
+                                + Apply Leave
+                            </button>
+                        </div>
+                    </div>
 
-            {/* Top Cards: Status & Stats */}
-            <div className="row g-4 mb-4">
-                {/* Today's Check-in Card */}
-                <div className="col-md-4">
-                    <div className="dashboard-card bg-gradient-purple text-white p-4 h-100"
-                        onClick={() => go('my-attendance')}
-                        style={{ cursor: 'pointer', transition: 'transform 0.2s' }}>
-                        <div className="d-flex justify-content-between align-items-start mb-4">
-                            <div>
-                                <h6 className="fw-bold opacity-75 mb-1">Today's Status</h6>
-                                <h2 className="mb-0">Logged In</h2>
-                                <p className="small opacity-75 mt-1">Shift Time: 09:00 AM - 06:00 PM</p>
-                            </div>
-                            <div className="bg-white bg-opacity-25 p-3 rounded-circle">
-                                <FaClock size={24} />
+                    {/* Top Cards: Status & Stats */}
+                    <div className="row g-4 mb-4">
+                        {/* Today's Check-in Card */}
+                        <div className="col-md-4">
+                            <div className="dashboard-card bg-gradient-purple text-white p-4 h-100"
+                                onClick={() => go('my-attendance')}
+                                style={{ cursor: 'pointer', transition: 'transform 0.2s' }}>
+                                <div className="d-flex justify-content-between align-items-start mb-4">
+                                    <div>
+                                        <h6 className="fw-bold opacity-75 mb-1">Today's Status</h6>
+                                        <h2 className="mb-0">Logged In</h2>
+                                        <p className="small opacity-75 mt-1">Shift Time: 09:00 AM - 06:00 PM</p>
+                                    </div>
+                                    <div className="bg-white bg-opacity-25 p-3 rounded-circle">
+                                        <FaClock size={24} />
+                                    </div>
+                                </div>
+                                <div className="d-flex justify-content-between pt-3 border-top border-white border-opacity-25">
+                                    <div>
+                                        <small className="opacity-75 d-block">PUNCH IN</small>
+                                        <span className="fw-bold">09:12 AM</span>
+                                    </div>
+                                    <div>
+                                        <small className="opacity-75 d-block">WORK TIME</small>
+                                        <span className="fw-bold">5h 24m</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div className="d-flex justify-content-between pt-3 border-top border-white border-opacity-25">
-                            <div>
-                                <small className="opacity-75 d-block">PUNCH IN</small>
-                                <span className="fw-bold">09:12 AM</span>
-                            </div>
-                            <div>
-                                <small className="opacity-75 d-block">WORK TIME</small>
-                                <span className="fw-bold">5h 24m</span>
+
+                        {/* Leave Balances Summary */}
+                        <div className="col-md-8">
+                            <div className="dashboard-card bg-white p-4 h-100"
+                                onClick={() => go('my-leaves')}
+                                style={{ cursor: 'pointer' }}>
+                                <div className="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 className="fw-bold text-dark mb-0">Available Leave Balances</h6>
+                                    <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0" onClick={() => go('my-leaves')}>View Balance Details</button>
+                                </div>
+                                <div className="row g-3">
+                                    {leaveBalances.map((l, i) => (
+                                        <div key={i} className="col-md-4">
+                                            <div className="p-3 bg-light rounded-3 border">
+                                                <div className="text-secondary small fw-bold text-uppercase mb-1">{l.type}</div>
+                                                <div className="d-flex align-items-end gap-2 mb-2">
+                                                    <h3 className="mb-0 fw-bold text-dark">{l.rem}</h3>
+                                                    <span className="text-muted small mb-1">/ {l.total} days</span>
+                                                </div>
+                                                <div className="progress" style={{ height: '5px' }}>
+                                                    <div className={`progress-bar bg-${l.color || 'primary'}`} style={{ width: `${(l.rem / l.total) * 100}%` }}></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Leave Balances Summary */}
-                <div className="col-md-8">
-                    <div className="dashboard-card bg-white p-4 h-100"
-                        onClick={() => go('my-leaves')}
-                        style={{ cursor: 'pointer' }}>
-                        <div className="d-flex justify-content-between align-items-center mb-3">
-                            <h6 className="fw-bold text-dark mb-0">Available Leave Balances</h6>
-                            <button className="btn btn-sm btn-link text-primary text-decoration-none small fw-bold p-0">View Balance Details</button>
-                        </div>
-                        <div className="row g-3">
-                            {leaveBalances.map((l, i) => (
-                                <div key={i} className="col-md-4">
-                                     <div className="p-3 bg-light rounded-3 border">
-                                         <div className="text-secondary small fw-bold text-uppercase mb-1">{l.type}</div>
-                                         <div className="d-flex align-items-end gap-2 mb-2">
-                                             <h3 className="mb-0 fw-bold text-dark">{l.rem}</h3>
-                                             <span className="text-muted small mb-1">/ {l.total} days</span>
-                                         </div>
-                                         <div className="progress" style={{ height: '5px' }}>
-                                             <div className={`progress-bar bg-${l.color || 'primary'}`} style={{ width: `${(l.rem / l.total) * 100}%` }}></div>
-                                         </div>
-                                     </div>
-                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
+                </>
+            )}
 
             {/* Simplified Charts: Bar, Pie, Line */}
             <div className="row g-4 mb-4">

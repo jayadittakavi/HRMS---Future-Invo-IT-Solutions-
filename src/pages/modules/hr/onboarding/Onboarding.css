@@ -1,0 +1,160 @@
+.onboarding-module-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Stepper */
+.onboarding-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+}
+
+.step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+}
+
+.step-icon {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.step-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+}
+
+.step-item.active .step-icon {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+    box-shadow: 0 0 0 5px rgba(99, 102, 241, 0.1);
+}
+
+.step-item.active .step-label {
+    color: #6366f1;
+}
+
+.step-item.completed .step-icon {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.step-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 -30px;
+    margin-bottom: 30px;
+}
+
+/* Form Card */
+.onboarding-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+}
+
+.upload-zone {
+    border: 2px dashed #e2e8f0;
+    background: #f8fafc;
+    transition: all 0.2s;
+}
+
+.upload-zone:hover {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.02);
+}
+
+/* HR Pipeline */
+.pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.pipeline-column {
+    background: #f8fafc;
+    border-radius: 20px;
+    padding: 15px;
+    min-height: 500px;
+}
+
+.badge-count {
+    background: white;
+    color: #64748b;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.onboarding-item-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    transition: transform 0.2s;
+}
+
+.onboarding-item-card:hover {
+    transform: translateY(-3px);
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+    background: #6366f1;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.btn-view-onb {
+    background: transparent;
+    border: none;
+    color: #6366f1;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.empty-stage {
+    border: 1.5px dashed #e2e8f0;
+    border-radius: 12px;
+}
+
+.success-icon-large {
+    animation: bounceIn 0.8s ease;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}

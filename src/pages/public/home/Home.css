@@ -193,6 +193,117 @@
     letter-spacing: -0.02em;
 }
 
+/* TRUSTED BY SECTION */
+.trusted-by {
+    padding: 60px 0;
+    background: transparent;
+}
+
+.trusted-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.purple-text {
+    color: #6366f1;
+}
+
+.trusted-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    max-width: 700px;
+    line-height: 1.6;
+}
+
+.logos-marquee-wrapper {
+    width: 100%;
+    overflow: hidden;
+    padding: 20px 0;
+    position: relative;
+    background: transparent;
+}
+
+/* Gradient Fade Effects for Smooth Scrolling */
+.logos-marquee-wrapper::before,
+.logos-marquee-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 150px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.logos-marquee-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--home-bg) 0%, transparent 100%);
+}
+
+.logos-marquee-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--home-bg) 0%, transparent 100%);
+}
+
+.logos-marquee {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    animation: scrollMarquee 25s linear infinite;
+    gap: 4rem; /* Spacing between logos */
+}
+
+/* Pause on hover for better user experience */
+.logos-marquee:hover {
+    animation-play-state: paused;
+}
+
+.logo-marquee-item {
+    flex: 0 0 auto;
+    width: 280px; /* Consistent width for all logos */
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.company-logo {
+    max-width: 100%;
+    max-height: 85px;
+    object-fit: contain;
+    filter: none;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.logo-marquee-item:hover .company-logo {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+@keyframes scrollMarquee {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        /* Move by half the total width of the content (since we duplicated it) */
+        /* Each logo is 280px + 4rem(64px) gap = 344px. Total 9 logos = 3096px */
+        transform: translateX(calc(-3096px)); 
+    }
+}
+
+@media (max-width: 768px) {
+    .logo-marquee-item {
+        width: 150px;
+    }
+    @keyframes scrollMarquee {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-(150px + 4rem) * 9)); }
+    }
+}
+
 /* STATS SECTION */
 .stats-section {
     padding: 80px 0;
@@ -321,8 +432,8 @@
 }
 
 .pricing-card.featured {
-    background: rgba(255, 255, 255, 0.85);
-    border: 2px solid var(--cp-purple-main);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--cp-purple-main);
     transform: scale(1.05);
     box-shadow: 0 20px 40px rgba(83, 71, 137, 0.15);
 }

@@ -9,6 +9,15 @@ import {
   FaLock, FaPalette, FaMicrochip, FaCheckCircle
 } from "react-icons/fa";
 import heroImg from "../../../assets/images/hrms_hero_illustration_1772780995397.png";
+import inmobiLogo from "../../../assets/images/Inmobi_logo.png";
+import razorpayLogo from "../../../assets/images/Razorpay_logo.png";
+import spotifyLogo from "../../../assets/images/Spotify_logo.png";
+import udaanLogo from "../../../assets/images/Udaan_logo.png";
+import zohoLogo from "../../../assets/images/Zoho_logo.png";
+import freshworksLogo from "../../../assets/images/Freshworks_logo.png";
+import dunzoLogo from "../../../assets/images/Dunzo_logo.png";
+import cleartaxLogo from "../../../assets/images/Cleartax_logo.png";
+import chargebeeLogo from "../../../assets/images/Chargebee_logo.png";
 
 const Home = () => {
   // Scroll Reveal Animation Hook
@@ -52,12 +61,51 @@ const Home = () => {
                 Get Started <FaArrowRight fontSize="0.8rem" />
               </Link>
               <Link to="/contact" className="btn-premium btn-glass">
-                Request Demo
+                Contact Sales
               </Link>
             </div>
           </div>
           <div className="col-lg-6 hero-image-wrapper reveal">
             <img src={heroImg} alt="HRMS Ecosystem" className="hero-main-img" />
+          </div>
+        </div>
+      </section>
+      
+      {/* TRUSTED BY SECTION */}
+      <section className="trusted-by reveal">
+        <div className="container text-center">
+          <h2 className="trusted-title mb-3">Trusted by <span className="purple-text">100+</span> companies worldwide</h2>
+          <p className="trusted-subtitle mx-auto mb-5">
+            Teams across fintech, SaaS, and enterprise trust our HRMS to manage their workforce, process payroll faster, and scale with confidence.
+          </p>
+          <div className="logos-marquee-wrapper mt-5">
+            <div className="logos-marquee">
+              {[
+                { img: inmobiLogo, alt: "Inmobi" },
+                { img: razorpayLogo, alt: "Razorpay" },
+                { img: zohoLogo, alt: "Zoho" },
+                { img: spotifyLogo, alt: "Spotify" },
+                { img: udaanLogo, alt: "Udaan" },
+                { img: freshworksLogo, alt: "Freshworks" },
+                { img: dunzoLogo, alt: "Dunzo" },
+                { img: cleartaxLogo, alt: "Cleartax" },
+                { img: chargebeeLogo, alt: "Chargebee" },
+                // Duplicate for seamless loop
+                { img: inmobiLogo, alt: "Inmobi" },
+                { img: razorpayLogo, alt: "Razorpay" },
+                { img: zohoLogo, alt: "Zoho" },
+                { img: spotifyLogo, alt: "Spotify" },
+                { img: udaanLogo, alt: "Udaan" },
+                { img: freshworksLogo, alt: "Freshworks" },
+                { img: dunzoLogo, alt: "Dunzo" },
+                { img: cleartaxLogo, alt: "Cleartax" },
+                { img: chargebeeLogo, alt: "Chargebee" },
+              ].map((logo, idx) => (
+                <div key={idx} className="logo-marquee-item">
+                  <img src={logo.img} alt={logo.alt} className="company-logo" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -189,34 +237,43 @@ const Home = () => {
           {/* Starter Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card">
-              <h4>Starter</h4>
-              <div className="price">₹0 <span>/ month</span></div>
+              <h4 className="text-indigo">Starter</h4>
+              <div className="price">₹999 <span>/ month</span></div>
+              <p className="small text-muted mb-4">For individuals getting started</p>
               <ul className="price-features">
-                <li><FaCheckCircle /> Up to 10 Employees</li>
-                <li><FaCheckCircle /> Basic Employee Database</li>
-                <li><FaCheckCircle /> Manual Attendance</li>
-                <li className="opacity-50"><FaCheckCircle /> Priority Support</li>
+                <li><FaCheckCircle /> Lead management</li>
+                <li><FaCheckCircle /> Basic analytics</li>
+                <li><FaCheckCircle /> Email support</li>
+                <li><FaCheckCircle /> 2 team members</li>
+                <li><FaCheckCircle /> Up to 1,000 contacts</li>
+                <li><FaCheckCircle /> Basic pipeline management</li>
+                <li><FaCheckCircle /> Standard support</li>
               </ul>
               <Link to="/signup" className="btn-premium btn-glass w-100 justify-content-center">
-                Begin Free
+                Get Started
               </Link>
             </div>
           </div>
 
-          {/* Business Plan */}
+          {/* Growth Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card featured">
               <span className="popular-chip">Most Popular</span>
-              <h4>Business</h4>
-              <div className="price">₹999 <span>/ month</span></div>
+              <h4 className="text-indigo">Growth</h4>
+              <div className="price">₹2,499 <span>/ month</span></div>
+              <p className="small text-muted mb-4">Best for growing teams</p>
               <ul className="price-features">
-                <li><FaCheckCircle /> Up to 200 Employees</li>
-                <li><FaCheckCircle /> Automated Payroll</li>
-                <li><FaCheckCircle /> Expense Management</li>
-                <li><FaCheckCircle /> Priority Support</li>
+                <li><FaCheckCircle /> Everything in Starter</li>
+                <li><FaCheckCircle /> Team collaboration</li>
+                <li><FaCheckCircle /> Up to 10,000 contacts</li>
+                <li><FaCheckCircle /> Advanced pipeline & automation</li>
+                <li><FaCheckCircle /> Email campaigns & tracking</li>
+                <li><FaCheckCircle /> Custom reports & dashboards</li>
+                <li><FaCheckCircle /> API access</li>
+                <li><FaCheckCircle /> Priority support</li>
               </ul>
               <Link to="/signup" className="btn-premium btn-indigo w-100 justify-content-center">
-                Go Professional
+                Get Started
               </Link>
             </div>
           </div>
@@ -224,13 +281,18 @@ const Home = () => {
           {/* Enterprise Plan */}
           <div className="col-lg-4 col-md-6 reveal">
             <div className="pricing-card">
-              <h4>Enterprise</h4>
+              <h4 className="text-indigo">Enterprise</h4>
               <div className="price">Custom</div>
+              <p className="small text-muted mb-4">For large scale operations</p>
               <ul className="price-features">
-                <li><FaCheckCircle /> Unlimited Scale</li>
-                <li><FaCheckCircle /> Dedicated Support</li>
-                <li><FaCheckCircle /> Custom API Access</li>
-                <li><FaCheckCircle /> White-label Branding</li>
+                <li><FaCheckCircle /> Unlimited users</li>
+                <li><FaCheckCircle /> Custom integrations</li>
+                <li><FaCheckCircle /> Dedicated manager</li>
+                <li><FaCheckCircle /> Advanced AI insights</li>
+                <li><FaCheckCircle /> SSO & advanced security</li>
+                <li><FaCheckCircle /> Dedicated success manager</li>
+                <li><FaCheckCircle /> 24/7 premium support</li>
+                <li><FaCheckCircle /> Custom training</li>
               </ul>
               <Link to="/contact" className="btn-premium btn-glass w-100 justify-content-center">
                 Contact Sales

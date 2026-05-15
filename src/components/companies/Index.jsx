@@ -224,46 +224,52 @@ export const CompaniesContent = () => {
             {/* Premium Stat Cards Row */}
             <div className="row g-4 mb-5">
                 <div className="col-md-4">
-                    <div className="premium-stat-card blue-gradient">
-                        <div className="card-overlay"></div>
-                        <div className="stat-content">
-                            <div className="stat-icon-box">
-                                <FaBuilding className="stat-icon" />
+                    <div className="card hrms-card hrms-card-blue h-100">
+                        <div className="card-body p-4 d-flex align-items-center">
+                            <div className="icon-box-solid me-4" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+                                <FaBuilding size={24} />
                             </div>
-                            <div className="stat-info">
-                                <span className="stat-title">Total Registered</span>
-                                <h2 className="stat-number">{companies.length}</h2>
-                                <span className="stat-trend">+10% from last month</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-4">
-                    <div className="premium-stat-card green-gradient">
-                        <div className="card-overlay"></div>
-                        <div className="stat-content">
-                            <div className="stat-icon-box">
-                                <FaGlobe className="stat-icon" />
-                            </div>
-                            <div className="stat-info">
-                                <span className="stat-title">System Health</span>
-                                <h2 className="stat-number">Active</h2>
-                                <span className="stat-trend">100% Uptime</span>
+                            <div className="flex-grow-1">
+                                <div className="text-uppercase text-muted fw-bold small ls-1 mb-1" style={{ fontSize: '0.65rem' }}>Total Registered</div>
+                                <h2 className="fw-bold text-dark mb-1">{companies.length}</h2>
+                                <div className="text-success small fw-bold d-flex align-items-center gap-1">
+                                    <span className="mb-0">↑ +10%</span>
+                                    <span className="text-muted fw-normal" style={{ fontSize: '0.7rem' }}>from last month</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="col-md-4">
-                    <div className="premium-stat-card purple-gradient">
-                        <div className="card-overlay"></div>
-                        <div className="stat-content">
-                            <div className="stat-icon-box">
-                                <FaUsers className="stat-icon" />
+                    <div className="card hrms-card hrms-card-green h-100">
+                        <div className="card-body p-4 d-flex align-items-center">
+                            <div className="icon-box-solid me-4" style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
+                                <FaGlobe size={24} />
                             </div>
-                            <div className="stat-info">
-                                <span className="stat-title">Global Reach</span>
-                                <h2 className="stat-number">Live</h2>
-                                <span className="stat-trend">24/7 Monitoring</span>
+                            <div className="flex-grow-1">
+                                <div className="text-uppercase text-muted fw-bold small ls-1 mb-1" style={{ fontSize: '0.65rem' }}>System Health</div>
+                                <h2 className="fw-bold text-success mb-1">Active</h2>
+                                <div className="text-success small fw-bold d-flex align-items-center gap-1">
+                                    <span className="mb-0">↑ 100%</span>
+                                    <span className="text-muted fw-normal" style={{ fontSize: '0.7rem' }}>Uptime</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-4">
+                    <div className="card hrms-card hrms-card-purple h-100">
+                        <div className="card-body p-4 d-flex align-items-center">
+                            <div className="icon-box-solid me-4" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+                                <FaUsers size={24} />
+                            </div>
+                            <div className="flex-grow-1">
+                                <div className="text-uppercase text-muted fw-bold small ls-1 mb-1" style={{ fontSize: '0.65rem' }}>Global Reach</div>
+                                <h2 className="fw-bold text-dark mb-1">Live</h2>
+                                <div className="text-primary small fw-bold d-flex align-items-center gap-1">
+                                    <span className="mb-0">↑ 24/7</span>
+                                    <span className="text-muted fw-normal" style={{ fontSize: '0.7rem' }}>Monitoring</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -271,26 +277,29 @@ export const CompaniesContent = () => {
             </div>
 
             {/* Smart Search & Actions Row */}
-            <div className="smart-action-row mb-5">
-                <div className="search-box-premium">
-                    <FaSearch className="search-icon-glamor" />
-                    <input
-                        type="text"
-                        placeholder="Search by name, ID, or industry..."
-                        className="search-input-premium"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            const val = e.target.value;
-                            setSearchTerm(val);
-                            setGlobalSearchTerm(val);
-                        }}
-                    />
+            <div className="d-flex justify-content-between align-items-center mb-4 gap-3">
+                <div className="search-box-premium flex-grow-1 shadow-sm rounded-4 overflow-hidden" style={{ border: '1px solid #e2e8f0' }}>
+                    <div className="d-flex align-items-center bg-white px-3 py-2">
+                        <FaSearch className="text-muted me-3" />
+                        <input
+                            type="text"
+                            placeholder="Search by name, ID, or industry..."
+                            className="form-control border-0 bg-transparent py-2 shadow-none"
+                            style={{ fontSize: '0.9rem' }}
+                            value={searchTerm}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setSearchTerm(val);
+                                setGlobalSearchTerm(val);
+                            }}
+                        />
+                    </div>
                 </div>
                 <button
-                    className="btn-add-premium rounded-pill"
+                    className="btn btn-primary rounded-4 px-4 py-3 d-flex align-items-center gap-2 shadow-sm"
                     onClick={() => { resetForm(); setShowAdd(true); }}
                 >
-                    <FaPlus className="me-2" /> <span>Add New Company</span>
+                    <FaPlus /> <span>Add New Company</span>
                 </button>
             </div>
 

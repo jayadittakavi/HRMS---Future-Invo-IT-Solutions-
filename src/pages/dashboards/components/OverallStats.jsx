@@ -22,10 +22,8 @@ const OverallStats = () => {
         { label: 'Leave', value: 0, color: '#f59e0b' },
     ]);
     const [revenueTrend, setRevenueTrend] = useState([0]);
-    const [alerts, setAlerts] = useState([
-        { type: "Critical", message: "Server storage usage at 85%. Consider upgrading plan." },
-        { type: "Info", message: "System maintenance scheduled for Sunday 2 AM." }
-    ]);
+    const [pendingRequests, setPendingRequests] = useState([]);
+    const [alerts, setAlerts] = useState([]);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -46,6 +44,14 @@ const OverallStats = () => {
                 
                 if (data.revenue_trend) {
                     setRevenueTrend(data.revenue_trend);
+                }
+
+                if (data.department_distribution) {
+                    setDepartmentData(data.department_distribution);
+                }
+
+                if (data.pending_requests) {
+                    setPendingRequests(data.pending_requests);
                 }
                 
                 if (data.missing_checkouts !== undefined) {
@@ -71,13 +77,7 @@ const OverallStats = () => {
         { label: 'Total Employees', value: statsData.employees, icon: <FaUsers />, color: 'bg-gradient-pink', path: '/employees' },
     ];
 
-    const departmentData = [
-        { label: 'IT', value: 450, color: '#3b82f6' },
-        { label: 'HR', value: 50, color: '#ec4899' },
-        { label: 'Finance', value: 80, color: '#10b981' },
-        { label: 'Sales', value: 200, color: '#f59e0b' },
-        { label: 'Support', value: 150, color: '#ef4444' },
-    ];
+    const [departmentData, setDepartmentData] = useState([]);
 
     const handleAction = (type, data) => {
         console.log(`${type} Action:`, data);
@@ -86,26 +86,36 @@ const OverallStats = () => {
 
     return (
         <div>
-            {/* Top Stat Grid (Matching Settings UI) */}
-            <div className="row g-4 mb-4">
+            {/* Top Stat Grid */}
+            <div className="row g-4 mb-5">
                 {stats.map((stat, index) => (
-                    <div className="col-md-4 col-lg-3" key={index}>
-                        <div className="config-card shadow-sm" onClick={() => navigate(stat.path)} style={{ cursor: 'pointer' }}>
-                            <div className={`config-icon-container ${stat.color.includes('purple') ? 'icon-bg-purple' :
-                                    stat.color.includes('blue') ? 'icon-bg-blue' :
-                                        stat.color.includes('green') ? 'icon-bg-green' :
-                                            stat.color.includes('orange') ? 'icon-bg-orange' :
-                                                stat.color.includes('cyan') ? 'icon-bg-cyan' : 'icon-bg-red'
-                                }`}>
-                                {stat.icon}
-                            </div>
-                            <h3 className="config-card-title">{stat.label}</h3>
-                            <p className="config-card-desc">
-                                Track and manage {stat.label.toLowerCase()} across your entire workspace organizations.
-                            </p>
-                            <div className="config-card-footer">
-                                <span className="config-label">{stat.value} total</span>
-                                <span className="config-link">Manage →</span>
+                    <div className="col-md-4 col-lg-2" key={index}>
+                        <div className={`card hrms-card h-100 ${
+                            stat.label.includes('Companies') ? 'hrms-card-purple' :
+                            stat.label.includes('Branches') ? 'hrms-card-blue' :
+                            stat.label.includes('Admins') ? 'hrms-card-green' :
+                            stat.label.includes('HRs') ? 'hrms-card-orange' :
+                            stat.label.includes('Managers') ? 'hrms-card-indigo' : 'hrms-card-red'
+                        }`} onClick={() => navigate(stat.path)} style={{ cursor: 'pointer' }}>
+                            <div className="card-body p-3 d-flex flex-column">
+                                <div className="icon-box-solid mb-3" style={{ 
+                                    backgroundColor: stat.color.includes('purple') ? 'rgba(139, 92, 246, 0.1)' :
+                                                     stat.color.includes('blue') ? 'rgba(59, 130, 246, 0.1)' :
+                                                     stat.color.includes('green') ? 'rgba(16, 185, 129, 0.1)' :
+                                                     stat.color.includes('orange') ? 'rgba(245, 158, 11, 0.1)' :
+                                                     stat.color.includes('cyan') ? 'rgba(6, 182, 212, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                    color: stat.color.includes('purple') ? '#8b5cf6' :
+                                           stat.color.includes('blue') ? '#3b82f6' :
+                                           stat.color.includes('green') ? '#10b981' :
+                                           stat.color.includes('orange') ? '#f59e0b' :
+                                           stat.color.includes('cyan') ? '#06b6d4' : '#ef4444',
+                                    width: '40px', height: '40px', minHeight: '40px'
+                                }}>
+                                    {React.cloneElement(stat.icon, { size: 18 })}
+                                </div>
+                                <div className="text-uppercase text-muted fw-bold mb-1" style={{ fontSize: '0.55rem', letterSpacing: '0.05em' }}>{stat.label}</div>
+                                <h3 className="fw-bold text-dark mb-1" style={{ fontSize: '1.4rem' }}>{stat.value}</h3>
+                                <div className="config-link small text-primary fw-bold mt-auto" style={{ fontSize: '0.7rem' }}>Manage →</div>
                             </div>
                         </div>
                     </div>
@@ -116,63 +126,66 @@ const OverallStats = () => {
             <div className="row g-4 mb-4">
                 {/* Attendance Summary Donut */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100 shadow-sm">
-                        <h6 className="dashboard-card-title">Today's Attendance</h6>
-                        <div className="py-3 d-flex justify-content-center">
-                            <SimpleDonutChart segments={attendanceSummary} size="200px" centerText="Total" />
-                        </div>
-                        <div className="d-flex flex-wrap justify-content-center gap-2 mt-2">
-                            {attendanceSummary.map((item, idx) => (
-                                <span key={idx} className="badge rounded-pill text-dark border bg-light small d-flex align-items-center">
-                                    <span className="rounded-circle me-1" style={{ width: '8px', height: '8px', backgroundColor: item.color }}></span>
-                                    {item.label}: {item.value}
-                                </span>
-                            ))}
+                    <div className="card hrms-card hrms-card-indigo h-100 border-0 shadow-sm">
+                        <div className="card-body p-4">
+                            <h6 className="fw-bold text-dark mb-4">Today's Attendance</h6>
+                            <div className="py-3 d-flex justify-content-center">
+                                <SimpleDonutChart segments={attendanceSummary} size="180px" centerText="Total" />
+                            </div>
+                            <div className="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                {attendanceSummary.map((item, idx) => (
+                                    <span key={idx} className="badge rounded-pill text-dark border-0 bg-light-subtle px-3 py-2 small d-flex align-items-center fw-bold" style={{ fontSize: '0.65rem' }}>
+                                        <span className="rounded-circle me-2" style={{ width: '8px', height: '8px', backgroundColor: item.color }}></span>
+                                        {item.label}: {item.value}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Pending Requests List */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100 shadow-sm">
-                        <h6 className="dashboard-card-title mb-3 d-flex justify-content-between align-items-center">
-                            Pending Requests <span className="badge bg-danger rounded-pill">12</span>
-                        </h6>
-                        <div className="list-group list-group-flush small">
-                            {[
-                                { id: 1, name: 'John Doe', initials: 'JD', type: 'Leave', color: '#6366f1' },
-                                { id: 2, name: 'Alice Smith', initials: 'AS', type: 'WFH', color: '#10b981' },
-                                { id: 3, name: 'Bob Johnson', initials: 'BJ', type: 'Expense', color: '#f59e0b' },
-                                { id: 4, name: 'Emma Wilson', initials: 'EW', type: 'Leave', color: '#ec4899' },
-                                { id: 5, name: 'Chris Brown', initials: 'CB', type: 'WFH', color: '#3b82f6' }
-                            ].map((item) => (
-                                <div key={item.id} className="list-group-item bg-transparent px-0 border-bottom d-flex align-items-center justify-content-between py-2 hover-bg-light transition-all rounded-3 mb-1" style={{ border: 'none' }}>
-                                    <div className="d-flex align-items-center gap-3">
-                                        <div className="avatar text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
-                                            style={{ width: '38px', height: '38px', fontSize: '0.75rem', backgroundColor: item.color }}>
-                                            {item.initials}
+                    <div className="card hrms-card hrms-card-orange h-100 border-0 shadow-sm">
+                        <div className="card-body p-4">
+                            <div className="d-flex justify-content-between align-items-center mb-4">
+                                <h6 className="fw-bold text-dark mb-0">Pending Requests</h6>
+                                <span className="badge bg-danger-subtle text-danger rounded-pill px-2 py-1 fw-bold" style={{ fontSize: '0.7rem' }}>{pendingRequests.length}</span>
+                            </div>
+                            <div className="list-group list-group-flush">
+                                {pendingRequests.map((item) => (
+                                    <div key={item.id} className="list-group-item bg-transparent px-0 border-bottom d-flex align-items-center justify-content-between py-3">
+                                        <div className="d-flex align-items-center gap-3">
+                                            <div className="avatar text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                                                style={{ width: '36px', height: '36px', fontSize: '0.7rem', backgroundColor: item.color }}>
+                                                {item.initials}
+                                            </div>
+                                            <div>
+                                                <div className="fw-bold text-dark mb-0" style={{ fontSize: '0.8rem' }}>{item.name}</div>
+                                                <div className="text-muted" style={{ fontSize: '0.7rem' }}>{item.type} Request</div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="fw-bold text-dark mb-0" style={{ fontSize: '0.85rem' }}>{item.name}</div>
-                                            <div className="text-muted" style={{ fontSize: '0.7rem' }}>{item.type} Request</div>
+                                        <div className="d-flex gap-2">
+                                            <button className="btn btn-sm btn-success-subtle text-success py-1 px-2 border-0 rounded-circle" style={{ fontSize: '0.75rem' }} onClick={() => handleAction('Approve', item)}>✓</button>
+                                            <button className="btn btn-sm btn-danger-subtle text-danger py-1 px-2 border-0 rounded-circle" style={{ fontSize: '0.75rem' }} onClick={() => handleAction('Reject', item)}>✕</button>
                                         </div>
                                     </div>
-                                    <div className="d-flex gap-1">
-                                        <button className="btn btn-sm btn-success py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Approve', item)}>✓</button>
-                                        <button className="btn btn-sm btn-danger py-0 px-2" style={{ fontSize: '0.7rem' }} onClick={() => handleAction('Reject', item)}>✕</button>
-                                    </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
+                            <button className="btn btn-link w-100 text-center text-primary fw-bold small mt-3 text-decoration-none" onClick={() => navigate('/leave-management')}>View All Requests</button>
                         </div>
-                        <button className="btn btn-link w-100 text-center text-primary fw-bold small mt-2" onClick={() => navigate('/leave-management')}>View All Requests</button>
                     </div>
                 </div>
 
                 {/* Company Growth / Trend */}
                 <div className="col-md-4">
-                    <div className="dashboard-card h-100 shadow-sm">
-                        <h6 className="dashboard-card-title">Revenue / Growth Trend</h6>
-                        <ModernTrendChart data={revenueTrend} height="200px" color="#6366f1" />
+                    <div className="card hrms-card hrms-card-blue h-100 border-0 shadow-sm">
+                        <div className="card-body p-4">
+                            <h6 className="fw-bold text-dark mb-4">Revenue / Growth Trend</h6>
+                            <div className="pt-2">
+                                <ModernTrendChart data={revenueTrend} height="200px" color="#6366f1" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -180,27 +193,31 @@ const OverallStats = () => {
             {/* Department Distribution Bar Chart */}
             <div className="row g-4 mb-4">
                 <div className="col-md-8">
-                    <div className="dashboard-card shadow-sm">
-                        <h6 className="dashboard-card-title">Employees by Department</h6>
-                        <SimpleBarChart data={departmentData} height="300px" />
+                    <div className="card hrms-card hrms-card-purple border-0 shadow-sm">
+                        <div className="card-body p-4">
+                            <h6 className="fw-bold text-dark mb-4">Employees by Department</h6>
+                            <SimpleBarChart data={departmentData} height="300px" />
+                        </div>
                     </div>
                 </div>
                 <div className="col-md-4">
-                    <div className="dashboard-card bg-gradient-orange h-100 text-white shadow-sm border-0">
-                        <div className="d-flex align-items-center justify-content-between mb-4">
-                            <h6 className="mb-0 fw-bold">System Alerts</h6>
-                            <FaClipboardList className="fs-4 opacity-50" />
+                    <div className="card hrms-card hrms-card-red bg-gradient-orange h-100 text-white shadow-sm border-0">
+                        <div className="card-body p-4">
+                            <div className="d-flex align-items-center justify-content-between mb-4">
+                                <h6 className="mb-0 fw-bold">System Alerts</h6>
+                                <FaClipboardList className="fs-4 opacity-50" />
+                            </div>
+                            <ul className="list-unstyled mb-0">
+                                {alerts.map((alert, idx) => (
+                                    <li key={idx} className="mb-3 border-bottom border-white border-opacity-25 pb-3">
+                                        <span className={`badge ${alert.type === 'Critical' ? 'bg-danger' : alert.type === 'Warning' ? 'bg-warning text-dark' : 'bg-info text-dark'} mb-2 fw-bold`}>
+                                            {alert.type}
+                                        </span>
+                                        <p className="mb-0 small" style={{ fontSize: '0.8rem', lineHeight: '1.4' }}>{alert.message}</p>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-                        <ul className="list-unstyled mb-0">
-                            {alerts.map((alert, idx) => (
-                                <li key={idx} className="mb-3 border-bottom border-white border-opacity-25 pb-2">
-                                    <span className={`badge ${alert.type === 'Critical' ? 'bg-danger' : alert.type === 'Warning' ? 'bg-warning text-dark' : 'bg-info text-dark'} mb-1`}>
-                                        {alert.type}
-                                    </span>
-                                    <p className="mb-0 small">{alert.message}</p>
-                                </li>
-                            ))}
-                        </ul>
                     </div>
                 </div>
             </div>

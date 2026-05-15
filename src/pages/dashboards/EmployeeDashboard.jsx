@@ -14,6 +14,7 @@ import { VisitorContent } from '../modules/administration/visitor/Visitor';
 import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
 
 import { dashboardsService } from './dashboardsService';
+import MySpace from './components/MySpace';
 
 const EmployeeDashboard = () => {
     const { user } = useAuth();
@@ -102,19 +103,7 @@ const EmployeeDashboard = () => {
             alert(`Logged ${type} at ${now}`);
         } catch (err) {
             console.error(`Failed to ${type}:`, err);
-            // Mock behavior for demo
-            const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            if (type === 'IN') {
-                setDashboardData(prev => ({
-                    ...prev,
-                    atAGlance: { ...prev.atAGlance, status: 'Present', checkIn: now }
-                }));
-            } else {
-                setDashboardData(prev => ({
-                    ...prev,
-                    atAGlance: { ...prev.atAGlance, status: 'Completed', checkOut: now }
-                }));
-            }
+            alert(`Error: Could not log ${type}. Please check your connection or contact support.`);
         }
     };
 
@@ -159,9 +148,9 @@ const EmployeeDashboard = () => {
                     </div>
 
                     {/* Today's Status Large Card */}
-                    <div className="row g-4 mb-4">
+                    <div className="row g-4 mb-5">
                         <div className="col-12">
-                            <div className="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+                            <div className="card hrms-card hrms-card-blue h-100 border-0 shadow-sm">
                                 <div className="card-body p-0">
                                     <div className="p-4 border-bottom bg-light-subtle d-flex justify-content-between align-items-center">
                                         <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
@@ -184,21 +173,21 @@ const EmployeeDashboard = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="p-4 row g-0 text-center">
+                                    <div className="p-4 row g-0 text-center align-items-center">
                                         <div className="col-md-3 border-end py-3">
-                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Status</p>
+                                            <div className="text-uppercase text-muted fw-bold mb-3 ls-1" style={{ fontSize: '0.65rem' }}>Status</div>
                                             <h4 className={`fw-bold mb-1 ${dashboardData.atAGlance.status === 'Absent' ? 'text-danger' : dashboardData.atAGlance.status === 'Present' ? 'text-success' : 'text-warning'}`}>
                                                 {dashboardData.atAGlance.status}
                                             </h4>
                                             <div className="small text-muted">{dashboardData.atAGlance.checkIn !== '--:--' ? `Since ${dashboardData.atAGlance.checkIn}` : 'Check-in pending'}</div>
                                         </div>
                                         <div className="col-md-3 border-end py-3 px-3">
-                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Shift</p>
+                                            <div className="text-uppercase text-muted fw-bold mb-3 ls-1" style={{ fontSize: '0.65rem' }}>Shift</div>
                                             <h5 className="fw-bold text-dark mb-1">{dashboardData.atAGlance.shift}</h5>
                                             <div className="small text-muted">9 Hours General</div>
                                         </div>
                                         <div className="col-md-3 border-end py-3 px-3">
-                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Timings</p>
+                                            <div className="text-uppercase text-muted fw-bold mb-3 ls-1" style={{ fontSize: '0.65rem' }}>Timings</div>
                                             <div className="d-flex justify-content-center gap-4 align-items-center mt-2">
                                                 <div className="text-center">
                                                     <span className="d-block smaller text-success fw-bold mb-1">IN</span>
@@ -212,7 +201,7 @@ const EmployeeDashboard = () => {
                                             </div>
                                         </div>
                                         <div className="col-md-3 py-3 px-3">
-                                            <p className="smaller text-uppercase fw-bold text-secondary mb-3 ls-1">Logged Hours</p>
+                                            <div className="text-uppercase text-muted fw-bold mb-3 ls-1" style={{ fontSize: '0.65rem' }}>Logged Hours</div>
                                             <h4 className="fw-bold text-primary mb-1 ls-tight">{dashboardData.atAGlance.workingHours}</h4>
                                             <div className="progress mt-2 mx-auto" style={{ height: '6px', maxWidth: '120px' }}>
                                                 <div className="progress-bar bg-primary rounded-pill" style={{ width: dashboardData.atAGlance.checkIn !== '--:--' ? '65%' : '0%' }}></div>
@@ -224,55 +213,20 @@ const EmployeeDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Quick Stats Grid */}
-                    <div className="row g-4 mb-4">
-                        <div className="col-md-4">
-                            <div className="card border-0 shadow-sm rounded-4 premium-card-blue text-white overflow-hidden p-4 h-100 position-relative">
-                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Leave Balance</h6>
-                                <div className="d-flex align-items-end gap-2 mb-2">
-                                    <h2 className="fw-bold mb-0">{dashboardData.leaveBalance.count}</h2>
-                                    <span className="mb-1 fw-medium h5 opacity-75">Days</span>
-                                </div>
-                                <p className="smaller mb-0 opacity-75">{dashboardData.leaveBalance.footer}</p>
-                                <FaUmbrellaBeach className="card-floating-icon text-white opacity-10" size={80} />
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="card border-0 shadow-sm rounded-4 premium-card-orange text-white overflow-hidden p-4 h-100 position-relative">
-                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Action Required</h6>
-                                <div className="d-flex align-items-end gap-2 mb-2">
-                                    <h2 className="fw-bold mb-0">{String(dashboardData.actionRequired.count).padStart(2, '0')}</h2>
-                                    <span className="mb-1 fw-medium h5 opacity-75">Tasks</span>
-                                </div>
-                                <p className="smaller mb-0 opacity-75">{dashboardData.actionRequired.description}</p>
-                                <FaListCheck className="card-floating-icon text-white opacity-10" size={80} />
-                            </div>
-                        </div>
-                        <div className="col-md-4">
-                            <div className="card border-0 shadow-sm rounded-4 premium-card-green text-white overflow-hidden p-4 h-100 position-relative">
-                                <h6 className="smaller fw-bold text-white-50 text-uppercase mb-4 ls-1">Next Holiday</h6>
-                                <div className="d-flex align-items-end gap-2 mb-2">
-                                    <h2 className="fw-bold mb-0">{dashboardData.nextHoliday.date}</h2>
-                                </div>
-                                <p className="smaller mb-0 opacity-75">{dashboardData.nextHoliday.name}</p>
-                                <FaMugHot className="card-floating-icon text-white opacity-10" size={80} />
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Chart & History Row */}
-                    <div className="row g-4">
+                    <div className="row g-4 mb-4">
                         <div className="col-lg-8">
-                            <div className="card border-0 shadow-sm rounded-4 p-4 h-100">
+                            <div className="card hrms-card hrms-card-indigo border-0 shadow-sm p-4 h-100">
                                 <div className="d-flex justify-content-between align-items-center mb-4">
                                     <h6 className="fw-bold text-dark mb-0">Salary Trend (Last 5 Months)</h6>
-                                    <div className="badge-modern pending rounded-pill" style={{ background: '#e0e7ff', color: '#4338ca' }}>Net Pay Overview</div>
+                                    <div className="badge bg-indigo-subtle text-indigo rounded-pill px-3 py-2 fw-bold" style={{ fontSize: '0.7rem' }}>Net Pay Overview</div>
                                 </div>
                                 <SimpleBarChart data={dashboardData.salaryTrend} height="240px" />
                             </div>
                         </div>
                         <div className="col-lg-4">
-                            <div className="card border-0 shadow-sm rounded-4 p-4 h-100">
+                            <div className="card hrms-card hrms-card-green border-0 shadow-sm p-4 h-100">
                                 <h6 className="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
                                     <FaFileInvoiceDollar className="text-primary" /> Current Payslips
                                 </h6>
@@ -289,10 +243,14 @@ const EmployeeDashboard = () => {
                                             <FaCircleCheck className="text-success opacity-50" />
                                         </div>
                                     ))}
-                                    <button className="btn btn-primary btn-sm rounded-pill mt-2 py-2 shadow-sm fw-bold" onClick={() => setActiveView('my-payslips')}>View Full History &rarr;</button>
+                                    <button className="btn btn-primary btn-sm rounded-pill mt-3 py-2 shadow-sm fw-bold" onClick={() => setActiveView('my-payslips')}>View Full History &rarr;</button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div className="mt-4">
+                        <MySpace role="employee" compact={true} onNavigate={(path) => setActiveView(path.replace('/', ''))} />
                     </div>
                 </div>
             )}

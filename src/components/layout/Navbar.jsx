@@ -63,7 +63,7 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
 
                             {user && (
                                 <li className="nav-item">
-                                    <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to={user.role === 'superadmin' ? "/dashboard/super-admin" : "/dashboard"}>My Space</Link>
+                                    <Link className={`nav-link fw-medium ${!isHome || theme === 'dark' ? 'text-main' : 'text-dark-blue'} hover-primary`} to={user.role === 'superadmin' ? "/dashboard/super-admin" : "/dashboard"}>Dashboard</Link>
                                 </li>
                             )}
 

@@ -8,6 +8,7 @@ import {
     MdAddBusiness, MdCheckCircle, MdErrorOutline, MdInfoOutline
 } from 'react-icons/md';
 import { ModernTrendChart, SimpleBarChart, SimpleDonutChart } from '../../components/charts/CustomCharts';
+import MySpace from './components/MySpace';
 
 // Mock data for the Information Related Dashboard
 const SYSTEM_LOGS = [
@@ -31,10 +32,10 @@ const SuperAdminDashboard = () => {
 
     // Stats
     const stats = [
-        { label: 'Total Workspaces', value: '24', sub: '+3 this month', icon: <MdBusiness />, color: '#6366f1' },
-        { label: 'Global Users', value: '1,245', sub: '98% Active', icon: <MdPeople />, color: '#10b981' },
-        { label: 'System Uptime', value: '99.98%', sub: 'Healthy', icon: <MdCloudQueue />, color: '#3b82f6' },
-        { label: 'DB Connections', value: '42', sub: '12% Load', icon: <MdStorage />, color: '#f59e0b' },
+        { label: 'Total Workspaces', value: '24', sub: '+3 this month', icon: <MdBusiness />, color: '#6366f1', path: '/companies' },
+        { label: 'Global Users', value: '1,245', sub: '98% Active', icon: <MdPeople />, color: '#10b981', path: '/users' },
+        { label: 'System Uptime', value: '99.98%', sub: 'Healthy', icon: <MdCloudQueue />, color: '#3b82f6', path: '/automation-center' },
+        { label: 'DB Connections', value: '42', sub: '12% Load', icon: <MdStorage />, color: '#f59e0b', path: '/settings' },
     ];
 
     return (
@@ -42,7 +43,9 @@ const SuperAdminDashboard = () => {
             {/* Header Section */}
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 className="h4 fw-bold text-dark mb-1">Super Admin Information Hub</h2>
+                    <h2 className="h4 fw-bold text-dark mb-1">
+                        Welcome, {user?.firstName || user?.lastName ? `${user?.firstName || ''} ${user?.lastName || ''}`.trim() : user?.username || 'User'}
+                    </h2>
                     <p className="text-secondary small mb-0">Complete system overview and global workspace management.</p>
                 </div>
                 <div className="d-flex gap-2">
@@ -59,7 +62,14 @@ const SuperAdminDashboard = () => {
             <div className="row g-4 mb-4">
                 {stats.map((s, i) => (
                     <div className="col-md-6 col-xl-3" key={i}>
-                        <div className="card border-0 shadow-sm rounded-4 p-3 h-100 bg-white">
+                        <div 
+                            className={`card hrms-card h-100 cursor-pointer ${
+                                s.color === '#6366f1' ? 'hrms-card-indigo' : 
+                                s.color === '#10b981' ? 'hrms-card-green' : 
+                                s.color === '#3b82f6' ? 'hrms-card-blue' : 'hrms-card-orange'
+                            }`}
+                            onClick={() => s.path && navigate(s.path)}
+                        >
                             <div className="d-flex justify-content-between align-items-start mb-2">
                                 <div className="p-2 rounded-3" style={{ backgroundColor: `${s.color}15`, color: s.color }}>
                                     {React.cloneElement(s.icon, { size: 24 })}
@@ -129,7 +139,7 @@ const SuperAdminDashboard = () => {
             </div>
 
             {/* Bottom Row: Logs and Workspaces */}
-            <div className="row g-4">
+            <div className="row g-4 mb-4">
                 {/* Global Logs */}
                 <div className="col-lg-7">
                     <div className="card border-0 shadow-sm rounded-4 bg-white">
@@ -183,7 +193,10 @@ const SuperAdminDashboard = () => {
                         </div>
                         <div className="p-4 pt-2">
                             {RECENT_WORKSPACES.map((ws, i) => (
-                                <div key={i} className="d-flex align-items-center justify-content-between p-3 rounded-4 mb-2 hover-bg-light transition-all border border-light border-opacity-50">
+                                <div key={i} 
+                                    className="d-flex align-items-center justify-content-between p-3 rounded-4 mb-2 hover-bg-light transition-all border border-light border-opacity-50 cursor-pointer"
+                                    onClick={() => navigate('/companies')}
+                                >
                                     <div className="d-flex align-items-center gap-3">
                                         <div className="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style={{ width: '40px', height: '40px', fontSize: '12px' }}>
                                             {ws.name.charAt(0)}
@@ -207,6 +220,11 @@ const SuperAdminDashboard = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+
+            <div className="mt-5 pb-4">
+                <MySpace role="superadmin" compact={true} onNavigate={(path) => navigate(path)} />
             </div>
 
             <style>{`

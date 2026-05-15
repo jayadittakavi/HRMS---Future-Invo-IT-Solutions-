@@ -1,11 +1,10 @@
 // src/config.js
 
-// Use the current browser origin to leverage the Vite proxy (defined in vite.config.js).
-// This prevents CORS issues by ensuring all requests are "same-origin" from the browser's perspective.
-const API_URL = window.location.origin;
-export const API_BASE = `${API_URL}/api`;
-export const LOGIN_URL = `${API_URL}/api/auth/login`;
-export const RESET_PASSWORD_URL = `${API_URL}/api/auth/reset-password`;
+// Backend is http://127.0.0.1:5000 — accessed via Vite proxy to avoid CORS.
+// The proxy in vite.config.js forwards /api/* → http://127.0.0.1:5000/api/*
+export const API_BASE = `/api`;
+export const LOGIN_URL = `/api/auth/login`;
+export const RESET_PASSWORD_URL = `/api/auth/reset-password`;
 
 // Latest Tokens provided by the user (as of April 10, 2026)
 export const TEST_TOKENS = {
@@ -23,14 +22,9 @@ export const TEST_TOKENS = {
 export const getAuthHeader = (role) => {
     let token = localStorage.getItem("token") || localStorage.getItem("authToken");
 
-    // If no token found, and a role was requested, try using the TEST_TOKEN for that role
-    if (!token && role && TEST_TOKENS[role]) {
-        console.warn(`No valid auth token found. Using TEST_TOKEN for ${role}.`);
-        token = TEST_TOKENS[role];
-    }
-
     // "No token = No data access"
     if (!token) {
+        console.warn(`No valid auth token found. User might need to login.`);
         return {
             "Content-Type": "application/json"
         };

@@ -117,8 +117,13 @@ const DashboardTab = ({ onTabChange }) => {
                 ].map((stat, i) => (
                     <div key={i} className="col-md-3">
                         <div
-                            className="card border-0 shadow-sm dash-clickable-card"
-                            style={{ borderRadius: '12px', cursor: 'pointer', transition: 'transform 0.2s' }}
+                            className={`card hrms-card dash-clickable-card h-100 ${
+                                stat.bg === 'primary' ? 'hrms-card-indigo' : 
+                                stat.bg === 'success' ? 'hrms-card-green' : 
+                                stat.bg === 'info' ? 'hrms-card-blue' : 
+                                stat.bg === 'warning' ? 'hrms-card-orange' : 'hrms-card-purple'
+                            }`}
+                            style={{ cursor: 'pointer' }}
                             onClick={() => onTabChange(stat.tab)}
                         >
                             <div className="card-body p-4">

@@ -1,10 +1,10 @@
-import { API_BASE } from '../../../config';
-const BASE_URL = API_BASE;
+const BASE_URL = '';
+
 
 export const signupService = {
     signupSuperAdmin: async (userData) => {
         try {
-            const response = await fetch(`/auth/super-admin/signup`, {
+            const response = await fetch(`${BASE_URL}/api/auth/super-admin/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -19,7 +19,7 @@ export const signupService = {
 
     verifySignupOtp: async (data) => {
         try {
-            const response = await fetch(`/auth/verify-signup-otp`, {
+            const response = await fetch(`${BASE_URL}/api/auth/verify-signup-otp`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export const signupService = {
 
     verifySuperAdminOtp: async (data) => {
         try {
-            const response = await fetch(`/auth/super-admin/verify-otp`, {
+            const response = await fetch(`${BASE_URL}/api/auth/super-admin/verify-otp`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

@@ -1,5 +1,4 @@
-const API_URL = window.location.origin;
-const BASE_URL = `${API_URL}/api/auth`;
+const BASE_URL = `/api/auth`;
 
 export const verifySignupOtpService = {
     verify: async (email, otp) => {

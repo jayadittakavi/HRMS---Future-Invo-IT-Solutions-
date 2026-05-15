@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../../context/AuthContext';
-import { EmployeesContent } from '../modules/hr/employees/Employees';
+import { EmployeesContent } from '../employees/Employees';
 import { AttendanceContent } from '../attendance/Attendance';
 import { DailyTaskContent } from '../modules/operations/daily_task/DailyTask';
 import { LoansContent } from '../modules/finance/loans/Loans';
@@ -31,18 +31,6 @@ const AdminDashboard = () => {
     const navigate = useNavigate();
     const [activeView, setActiveView] = useState('dashboard');
 
-    // Initialize dashboardType based on URL param 'tab'
-    const tabParam = searchParams.get('tab');
-    const [dashboardType, setDashboardType] = useState('overall');
-
-    useEffect(() => {
-        if (tabParam === 'myspace') {
-            setDashboardType('myspace');
-        } else {
-            setDashboardType('overall');
-        }
-    }, [tabParam]);
-
     const handleNavigate = (path) => {
         const view = path.replace('/', '');
         setActiveView(view || 'dashboard');
@@ -60,33 +48,11 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Dashboard Tabs */}
-                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('overall');
-                                navigate('/dashboard/admin?tab=overall');
-                            }}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('myspace');
-                                navigate('/dashboard/admin?tab=myspace');
-                            }}
-                        >
-                            My Space
-                        </button>
+                    {/* Dashboard Content */}
+                    <OverallStats />
+                    <div className="mt-5 pb-4">
+                        <MySpace role="admin" compact={true} onNavigate={handleNavigate} />
                     </div>
-
-                    {dashboardType === 'overall' ? (
-                        <OverallStats />
-                    ) : (
-                        <MySpace role="admin" onNavigate={handleNavigate} />
-                    )}
                 </>
             )}
 

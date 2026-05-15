@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from "../../context/AuthContext";
 import "../../components/layout/DashboardLayout.css";
-import { EmployeesContent } from "../modules/hr/employees/Employees";
+import { EmployeesContent } from '../employees/Employees';
 import { AttendanceContent } from '../attendance/Attendance';
 import { ProfileContent } from '../modules/hr/profile/Profile';
 import { OnboardingContent } from '../modules/hr/onboarding/Onboarding';
@@ -12,6 +12,7 @@ import { DocumentsContent } from '../modules/hr/documents/Documents';
 import { TrainingContent } from '../modules/hr/training/Training';
 import { HRReportsContent } from '../modules/hr/reports/HRReports';
 import HROverallStats from './components/HROverallStats';
+import MySpace from './components/MySpace';
 import { DelegationContent } from '../modules/administration/delegation/Delegation';
 import { VisitorContent } from '../modules/administration/visitor/Visitor';
 import { DeskManagementContent } from '../modules/administration/desk/DeskManagement';
@@ -43,33 +44,11 @@ const HRDashboard = () => {
                         </div>
                     </div>
 
-                    {/* Dashboard Tabs */}
-                    <div className="d-flex border-bottom mb-4 scroll-x-mobile">
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'overall' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('overall');
-                                navigate('/dashboard/hr?tab=overall');
-                            }}
-                        >
-                            Overview
-                        </button>
-                        <button
-                            className={`btn border-0 py-2 px-4 rounded-0 fw-bold transition-all ${dashboardType === 'myspace' ? 'text-primary border-bottom border-3 border-primary bg-light bg-opacity-50' : 'text-secondary'}`}
-                            onClick={() => {
-                                setDashboardType('myspace');
-                                navigate('/dashboard/hr?tab=myspace');
-                            }}
-                        >
-                            My Space
-                        </button>
+                    {/* Combined Dashboard View */}
+                    <HROverallStats />
+                    <div className="mt-5 pb-4">
+                        <MySpace role="hr" compact={true} onNavigate={handleNavigate} />
                     </div>
-
-                    {dashboardType === 'overall' ? (
-                        <HROverallStats />
-                    ) : (
-                        <MySpace role="hr" onNavigate={handleNavigate} />
-                    )}
                 </>
             )}
 

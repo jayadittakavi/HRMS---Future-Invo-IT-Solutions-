@@ -4,6 +4,7 @@ import { PayrollContent } from '../modules/finance/payroll/Payroll';
 import { useAuth } from '../../context/AuthContext';
 import { SimpleLineChart, SimpleBarChart, SimpleDonutChart } from '../../components/charts/CustomCharts';
 import { FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
+import MySpace from './components/MySpace';
 
 const AccountantDashboard = () => {
     const { user } = useAuth();
@@ -146,6 +147,11 @@ const AccountantDashboard = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+
+                    <div className="mt-4">
+                        <MySpace role="accountant" compact={true} onNavigate={handleNavigate} />
                     </div>
                 </>
             )}

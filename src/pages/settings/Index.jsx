@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FaUserCog, FaPalette, FaShieldAlt, FaBell, FaCheckCircle } from 'react-icons/fa';
 
 const Settings = () => {

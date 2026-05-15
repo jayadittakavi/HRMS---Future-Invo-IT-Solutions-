@@ -24,19 +24,7 @@ const ManagerDashboard = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams(); // Get query params
-    const activeTab = searchParams.get('tab');
-
     const [activeView, setActiveView] = useState('dashboard');
-    const [dashboardType, setDashboardType] = useState('overall'); // 'overall' or 'myspace'
-
-    // Sync dashboardType with query param
-    useEffect(() => {
-        if (activeTab === 'myspace') {
-            setDashboardType('myspace');
-        } else {
-            setDashboardType('overall');
-        }
-    }, [activeTab]);
 
     const handleNavigate = (path) => {
         // Handle external dashboard navigation (e.g., HR, Employee)
@@ -71,6 +59,9 @@ const ManagerDashboard = () => {
                     </div>
 
                     <ManagerOverallStats onNavigate={handleNavigate} />
+                    <div className="mt-4">
+                        <MySpace role="manager" compact={true} onNavigate={handleNavigate} />
+                    </div>
                 </>
             )}
 

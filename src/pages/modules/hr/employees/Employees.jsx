@@ -1,682 +1,219 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    FaEdit, FaCheckCircle, FaBan, FaPlus,
-    FaFileCsv, FaSearch, FaUsers, FaUserPlus,
-    FaBuilding, FaFilter, FaEllipsisV, FaEnvelope, FaPhone, FaTimesCircle
-} from 'react-icons/fa';
+import { 
+    FiUserPlus, FiSearch, FiFilter, FiEdit, FiShield, 
+    FiMoreVertical, FiCalendar, FiBriefcase, FiMail, FiPhone, FiCheckCircle, FiXCircle 
+} from 'react-icons/fi';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { useSearch } from '../../../../context/SearchContext';
-import { useAuth } from '../../../../context/AuthContext';
-import { employeeSuperAdminService } from './superadmin-service';
-import { companyService } from '../../core/companies/service';
-import { coreService } from '../../../../services/coreService';
-import "../../../../components/layout/DashboardLayout.css";
+import { usePermissions } from '../../../../context/PermissionsContext';
+import './Employees.css';
 
-export const EmployeesContent = () => {
-    const navigate = useNavigate();
-    const { user: currentUser } = useAuth();
-    const { globalSearchTerm, setGlobalSearchTerm } = useSearch();
+const PermissionDrawer = ({ employee, onClose, onSave }) => {
+    const { roles } = usePermissions();
+    const rolePermissions = roles.find(r => r.id === employee.role)?.permissions || {};
+    const [permissions, setPermissions] = useState(employee.permissionOverrides || rolePermissions);
 
-    const [employees, setEmployees] = useState([]);
-    const [companies, setCompanies] = useState([]);
-    const [allBranches, setAllBranches] = useState([]);
-    const [filteredBranches, setFilteredBranches] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [searchTerm, setSearchTerm] = useState(globalSearchTerm);
-    const [managerStats, setManagerStats] = useState(null);
-
-    // Modal States
-    const [showAdd, setShowAdd] = useState(false);
-    const [showEdit, setShowEdit] = useState(false);
-    const [showFilter, setShowFilter] = useState(false);
-    const [selectedEmployee, setSelectedEmployee] = useState(null);
-
-    // Filter States
-    const [filters, setFilters] = useState({
-        role: '',
-        department: '',
-        company: '',
-        status: ''
-    });
-
-    // Form Data
-    const [formData, setFormData] = useState({
-        user_account: '',
-        full_name: '',
-        personal_email: '',
-        company_email: '',
-        phone_number: '',
-        username: '',
-        password: '',
-        confirm_password: '',
-        department: '',
-        designation: '',
-        role: 'employee',
-        employment_type: 'fulltime employee',
-        joining_date: '',
-        company_id: '',
-        branch: '',
-        gender: 'Other',
-        pay_grade: '',
-        ctc: ''
-    });
-
-    const isAdmin = currentUser?.role?.toLowerCase() === 'admin';
-    const isSuperAdmin = currentUser?.role?.toLowerCase() === 'superadmin' || currentUser?.role?.toUpperCase() === 'SUPER_ADMIN' || isAdmin;
-    const isHR = currentUser?.role?.toLowerCase() === 'hr' || currentUser?.role?.toLowerCase() === 'fulltime';
-    const isEmployee = currentUser?.role?.toLowerCase() === 'employee';
-
-    // Permissions
-    const canManageAll = isSuperAdmin;
-    const canManageCompany = isAdmin || isHR; // Admin and HR can manage their company
-    const canAddEmployee = isSuperAdmin || isAdmin || isHR;
-
-    const fetchData = async () => {
-        setLoading(true);
-        const role = currentUser?.role?.toLowerCase();
-        try {
-            // Fetch stats if manager
-            let dashboardStats = null;
-            if (role === 'manager') {
-                dashboardStats = await employeeSuperAdminService.getDashboardStats(role);
-            }
-
-            // Fetch all for SuperAdmin/Admin/HR to allow filtering
-            const empRes = await employeeSuperAdminService.getAllEmployees(role);
-            let empData = Array.isArray(empRes) ? empRes : (empRes.data || empRes.employees || []);
-
-            // Apply role-based filtering
-            if (isSuperAdmin) {
-                setEmployees(empData);
-            } else if (isAdmin || isHR || role === 'manager') {
-                // Admin, HR, and Manager see employees of their own company/department
-                // Usually backend filters for Manager, but we keep frontend filter as safety
-                const filtered = empData.filter(e => e.company_id === currentUser?.company_id || e.company_name === currentUser?.company_name);
-                setEmployees(filtered);
-            } else if (isEmployee) {
-                const self = empData.filter(e => e.id === currentUser?.user_id || e.id === currentUser?.id || e.email === currentUser?.email);
-                setEmployees(self.length > 0 ? self : [currentUser]);
-            }
-
-            // If we have dashboardStats, override the calculated stats for Manager
-            if (dashboardStats) {
-                setManagerStats(dashboardStats);
-            }
-
-            // Fetch companies for dropdown if allowed to manage
-            if (canAddEmployee) {
-                const compRes = await companyService.getAllCompanies();
-                const compData = Array.isArray(compRes) ? compRes : (compRes.data || compRes.companies || []);
-                setCompanies(compData);
-
-                // Fetch branches
-                const branchRes = await coreService.getBranches();
-                const branchData = Array.isArray(branchRes) ? branchRes : (branchRes.data || branchRes.branches || []);
-                setAllBranches(branchData);
-            }
-        } catch (error) {
-            console.error("Error fetching employee data:", error);
-            // If API fails (e.g. Employee unauthorized for admin endpoint), fallback for Employee
-            if (isEmployee) {
-                setEmployees([currentUser]);
-            }
-        } finally {
-            setLoading(false);
-        }
+    const togglePermission = (category, moduleId) => {
+        setPermissions(prev => {
+            const current = prev[category] || [];
+            const updated = current.includes(moduleId) 
+                ? current.filter(id => id !== moduleId) 
+                : [...current, moduleId];
+            return { ...prev, [category]: updated };
+        });
     };
-
-    useEffect(() => {
-        if (currentUser) {
-            fetchData();
-        }
-    }, [currentUser]);
-
-    useEffect(() => {
-        setSearchTerm(globalSearchTerm);
-    }, [globalSearchTerm]);
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-
-        // Dependent dropdown logic for branches
-        if (name === 'company_id') {
-            const selectedCompanyId = value;
-            const selectedCompany = companies.find(c => String(c.id) === String(selectedCompanyId));
-            const companyName = selectedCompany ? (selectedCompany.name || selectedCompany.company_name) : '';
-
-            // Filter branches by company_id OR company_name (depending on how branch object is structured)
-            const filtered = allBranches.filter(b => 
-                String(b.company_id) === String(selectedCompanyId) || 
-                (b.company && String(b.company).toLowerCase() === String(companyName).toLowerCase()) ||
-                (b.company_name && String(b.company_name).toLowerCase() === String(companyName).toLowerCase())
-            );
-            setFilteredBranches(filtered);
-            setFormData(prev => ({ ...prev, company_id: value, branch: '' })); // Reset branch when company changes
-        }
-    };
-
-    const handleAdd = async (e) => {
-        e.preventDefault();
-        if (formData.password?.trim() !== formData.confirm_password?.trim()) {
-            alert("Passwords do not match. Please ensure both password fields are identical and contain no extra spaces.");
-            return;
-        }
-
-        // Basic frontend unique email validation for better UX
-        const emailToSubmit = (formData.personal_email || formData.company_email || formData.email || "").toLowerCase();
-        const emailExists = employees.some(emp => 
-            (emp.personal_email || emp.company_email || emp.email || "").toLowerCase() === emailToSubmit
-        );
-
-        if (emailExists && emailToSubmit) {
-            const proceed = window.confirm(`An employee with the email ${emailToSubmit} already exists in your current view. Are you sure you want to proceed?`);
-            if (!proceed) return;
-        }
-
-        try {
-            if (canAddEmployee) {
-                // Determine the correct company_id
-                const companyId = isSuperAdmin ? formData.company_id : currentUser.company_id;
-                
-                // Construct final payload
-                const payload = { 
-                    ...formData, 
-                    company_id: companyId,
-                    ctc: formData.ctc ? Number(formData.ctc) : 0,
-                    pay_grade: formData.pay_grade || "N/A"
-                };
-
-                await employeeSuperAdminService.createEmployee(payload);
-                setShowAdd(false);
-                fetchData();
-                alert("Employee created successfully!");
-                
-                // Clear form for next use
-                setFormData({
-                    user_account: '', full_name: '', personal_email: '', company_email: '', phone_number: '',
-                    username: '', password: '', confirm_password: '',
-                    department: '', designation: '',
-                    role: 'employee', employment_type: 'fulltime employee',
-                    joining_date: '', company_id: currentUser?.company_id || '', branch: '',
-                    pay_grade: '', ctc: ''
-                });
-            }
-        } catch (error) {
-            // Error message is already cleaned by the service
-            alert("Error: " + error.message);
-        }
-    };
-
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        if (formData.password || formData.confirm_password) {
-            if (formData.password !== formData.confirm_password) {
-                alert("Passwords do not match. Please ensure both password fields are identical.");
-                return;
-            }
-        }
-        try {
-            if ((isSuperAdmin || isAdmin || isHR) && selectedEmployee) {
-                const payload = { ...formData };
-                payload.ctc = payload.ctc ? Number(payload.ctc) : 0;
-                payload.pay_grade = payload.pay_grade || "N/A";
-                await employeeSuperAdminService.updateEmployee(selectedEmployee.id, payload);
-                setShowEdit(false);
-                fetchData();
-                alert("Employee updated successfully!");
-            }
-        } catch (error) {
-            alert("Failed to update employee: " + (error.message || "Unknown error"));
-        }
-    };
-
-    const handleToggleStatus = async (id) => {
-        // Simplified based on user request: Action available for all administrative roles
-        const canToggle = isSuperAdmin || isAdmin || isHR;
-        
-        try {
-            if (canToggle) {
-                await employeeSuperAdminService.toggleStatus(id, currentUser?.role);
-                fetchData();
-                alert("Status updated successfully!");
-            } else {
-                alert("Permission Denied: You do not have sufficient privileges to modify member records.");
-            }
-        } catch (error) {
-            console.error("Toggle Failure:", error);
-            alert(`Toggle Action Failed:\n\n${error.message}\n\nPlease check your server connectivity or permissions.`);
-        }
-    };
-
-    const filteredEmployees = employees.filter(emp => {
-        const query = searchTerm.toLowerCase();
-        const matchesSearch = (
-            (emp.full_name || emp.name || emp.first_name || '').toLowerCase().includes(query) ||
-            (emp.personal_email || emp.company_email || emp.email || '').toLowerCase().includes(query) ||
-            (emp.designation || '').toLowerCase().includes(query) ||
-            (emp.company_name || '').toLowerCase().includes(query)
-        );
-
-        const matchesRole = !filters.role || (emp.role || '').toLowerCase() === filters.role.toLowerCase();
-        const matchesDept = !filters.department || (emp.department || '').toLowerCase() === filters.department.toLowerCase();
-        const matchesCompany = !filters.company || (emp.company_name || emp.company || '').toLowerCase() === filters.company.toLowerCase();
-        const matchesStatus = !filters.status || (emp.status || 'Active').toLowerCase() === filters.status.toLowerCase();
-
-        return matchesSearch && matchesRole && matchesDept && matchesCompany && matchesStatus;
-    });
-
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const newThisMonthCount = employees.filter(e => {
-        const dateStr = e.joining_date || e.created_at || e.createdAt;
-        if (!dateStr) return false;
-        const date = new Date(dateStr);
-        // Ensure valid date parsing before comparison
-        if (isNaN(date.getTime())) return false;
-        return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
-    }).length;
-
-    const stats = [
-        { label: 'Total Employees', count: managerStats?.totalMembers || employees.length, icon: <FaUsers />, color: '#818cf8', bg: 'rgba(129, 140, 248, 0.1)' },
-        { label: 'Active Now', count: managerStats?.activeNow || employees.filter(e => e.status === 'Active' || !e.status).length, icon: <FaCheckCircle />, color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)' },
-        { label: isEmployee ? 'Performance' : 'New This Month', count: isEmployee ? '95%' : (managerStats?.newThisMonth || newThisMonthCount), icon: <FaUserPlus />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)' },
-    ];
 
     return (
-        <div style={{ padding: '0px', maxWidth: '100%', margin: '0 auto' }}>
-            {/* Stats Row */}
-            <div className="row g-4 mb-5">
-                {stats.map((stat, i) => (
-                    <div key={i} className="col-md-4">
-                        <div className="card h-100 border-0 shadow-sm rounded-4"
-                            style={{
-                                padding: '24px',
-                                background: 'rgba(255, 255, 255, 0.7)',
-                                backdropFilter: 'blur(10px)',
-                                border: '1px solid rgba(255, 255, 255, 0.5)'
-                            }}>
-                            <div className="d-flex align-items-center gap-4">
-                                <div style={{
-                                    width: 60, height: 60, borderRadius: '18px',
-                                    background: stat.bg, color: stat.color,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    fontSize: '1.5rem'
-                                }}>
-                                    {stat.icon}
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: '0.85rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
-                                    <div style={{ fontSize: '1.85rem', fontWeight: 900, color: '#0f172a' }}>{stat.count}</div>
-                                </div>
-                            </div>
+        <div className="permission-drawer-overlay animate__animated animate__fadeIn" onClick={onClose}>
+            <div className="permission-drawer animate__animated animate__slideInRight" onClick={e => e.stopPropagation()}>
+                <div className="drawer-header border-bottom">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="avatar-preview">
+                            <img src={employee.avatar} alt={employee.name} className="rounded-circle" width="50" height="50" />
+                        </div>
+                        <div>
+                            <h5 className="mb-0 fw-bold">{employee.name}</h5>
+                            <span className="badge bg-primary bg-opacity-10 text-primary small">Individual Permissions</span>
                         </div>
                     </div>
-                ))}
-            </div>
+                    <button className="btn-close-custom" onClick={onClose}><FiXCircle size={24} /></button>
+                </div>
 
-            {/* Smart Action Bar */}
-            <div className="card border-0 shadow-lg rounded-4 overflow-hidden mb-5"
-                style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255, 255, 255, 0.6)'
-                }}>
-                <div className="card-header bg-transparent border-0 p-4">
-                    <div className="row g-3 align-items-center">
-                        <div className="col-md-6">
-                            <div className="position-relative">
-                                <FaSearch className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted opacity-50" />
-                                <input
-                                    type="text"
-                                    className="form-control rounded-pill ps-5 border-0 shadow-sm"
-                                    placeholder="Search by name, email, or role..."
-                                    style={{ background: 'rgba(255, 255, 255, 0.9)', padding: '12px 20px 12px 48px' }}
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setGlobalSearchTerm(e.target.value);
-                                    }}
-                                />
+                <div className="drawer-body">
+                    <div className="alert alert-info border-0 rounded-4 mb-4 small">
+                        Adjusting these permissions will override the default permissions assigned by the <strong>{employee.role}</strong> role.
+                    </div>
+
+                    {Object.entries(rolePermissions).map(([category, modules]) => (
+                        <div key={category} className="perm-group mb-4">
+                            <h6 className="text-uppercase fw-bold text-muted small mb-3">{category}</h6>
+                            <div className="d-flex flex-wrap gap-2">
+                                {modules.map(mod => {
+                                    const isActive = (permissions[category] || []).includes(mod);
+                                    return (
+                                        <div 
+                                            key={mod} 
+                                            className={`perm-toggle ${isActive ? 'active' : ''}`}
+                                            onClick={() => togglePermission(category, mod)}
+                                        >
+                                            <div className={`toggle-switch ${isActive ? 'on' : 'off'}`}></div>
+                                            <span className="small fw-bold">{mod.replace(/_/g, ' ')}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </div>
-                        <div className="col-md-6 text-end d-flex gap-3 justify-content-end">
-                            <button className="btn rounded-pill px-4 d-flex align-items-center gap-2 shadow-sm border-0 position-relative"
-                                onClick={() => setShowFilter(true)}
-                                style={{ background: 'white', color: '#64748b', fontWeight: 700 }}>
-                                <FaFilter /> Filters
-                                {(filters.role || filters.department || filters.company || filters.status) && (
-                                    <span className="position-absolute top-0 start-100 translate-middle p-1 bg-primary border border-light rounded-circle">
-                                        <span className="visually-hidden">New alerts</span>
-                                    </span>
-                                )}
-                            </button>
+                    ))}
+                </div>
 
-                        </div>
+                <div className="drawer-footer border-top d-flex gap-3">
+                    <button className="btn btn-light rounded-pill flex-grow-1" onClick={onClose}>Cancel</button>
+                    <button className="btn btn-primary rounded-pill flex-grow-1 shadow-sm" onClick={() => { onSave(employee.id, permissions); onClose(); }}>Update Permissions</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const Employees = () => {
+    const navigate = useNavigate();
+    const { employees, roles, updateEmployeePermissions } = usePermissions();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedEmpForPerms, setSelectedEmpForPerms] = useState(null);
+
+    const filteredEmployees = employees.filter(emp => 
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.id.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const getModulesCount = (emp) => {
+        const perms = emp.permissionOverrides || roles.find(r => r.id === emp.role)?.permissions || {};
+        return Object.values(perms).flat().length;
+    };
+
+    return (
+        <DashboardLayout title="">
+            <div className="employees-module-container">
+                {/* Header Section */}
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+                    <div>
+                        <h2 className="fw-bold text-dark mb-1">Workforce Directory</h2>
+                        <p className="text-muted mb-0">Manage employees, roles, and access across modules</p>
+                    </div>
+                    <div className="d-flex gap-3">
+                        <button className="btn btn-light-glass" onClick={() => navigate('/invite-member')}>
+                            <FiUserPlus className="me-2" /> Invite Employee
+                        </button>
                     </div>
                 </div>
 
-                <div className="card-body p-0">
+                {/* Filter Bar */}
+                <div className="filter-bar-glass mb-4">
+                    <div className="search-input-modern">
+                        <FiSearch />
+                        <input 
+                            type="text" 
+                            placeholder="Search by name, ID or email..." 
+                            className="form-control border-0 bg-transparent shadow-none"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                    <div className="filter-actions">
+                        <button className="btn-filter"><FiFilter className="me-2" /> Filters</button>
+                    </div>
+                </div>
+
+                {/* Employees Table */}
+                <div className="employees-table-card shadow-sm rounded-4 overflow-hidden">
                     <div className="table-responsive">
-                        <table className="table table-hover mb-0 align-middle">
-                            <thead style={{ background: 'rgba(129, 140, 248, 0.05)' }}>
+                        <table className="table table-hover align-middle mb-0">
+                            <thead>
                                 <tr>
-                                    <th className="px-4 py-3 border-0 text-muted small fw-bold">EMPLOYEE</th>
-                                    <th className="py-3 border-0 text-muted small fw-bold">CONTACT</th>
-                                    {!isEmployee && <th className="py-3 border-0 text-muted small fw-bold">CREDENTIALS</th>}
-                                    <th className="py-3 border-0 text-muted small fw-bold">ROLE & DEPT</th>
-                                    <th className="py-3 border-0 text-muted small fw-bold">COMPANY</th>
-                                    <th className="py-3 border-0 text-muted small fw-bold">STATUS</th>
-                                    {!isEmployee && <th className="pe-4 py-3 border-0 text-muted small fw-bold text-end">ACTIONS</th>}
+                                    <th>Employee</th>
+                                    <th>ID</th>
+                                    <th>Role & Dept</th>
+                                    <th className="text-center">Assigned Modules</th>
+                                    <th className="text-center">Status</th>
+                                    <th className="text-center">Join Date</th>
+                                    <th className="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {loading ? (
-                                    <tr><td colSpan="6" className="text-center py-5"><div className="spinner-border text-primary"></div></td></tr>
-                                ) : filteredEmployees.length === 0 ? (
-                                    <tr><td colSpan="6" className="text-center py-5 text-muted">No employees found.</td></tr>
-                                ) : (
-                                    filteredEmployees.map((emp, i) => (
-                                        <tr key={i} className="border-bottom border-light" style={{ transition: 'all 0.2s' }}>
-                                            <td className="px-4 py-4">
-                                                <div className="d-flex align-items-center gap-3">
-                                                    <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
-                                                        style={{ width: 42, height: 42, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', fontSize: '0.9rem' }}>
-                                                        {(emp.full_name || emp.name || 'E').charAt(0).toUpperCase()}
-                                                    </div>
-                                                    <div>
-                                                        <div className="fw-bold text-dark">{emp.full_name || emp.name}</div>
-                                                        <div className="small text-muted">ID: {emp.employee_id || `#${emp.id}`}</div>
+                                {filteredEmployees.map((emp) => (
+                                    <tr key={emp.id} className="employee-row-animate">
+                                        <td>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="emp-avatar-wrapper">
+                                                    <img src={emp.avatar} alt={emp.name} className="rounded-circle border border-2 border-white shadow-sm" width="40" height="40" />
+                                                    <div className={`status-indicator ${emp.status === 'Active' ? 'active' : 'invited'}`}></div>
+                                                </div>
+                                                <div>
+                                                    <div className="fw-bold text-dark">{emp.name}</div>
+                                                    <div className="text-muted extra-small d-flex align-items-center gap-1">
+                                                        <FiMail size={10} /> {emp.email}
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="py-4">
-                                                <div className="d-flex flex-column gap-1">
-                                                    <div className="small text-dark d-flex align-items-center gap-2"><FaEnvelope className="text-muted" size={12} /> {emp.personal_email || emp.company_email || emp.email}</div>
-                                                    <div className="small text-muted d-flex align-items-center gap-2"><FaPhone className="text-muted" size={12} /> {emp.phone_number || emp.phone || 'No phone'}</div>
-                                                </div>
-                                            </td>
-                                            {!isEmployee && (
-                                                <td className="py-4">
-                                                    <div className="small text-dark"><strong>User:</strong> {emp.username || emp.email || 'N/A'}</div>
-                                                    <div className="small text-muted"><strong>Pass:</strong> {emp.password || '••••••••'}</div>
-                                                </td>
-                                            )}
-                                            <td className="py-4">
-                                                <div className="fw-bold text-dark">{emp.designation || 'Designation'}</div>
-                                                <div className="small text-muted">{emp.employment_type || emp.role || 'employee'} | {emp.department || 'N/A'}</div>
-                                            </td>
-                                            <td className="py-4">
-                                                <span className="badge bg-light text-dark border rounded-pill px-3 py-2 fw-600">
-                                                    <FaBuilding className="me-2 opacity-50" /> {emp.company_name || emp.company || 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td className="py-4">
-                                                <span className={`badge rounded-pill px-3 py-2 ${emp.status === 'Inactive' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'}`} style={{ fontSize: '0.75rem', fontWeight: 800 }}>
-                                                    {emp.status || 'Active'}
-                                                </span>
-                                            </td>
-                                            {!isEmployee && (
-                                                <td className="pe-4 py-4 text-end">
-                                                    <div className="d-flex gap-2 justify-content-end">
-                                                        <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
-                                                            onClick={() => {
-                                                                // Redirect to Roles & Permissions page for editing
-                                                                navigate('/add-member', { 
-                                                                    state: { 
-                                                                        newMember: {
-                                                                            id: emp.id,
-                                                                            user_id: emp.user_id || emp.id,
-                                                                            name: emp.full_name || emp.name,
-                                                                            email: emp.personal_email || emp.email,
-                                                                            company_id: emp.company_id,
-                                                                            branch: emp.branch
-                                                                        }
-                                                                    } 
-                                                                });
-                                                            }}
-                                                            style={{ background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8' }}>
-                                                            <FaEdit size={14} />
-                                                        </button>
-                                                        {(isSuperAdmin || isAdmin || isHR) && (
-                                                            <button className="btn btn-sm rounded-circle p-2 border-0 shadow-sm"
-                                                                onClick={() => handleToggleStatus(emp.id)}
-                                                                title={emp.status === 'Inactive' ? "Activate" : "Deactivate"}
-                                                                style={{ 
-                                                                    background: emp.status === 'Inactive' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
-                                                                    color: emp.status === 'Inactive' ? '#10b981' : '#ef4444' 
-                                                                }}>
-                                                                {emp.status === 'Inactive' ? <FaCheckCircle size={14} /> : <FaTimesCircle size={14} />}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                            )}
-                                        </tr>
-                                    ))
-                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span className="text-muted fw-bold small">{emp.id}</span>
+                                        </td>
+                                        <td>
+                                            <div className="fw-bold text-dark small">{roles.find(r => r.id === emp.role)?.name || emp.role}</div>
+                                            <div className="text-muted extra-small d-flex align-items-center gap-1">
+                                                <FiBriefcase size={10} /> {emp.department}
+                                            </div>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="module-count-badge">
+                                                {getModulesCount(emp)} Modules
+                                            </div>
+                                        </td>
+                                        <td className="text-center">
+                                            <span className={`badge-status ${emp.status.toLowerCase()}`}>
+                                                {emp.status}
+                                            </span>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="text-muted small d-flex align-items-center justify-content-center gap-1">
+                                                <FiCalendar size={12} /> {emp.joinDate}
+                                            </div>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="d-flex justify-content-center align-items-center gap-2">
+                                                <button className="btn-icon-action" title="Edit Employee">
+                                                    <FiEdit size={16} />
+                                                </button>
+                                                <button 
+                                                    className="btn-icon-action security" 
+                                                    title="Edit Permissions"
+                                                    onClick={() => setSelectedEmpForPerms(emp)}
+                                                >
+                                                    <FiShield size={16} />
+                                                </button>
+                                                <button className="btn-icon-action" title="More Options">
+                                                    <FiMoreVertical size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            {/* Modals Implementation */}
-            {(showAdd || showEdit) && (
-                <div className="modal fade show d-block" style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)' }}>
-                    <div className="modal-dialog modal-dialog-centered modal-lg">
-                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style={{ background: '#fff' }}>
-                            <div className="p-4 border-bottom border-light d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h4 className="fw-bold mb-1" style={{ color: '#0f172a' }}>{showAdd ? 'Add New Employee' : 'Edit Employee Details'}</h4>
-                                    <p className="text-muted small mb-0">{showAdd ? 'Enter employee information to add to the system' : 'Modify the existing details for this member and save your changes'}</p>
-                                </div>
-                                <button onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn-close shadow-none"></button>
-                            </div>
-                            <div className="modal-body p-4">
-                                <form onSubmit={showAdd ? handleAdd : handleUpdate}>
-                                    <div className="row g-4">
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Select User Account</label>
-                                            <select name="user_account" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.user_account} onChange={handleInputChange}>
-                                                <option value="">Select a user account</option>
-                                                <option value="1">Account 1</option>
-                                                <option value="2">Account 2</option>
-                                            </select>
-                                            <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>Only unassigned user accounts are shown</div>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Full Name *</label>
-                                            <input type="text" name="full_name" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.full_name} onChange={handleInputChange} placeholder="John Doe" />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Personal Email *</label>
-                                            <input type="email" name="personal_email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.personal_email} onChange={handleInputChange} placeholder="john.doe@gmail.com" />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Company Email *</label>
-                                            <input type="email" name="company_email" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.company_email} onChange={handleInputChange} placeholder="john.doe@company.com" />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Phone *</label>
-                                            <input type="tel" name="phone_number" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.phone_number} onChange={handleInputChange} placeholder="Phone number" />
-                                        </div>
-
-                                        <div className="col-12 mt-4 pt-2">
-                                            <div className="text-primary fw-bold small mb-3 border-bottom pb-2">Login Credentials</div>
-                                        </div>
-
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Username *</label>
-                                            <input type="text" name="username" className="form-control rounded-3 p-3 bg-light border-0" required value={formData.username} onChange={handleInputChange} placeholder="username / email" />
-                                            <div className="small text-muted mt-1" style={{ fontSize: '0.75rem' }}>The user will use these credentials to access their account.</div>
-                                        </div>
-                                        <div className="col-md-3">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Password *</label>
-                                            <input type="password" name="password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.password} onChange={handleInputChange} placeholder="........" />
-                                        </div>
-                                        <div className="col-md-3">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Confirm *</label>
-                                            <input type="password" name="confirm_password" className="form-control rounded-3 p-3 bg-light border-0" required={showAdd} value={formData.confirm_password} onChange={handleInputChange} placeholder="........" />
-                                        </div>
-
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Department</label>
-                                            <select name="department" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.department} onChange={handleInputChange}>
-                                                <option value="">Select Department</option>
-                                                <option value="IT">IT</option>
-                                                <option value="NON IT">NON IT</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Designation</label>
-                                            <input type="text" name="designation" className="form-control rounded-3 p-3 bg-light border-0" value={formData.designation} onChange={handleInputChange} placeholder="Software Engineer" />
-                                        </div>
-
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Employee Type</label>
-                                            <select name="employment_type" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.employment_type} onChange={(e) => {
-                                                const val = e.target.value;
-                                                let newRole = 'employee';
-                                                
-                                                if (val.toLowerCase().includes('hr')) newRole = 'hr';
-                                                else if (val.toLowerCase().includes('manager')) newRole = 'manager';
-                                                else if (val.toLowerCase().includes('admin')) newRole = 'admin';
-                                                
-                                                setFormData({ ...formData, employment_type: val, role: newRole });
-                                            }}>
-                                                <option value="fulltime HR">fulltime HR</option>
-                                                <option value="Intern HR">Intern HR</option>
-                                                <option value="MANAGER">MANAGER</option>
-                                                <option value="admin">admin</option>
-                                                <option value="fulltime employee">fulltime employee</option>
-                                                <option value="tech intern">tech intern</option>
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Joining Date</label>
-                                            <input type="date" name="joining_date" className="form-control rounded-3 p-3 bg-light border-0" value={formData.joining_date} onChange={handleInputChange} />
-                                        </div>
-
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Company</label>
-                                            <select name="company_id" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" required value={formData.company_id} onChange={handleInputChange}>
-                                                <option value="">Select Company</option>
-                                                {companies.map((c, idx) => (
-                                                    <option key={idx} value={c.id}>{c.name || c.company_name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Branch</label>
-                                            <select name="branch" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.branch} onChange={handleInputChange}>
-                                                <option value="">Select Branch</option>
-                                                {filteredBranches.map((b, idx) => (
-                                                    <option key={idx} value={b.branch_name || b.name}>{b.branch_name || b.name}</option>
-                                                ))}
-                                                {/* Fallback if no company selected or no branches found */}
-                                                {!formData.company_id && (
-                                                    <>
-                                                        <option value="Main">Main Branch</option>
-                                                        <option value="Regional">Regional Branch</option>
-                                                    </>
-                                                )}
-                                            </select>
-                                        </div>
-
-                                        <div className="col-md-6">
-                                            <label className="form-label fw-bold small text-muted text-uppercase">Gender</label>
-                                            <select name="gender" className="form-select rounded-3 p-3 bg-light border-0 shadow-none" value={formData.gender} onChange={handleInputChange}>
-                                                <option value="Male">Male</option>
-                                                <option value="Female">Female</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-
-                                    </div>
-                                    <div className="mt-5 d-flex gap-3 pt-3 border-top">
-                                        <button type="button" onClick={() => { setShowAdd(false); setShowEdit(false); }} className="btn btn-light rounded-pill px-4 py-3 fw-bold w-100 border-0" style={{ background: '#f8fafc' }}>Cancel</button>
-                                        <button type="submit" className="btn btn-primary rounded-pill px-4 py-3 fw-bold w-100 border-0 shadow-lg" style={{ background: '#6366f1' }}>
-                                            {showAdd ? 'Add Employee' : 'Save Changes'}
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            {/* Permission Edit Drawer */}
+            {selectedEmpForPerms && (
+                <PermissionDrawer 
+                    employee={selectedEmpForPerms} 
+                    onClose={() => setSelectedEmpForPerms(null)}
+                    onSave={updateEmployeePermissions}
+                />
             )}
-            {/* Filter Modal */}
-            {showFilter && (
-                <div className="modal fade show d-block" style={{ background: 'rgba(0, 0, 0, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1060 }}>
-                    <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: '450px' }}>
-                        <div className="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                            <div className="p-4 border-bottom border-light d-flex justify-content-between align-items-center bg-light">
-                                <h5 className="fw-bold mb-0 text-dark">Filter Members</h5>
-                                <button onClick={() => setShowFilter(false)} className="btn-close shadow-none"></button>
-                            </div>
-                            <div className="modal-body p-4">
-                                <div className="row g-3">
-                                    <div className="col-12">
-                                        <label className="form-label fw-bold small text-muted text-uppercase">Role</label>
-                                        <select className="form-select rounded-3 bg-light border-0" value={filters.role} onChange={(e) => setFilters({...filters, role: e.target.value})}>
-                                            <option value="">All Roles</option>
-                                            <option value="superadmin">Super Admin</option>
-                                            <option value="admin">Admin</option>
-                                            <option value="hr">HR</option>
-                                            <option value="manager">Manager</option>
-                                            <option value="employee">Employee</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-12">
-                                        <label className="form-label fw-bold small text-muted text-uppercase">Department</label>
-                                        <select className="form-select rounded-3 bg-light border-0" value={filters.department} onChange={(e) => setFilters({...filters, department: e.target.value})}>
-                                            <option value="">All Departments</option>
-                                            <option value="IT">IT</option>
-                                            <option value="NON IT">NON IT</option>
-                                            <option value="Sales">Sales</option>
-                                            <option value="Marketing">Marketing</option>
-                                        </select>
-                                    </div>
-                                    <div className="col-12">
-                                        <label className="form-label fw-bold small text-muted text-uppercase">Company</label>
-                                        <select className="form-select rounded-3 bg-light border-0" value={filters.company} onChange={(e) => setFilters({...filters, company: e.target.value})}>
-                                            <option value="">All Companies</option>
-                                            {companies.map((c, idx) => (
-                                                <option key={idx} value={c.name || c.company_name}>{c.name || c.company_name}</option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="col-12">
-                                        <label className="form-label fw-bold small text-muted text-uppercase">Status</label>
-                                        <select className="form-select rounded-3 bg-light border-0" value={filters.status} onChange={(e) => setFilters({...filters, status: e.target.value})}>
-                                            <option value="">All Status</option>
-                                            <option value="Active">Active</option>
-                                            <option value="Inactive">Inactive</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="mt-4 d-flex gap-2">
-                                    <button className="btn btn-light rounded-pill w-100 fw-bold py-2" onClick={() => {
-                                        setFilters({ role: '', department: '', company: '', status: '' });
-                                        setShowFilter(false);
-                                    }}>Reset All</button>
-                                    <button className="btn btn-primary rounded-pill w-100 fw-bold py-2" style={{ background: '#6366f1' }} onClick={() => setShowFilter(false)}>Apply Filters</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
-
-const Employees = () => {
-    return (
-        <DashboardLayout title="Member Directory">
-            <EmployeesContent />
         </DashboardLayout>
     );
 };

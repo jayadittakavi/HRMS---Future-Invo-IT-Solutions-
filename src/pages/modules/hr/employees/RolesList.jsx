@@ -1,320 +1,297 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { API_BASE, getAuthHeader } from '../../../../config';
-import { FiShield, FiUsers, FiEdit2, FiTrash2, FiSearch, FiPlus } from 'react-icons/fi';
-import { MdOutlineSecurity } from 'react-icons/md';
+import { 
+    FiShield, FiUsers, FiEdit2, FiTrash2, FiSearch, FiPlus, FiCheck, FiX, 
+    FiGrid, FiChevronRight, FiSearch as FiSearchIcon 
+} from 'react-icons/fi';
+import { MdOutlineSecurity, MdDashboard, MdFactCheck, MdEventBusy, MdAttachMoney, MdAdminPanelSettings, MdSettings } from 'react-icons/md';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
-import { accessControlService } from '../../core/user_management/service';
-import { employeeSuperAdminService } from './superadmin-service';
+import { usePermissions } from '../../../../context/PermissionsContext';
+import './RolesList.css';
+
+const PermissionManagement = ({ role, onClose, onSave }) => {
+    const [permissions, setPermissions] = useState(role.permissions || {});
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const permissionCategories = [
+        {
+            id: 'dashboard',
+            label: 'Dashboard',
+            icon: <MdDashboard />,
+            modules: [
+                { id: 'dashboard', label: 'Dashboard' },
+                { id: 'my_dashboard', label: 'My Dashboard' }
+            ]
+        },
+        {
+            id: 'attendance',
+            label: 'Attendance',
+            icon: <MdFactCheck />,
+            modules: [
+                { id: 'attendance', label: 'Attendance' },
+                { id: 'my_attendance', label: 'My Attendance' }
+            ]
+        },
+        {
+            id: 'leave',
+            label: 'Leave',
+            icon: <MdEventBusy />,
+            modules: [
+                { id: 'leave_management', label: 'Leave Management' },
+                { id: 'my_leave', label: 'My Leave' }
+            ]
+        },
+        {
+            id: 'payroll',
+            label: 'Payroll',
+            icon: <MdAttachMoney />,
+            modules: [
+                { id: 'payroll_management', label: 'Payroll' },
+                { id: 'my_payroll', label: 'My Payroll' }
+            ]
+        },
+        {
+            id: 'hr',
+            label: 'HR',
+            icon: <MdAdminPanelSettings />,
+            modules: [
+                { id: 'employees', label: 'Employees' },
+                { id: 'departments', label: 'Departments' },
+                { id: 'onboarding', label: 'Onboarding' },
+                { id: 'documents', label: 'Documents' }
+            ]
+        },
+        {
+            id: 'others',
+            label: 'Others',
+            icon: <MdSettings />,
+            modules: [
+                { id: 'reports', label: 'Reports' },
+                { id: 'calendar', label: 'Calendar' },
+                { id: 'settings', label: 'Settings' }
+            ]
+        }
+    ];
+
+    const togglePermission = (category, moduleId) => {
+        setPermissions(prev => {
+            const current = prev[category] || [];
+            const updated = current.includes(moduleId) 
+                ? current.filter(id => id !== moduleId) 
+                : [...current, moduleId];
+            return { ...prev, [category]: updated };
+        });
+    };
+
+    const handleSave = () => {
+        onSave(role.id, permissions);
+        onClose();
+    };
+
+    return (
+        <div className="permission-drawer-overlay animate__animated animate__fadeIn" onClick={onClose}>
+            <div className="permission-drawer animate__animated animate__slideInRight" onClick={e => e.stopPropagation()}>
+                <div className="drawer-header">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="role-icon-circle" style={{ backgroundColor: role.dotColor }}>
+                            <FiShield size={20} color="white" />
+                        </div>
+                        <div>
+                            <h4 className="mb-0 fw-bold">Edit Permissions</h4>
+                            <p className="text-muted small mb-0">{role.name} Role</p>
+                        </div>
+                    </div>
+                    <button className="btn-close-custom" onClick={onClose}><FiX size={24} /></button>
+                </div>
+
+                <div className="drawer-body">
+                    <div className="search-box mb-4">
+                        <FiSearchIcon className="search-icon" />
+                        <input 
+                            type="text" 
+                            placeholder="Search modules..." 
+                            className="form-control shadow-none"
+                            value={searchTerm}
+                            onChange={e => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="permission-grid">
+                        {permissionCategories.map(cat => (
+                            <div key={cat.id} className="permission-category">
+                                <div className="category-header d-flex align-items-center gap-2 mb-3">
+                                    <span className="category-icon">{cat.icon}</span>
+                                    <h6 className="mb-0 fw-bold">{cat.label}</h6>
+                                </div>
+                                <div className="category-modules d-flex flex-wrap gap-2">
+                                    {cat.modules.filter(m => m.label.toLowerCase().includes(searchTerm.toLowerCase())).map(m => {
+                                        const isActive = (permissions[cat.id] || []).includes(m.id);
+                                        return (
+                                            <div 
+                                                key={m.id} 
+                                                className={`permission-chip ${isActive ? 'active' : ''}`}
+                                                onClick={() => togglePermission(cat.id, m.id)}
+                                            >
+                                                {isActive && <FiCheck className="me-1" />}
+                                                {m.label}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="drawer-footer">
+                    <button className="btn btn-light rounded-pill px-4" onClick={onClose}>Cancel</button>
+                    <button className="btn btn-primary rounded-pill px-4" onClick={handleSave}>Save Changes</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const RolesList = () => {
     const navigate = useNavigate();
-
-    const [rolesData, setRolesData] = React.useState([]);
-    const [membersData, setMembersData] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                // Explicitly use superadmin headers for system-level data retrieval
-                const saHeader = getAuthHeader('superadmin');
-                
-                const fetchWithSA = async (url) => {
-                    try {
-                        const res = await fetch(url, { headers: saHeader });
-                        if (res.ok) return await res.json();
-                        return [];
-                    } catch (e) {
-                        console.warn(`Fetch failed for ${url}:`, e);
-                        return [];
-                    }
-                };
-
-                // Fetch from all sources with superadmin privilege
-                const [rolesRes, usersRes, empRes] = await Promise.all([
-                    fetchWithSA(`${API_BASE}/roles`),
-                    fetchWithSA(`${API_BASE}/team/members`),
-                    fetchWithSA(`${API_BASE}/team/members`) // Same endpoint to satisfy Promise.all array length
-                ]);
-                
-                // Get employees data (either as array or nested in data field)
-                const employeesList = Array.isArray(empRes) ? empRes : (empRes.data || empRes.employees || []);
-                
-                // Merge users and employees for more comprehensive list
-                const combinedMembers = [...employeesList];
-                
-                // Add users from auth if they are not already in employee list
-                (usersRes || []).forEach(u => {
-                    const exists = combinedMembers.some(e => 
-                        (e.email?.toLowerCase() === u.email?.toLowerCase() || 
-                         e.personal_email?.toLowerCase() === u.email?.toLowerCase() || 
-                         e.username?.toLowerCase() === u.username?.toLowerCase())
-                    );
-                    if (!exists) combinedMembers.push(u);
-                });
-
-                // Map backend roles to UI format
-                let mappedRoles = (rolesRes || []).map(role => ({
-                    id: role.id,
-                    name: role.name,
-                    description: role.description || `Management of ${role.name} level access.`,
-                    userCount: employeesList.filter(e => String(e.role).toLowerCase() === String(role.name).toLowerCase()).length || role.userCount || 0,
-                    modulesCount: Object.keys(role.permissions || {}).length || 8,
-                    totalModules: 8,
-                    dotColor: role.name === 'Super Admin' ? '#f59e0b' : '#3b82f6',
-                    members: `${employeesList.filter(e => String(e.role).toLowerCase() === String(role.name).toLowerCase()).length || role.userCount || 0} Members`
-                }));
-                
-                // Fallback for roles if empty
-                if (mappedRoles.length === 0) {
-                    mappedRoles = [
-                        { id: 1, name: 'Super Admin', description: 'Full system access and master configuration rights.', userCount: 1, modulesCount: 8, totalModules: 8, dotColor: '#f59e0b', members: '1 Members' },
-                        { id: 2, name: 'Admin', description: 'Company-level administrative controls and reporting.', userCount: 1, modulesCount: 6, totalModules: 8, dotColor: '#3b82f6', members: '1 Members' },
-                        { id: 3, name: 'HR', description: 'Employee management, payroll and attendance records.', userCount: 2, modulesCount: 5, totalModules: 8, dotColor: '#10b981', members: '2 Members' },
-                        { id: 4, name: 'Manager', description: 'Team leader access for approvals and performance tracking.', userCount: 5, modulesCount: 4, totalModules: 8, dotColor: '#6366f1', members: '5 Members' },
-                        { id: 5, name: 'Employee', description: 'Individual access for self-service and daily operations.', userCount: 15, modulesCount: 2, totalModules: 8, dotColor: '#818cf8', members: '15 Members' }
-                    ];
-                }
-                
-                setRolesData(mappedRoles);
-
-                // Map members to members format
-                const mappedMembers = combinedMembers.map(user => ({
-                    id: user.id || user.user_id,
-                    user_id: user.user_id || user.id,
-                    name: user.full_name || user.name || user.username || "Unknown member",
-                    email: user.personal_email || user.email || "N/A",
-                    role: user.role || "Employee",
-                    status: user.status === 'Active' || user.is_active ? 'Active' : 'Invited',
-                    joined: user.joining_date || user.created_at || user.createdAt || "Recently"
-                }));
-
-                // Define the core invited members that MUST be displayed
-                const originalMembers = [
-                    { id: 101, user_id: 101, name: 'Aparna', email: 'aparna@gmail.com', role: 'Super Admin', status: 'Active', joined: '2024-01-15' },
-                    { id: 102, user_id: 102, name: 'Sandhya', email: 'sandhya@23gmail.com', role: 'Admin', status: 'Active', joined: '2024-02-10' },
-                    { id: 103, user_id: 103, name: 'Rahul Sharma', email: 'rahul.s@company.com', role: 'Manager', status: 'Active', joined: '2024-03-05' },
-                    { id: 104, user_id: 104, name: 'Priya Singh', email: 'priya.hr@company.com', role: 'HR', status: 'Active', joined: '2024-03-12' },
-                    { id: 105, user_id: 105, name: 'Amit Kumar', email: 'amit.k@company.com', role: 'Employee', status: 'Active', joined: '2024-03-20' }
-                ];
-
-                // Merge with priority on original members
-                const finalMembers = [...originalMembers];
-                mappedMembers.forEach(m => {
-                    const alreadyExists = finalMembers.some(om => om.email.toLowerCase() === m.email.toLowerCase());
-                    if (!alreadyExists) finalMembers.push(m);
-                });
-                
-                setMembersData(finalMembers);
-
-            } catch (error) {
-                console.error("Failed to fetch dashboard data:", error);
-                // Last resort fallback
-                setMembersData([
-                    { id: 101, user_id: 101, name: 'Aparna', email: 'aparna@gmail.com', role: 'Super Admin', status: 'Active', joined: '2024-01-15' },
-                    { id: 102, user_id: 102, name: 'Sandhya', email: 'sandhya@23gmail.com', role: 'Admin', status: 'Active', joined: '2024-02-10' },
-                    { id: 103, user_id: 103, name: 'Rahul Sharma', email: 'rahul.s@company.com', role: 'Manager', status: 'Active', joined: '2024-03-05' }
-                ]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    const navigateToAddMember = () => navigate('/add-member');
+    const { roles, updateRolePermissions } = usePermissions();
+    const [editingRole, setEditingRole] = useState(null);
 
     const stats = [
-        { icon: <MdOutlineSecurity size={18} />, label: `${rolesData.length} Roles Defined` },
-        { icon: <FiUsers size={18} />, label: `${rolesData.reduce((acc, r) => acc + (r.userCount || 0), 0)} Users Assigned` },
-        { icon: <FiShield size={18} />, label: "8 Modules Protected" }
+        { icon: <MdOutlineSecurity size={18} />, label: `${roles.length} Roles Defined`, color: '#6366f1' },
+        { icon: <FiUsers size={18} />, label: `${roles.reduce((acc, r) => acc + (r.usersCount || 0), 0)} Users Assigned`, color: '#3b82f6' },
+        { icon: <FiGrid size={18} />, label: "12 Modules Protected", color: '#10b981' }
     ];
+
     return (
         <DashboardLayout title="">
-            <div className="container-fluid p-0 roles-list-page" style={{ backgroundColor: '#e2e8f0', minHeight: '100vh', padding: '24px 32px' }}>
-                <div style={{ backgroundColor: '#e2e8f0', padding: '24px 32px' }}>
-                    
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <div className="d-flex gap-3">
-                            {stats.map((stat, idx) => (
-                                <div 
-                                    key={idx} 
-                                    className="d-flex align-items-center gap-2 bg-white px-3 py-2 rounded-pill shadow-sm border"
-                                    style={{ borderColor: '#cbd5e1' }}
-                                >
-                                    <span className="text-secondary d-flex">{stat.icon}</span>
-                                    <span className="fw-bold text-dark" style={{ fontSize: '0.85rem' }}>{stat.label}</span>
-                                </div>
-                            ))}
+            <div className="roles-management-container">
+                {/* Page Header */}
+                <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="header-icon-gradient">
+                            <FiShield size={24} />
                         </div>
-                        <button className="btn btn-primary rounded-pill px-4" onClick={navigateToAddMember}>
-                            <FiPlus className="me-2" /> Add New Member
+                        <div>
+                            <h2 className="mb-1 fw-bold text-dark">Roles & Permissions</h2>
+                            <p className="text-muted mb-0">Control who can access what with role-based access control</p>
+                        </div>
+                    </div>
+                    
+                    <div className="search-and-create d-flex gap-3">
+                        <div className="modern-search">
+                            <FiSearch />
+                            <input type="text" placeholder="Search roles..." className="form-control" />
+                        </div>
+                        <button className="btn-create-role">
+                            <FiPlus className="me-2" /> Create Role
                         </button>
                     </div>
+                </div>
 
-                    {/* Table Container */}
-                    <div className="card border-0 rounded-4 shadow-sm overflow-hidden" style={{ backgroundColor: '#f8fafc' }}>
-                        <div className="table-responsive">
-                            <table className="table table-borderless align-middle mb-0 custom-roles-table">
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                        <th className="py-3 px-4 text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>ROLE NAME</th>
-                                        <th className="py-3 px-2 text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>DESCRIPTION</th>
-                                        <th className="py-3 px-2 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>USERS</th>
-                                        <th className="py-3 px-2 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>MODULES</th>
-                                        <th className="py-3 px-4 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>ACTIONS</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {loading ? (
-                                        <tr><td colSpan="5" className="text-center py-5"><div className="spinner-border text-primary"></div></td></tr>
-                                    ) : rolesData.length === 0 ? (
-                                        <tr><td colSpan="5" className="text-center py-5 text-muted">No roles found.</td></tr>
-                                    ) : rolesData.map((role, idx) => (
-                                        <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }} className="role-row">
-                                            <td className="py-3 px-4">
-                                                <div className="d-flex align-items-start gap-3">
-                                                    <div className="mt-2 rounded-circle" style={{ width: '10px', height: '10px', backgroundColor: role.dotColor, flexShrink: 0 }}></div>
-                                                    <div>
-                                                        <div className="fw-bold text-dark" style={{ fontSize: '0.95rem' }}>{role.name}</div>
-                                                        <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{role.members}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="py-3 px-2 text-secondary" style={{ fontSize: '0.85rem', maxWidth: '400px' }}>
-                                                {role.description}
-                                            </td>
-                                            <td className="py-3 px-2 text-center">
-                                                <div className="d-inline-flex align-items-center gap-1 bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem', fontWeight: '600' }}>
-                                                    <FiUsers size={12} /> {role.userCount}
-                                                </div>
-                                            </td>
-                                            <td className="py-3 px-2 text-center">
-                                                <div className="d-inline-flex align-items-center bg-info bg-opacity-10 text-info px-2 py-1 rounded-pill" style={{ fontSize: '0.75rem', fontWeight: '600', color: '#0ea5e9' }}>
-                                                    {role.modulesCount} / {role.totalModules}
-                                                </div>
-                                            </td>
-                                            <td className="py-3 px-4 text-center">
-                                                <div className="d-flex justify-content-center align-items-center gap-3">
-                                                    <button className="btn btn-link text-secondary text-decoration-none d-flex align-items-center gap-1 p-0 fw-bold" style={{ fontSize: '0.8rem' }}>
-                                                        <FiEdit2 size={14} /> Edit
-                                                    </button>
-                                                    {role.name !== 'Super Admin' && (
-                                                        <button className="btn btn-link text-danger p-0 d-flex align-items-center">
-                                                            <FiTrash2 size={16} style={{ color: '#ef4444' }} />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    {/* Bottom Cards (Decoration matching the screenshot's cut-off view) */}
-                    <div className="d-flex gap-3 mt-4 overflow-hidden" style={{ height: '40px', opacity: 0.5 }}>
-                        <div className="card border-primary border-top-0 border-end-0 border-bottom-0 shadow-sm rounded-top-3 flex-grow-1" style={{ borderLeftWidth: '4px' }}></div>
-                        <div className="card border-info border-top-0 border-end-0 border-bottom-0 shadow-sm rounded-top-3 flex-grow-1" style={{ borderLeftWidth: '4px' }}></div>
-                        <div className="card border-warning border-top-0 border-end-0 border-bottom-0 shadow-sm rounded-top-3 flex-grow-1" style={{ borderLeftWidth: '4px' }}></div>
-                    </div>
-
-                    {/* Invited Members Section */}
-                    <div className="mt-5">
-                        <div className="d-flex justify-content-between align-items-center mb-4">
-                            <h5 className="fw-bold text-dark d-flex align-items-center gap-2 mb-0">
-                                <FiUsers className="text-primary" /> Invited Members List
-                            </h5>
-                        </div>
-
-                        <div className="card border-0 rounded-4 shadow-sm overflow-hidden" style={{ backgroundColor: '#ffffff' }}>
-                            <div className="table-responsive">
-                                <table className="table table-borderless align-middle mb-0">
-                                    <thead style={{ backgroundColor: '#f8fafc' }}>
-                                        <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                            <th className="py-3 px-4 text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>NAME & EMAIL</th>
-                                            <th className="py-3 px-2 text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>ROLE</th>
-                                            <th className="py-3 px-2 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>STATUS</th>
-                                            <th className="py-3 px-2 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>JOINED</th>
-                                            <th className="py-3 px-4 text-center text-secondary fw-bold" style={{ fontSize: '0.75rem', letterSpacing: '1px' }}>ACTIONS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {loading ? (
-                                            <tr><td colSpan="5" className="text-center py-5"><div className="spinner-border text-primary"></div></td></tr>
-                                        ) : membersData.length === 0 ? (
-                                            <tr><td colSpan="5" className="text-center py-5 text-muted">No members invited yet.</td></tr>
-                                        ) : membersData.map((member, idx) => (
-                                            <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }} className="user-row">
-                                                <td className="py-3 px-4">
-                                                    <div className="d-flex align-items-center gap-3">
-                                                        <div className="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm"
-                                                            style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', fontSize: '0.8rem' }}>
-                                                            {member.name.charAt(0).toUpperCase()}
-                                                        </div>
-                                                        <div>
-                                                            <div className="fw-bold text-dark" style={{ fontSize: '0.9rem' }}>{member.name}</div>
-                                                            <div className="text-secondary" style={{ fontSize: '0.75rem' }}>{member.email}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="py-3 px-2">
-                                                    <span className="badge bg-light text-dark border fw-normal px-2 py-1 rounded" style={{ fontSize: '0.75rem' }}>
-                                                        {member.role}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-2 text-center">
-                                                    <span className={`badge rounded-pill px-2 py-1 ${member.status === 'Active' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'}`} style={{ fontSize: '0.7rem' }}>
-                                                        {member.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-3 px-2 text-center text-secondary small">
-                                                    {new Date(member.joined).toLocaleDateString() === 'Invalid Date' ? member.joined : new Date(member.joined).toLocaleDateString()}
-                                                </td>
-                                                <td className="py-3 px-4 text-center">
-                                                    <button 
-                                                        className="btn btn-link text-secondary p-0 me-3"
-                                                        onClick={() => navigate('/add-member', { 
-                                                            state: { 
-                                                                newMember: {
-                                                                    user_id: member.user_id,
-                                                                    name: member.name,
-                                                                    email: member.email,
-                                                                    role: member.role
-                                                                }
-                                                            } 
-                                                        })}
-                                                    >
-                                                        <FiEdit2 size={14} />
-                                                    </button>
-                                                    <button className="btn btn-link text-danger p-0"><FiTrash2 size={14} /></button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                {/* Stat Cards */}
+                <div className="row g-4 mb-5">
+                    {stats.map((stat, idx) => (
+                        <div key={idx} className="col-md-4">
+                            <div className="stat-card-glass">
+                                <div className="stat-icon-wrapper" style={{ color: stat.color, backgroundColor: `${stat.color}15` }}>
+                                    {stat.icon}
+                                </div>
+                                <div className="stat-info">
+                                    <h5 className="mb-0 fw-bold">{stat.label}</h5>
+                                    <p className="text-muted small mb-0">Security coverage enabled</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    ))}
+                </div>
 
+                {/* Roles List Table */}
+                <div className="card-table-wrapper">
+                    <div className="table-responsive">
+                        <table className="table table-modern align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Role Name</th>
+                                    <th>Description</th>
+                                    <th className="text-center">Users</th>
+                                    <th className="text-center">Modules</th>
+                                    <th className="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {roles.map((role) => (
+                                    <tr key={role.id} className="role-row-animate">
+                                        <td>
+                                            <div className="d-flex align-items-center gap-3">
+                                                <div className="role-dot" style={{ backgroundColor: role.dotColor }}></div>
+                                                <div>
+                                                    <div className="fw-bold text-dark">{role.name}</div>
+                                                    <div className="text-muted small">System Level Access</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <p className="text-secondary small mb-0 max-width-description">
+                                                {role.description}
+                                            </p>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="badge-pill-users">
+                                                <FiUsers size={12} className="me-1" /> {role.usersCount}
+                                            </div>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="badge-pill-modules">
+                                                {role.modulesCount} / 12
+                                            </div>
+                                        </td>
+                                        <td className="text-center">
+                                            <div className="d-flex justify-content-center align-items-center gap-2">
+                                                <button className="btn-action-edit" onClick={() => setEditingRole(role)}>
+                                                    <FiEdit2 size={14} className="me-1" /> Edit
+                                                </button>
+                                                {role.id !== 'superadmin' && (
+                                                    <button className="btn-action-delete">
+                                                        <FiTrash2 size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Decorative Background Elements */}
+                <div className="row g-4 mt-5">
+                    {roles.slice(0, 4).map((role, idx) => (
+                        <div key={idx} className="col-md-3">
+                            <div className="role-preview-card" style={{ borderLeft: `4px solid ${role.dotColor}` }}>
+                                <div className="d-flex align-items-center justify-content-between mb-2">
+                                    <div className="role-icon-sm" style={{ backgroundColor: `${role.dotColor}20`, color: role.dotColor }}>
+                                        <FiShield size={16} />
+                                    </div>
+                                    <span className="text-muted tiny-text">ACTIVE</span>
+                                </div>
+                                <h6 className="fw-bold mb-1">{role.name}</h6>
+                                <p className="text-muted extra-small mb-0 text-truncate">{role.description}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
 
-            <style>{`
-                .roles-list-page th {
-                    text-transform: uppercase;
-                }
-                .role-row:hover {
-                    background-color: #f1f5f9;
-                }
-                /* Disable page bg from main content layout */
-                .page-content {
-                    background-color: #e2e8f0 !important;
-                }
-            `}</style>
+            {/* Permission Management Drawer */}
+            {editingRole && (
+                <PermissionManagement 
+                    role={editingRole} 
+                    onClose={() => setEditingRole(null)} 
+                    onSave={updateRolePermissions}
+                />
+            )}
         </DashboardLayout>
     );
 };

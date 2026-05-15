@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { useAuth } from '../context/AuthContext';
 import { EmployeesContent } from '../pages/employees/Employees';
 import { AttendanceContent } from '../pages/attendance/Attendance';

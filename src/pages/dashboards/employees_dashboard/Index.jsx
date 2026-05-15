@@ -1,6 +1,6 @@
 import { FaEdit, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import DashboardLayout from '../../components/DashboardLayout';
-import '../../components/DashboardLayout.css';
+import DashboardLayout from '../../components/layout/DashboardLayout';
+import '../../components/layout/DashboardLayout.css';
 
 import { useAuth } from '../../context/AuthContext';
 

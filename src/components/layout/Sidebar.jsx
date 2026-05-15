@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { usePermissions } from '../../context/PermissionsContext';
 import logo from '../../assets/images/logo.jpg';
 import './Sidebar.css';
 import {
@@ -150,6 +151,7 @@ const getSidebarConfig = (role) => {
             roles: MGMT_ROLES,
             children: [
                 { id: 'delegation', label: 'Delegation', path: '/delegation', roles: MGMT_ROLES },
+                { id: 'visitor-approvals', label: 'Approvals', path: '/visitor-approvals', roles: MGMT_ROLES },
                 { id: 'visitors', label: 'Visitor Mgmt', path: '/visitors', roles: ALL_ROLES },
                 { id: 'desk', label: 'Desk Mgmt', path: '/desk-management', roles: ALL_ROLES },
                 { id: 'automation', label: 'Automation', path: '/automation-center', roles: ['superadmin', 'admin'] },
@@ -202,12 +204,62 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         navigate('/login');
     };
 
-    // ── Filter items by role ──
+    const { currentUserPermissions } = usePermissions();
+
+    // ── Filter items by role and permission ──
     const filterByRole = (items) => {
         return items.filter(item => {
+            // Superadmin always sees everything
             if (role === 'superadmin') return true;
-            if (!item.roles) return true;
-            return item.roles.includes(role);
+            
+            // Check basic role restriction
+            const roleAllowed = !item.roles || item.roles.includes(role);
+            if (!roleAllowed) return false;
+
+            // Check explicit permission if defined in context
+            if (currentUserPermissions) {
+                // Map sidebar IDs to permission keys
+                const permissionMap = {
+                    'dashboard': 'dashboard',
+                    'my-dashboard': 'dashboard',
+                    'my-team': 'dashboard',
+                    'employees': 'hr',
+                    'departments': 'hr',
+                    'attendance': 'attendance',
+                    'my-attendance': 'attendance',
+                    'attendance-mgmt': 'attendance',
+                    'leave': 'leave',
+                    'my-leaves': 'leave',
+                    'leave-requests': 'leave',
+                    'payroll': 'payroll',
+                    'my-payroll': 'payroll',
+                    'payroll-mgmt': 'payroll',
+                    'recruitment': 'hr', // Recruitment usually under HR
+                    'onboarding': 'hr',
+                    'documents': 'hr',
+                    'reports': 'others',
+                    'calendar': 'others',
+                    'settings': 'others'
+                };
+
+                const permKey = permissionMap[item.id];
+                if (permKey) {
+                    const allowedModules = currentUserPermissions[permKey] || [];
+                    // Check if specific module or the whole category is allowed
+                    // Note: In PermissionsContext, we store internal module IDs like 'my_dashboard'
+                    // We need to normalize or check if any allowed module matches
+                    const normalizedId = item.id.replace(/-/g, '_');
+                    const isPermitted = allowedModules.includes(normalizedId) || 
+                                       allowedModules.some(m => m.includes(normalizedId));
+                    
+                    // If it's a category (like 'dashboard' or 'hr-tools'), it's visible if it has children or is directly allowed
+                    if (item.children) return true; // Let the children filter themselves
+
+                    return isPermitted;
+                }
+            }
+
+            return true;
         });
     };
 
@@ -253,7 +305,7 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
                      role === 'admin' ? 'Admin Controls' :
                      role === 'hr' ? 'HR Controls' :
                      role === 'manager' ? 'Manager Controls' :
-                     'My Workspace'}
+                     'My Dashboard'}
                 </div>
             )}
 

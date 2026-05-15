@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { SimpleBarChart, SimpleDonutChart, SimpleLineChart } from '../components/charts/CustomCharts';
 import { CompaniesContent } from '../pages/companies/Companies';
 import { BranchesContent } from '../pages/branches/Branches';

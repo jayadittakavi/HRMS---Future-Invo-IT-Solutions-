@@ -1,5 +1,5 @@
 import React from 'react';
-import DashboardLayout from '../../components/DashboardLayout';
+import DashboardLayout from '../../components/layout/DashboardLayout';
 import { SimpleLineChart } from '../../components/charts/CustomCharts';
 import { FaPlaneDeparture, FaReceipt, FaWallet } from 'react-icons/fa';
 
