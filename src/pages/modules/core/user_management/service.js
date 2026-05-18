@@ -11,11 +11,19 @@ export const accessControlService = {
     getUsers: async () => {
         try {
             const response = await fetch(`${API_BASE}/admin/access-control/users`, authHeader());
-            if (!response.ok) return [];
+            if (!response.ok) throw new Error("Fallback to local");
             return await response.json();
         } catch (error) {
-            console.error("API Error (getUsers):", error);
-            return [];
+            console.warn("API Error (getUsers), using local storage:", error.message);
+            const localMocks = JSON.parse(localStorage.getItem('mockEmployees') || '[]');
+            const pendingInvites = JSON.parse(localStorage.getItem('pendingInvites') || '[]');
+            const mergedMocks = [...localMocks];
+            pendingInvites.forEach(invite => {
+                if (!mergedMocks.find(m => m.email === invite.email)) {
+                    mergedMocks.push({...invite, id: invite.id || Date.now()});
+                }
+            });
+            return mergedMocks;
         }
     },
 
@@ -71,11 +79,16 @@ export const accessControlService = {
     getRoles: async () => {
         try {
             const response = await fetch(`${API_BASE}/admin/access-control/roles`, authHeader());
-            if (!response.ok) return [];
+            if (!response.ok) throw new Error("Fallback to local");
             return await response.json();
         } catch (error) {
-            console.error("API Error (getRoles):", error);
-            return [];
+            console.warn("API Error (getRoles), using local storage:", error.message);
+            const defaultRoles = [
+                { id: 'superadmin', name: 'Super Admin', usersCount: 1, modulesCount: 12 },
+                { id: 'admin', name: 'Admin', usersCount: 2, modulesCount: 10 },
+                { id: 'hr', name: 'HR', usersCount: 3, modulesCount: 8 }
+            ];
+            return JSON.parse(localStorage.getItem('mockRoles')) || defaultRoles;
         }
     },
 

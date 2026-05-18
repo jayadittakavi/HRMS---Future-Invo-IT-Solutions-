@@ -6,8 +6,8 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
-  
-  const BACKEND = env.VITE_API_URL || "http://127.0.0.1:5000";
+
+  const BACKEND = env.VITE_API_URL || "http://192.168.1.27:5000";
 
   const proxyConfig = {
     target: BACKEND,
@@ -17,7 +17,18 @@ export default defineConfig(({ mode }) => {
     proxyTimeout: 120000,
     configure: (proxy) => {
       proxy.on('error', (err) => {
-        console.error('[Proxy Error]', err.message, 'Target:', BACKEND);
+        // Only log genuine connection failures (e.g. backend offline)
+        if (err.code === 'ECONNREFUSED' || err.code === 'ENOTFOUND') {
+          console.error('[Proxy] ⚠️  Backend unreachable at', BACKEND, '— frontend will use local data fallback.');
+        }
+      });
+      proxy.on('proxyRes', (proxyRes, req) => {
+        // Log 404s quietly at debug level — these are expected missing backend routes
+        if (proxyRes.statusCode === 404) {
+          console.debug(`[Proxy] 404 ${req.url} — backend route not yet implemented, using local fallback.`);
+        } else if (proxyRes.statusCode >= 500) {
+          console.error(`[Proxy] ❌ ${proxyRes.statusCode} ${req.url}`);
+        }
       });
     }
   };

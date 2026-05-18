@@ -98,7 +98,12 @@ const Login = () => {
 
     } catch (err) {
       console.error('Login Error:', err);
-      setError(err.message || "Something went wrong");
+      // Friendly message when backend is offline / unreachable
+      if (err instanceof TypeError && err.message.toLowerCase().includes('fetch')) {
+        setError('Unable to reach the server. Please check your network or contact your administrator.');
+      } else {
+        setError(err.message || 'Something went wrong. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -135,6 +140,7 @@ const Login = () => {
                     className="form-control"
                     placeholder="name@company.com"
                     required
+                    autoComplete="username"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
@@ -148,6 +154,7 @@ const Login = () => {
                       className="form-control border-end-0"
                       placeholder="••••••••"
                       required
+                      autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                     />

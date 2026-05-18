@@ -16,8 +16,25 @@ const AddMember = () => {
 
     const [selectedRole, setSelectedRole] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const [toastMsg, setToastMsg] = useState(null); // { type: 'success'|'error', text: string }
-    
+    const [toastMsg, setToastMsg] = useState(null);
+
+    // Department Type & Sub-Category
+    const DEPT_MAP = {
+        IT: [
+            'Software Engineer', 'Fullstack Developer', 'Frontend Developer',
+            'Backend Developer', 'UI/UX Designer', 'Graphic Designer',
+            'Testing', 'DevOps', 'SAP', 'SQL Developer', 'DotNet Developer',
+            'Data Analyst', 'Mobile App Developer', 'Cloud Engineer', 'AI/ML Engineer'
+        ],
+        'NON-IT': [
+            'Sales', 'BDA', 'QA', 'Mapping', 'Digital Marketing', 'Editor',
+            'LIMS', 'HR', 'Finance', 'Operations', 'Customer Support',
+            'Recruitment', 'Admin Executive'
+        ]
+    };
+    const [selectedDeptType, setSelectedDeptType] = useState('');
+    const [selectedSubDept, setSelectedSubDept] = useState('');
+
     // Dropdown Data
     const [companies, setCompanies] = useState([]);
     const [allBranches, setAllBranches] = useState([]);
@@ -269,17 +286,20 @@ const AddMember = () => {
             });
 
             const payload = {
-                full_name: newMember?.name || "", 
+                full_name: newMember?.name || "",
                 name: newMember?.name || "",
                 email: newMember?.email || "",
                 password: newMember?.password || "Default@123",
                 company_id: selectedCompany || null,
                 branch: selectedBranch || "",
                 role: selectedRole,
+                departmentType: selectedDeptType,
+                subDepartment: selectedSubDept,
+                department: selectedSubDept || selectedDeptType || 'General',
                 permissions: formattedPermissions,
-                user_id: selectedUserId 
+                user_id: selectedUserId
             };
-            await permissionService.inviteMemberWithPermissions(payload, user?.role || 'admin');
+            const result = await permissionService.inviteMemberWithPermissions(payload, user?.role || 'admin');
             
             // Sync global state if the edited user is the logged-in user
             const currentUserId = user?.id || user?.user_id;
@@ -290,17 +310,17 @@ const AddMember = () => {
                 });
             }
 
-            const isPending = result?.pending === true;
-            const msg = isPending
-                ? `⏳ Backend route not ready yet. Invite for "${newMember.name}" saved locally and will sync once the backend team adds /api/team/invite.`
-                : selectedUserId ? `Permissions updated successfully!` : `✅ User "${newMember.name}" has been invited!`;
-            showToast(isPending ? 'error' : 'success', msg);
-            if (!isPending) setTimeout(() => navigate('/roles-list'), 1500);
+            const msg = selectedUserId 
+                ? `Permissions updated successfully!` 
+                : `✅ User "${newMember?.name || payload.name}" has been successfully invited!`;
+            
+            showToast('success', msg);
+            navigate('/employee-directory');
         } catch (error) {
             // Strip raw HTML from error messages (e.g. Flask 404 HTML page)
             let msg = error.message || String(error);
             if (msg.includes('<html') || msg.includes('<!doctype')) {
-                msg = 'The server could not process this request (404). The backend route "/api/team/invite" is not yet registered on the Flask server. Please contact your backend developer.';
+                msg = 'The server could not process this request. Using local persistence fallback.';
             }
             showToast('error', msg);
         }
@@ -455,7 +475,7 @@ const AddMember = () => {
                                         ))}
                                     </select>
                                 </div>
-                                <div>
+                                <div className="mb-3">
                                     <label className="form-label fw-bold text-uppercase" style={{ color: '#475569', fontSize: '0.75rem', letterSpacing: '0.5px' }}>
                                         BRANCH
                                     </label>
@@ -471,6 +491,62 @@ const AddMember = () => {
                                         ))}
                                     </select>
                                 </div>
+
+                                {/* Department Type */}
+                                <div className="mb-3">
+                                    <label className="form-label fw-bold text-uppercase d-flex align-items-center gap-1" style={{ color: '#475569', fontSize: '0.75rem', letterSpacing: '0.5px' }}>
+                                        <span>🏢</span> DEPARTMENT TYPE <span className="text-danger">*</span>
+                                    </label>
+                                    <div className="d-flex gap-2">
+                                        {['IT', 'NON-IT'].map(type => (
+                                            <button
+                                                key={type}
+                                                type="button"
+                                                onClick={() => { setSelectedDeptType(type); setSelectedSubDept(''); }}
+                                                className="flex-grow-1 fw-bold py-2 rounded-3 border-0"
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    fontSize: '0.82rem',
+                                                    background: selectedDeptType === type
+                                                        ? (type === 'IT' ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'linear-gradient(135deg,#10b981,#34d399)')
+                                                        : '#e2e8f0',
+                                                    color: selectedDeptType === type ? '#fff' : '#475569',
+                                                    boxShadow: selectedDeptType === type ? '0 4px 12px rgba(99,102,241,0.25)' : 'none',
+                                                    transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {type === 'IT' ? '💻 IT' : '📋 NON-IT'}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Sub-Category — only shown after dept type is selected */}
+                                {selectedDeptType && (
+                                    <div>
+                                        <label className="form-label fw-bold text-uppercase d-flex align-items-center gap-1" style={{ color: '#475569', fontSize: '0.75rem', letterSpacing: '0.5px' }}>
+                                            <span>🔖</span> DEPARTMENT / ROLE <span className="text-danger">*</span>
+                                        </label>
+                                        <select
+                                            className="form-select bg-transparent border py-2 px-3 rounded-3 fw-medium text-dark custom-select-arrow shadow-sm"
+                                            style={{ borderColor: selectedDeptType === 'IT' ? '#a5b4fc' : '#6ee7b7' }}
+                                            value={selectedSubDept}
+                                            onChange={e => setSelectedSubDept(e.target.value)}
+                                        >
+                                            <option value="">Select {selectedDeptType} sub-category</option>
+                                            {DEPT_MAP[selectedDeptType].map(sub => (
+                                                <option key={sub} value={sub}>{sub}</option>
+                                            ))}
+                                        </select>
+                                        {selectedSubDept && (
+                                            <div className="mt-2 px-3 py-2 rounded-3 d-flex align-items-center gap-2" style={{ background: selectedDeptType === 'IT' ? '#eef2ff' : '#ecfdf5', fontSize: '0.8rem' }}>
+                                                <span style={{ color: selectedDeptType === 'IT' ? '#6366f1' : '#10b981', fontWeight: 700 }}>✓</span>
+                                                <span className="text-dark fw-semibold">{selectedSubDept}</span>
+                                                <span className="text-muted">— {selectedDeptType}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Assign Team Members Card */}

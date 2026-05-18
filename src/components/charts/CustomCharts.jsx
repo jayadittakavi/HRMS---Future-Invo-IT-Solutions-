@@ -182,13 +182,15 @@ export const SimpleDonutChart = ({ segments = [], size = '180px', centerText = '
  * @param {string} color - Line color
  * @param {string} height - Chart height
  */
-export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px' }) => {
-    const max = Math.max(...data) || 100;
+export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px', suffix = '' }) => {
+    const validData = Array.isArray(data) && data.length > 0 ? data : [0];
+    const max = Math.max(...validData) || 100;
     const width = 500; // Higher resolution viewBox
 
     // Simple spline or polyline
-    const points = data.map((val, i) => {
-        const x = (i / (data.length - 1)) * width;
+    const points = validData.map((val, i) => {
+        const divisor = validData.length > 1 ? validData.length - 1 : 1;
+        const x = (i / divisor) * width;
         const y = 200 - ((val / max) * 180); // Leave some padding
         return `${x},${y}`;
     }).join(' ');
@@ -230,8 +232,9 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
                 />
 
                 {/* Dots and Labels */}
-                {data.map((val, i) => {
-                    const x = (i / (data.length - 1)) * width;
+                {validData.map((val, i) => {
+                    const divisor = validData.length > 1 ? validData.length - 1 : 1;
+                    const x = (i / divisor) * width;
                     const y = 200 - ((val / max) * 180);
                     return (
                         <g key={i} className="chart-marker">
@@ -245,7 +248,7 @@ export const SimpleLineChart = ({ data = [], color = '#3b82f6', height = '200px'
                                 fill={color}
                                 style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' }}
                             >
-                                {typeof val === 'number' ? `$${val}` : val}
+                                {typeof val === 'number' ? `${val}${suffix}` : val}
                             </text>
                         </g>
                     );

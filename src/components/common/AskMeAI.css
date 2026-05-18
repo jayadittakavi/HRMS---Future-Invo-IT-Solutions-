@@ -1,8 +1,8 @@
 .ask-me-ai-container {
     position: fixed;
-    bottom: 30px;
+    bottom: 90px;
     right: 30px;
-    z-index: 2000;
+    z-index: 1035;
     font-family: 'Inter', sans-serif;
 }
 

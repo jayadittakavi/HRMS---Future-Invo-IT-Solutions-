@@ -75,10 +75,10 @@ const Home = () => {
       <section className="trusted-by reveal">
         <div className="container text-center">
           <h2 className="trusted-title mb-3">Trusted by <span className="purple-text">100+</span> companies worldwide</h2>
-          <p className="trusted-subtitle mx-auto mb-5">
+          <p className="trusted-subtitle mx-auto mb-4">
             Teams across fintech, SaaS, and enterprise trust our HRMS to manage their workforce, process payroll faster, and scale with confidence.
           </p>
-          <div className="logos-marquee-wrapper mt-5">
+          <div className="logos-marquee-wrapper mt-4">
             <div className="logos-marquee">
               {[
                 { img: inmobiLogo, alt: "Inmobi" },

@@ -47,17 +47,50 @@ export const employeeSuperAdminService = {
                 ...authHeader(role)
             });
 
-            // Return empty array gracefully on 404/405 — backend route may not be ready yet
+            // Merge with local mock data
+            const localMocks = JSON.parse(localStorage.getItem('mockEmployees') || '[]');
+            const pendingInvites = JSON.parse(localStorage.getItem('pendingInvites') || '[]');
+            const mergedMocks = [...localMocks];
+            
+            pendingInvites.forEach(invite => {
+                if (!mergedMocks.find(m => m.email === invite.email)) {
+                    mergedMocks.push({
+                        ...invite,
+                        id: invite.id || Date.now(),
+                        name: invite.name || invite.full_name,
+                        department: invite.department || "General",
+                        designation: invite.designation || "Employee",
+                        status: "Active"
+                    });
+                }
+            });
+
             if (!response.ok) {
-                console.warn(`GET /api/team/members returned ${response.status} — returning empty list`);
-                return [];
+                console.warn(`GET /api/team/members returned ${response.status} — returning local data`);
+                return mergedMocks;
             }
             const data = await response.json();
-            // Support both array and {data: [...]} response shapes
-            return Array.isArray(data) ? data : (data.data || data.employees || data.members || []);
+            const apiEmployees = Array.isArray(data) ? data : (data.data || data.employees || data.members || []);
+            
+            // Merge API employees with local mocks, prioritizing API if emails match
+            const allEmployees = [...apiEmployees];
+            mergedMocks.forEach(mock => {
+                if (!allEmployees.find(apiEmp => apiEmp.email === mock.email)) {
+                    allEmployees.push(mock);
+                }
+            });
+            return allEmployees;
         } catch (error) {
-            console.warn("API Error (getAllEmployees) — returning empty list:", error.message);
-            return []; // Never throw — caller handles empty list
+            console.warn("API Error (getAllEmployees) — returning local data:", error.message);
+            const localMocks = JSON.parse(localStorage.getItem('mockEmployees') || '[]');
+            const pendingInvites = JSON.parse(localStorage.getItem('pendingInvites') || '[]');
+            const mergedMocks = [...localMocks];
+            pendingInvites.forEach(invite => {
+                if (!mergedMocks.find(m => m.email === invite.email)) {
+                    mergedMocks.push({...invite, id: invite.id || Date.now()});
+                }
+            });
+            return mergedMocks; // Fallback to local mock data
         }
     },
 

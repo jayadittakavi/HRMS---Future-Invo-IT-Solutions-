@@ -8,8 +8,8 @@ const Contact = () => {
         <div className="min-vh-100 d-flex flex-column" style={{ background: '#f5f3ff' }}>
             <Navbar isHome={true} />
 
-            <main className="flex-grow-1 pt-5">
-                <div className="container py-5">
+            <main className="flex-grow-1 pt-2">
+                <div className="container pt-2 pb-5 mb-5">
                     <div className="row justify-content-center">
                         <div className="col-lg-8 text-center mb-5">
                             <h1 className="display-4 fw-bold text-main mb-3">Get in Touch</h1>
@@ -18,9 +18,9 @@ const Contact = () => {
                     </div>
 
                     <div className="row justify-content-center">
-                        <div className="col-lg-6">
+                        <div className="col-lg-5 col-md-8">
                             <div className="card shadow-lg border-0 rounded-4">
-                                <div className="card-body p-5">
+                                <div className="card-body p-4">
                                     <form>
                                         <div className="row g-3">
                                             <div className="col-md-6">
@@ -37,9 +37,9 @@ const Contact = () => {
                                             </div>
                                             <div className="col-12">
                                                 <label className="form-label fw-semibold">Message</label>
-                                                <textarea className="form-control bg-card" rows="5" placeholder="How can we help you?"></textarea>
+                                                <textarea className="form-control bg-card" rows="4" placeholder="How can we help you?"></textarea>
                                             </div>
-                                            <div className="col-12 mt-4">
+                                            <div className="col-12 mt-3">
                                                 <button type="button" className="btn btn-primary btn-lg w-100 fw-bold rounded-pill">Send Message</button>
                                             </div>
                                         </div>

@@ -211,55 +211,77 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
         return items.filter(item => {
             // Superadmin always sees everything
             if (role === 'superadmin') return true;
-            
+
             // Check basic role restriction
             const roleAllowed = !item.roles || item.roles.includes(role);
             if (!roleAllowed) return false;
 
-            // Check explicit permission if defined in context
-            if (currentUserPermissions) {
-                // Map sidebar IDs to permission keys
-                const permissionMap = {
-                    'dashboard': 'dashboard',
-                    'my-dashboard': 'dashboard',
-                    'my-team': 'dashboard',
-                    'employees': 'hr',
-                    'departments': 'hr',
-                    'attendance': 'attendance',
-                    'my-attendance': 'attendance',
-                    'attendance-mgmt': 'attendance',
-                    'leave': 'leave',
-                    'my-leaves': 'leave',
-                    'leave-requests': 'leave',
-                    'payroll': 'payroll',
-                    'my-payroll': 'payroll',
-                    'payroll-mgmt': 'payroll',
-                    'recruitment': 'hr', // Recruitment usually under HR
-                    'onboarding': 'hr',
-                    'documents': 'hr',
-                    'reports': 'others',
-                    'calendar': 'others',
-                    'settings': 'others'
-                };
+            // If no permissions saved, role-only check is enough
+            if (!currentUserPermissions || Object.keys(currentUserPermissions).length === 0) return true;
 
-                const permKey = permissionMap[item.id];
-                if (permKey) {
-                    const allowedModules = currentUserPermissions[permKey] || [];
-                    // Check if specific module or the whole category is allowed
-                    // Note: In PermissionsContext, we store internal module IDs like 'my_dashboard'
-                    // We need to normalize or check if any allowed module matches
-                    const normalizedId = item.id.replace(/-/g, '_');
-                    const isPermitted = allowedModules.includes(normalizedId) || 
-                                       allowedModules.some(m => m.includes(normalizedId));
-                    
-                    // If it's a category (like 'dashboard' or 'hr-tools'), it's visible if it has children or is directly allowed
-                    if (item.children) return true; // Let the children filter themselves
+            // Detect permission format:
+            // NEW structured: { dashboard: { view: true, create: false }, ... }
+            // OLD array:      { dashboard: ['my_dashboard', 'dashboard'], ... }
+            const firstVal = Object.values(currentUserPermissions)[0];
+            const isStructured = firstVal !== null && typeof firstVal === 'object' && !Array.isArray(firstVal);
 
-                    return isPermitted;
-                }
+            // Map sidebar IDs → permission module keys
+            const permKeyMap = {
+                'dashboard':        'dashboard',
+                'my-dashboard':     'dashboard',
+                'my-team':          'dashboard',
+                'employees':        'employees',
+                'departments':      'hr',
+                'attendance':       'attendance',
+                'my-attendance':    'attendance',
+                'attendance-mgmt':  'attendance',
+                'leave':            'leave',
+                'my-leaves':        'leave',
+                'leave-requests':   'leave',
+                'wfh':              'leave',
+                'payroll':          'payroll',
+                'my-payroll':       'payroll',
+                'payroll-mgmt':     'payroll',
+                'loans':            'loans',
+                'travel':           'travel',
+                'recruitment':      'hr',
+                'onboarding':       'hr',
+                'training':         'hr',
+                'performance':      'hr',
+                'hr-tools':         'hr',
+                'documents':        'documents',
+                'reports':          'reports',
+                'administration':   'administration',
+                'delegation':       'administration',
+                'visitor-approvals':'administration',
+                'visitors':         'administration',
+                'desk':             'administration',
+                'automation':       'administration',
+                'audit-logs':       'administration',
+            };
+
+            const permKey = permKeyMap[item.id];
+
+            // No mapping = not permission-gated, show if role allows
+            if (!permKey) return true;
+
+            // Parent dropdown — show if any child would be visible
+            if (item.children) return true;
+
+            const modulePerms = currentUserPermissions[permKey];
+            if (!modulePerms) return false; // module not in permissions = hidden
+
+            if (isStructured) {
+                // New format: needs at least VIEW to appear in sidebar
+                return modulePerms.view === true;
+            } else {
+                // Old array format
+                const normalizedId = item.id.replace(/-/g, '_');
+                return Array.isArray(modulePerms) && (
+                    modulePerms.includes(normalizedId) ||
+                    modulePerms.some(m => m.includes(normalizedId))
+                );
             }
-
-            return true;
         });
     };
 

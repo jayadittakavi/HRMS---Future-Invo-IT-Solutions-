@@ -5,7 +5,7 @@
     width: 100%;
     position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, var(--cp-deep-navy), var(--cp-purple-dark), var(--cp-purple-main), var(--cp-slate-blue));
+    background: linear-gradient(135deg, #5a5796, #5e6b9f, #6488b3, #6079a8);
     background-size: 400% 400%;
     animation: gradientMove 15s ease infinite;
     display: flex;
@@ -177,7 +177,7 @@
 
 /* Sign Up button */
 .signup-btn-premium {
-    background: linear-gradient(135deg, #6c5ce7 0%, #a855f7 100%);
+    background: linear-gradient(135deg, #5a5796 0%, #6488b3 100%);
     border: none;
     padding: 0.95rem;
     border-radius: 0.75rem;
@@ -210,14 +210,14 @@
 
 /* Login link */
 .login-link-modern {
-    color: #6c5ce7;
+    color: #5a5796;
     text-decoration: none;
     font-weight: 600;
     transition: all 0.2s;
 }
 
 .login-link-modern:hover {
-    color: #a855f7;
+    color: #6488b3;
     text-decoration: underline;
     text-underline-offset: 4px;
 }
