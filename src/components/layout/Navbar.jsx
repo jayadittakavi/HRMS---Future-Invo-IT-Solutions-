@@ -4,14 +4,19 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useNotification } from "../../context/NotificationContext"; // Added
+import { useCompany } from "../../context/CompanyContext";
 import logo from "../../assets/images/logo.jpg";
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
 const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
     const { user, logout } = useAuth();
+    const { settings } = useCompany();
     const { toggleSettingsDrawer, theme } = useTheme();
     const { toggleNotificationDrawer, unreadCount } = useNotification(); // Added
     const navigate = useNavigate();
+
+    const companyName = settings?.company_name || 'WS HRMS';
+    const companyLogo = settings?.logo_url || logo;
 
     const handleProfileClick = () => {
         if (user) {
@@ -38,8 +43,8 @@ const Navbar = ({ toggleSidebar, hideLogo, isHome }) => {
                     )}
                     {!hideLogo && (
                         <Link className="navbar-brand d-flex align-items-center" to="/">
-                            <img src={logo} alt="HRMS Logo" height="35" className="me-2 rounded-circle" style={{ width: '35px', objectFit: 'cover' }} />
-                            <span className="fw-bold d-none d-sm-block" style={{ color: theme === 'dark' ? '#fff' : 'var(--cp-purple-main)', fontWeight: '800' }}>WS HRMS</span>
+                            <img src={companyLogo} alt="HRMS Logo" height="35" className="me-2 rounded-circle" style={{ width: '35px', height: '35px', objectFit: 'cover' }} />
+                            <span className="fw-bold d-none d-sm-block text-truncate" style={{ color: theme === 'dark' ? '#fff' : 'var(--cp-purple-main)', fontWeight: '800', maxWidth: '180px' }} title={companyName}>{companyName}</span>
                         </Link>
                     )}
 

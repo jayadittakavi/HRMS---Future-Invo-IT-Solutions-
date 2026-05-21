@@ -26,7 +26,9 @@ const ManagerDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Manager'}!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">
+                                Welcome, {user?.firstName || user?.first_name ? `${user?.firstName || user?.first_name || ''} ${user?.lastName || user?.last_name || ''}`.trim() : user?.name || user?.username || 'Manager'}!
+                            </h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Team Performance:</span>
                                 <span className="badge bg-primary text-white fw-bold">EXCELLENT</span>

@@ -49,7 +49,9 @@ const AdminDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">
+                                Welcome, {user?.firstName || user?.first_name ? `${user?.firstName || user?.first_name || ''} ${user?.lastName || user?.last_name || ''}`.trim() : user?.name || user?.username || 'Admin'}!
+                            </h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">System status:</span>
                                 <span className="badge bg-success text-white fw-bold">OPERATIONAL</span>

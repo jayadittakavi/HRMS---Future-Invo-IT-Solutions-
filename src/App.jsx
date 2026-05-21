@@ -8,6 +8,7 @@ import { NotificationProvider } from "./context/NotificationContext"; // Added
 import { AutomationProvider } from "./context/AutomationContext";
 import { SearchProvider } from "./context/SearchContext";
 import { PermissionsProvider } from './context/PermissionsContext';
+import { CompanyProvider } from './context/CompanyContext';
 import ProtectedRoute from "./components/ProtectedRoute";
 import TeamMembers from './pages/modules/manager/components/TeamMembers';
 import { AttendanceContent } from "./pages/attendance/Attendance";
@@ -71,8 +72,10 @@ import UserManagement from "./pages/modules/core/user_management/UserManagement"
 /* HR */
 import Employees from "./pages/modules/hr/employees/Employees";
 import AddMember from "./pages/modules/hr/employees/AddMember";
+
 import RolesList from "./pages/modules/hr/employees/RolesList";
 import CreateUsername from "./pages/modules/hr/employees/CreateUsername";
+import OnboardingForm from "./pages/modules/hr/onboarding/OnboardingForm";
 import WFHRequests from "./pages/modules/hr/wfh/WFHRequests";
 import Attendance from "./pages/attendance/Attendance";
 import LeaveManagement from "./pages/modules/hr/leave_management/LeaveManagement";
@@ -228,8 +231,10 @@ function AppContent() {
         {/* HR Routes */}
         <Route path="/employee-directory" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'employee']}><Employees /></ProtectedRoute>} />
         <Route path="/add-member" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><AddMember /></ProtectedRoute>} />
+
         <Route path="/roles-list" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><RolesList /></ProtectedRoute>} />
         <Route path="/create-username" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin']}><CreateUsername /></ProtectedRoute>} />
+        <Route path="/onboarding-form" element={<ProtectedRoute><OnboardingForm /></ProtectedRoute>} />
         <Route path="/wfh-requests" element={<ProtectedRoute requiredRoles={['superadmin', 'hr', 'admin', 'manager', 'employee']}><WFHRequests /></ProtectedRoute>} />
         <Route path="/recruitment" element={<ProtectedRoute requiredRoles={['hr']}><Recruitment /></ProtectedRoute>} />
         <Route path="/training" element={<ProtectedRoute requiredRoles={['hr']}><Training /></ProtectedRoute>} />
@@ -300,19 +305,21 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <ThemeProvider>
-        <NotificationProvider>
-          <AutomationProvider>
-            <SearchProvider>
-              <PermissionsProvider>
-                <BrowserRouter>
-                  <AppContent />
-                </BrowserRouter>
-              </PermissionsProvider>
-            </SearchProvider>
-          </AutomationProvider>
-        </NotificationProvider>
-      </ThemeProvider>
+      <CompanyProvider>
+        <ThemeProvider>
+          <NotificationProvider>
+            <AutomationProvider>
+              <SearchProvider>
+                <PermissionsProvider>
+                  <BrowserRouter>
+                    <AppContent />
+                  </BrowserRouter>
+                </PermissionsProvider>
+              </SearchProvider>
+            </AutomationProvider>
+          </NotificationProvider>
+        </ThemeProvider>
+      </CompanyProvider>
     </AuthProvider>
   );
 }

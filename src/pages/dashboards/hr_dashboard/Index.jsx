@@ -40,7 +40,9 @@ const HRDashboard = () => {
                     <>
                         {/* Welcome Header */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'HR Specialist'}!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">
+                                Welcome, {user?.firstName || user?.first_name ? `${user?.firstName || user?.first_name || ''} ${user?.lastName || user?.last_name || ''}`.trim() : user?.name || user?.username || 'HR Specialist'}!
+                            </h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Recruitment Status:</span>
                                 <span className="badge bg-danger text-white fw-bold">URGENT HIRING</span>

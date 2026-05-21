@@ -2,20 +2,25 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
+import { useCompany } from '../../../context/CompanyContext';
 import logo from '../../../assets/images/logo.jpg';
 import { FaCog, FaUserCircle, FaSearch, FaRegCalendarAlt, FaBell } from 'react-icons/fa';
 
 const Navbar = () => {
     const { toggleSettingsDrawer } = useTheme();
+    const { settings } = useCompany();
     const navigate = useNavigate();
+
+    const companyName = settings?.company_name || 'WS HRMS';
+    const companyLogo = settings?.logo_url || logo;
 
     return (
         <nav className="navbar navbar-expand-lg glass-navbar sticky-top py-2" style={{ minHeight: '70px' }}>
             <div className="container">
                 <Link className="navbar-brand d-flex align-items-center" style={{ textDecoration: 'none' }} to="/">
-                    <img src={logo} alt="HRMS Logo" height="40" className="me-3 rounded-circle shadow-sm" style={{ width: '40px', objectFit: 'cover' }} />
+                    <img src={companyLogo} alt="HRMS Logo" height="40" className="me-3 rounded-circle shadow-sm" style={{ width: '40px', height: '40px', objectFit: 'cover' }} />
                     <div className="d-flex flex-column ms-2">
-                        <span className="fw-bold fs-4 lh-1 text-primary">WS HRMS</span>
+                        <span className="fw-bold fs-4 lh-1 text-primary text-truncate" style={{ maxWidth: '180px' }} title={companyName}>{companyName}</span>
                     </div>
                 </Link>
 

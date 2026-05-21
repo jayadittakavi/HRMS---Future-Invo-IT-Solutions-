@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUserTie, FaCalculator, FaUser, FaCrown, FaBriefcase, FaMoneyBillWave, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaUserShield, FaCheck, FaTimes, FaPlus, FaUsers, FaUserTie, FaCalculator, FaUser, FaCrown, FaBriefcase, FaMoneyBillWave, FaSearch, FaEllipsisV } from 'react-icons/fa';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { useSearch } from '../../../../context/SearchContext';
 import "../../../../components/layout/DashboardLayout.css";
@@ -52,7 +52,8 @@ export const UserManagementContent = () => {
         employeeId: '',
         role: 'Employee',
         status: 'Active',
-        permissions: []
+        permissions: [],
+        phone: ''
     });
 
     const filteredUsers = users.filter(u =>
@@ -281,6 +282,7 @@ export const UserManagementContent = () => {
                                         <td>
                                             <div className="d-flex gap-2">
                                                 <button className="action-btn edit" onClick={() => handleEditUser(user)}><FaEdit /></button>
+                                                <button className="action-btn more" title="Edit" onClick={() => handleEditUser(user)}><FaEllipsisV /></button>
                                                 <button
                                                     className={`action-btn ${user.status === 'Active' ? 'text-danger' : 'text-success'}`}
                                                     onClick={() => toggleUserStatus(user.id)}
@@ -559,6 +561,16 @@ export const UserManagementContent = () => {
                                             className="form-control"
                                             name="name"
                                             value={userForm.name}
+                                            onChange={handleUserInputChange}
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label className="form-label small fw-bold">Phone Number</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="phone"
+                                            value={userForm.phone}
                                             onChange={handleUserInputChange}
                                         />
                                     </div>

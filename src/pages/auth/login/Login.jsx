@@ -90,6 +90,7 @@ const Login = () => {
         else if (normalizedRole === "admin") navigate("/admin-dashboard");
         else if (normalizedRole === "hr") navigate("/hr-dashboard");
         else if (normalizedRole === "manager") navigate("/manager-dashboard");
+        else if (normalizedRole === "accountant") navigate("/dashboard/accountant");
         else if (normalizedRole === "employee") navigate("/employee-dashboard");
         else navigate("/dashboard");
       } else {

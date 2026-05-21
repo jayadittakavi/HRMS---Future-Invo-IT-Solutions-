@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { usePermissions } from '../../context/PermissionsContext';
+import { useCompany } from '../../context/CompanyContext';
 import logo from '../../assets/images/logo.jpg';
 import './Sidebar.css';
 import {
@@ -170,8 +171,12 @@ const getSidebarConfig = (role) => {
 
 const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
     const { user, logout } = useAuth();
+    const { settings } = useCompany();
     const navigate = useNavigate();
     const location = useLocation();
+
+    const companyName = settings?.company_name || 'WS HRMS';
+    const companyLogo = settings?.logo_url || logo;
 
     if (!user) return null;
 
@@ -310,11 +315,11 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             {/* Logo and Role */}
             <div className={`sidebar-header d-flex align-items-center mb-4 ps-2 ${!isOpen ? 'justify-content-center ps-0' : ''}`}>
                 <div className="bg-white p-0 rounded-circle d-flex align-items-center justify-content-center overflow-hidden" style={{ width: '40px', height: '40px', marginRight: isOpen ? '12px' : '0', minWidth: '40px' }}>
-                    <img src={logo} alt="HRMS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={companyLogo} alt="HRMS Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 {isOpen && (
-                    <div className="d-flex flex-column">
-                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1" style={{ fontSize: '18px' }}>WS HRMS</h5>
+                    <div className="d-flex flex-column text-truncate" style={{ maxWidth: '180px' }}>
+                        <h5 className="mb-0 fw-bold sidebar-text-logo lh-1 text-truncate" style={{ fontSize: '18px' }} title={companyName}>{companyName}</h5>
                         <span className="text-white opacity-75 mt-1" style={{ fontSize: '12px', fontWeight: '500' }}>Role : {displayRole}</span>
                     </div>
                 )}
@@ -399,8 +404,8 @@ const Sidebar = ({ isOpen, toggleSidebar, onNavigate, activePath }) => {
             <div className="mt-auto d-flex align-items-center justify-content-between p-2 border-top border-secondary border-opacity-25" style={{ minHeight: '45px' }}>
                 {isOpen ? (
                     <>
-                        <div className="text-white opacity-50 ms-2" style={{ fontSize: '11px' }}>
-                            © 2026 WorkSphrer
+                        <div className="text-white opacity-50 ms-2 text-truncate" style={{ fontSize: '11px', maxWidth: '170px' }}>
+                            © 2026 {companyName}
                         </div>
                         <button
                             onClick={toggleSidebar}

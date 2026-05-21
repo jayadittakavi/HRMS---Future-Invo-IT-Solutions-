@@ -2,27 +2,145 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
     FiUserPlus, FiSearch, FiFilter, FiEdit, FiShield, 
-    FiMoreVertical, FiCalendar, FiBriefcase, FiMail, FiPhone, FiCheckCircle, FiXCircle, FiTrash2
+    FiMoreVertical, FiCalendar, FiBriefcase, FiMail, FiPhone, FiCheckCircle, FiXCircle 
 } from 'react-icons/fi';
 import DashboardLayout from '../../../../components/layout/DashboardLayout';
 import { usePermissions } from '../../../../context/PermissionsContext';
 import './Employees.css';
 
+const PermissionDrawer = ({ employee, onClose, onSave }) => {
+    const { roles } = usePermissions();
+    const rolePermissions = roles.find(r => r.id === employee.role)?.permissions || {};
+    const [permissions, setPermissions] = useState(employee.permissionOverrides || rolePermissions);
+
+    const togglePermission = (category, moduleId) => {
+        setPermissions(prev => {
+            const current = prev[category] || [];
+            const updated = current.includes(moduleId) 
+                ? current.filter(id => id !== moduleId) 
+                : [...current, moduleId];
+            return { ...prev, [category]: updated };
+        });
+    };
+
+    return (
+        <div className="permission-drawer-overlay animate__animated animate__fadeIn" onClick={onClose}>
+            <div className="permission-drawer animate__animated animate__slideInRight" onClick={e => e.stopPropagation()}>
+                <div className="drawer-header border-bottom">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="avatar-preview">
+                            <img src={employee.avatar} alt={employee.name} className="rounded-circle" width="50" height="50" />
+                        </div>
+                        <div>
+                            <h5 className="mb-0 fw-bold">{employee.name}</h5>
+                            <span className="badge bg-primary bg-opacity-10 text-primary small">Individual Permissions</span>
+                        </div>
+                    </div>
+                    <button className="btn-close-custom" onClick={onClose}><FiXCircle size={24} /></button>
+                </div>
+
+                <div className="drawer-body">
+                    <div className="alert alert-info border-0 rounded-4 mb-4 small">
+                        Adjusting these permissions will override the default permissions assigned by the <strong>{employee.role}</strong> role.
+                    </div>
+
+                    {Object.entries(rolePermissions).map(([category, modules]) => (
+                        <div key={category} className="perm-group mb-4">
+                            <h6 className="text-uppercase fw-bold text-muted small mb-3">{category}</h6>
+                            <div className="d-flex flex-wrap gap-2">
+                                {modules.map(mod => {
+                                    const isActive = (permissions[category] || []).includes(mod);
+                                    return (
+                                        <div 
+                                            key={mod} 
+                                            className={`perm-toggle ${isActive ? 'active' : ''}`}
+                                            onClick={() => togglePermission(category, mod)}
+                                        >
+                                            <div className={`toggle-switch ${isActive ? 'on' : 'off'}`}></div>
+                                            <span className="small fw-bold">{mod.replace(/_/g, ' ')}</span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="drawer-footer border-top d-flex gap-3">
+                    <button className="btn btn-light rounded-pill flex-grow-1" onClick={onClose}>Cancel</button>
+                    <button className="btn btn-primary rounded-pill flex-grow-1 shadow-sm" onClick={() => { onSave(employee.id, permissions); onClose(); }}>Update Permissions</button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const Employees = () => {
     const navigate = useNavigate();
-    const { employees, roles, updateEmployeePermissions, removeEmployee } = usePermissions();
+    const { employees, roles, updateEmployeePermissions } = usePermissions();
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedEmpForPerms, setSelectedEmpForPerms] = useState(null);
+    const [editEmp, setEditEmp] = useState(null); // employee being edited
+    const [menuOpenId, setMenuOpenId] = useState(null); // three‑dot menu state
+    const [saving, setSaving] = useState(false);
 
     const filteredEmployees = employees.filter(emp => 
-        (emp.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (emp.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        String(emp.id || '').toLowerCase().includes(searchTerm.toLowerCase())
+        emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.id.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const getModulesCount = (emp) => {
         const perms = emp.permissionOverrides || roles.find(r => r.id === emp.role)?.permissions || {};
         return Object.values(perms).flat().length;
+    };
+
+    // ---------- Edit Modal Handlers ----------
+    const openEditModal = (emp) => {
+        // split name into first / last for convenience
+        const [first = '', ...rest] = emp.name.split(' ');
+        const last = rest.join(' ');
+        setEditEmp({
+            ...emp,
+            firstName: first,
+            lastName: last,
+            personalEmail: emp.email,
+            phone: emp.phone || ''
+        });
+    };
+
+    const closeEditModal = () => setEditEmp(null);
+
+    const { updateEmployeeInfo } = usePermissions();
+
+    const handleSaveEdit = async () => {
+        if (!editEmp) return;
+        setSaving(true);
+        // simulate async save (replace with real API later)
+        setTimeout(() => {
+            const updated = {
+                ...editEmp,
+                name: `${editEmp.firstName} ${editEmp.lastName}`.trim(),
+                email: editEmp.personalEmail,
+                phone: editEmp.phone,
+                // avatar optional – keep previous if unchanged
+                avatar: editEmp.avatar
+            };
+            // Update via context helper
+            updateEmployeeInfo(editEmp.id, updated);
+            closeEditModal();
+            setSaving(false);
+            alert('Employee details updated successfully');
+        }, 800);
+    };
+
+    // ---------- Status Change Handlers ----------
+    const toggleStatus = (emp) => {
+        const newStatus = emp.status === 'Active' ? 'Inactive' : 'Active';
+        if (window.confirm(`Are you sure you want to set this employee to ${newStatus}?`)) {
+            updateEmployeeInfo(emp.id, { status: newStatus });
+            alert(`Employee status changed to ${newStatus}`);
+        }
     };
 
     return (
@@ -34,6 +152,7 @@ const Employees = () => {
                         <h2 className="fw-bold text-dark mb-1">Workforce Directory</h2>
                         <p className="text-muted mb-0">Manage employees, roles, and access across modules</p>
                     </div>
+
                 </div>
 
                 {/* Filter Bar */}
@@ -62,8 +181,6 @@ const Employees = () => {
                                     <th>Employee</th>
                                     <th>ID</th>
                                     <th>Role & Dept</th>
-                                    <th className="text-center">Dept Type</th>
-                                    <th>Department</th>
                                     <th className="text-center">Assigned Modules</th>
                                     <th className="text-center">Status</th>
                                     <th className="text-center">Join Date</th>
@@ -97,27 +214,6 @@ const Employees = () => {
                                             </div>
                                         </td>
                                         <td className="text-center">
-                                            {emp.departmentType ? (
-                                                <span
-                                                    className="badge rounded-pill fw-bold px-2 py-1"
-                                                    style={{
-                                                        fontSize: '0.7rem',
-                                                        background: emp.departmentType === 'IT'
-                                                            ? 'linear-gradient(135deg,#6366f1,#818cf8)'
-                                                            : 'linear-gradient(135deg,#10b981,#34d399)',
-                                                        color: '#fff'
-                                                    }}
-                                                >
-                                                    {emp.departmentType === 'IT' ? '💻 IT' : '📋 NON-IT'}
-                                                </span>
-                                            ) : (
-                                                <span className="text-muted extra-small">—</span>
-                                            )}
-                                        </td>
-                                        <td>
-                                            <div className="fw-semibold text-dark small">{emp.subDepartment || emp.department || '—'}</div>
-                                        </td>
-                                        <td className="text-center">
                                             <div className="module-count-badge">
                                                 {getModulesCount(emp)} Modules
                                             </div>
@@ -134,30 +230,11 @@ const Employees = () => {
                                         </td>
                                         <td className="text-center">
                                             <div className="d-flex justify-content-center align-items-center gap-2">
-                                                <button 
-                                                    className="btn-icon-action" 
-                                                    title="Edit Employee / Permissions"
-                                                    onClick={() => navigate('/add-member', { state: { newMember: { user_id: emp.id, name: emp.name, email: emp.email, role: emp.role, branch: emp.branch } } })}
-                                                >
-                                                    <FiEdit size={16} />
-                                                </button>
-                                                <button 
-                                                    className="btn-icon-action security" 
-                                                    title="Edit Permissions"
-                                                    onClick={() => navigate('/add-member', { state: { newMember: { user_id: emp.id, name: emp.name, email: emp.email, role: emp.role, branch: emp.branch } } })}
-                                                >
+                                                <button className="btn-icon-action security" title="Edit Permissions" onClick={() => setSelectedEmpForPerms(emp)}>
                                                     <FiShield size={16} />
                                                 </button>
-                                                <button 
-                                                    className="btn-icon-action text-danger" 
-                                                    title="Remove Member"
-                                                    onClick={() => {
-                                                        if (window.confirm(`Are you sure you want to remove ${emp.name}?`)) {
-                                                            removeEmployee(emp.id);
-                                                        }
-                                                    }}
-                                                >
-                                                    <FiTrash2 size={16} />
+                                                <button className="btn-icon-action" title={emp.status === 'Active' ? 'Deactivate' : 'Activate'} onClick={() => toggleStatus(emp)}>
+                                                    {emp.status === 'Active' ? <FiCheckCircle size={16} /> : <FiXCircle size={16} />}
                                                 </button>
                                             </div>
                                         </td>
@@ -169,6 +246,14 @@ const Employees = () => {
                 </div>
             </div>
 
+            {/* Permission Edit Drawer */}
+            {selectedEmpForPerms && (
+                <PermissionDrawer 
+                    employee={selectedEmpForPerms} 
+                    onClose={() => setSelectedEmpForPerms(null)}
+                    onSave={updateEmployeePermissions}
+                />
+            )}
         </DashboardLayout>
     );
 };

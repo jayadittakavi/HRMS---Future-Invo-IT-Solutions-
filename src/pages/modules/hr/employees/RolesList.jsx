@@ -154,10 +154,8 @@ const PermissionManagement = ({ role, onClose, onSave }) => {
 
 const RolesList = () => {
     const navigate = useNavigate();
-    const { roles, updateRolePermissions, addRole, deleteRole } = usePermissions();
+    const { roles, updateRolePermissions } = usePermissions();
     const [editingRole, setEditingRole] = useState(null);
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newRoleData, setNewRoleData] = useState({ name: '', description: '' });
 
     const stats = [
         { icon: <MdOutlineSecurity size={18} />, label: `${roles.length} Roles Defined`, color: '#6366f1' },
@@ -185,7 +183,7 @@ const RolesList = () => {
                             <FiSearch />
                             <input type="text" placeholder="Search roles..." className="form-control" />
                         </div>
-                        <button className="btn-create-role" onClick={() => setShowCreateModal(true)}>
+                        <button className="btn-create-role">
                             <FiPlus className="me-2" /> Create Role
                         </button>
                     </div>
@@ -254,7 +252,7 @@ const RolesList = () => {
                                                     <FiEdit2 size={14} className="me-1" /> Edit
                                                 </button>
                                                 {role.id !== 'superadmin' && (
-                                                    <button className="btn-action-delete" onClick={() => { if(window.confirm('Are you sure you want to delete this role?')) deleteRole(role.id); }}>
+                                                    <button className="btn-action-delete">
                                                         <FiTrash2 size={14} />
                                                     </button>
                                                 )}
@@ -293,33 +291,6 @@ const RolesList = () => {
                     onClose={() => setEditingRole(null)} 
                     onSave={updateRolePermissions}
                 />
-            )}
-
-            {/* Create Role Modal */}
-            {showCreateModal && (
-                <div className="permission-drawer-overlay d-flex justify-content-center align-items-center" style={{ zIndex: 1050 }} onClick={() => setShowCreateModal(false)}>
-                    <div className="card border-0 shadow-lg p-4 rounded-4 animate__animated animate__zoomIn" style={{ width: '400px', backgroundColor: '#fff' }} onClick={e => e.stopPropagation()}>
-                        <h5 className="fw-bold mb-4">Create New Role</h5>
-                        <div className="mb-3">
-                            <label className="form-label small fw-bold text-secondary">Role Name</label>
-                            <input type="text" className="form-control bg-light" placeholder="e.g. Marketing Lead" value={newRoleData.name} onChange={e => setNewRoleData({...newRoleData, name: e.target.value})} />
-                        </div>
-                        <div className="mb-4">
-                            <label className="form-label small fw-bold text-secondary">Description</label>
-                            <textarea className="form-control bg-light" rows="3" placeholder="Describe the role's purpose..." value={newRoleData.description} onChange={e => setNewRoleData({...newRoleData, description: e.target.value})}></textarea>
-                        </div>
-                        <div className="d-flex gap-3">
-                            <button className="btn btn-light w-50 rounded-pill fw-bold" onClick={() => setShowCreateModal(false)}>Cancel</button>
-                            <button className="btn btn-primary w-50 rounded-pill fw-bold" onClick={() => { 
-                                if(newRoleData.name) {
-                                    addRole(newRoleData);
-                                    setShowCreateModal(false);
-                                    setNewRoleData({ name: '', description: '' });
-                                }
-                            }}>Create</button>
-                        </div>
-                    </div>
-                </div>
             )}
         </DashboardLayout>
     );

@@ -7,7 +7,7 @@ export default defineConfig(({ mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), '');
 
-  const BACKEND = env.VITE_API_URL || "http://192.168.1.27:5000";
+  const BACKEND = env.VITE_API_URL || "http://192.168.1.39:5000";
 
   const proxyConfig = {
     target: BACKEND,

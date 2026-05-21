@@ -1,40 +1,42 @@
 import React, { useState } from 'react';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { FaLock, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { changePassword } from '../../services/settingsService';
 
 const ChangePassword = () => {
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [status, setStatus] = useState(null); // 'success' | 'error'
+    const [errorMsg, setErrorMsg] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setStatus(null);
+        setErrorMsg('');
+
         if (newPassword !== confirmPassword) {
             setStatus('error');
+            setErrorMsg('New passwords do not match.');
             return;
         }
-        // API Call
-        const token = localStorage.getItem('token');
-        fetch("/api/auth/change-password", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify({ currentPassword, newPassword })
-        })
-        .then(async (res) => {
-            if (!res.ok) throw new Error('Password change failed');
+
+        setLoading(true);
+        try {
+            // POST /api/auth/change-password
+            await changePassword({ currentPassword, newPassword, confirmPassword });
             setStatus('success');
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        })
-        .catch(err => {
+        } catch (err) {
             console.error(err);
             setStatus('error');
-        });
+            setErrorMsg(err.message || 'Password change failed. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -60,7 +62,7 @@ const ChangePassword = () => {
 
                                 {status === 'error' && (
                                     <div className="alert alert-danger d-flex align-items-center gap-2 small">
-                                        <FaExclamationTriangle /> Passwords do not match.
+                                        <FaExclamationTriangle /> {errorMsg || 'Something went wrong.'}
                                     </div>
                                 )}
 
@@ -95,8 +97,8 @@ const ChangePassword = () => {
                                             required
                                         />
                                     </div>
-                                    <button type="submit" className="btn btn-primary w-100 py-2 fw-bold">
-                                        Update Password
+                                    <button type="submit" className="btn btn-primary w-100 py-2 fw-bold d-flex align-items-center justify-content-center gap-2" disabled={loading}>
+                                        {loading ? <><span className="spinner-border spinner-border-sm" /> Updating...</> : 'Update Password'}
                                     </button>
                                 </form>
                             </div>

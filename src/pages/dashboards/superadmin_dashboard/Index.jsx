@@ -72,7 +72,9 @@ const SuperAdminDashboard = () => {
                     <>
                         {/* Welcome & Status Section */}
                         <div className="mb-4">
-                            <h2 className="h4 fw-bold text-dark mb-1">Welcome {user?.name || 'Super Admin'}!</h2>
+                            <h2 className="h4 fw-bold text-dark mb-1">
+                                Welcome, {user?.firstName || user?.first_name ? `${user?.firstName || user?.first_name || ''} ${user?.lastName || user?.last_name || ''}`.trim() : user?.name || user?.username || 'Super Admin'}!
+                            </h2>
                             <div className="d-flex align-items-center gap-2">
                                 <span className="text-secondary fw-medium">Process Pay Run for May 2024</span>
                                 <span className="badge bg-warning text-dark fw-bold px-3">APPROVED</span>
